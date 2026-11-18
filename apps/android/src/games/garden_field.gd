@@ -76,7 +76,7 @@ func _process(delta: float) -> void:
 			ghost_back = 0 # 回弹结束，销毁 ghost
 	_card_error_time = maxf(0, _card_error_time - delta)
 	_shovel_return = maxf(0, _shovel_return - delta / .2)
-	if not paused or cell_flash > 0 or ghost_back > 0 or _card_error_time > 0 or _shovel_return > 0:
+	if not paused or cell_flash > 0 or ghost_back > 0 or _card_error_time > 0 or _shovel_return > 0 or bool(state.get("bannerVisible", false)):
 		queue_redraw()
 
 
@@ -141,7 +141,9 @@ func _draw() -> void:
 	_draw_effects(transform)
 	_draw_boss(transform)
 	_draw_fog()
+	_draw_intro()
 	_draw_preview(transform)
+	_draw_battle_banner()
 	_draw_hud()
 	_draw_ghost(transform)
 	draw_set_transform_matrix(Transform2D.IDENTITY)
@@ -395,7 +397,7 @@ func _draw_effects(transform: Transform2D) -> void:
 		var kind := str(effect.get("type", ""))
 		var position := GardenLayout.foot(state, int(effect.get("row", 0)), float(effect.get("col", 0)) + (.5 if kind == "plant" else 0))
 		if kind == "flag":
-			_text("一大波僵尸正在接近！", Vector2(250, 295), 28, Color("#c73425"))
+			continue
 		elif kind == "plant" or kind == "shovel":
 			for index in 5:
 				var offset := Vector2(sin(index * 2.4) * age * 32, -sin(age * PI) * 18)
@@ -475,6 +477,8 @@ func _draw_hud() -> void:
 		draw_rect(speed_rect, Color(0, 0, 0, .1))
 	art.draw_image(self, "original/meter-empty.webp", Rect2(570, 574, 205, 20))
 	var progress := clampf(float(state.waveIndex) / maxf(1, float(state.waveCount)), 0, 1) if state.boss.is_empty() else clampf(1 - float(state.boss.health) / float(state.boss.maxHealth), 0, 1)
+	if state.boss.is_empty() and state.has("waveProgressAt") and float(state.get("waveDuration", 0.0)) > 0.0:
+		progress = clampf(float(state.waveProgressAt), 0.0, 1.0)
 	if progress > 0:
 		art.draw_image(self, "original/meter-full.webp", Rect2(570, 574, 205 * progress, 20))
 	art.draw_image(self, "original/meter-head.webp", Rect2(565 + 195 * progress, 565, 25, 30), Color.WHITE, true)
@@ -574,6 +578,32 @@ func _draw_preview(transform: Transform2D) -> void:
 	if cell_flash > 0 and _cell_valid(cell_flash_at):
 		var flash := GardenLayout.cell_polygon(state, cell_flash_at.y, cell_flash_at.x)
 		draw_polyline(flash + PackedVector2Array([flash[0]]), Color(1, .25, .15, .4 + .6 * absf(sin(cell_flash * 22))), 3.5, true)
+
+
+func _draw_battle_banner() -> void:
+	if not bool(state.get("bannerVisible", false)):
+		return
+	var banner: Dictionary = state.get("banner", {})
+	var age := clampf(float(banner.get("age", 0.0)), 0.0, 1.0)
+	var alpha := 1.0 if age < 0.8 else clampf((1.0 - age) / 0.2, 0.0, 1.0)
+	var text := str(banner.get("text", ""))
+	var font := PlaygroundUI.font()
+	var font_size := 30
+	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	draw_string(font, (size.x - width) * 0.5, size.y * 0.44, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#c73425", alpha))
+
+
+func _draw_intro() -> void:
+	if int(state.get("introStep", -1)) < 0:
+		return
+	var texts := ["准备", "放置", "开始"]
+	var step := clampi(int(state.introStep), 0, 2)
+	var age := clampf(float(state.introAge), 0.0, 1.0)
+	var font := PlaygroundUI.font()
+	var text := str(texts[step])
+	var font_size := 44
+	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
+	draw_string(font, (size.x - width) * 0.5, size.y * 0.38, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#fff3b2", 1.0 - age * 0.4))
 
 
 func _draw_ghost(transform: Transform2D) -> void:
@@ -945,7 +975,7 @@ func _shovel_target() -> Dictionary:
 	var index := cell.y * 9 + cell.x
 	if state.grid[index].is_empty() and cell.x > 0 and str(state.grid[index - 1].get("kind", "")) == "cobcannon":
 		index -= 1
-	for layer in ["shells", "grid", "bases"]:
+	for layer in ["bases", "shells", "grid"]:
 		var plant: Dictionary = state[layer][index]
 		if not plant.is_empty():
 			return plant

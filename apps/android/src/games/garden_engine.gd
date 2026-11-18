@@ -32,12 +32,13 @@ func create(player: Dictionary, level_id: int, mode: String, seeds: Array, tutor
 		"sun": 150 if tutorial or mode == "endless" else int(level.get("initialSun", 150)), "seeds": cards,
 		"selectedSeed": "", "shovel": false, "aimingCannon": -1,
 		"grid": grid, "bases": bases, "shells": shells, "zombies": [], "projectiles": [], "suns": [], "coins": [],
-		"mowers": mowers, "cooldowns": {}, "graves": [], "craters": [], "ladders": [], "iceTrails": [],
+		"mowers": mowers, "cooldowns": {}, "graves": [], "craters": [], "ladders": [], "iceTrails": [], "totalSkySun": 0,
 		"deaths": [], "debris": [], "packets": [], "rollers": [], "vases": [], "boss": {},
 		"phase": "playing", "time": 0.0, "waveIndex": 0, "waveCount": 2147483647 if mode == "endless" else int(level.get("waveCount", 10)),
 		"waveTimer": _timing("firstWave", 18.0), "sunTimer": 6.0, "conveyorTimer": .5, "graveTimer": 35.0,
 		"fogCleared": 0.0, "stormTimer": 7.0, "lightning": 0.0, "score": 0, "vaseStage": 0,
 		"nextUid": 1, "eventUid": 1, "rngState": (Time.get_ticks_usec() ^ int(Time.get_unix_time_from_system())) & 0x7fffffff,
+		"waveProgressAt": 0.0, "waveDuration": 1.0, "introStep": 0, "introAge": 0.0,
 		"usedMowers": 0, "flags": 0, "bestFlags": 0, "bossSpawned": false, "events": [], "resultStars": 0, "renderPreviousX": {},
 		"zombieSpeedMultiplier": float(GameTuning.value("garden", resolved, "zombieSpeed", 1.0)),
 		"zombieHealthMultiplier": float(GameTuning.value("garden", resolved, "zombieHealth", 1.0)),
@@ -91,8 +92,21 @@ func tick(state: Dictionary, delta: float) -> Array:
 		projectile.previousY = float(projectile.y)
 	for key in state.cooldowns.keys():
 		state.cooldowns[key] = maxf(0.0, float(state.cooldowns[key]) - delta)
+	if int(state.get("introStep", -1)) >= 0:
+		state.introAge = clampf(float(state.get("introAge", 0.0)) + delta / 0.6, 0.0, 1.0)
+		if float(state.introAge) >= 1.0:
+			state.introAge = 0.0
+			state.introStep = int(state.introStep) + 1
+			if int(state.introStep) >= 3:
+				state.introStep = -1
 	for key in ["waveTimer", "sunTimer", "conveyorTimer", "graveTimer", "fogCleared", "stormTimer", "lightning"]:
 		state[key] = maxf(0.0, float(state[key]) - delta)
+	if float(state.get("waveDuration", 1.0)) > 0.0:
+		state.waveProgressAt = clampf(float(state.get("waveProgressAt", 0.0)) + delta / float(state.waveDuration), 0.0, 1.0)
+	if bool(state.get("bannerVisible", false)):
+		state.banner.age = clampf(float(state.get("banner", {}).get("age", 0.0)) + delta, 0.0, 1.0)
+		if float(state.banner.age) >= 1.0:
+			state.bannerVisible = false
 	_update_environment(state, delta)
 	if bool(state.tutorial):
 		if int(state.tutorialStep) == 0 and state.suns.is_empty():
@@ -175,7 +189,11 @@ func _spawn_logic(state: Dictionary) -> void:
 		state.flags = int(state.flags) + 1
 		state.bestFlags = maxi(int(state.bestFlags), int(state.flags))
 		_emit(state, "flag", {"wave": wave})
+		state.banner = {"text": "最后一波！" if wave == int(state.waveCount) else "一大波僵尸正在接近！", "age": 0.0}
+		state.bannerVisible = true
 	state.waveTimer = maxf(8.0, _timing("waveInterval", 22) - int(state.levelId) * .12) * float(state.waveIntervalMultiplier)
+	state.waveDuration = maxf(1.0, float(state.waveTimer))
+	state.waveProgressAt = clampf(float(wave - 1) / maxf(1.0, float(state.waveCount)), 0.0, 1.0)
 
 
 func _spawn_zombie(state: Dictionary, kind: String, row: int, custom_health: float = 0.0, boss: bool = false, spawn_group: bool = true) -> Dictionary:
@@ -216,6 +234,7 @@ func _update_environment(state: Dictionary, delta: float) -> void:
 	if str(state.environment) in ["day", "pool"] and float(state.sunTimer) <= 0 and str(state.special) == "lawn":
 		_spawn_sun(state, _random_float(state) * 7.8, roundi(25.0 * float(state.sunMultiplier)))
 		state.sunTimer = _timing("skySun", 9.0) + _random_float(state) * 3.0
+		state.totalSkySun = int(state.get("totalSkySun", 0)) + 1
 	if str(state.special) in ["conveyor", "bowling"] and float(state.conveyorTimer) <= 0.0 and state.packets.size() < 10:
 		var cards: Array = state.seeds
 		if not cards.is_empty():
@@ -396,7 +415,7 @@ func shovel(state: Dictionary, row: int, col: int, target_uid: int = -1) -> Dict
 	var index := row * COLS + col
 	if col > 0 and state.grid[index].is_empty() and str(state.grid[index - 1].get("kind", "")) == "cobcannon":
 		index -= 1
-	for layer in ["shells", "grid", "bases"]:
+	for layer in ["bases", "shells", "grid"]:
 		if not state[layer][index].is_empty() and (target_uid < 0 or int(state[layer][index].get("uid", -1)) == target_uid):
 			state[layer][index] = {}
 			state.shovel = false
@@ -1371,7 +1390,9 @@ func restore(raw: Variant, player: Dictionary = {}) -> Dictionary:
 						return {}
 		if not clean.get("boss") is Dictionary:
 			return {}
-		if not clean.get("cooldowns") is Dictionary or not _numbers(clean, ["time", "waveIndex", "waveTimer", "waveCount", "sunTimer", "eventUid", "rngState", "nextUid", "sun"]):
+		if not clean.get("cooldowns") is Dictionary or not _numbers(clean, ["time", "waveIndex", "waveTimer", "waveCount", "sunTimer", "eventUid", "rngState", "nextUid", "sun", "waveProgressAt", "waveDuration", "totalSkySun"]):
+			return {}
+		if not clean.get("banner", {}) is Dictionary:
 			return {}
 		if not clean.boss.is_empty():
 			for key in ["health", "maxHealth", "phase", "timer", "row", "age", "damageStage", "attack", "ball"]:
@@ -1384,9 +1405,12 @@ func restore(raw: Variant, player: Dictionary = {}) -> Dictionary:
 		clean.events = []
 		clean.renderPreviousX = {}
 		return clean
-	for key in ["sun", "time", "waveIndex", "waveTimer", "sunTimer", "cooldowns", "rngState", "sessionId", "tutorialStep", "usedMowers", "flags", "phase"]:
+	for key in ["sun", "time", "waveIndex", "waveTimer", "sunTimer", "cooldowns", "rngState", "sessionId", "tutorialStep", "usedMowers", "flags", "phase", "totalSkySun", "waveProgressAt", "waveDuration", "introStep", "introAge", "banner", "bannerVisible"]:
 		if raw.has(key):
 			clean[key] = raw[key]
+	if raw.has("banner") and raw.banner is Dictionary:
+		clean.banner = {"text": str(raw.banner.get("text", "")), "age": clampf(float(raw.banner.get("age", 0.0)), 0.0, 1.0)}
+		clean.bannerVisible = bool(raw.get("bannerVisible", false)) and not str(clean.banner.text).is_empty()
 	for index in raw.grid.size():
 		if not raw.grid[index] is Dictionary or raw.grid[index].is_empty():
 			continue

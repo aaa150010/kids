@@ -16,8 +16,8 @@ const GAME_SCRIPTS := {
 	"stories": "res://src/games/story_game.gd",
 }
 const SIZES := [
-	{"label":"3000x2120", "logical":Vector2i(1600, 1131), "physical":Vector2i(3000, 2120)},
-	{"label":"3392x2400", "logical":Vector2i(1600, 1132), "physical":Vector2i(3392, 2400)},
+	{"label":"3000x2120", "logical":Vector2i(1600, 1129), "physical":Vector2i(3000, 2120)},
+	{"label":"3392x2400", "logical":Vector2i(1600, 1129), "physical":Vector2i(3392, 2400)},
 	{"label":"1180x800", "logical":Vector2i(1180, 800), "physical":Vector2i(1180, 800)},
 ]
 const MIN_TOUCH_SIZE := 48.0
