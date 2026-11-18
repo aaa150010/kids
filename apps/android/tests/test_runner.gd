@@ -157,6 +157,56 @@ func _run() -> void:
 	})
 	check(bool(military_rules.handle_input({"type":"select","to":5}).ok), "military engineer can be selected")
 	check(bool(military_rules.handle_input({"type":"move","to":6}).ok) and military_state.phase == "finished", "military engineer clears a mine in a puzzle")
+	check(bool(military_state.get("factionAssigned", true)), "military puzzle starts with assigned factions")
+
+	var military_classic = BoardRulesResource.new()
+	var military_classic_state: Dictionary = military_classic.create_session({
+		"gameId": "military",
+		"modeId": "classic",
+		"players": [fake_player, fake_player_two],
+		"seed": 47,
+	})
+	check(not bool(military_classic_state.factionAssigned), "military classic waits for faction assignment")
+	var hidden_by_side := {"0": [], "1": []}
+	for piece in military_classic_state.pieces:
+		if not bool(piece.revealed):
+			hidden_by_side[str(int(piece.side))].append(int(piece.position))
+	check(hidden_by_side["0"].size() >= 3 and hidden_by_side["1"].size() >= 2, "military classic has enough hidden pieces to assign factions")
+	var flip_one: Dictionary = military_classic.handle_input({"type":"move","to":int(hidden_by_side["0"][0])})
+	var flip_two: Dictionary = military_classic.handle_input({"type":"move","to":int(hidden_by_side["1"][0])})
+	var flip_three: Dictionary = military_classic.handle_input({"type":"move","to":int(hidden_by_side["0"][1])})
+	check(bool(flip_one.ok) and bool(flip_two.ok) and bool(flip_three.ok), "military flips alternate between players")
+	check(bool(military_classic_state.factionAssigned) and bool(flip_three.get("factionAssigned", false)), "two same-side flips assign the player faction")
+	check(int(military_classic_state.factionSides[0]) == 0 and int(military_classic_state.factionSides[1]) == 1, "assigned factions split both sides")
+	check(int(military_classic.player_side(0)) == 0 and int(military_classic.player_for_side(1)) == 1, "military faction mapping is symmetric")
+
+	var reset_game = BoardRulesResource.new()
+	var reset_state: Dictionary = reset_game.create_session({
+		"gameId": "military",
+		"modeId": "classic",
+		"players": [fake_player, fake_player_two],
+		"seed": 47,
+	})
+	var reset_zero: Array = []
+	var reset_one: Array = []
+	for piece in reset_state.pieces:
+		if not bool(piece.revealed):
+			if int(piece.side) == 0:
+				reset_zero.append(int(piece.position))
+			else:
+				reset_one.append(int(piece.position))
+	reset_game.handle_input({"type":"move","to":int(reset_zero[0])})
+	reset_game.handle_input({"type":"move","to":int(reset_one[0])})
+	reset_game.handle_input({"type":"move","to":int(reset_one[1])})
+	check(not bool(reset_state.factionAssigned) and int(reset_state.factionLastSides[0]) == 1, "an opposite flip resets that player's faction streak")
+
+	var legacy_military = BoardRulesResource.new()
+	var legacy_save: Dictionary = reset_game.snapshot()
+	legacy_save.erase("factionSides")
+	legacy_save.erase("factionAssigned")
+	legacy_save.erase("factionLastSides")
+	check(legacy_military.restore(legacy_save), "legacy military snapshot still restores")
+	check(bool(legacy_military.state.factionAssigned) and int(legacy_military.state.factionSides[0]) == 0, "legacy military saves default to fixed factions")
 
 	var quiz = QuizRulesResource.new()
 	var quiz_pool: Array = content.questions("math", 5).slice(0, 2)
@@ -196,6 +246,67 @@ func _run() -> void:
 	check(bool(first_flip.ok) and bool(second_flip.ok) and bool(memory_state.pending), "memory waits for a pair before advancing")
 	memory.tick(1.0)
 	check(memory_state.matched.size() == 2, "memory resolves a matching pair")
+	var memory_two = MemoryRulesResource.new()
+	var memory_two_state: Dictionary = memory_two.create_session({
+		"gameId": "memory",
+		"modeId": "classic",
+		"players": [fake_player, fake_player_two],
+		"seed": 48,
+		"cards": content.memory_cards().slice(0, 4),
+		"pairs": 4,
+	})
+	var match_a := -1
+	var match_b := -1
+	for index in memory_two_state.deck.size():
+		for other in range(index + 1, memory_two_state.deck.size()):
+			if str(memory_two_state.deck[index]) == str(memory_two_state.deck[other]):
+				match_a = index
+				match_b = other
+				break
+		if match_a >= 0:
+			break
+	memory_two.handle_input({"type":"flip","index":match_a})
+	memory_two.handle_input({"type":"flip","index":match_b})
+	memory_two.tick(1.0)
+	check(int(memory_two_state.currentPlayer) == 0, "memory match keeps the current player's turn")
+	var mismatch_a := -1
+	var mismatch_b := -1
+	for index in memory_two_state.deck.size():
+		if index in memory_two_state.matched:
+			continue
+		for other in range(index + 1, memory_two_state.deck.size()):
+			if other in memory_two_state.matched:
+				continue
+			if str(memory_two_state.deck[index]) != str(memory_two_state.deck[other]):
+				mismatch_a = index
+				mismatch_b = other
+				break
+		if mismatch_a >= 0:
+			break
+	memory_two.handle_input({"type":"flip","index":mismatch_a})
+	memory_two.handle_input({"type":"flip","index":mismatch_b})
+	memory_two.tick(1.0)
+	memory_two.tick(1.0)
+	check(int(memory_two_state.currentPlayer) == 1, "memory mismatch passes the turn")
+	var poetry_screen = load("res://src/games/poetry_game.gd").new()
+	var poetry_poem: Dictionary = content.poems[0]
+	var poetry_snapshot := {
+		"schemaVersion": 1,
+		"player": fake_player,
+		"currentPoemId": str(poetry_poem.id),
+		"mode": "draw",
+		"knownIds": [],
+		"reviewIds": [],
+		"usedIds": [str(poetry_poem.id)],
+		"poemScrolls": {
+			str(poetry_poem.id): {"line": 5, "ratio": 0.5},
+			"missing-poem": {"line": 99, "ratio": 2.0},
+		},
+	}
+	check(poetry_screen._restore_snapshot(poetry_snapshot, str(fake_player.id)), "poetry snapshot with semantic scroll anchor restores")
+	check(int(poetry_screen.poem_scrolls.get(str(poetry_poem.id), {}).get("line", -1)) == 5, "poetry keeps the first visible line anchor")
+	check(not poetry_screen.poem_scrolls.has("missing-poem"), "poetry drops scroll anchors for unknown poems")
+	poetry_screen.free()
 
 	var save_store := root.get_node_or_null("/root/SaveStore")
 	check(save_store != null, "SaveStore autoload is available")

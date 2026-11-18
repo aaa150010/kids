@@ -82,6 +82,9 @@ var library_box: VBoxContainer
 var route_section := 0
 var library_filter := "all"
 var _draw_sequence := 0
+var poem_scrolls: Dictionary = {}
+var poem_scroll: ScrollContainer = null
+var poem_line_labels: Array[Label] = []
 # 当前诗卡与待播放的入场动画（"flip" 抽诗翻面 / "pop" 换一首弹入 / "" 直接显示）
 var _card: Control = null
 var _pending_transition := ""
@@ -133,6 +136,17 @@ func _restore_snapshot(value: Dictionary, profile_id: String) -> bool:
 	var saved_filter := str(value.get("libraryFilter", "all"))
 	library_filter = saved_filter if saved_filter in ["all", "age", "known", "review"] else "all"
 	_draw_sequence = maxi(0, _integer(value.get("drawSequence", 0)))
+	poem_scrolls = {}
+	if value.get("poemScrolls") is Dictionary:
+		for poem_id in value.poemScrolls:
+			if not valid_ids.has(str(poem_id)) or not value.poemScrolls[poem_id] is Dictionary:
+				continue
+			var anchor: Dictionary = value.poemScrolls[poem_id]
+			var ratio := clampf(float(anchor.get("ratio", 0.0)), 0.0, 1.0) if _numeric(anchor.get("ratio", 0.0)) else 0.0
+			poem_scrolls[str(poem_id)] = {
+				"line": maxi(0, _integer(anchor.get("line", 0))),
+				"ratio": ratio,
+			}
 	return true
 
 
@@ -289,6 +303,9 @@ func _draw_view() -> Control:
 		return empty
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	poem_scroll = scroll
+	poem_line_labels.clear()
 	var front_style := PlaygroundUI.style(Color("#fffaf0"), 22, Color("#d6c29b"), 2)
 	var back_style := PlaygroundUI.style(PlaygroundUI.mix(accent, Color.WHITE, 0.12), 22, PlaygroundUI.mix(accent, Color.WHITE, 0.5), 3)
 	var poem_card := PanelContainer.new()
@@ -335,6 +352,7 @@ func _draw_view() -> Control:
 		if transition == "flip":
 			line_label.modulate.a = 0.0
 		line_labels.append(line_label)
+		poem_line_labels.append(line_label)
 		text.add_child(line_label)
 	column.add_child(text)
 	var tools := HBoxContainer.new()
@@ -402,12 +420,45 @@ func _draw_view() -> Control:
 	poem_card.set_meta("face_lines", line_labels)
 	_card = poem_card
 	scroll.add_child(poem_card)
+	call_deferred("_restore_poem_scroll")
 	if transition == "flip":
 		_busy = true
 		call_deferred("_play_card_flip", poem_card)
 	elif transition == "pop":
 		call_deferred("_pop_card_in", poem_card)
 	return scroll
+
+
+func _restore_poem_scroll() -> void:
+	if not is_instance_valid(poem_scroll) or current_poem.is_empty() or poem_line_labels.is_empty():
+		return
+	var anchor: Dictionary = poem_scrolls.get(str(current_poem.id), {})
+	if anchor.is_empty():
+		return
+	var index := clampi(int(anchor.get("line", 0)), 0, poem_line_labels.size() - 1)
+	var label: Label = poem_line_labels[index]
+	if not is_instance_valid(label):
+		return
+	var top := label.get_global_rect().position.y - poem_scroll.get_global_rect().position.y + float(poem_scroll.scroll_vertical)
+	poem_scroll.scroll_vertical = maxi(0, roundi(top + float(anchor.get("ratio", 0.0)) * maxf(1.0, label.size.y)))
+
+
+func _capture_poem_scroll() -> void:
+	if not is_instance_valid(poem_scroll) or current_poem.is_empty() or poem_line_labels.is_empty():
+		return
+	var top := poem_scroll.get_global_rect().position.y
+	var line_index := 0
+	var ratio := 0.0
+	for index in poem_line_labels.size():
+		var label: Label = poem_line_labels[index]
+		if not is_instance_valid(label):
+			continue
+		var rect := label.get_global_rect()
+		if rect.end.y > top:
+			line_index = index
+			ratio = clampf((top - rect.position.y) / maxf(1.0, rect.size.y), 0.0, 1.0)
+			break
+	poem_scrolls[str(current_poem.id)] = {"line": line_index, "ratio": ratio}
 
 
 func _library_view() -> Control:
@@ -648,6 +699,7 @@ func _count_pool(ids: Array) -> int:
 
 
 func _save(note: String) -> void:
+	_capture_poem_scroll()
 	var data := {
 		"schemaVersion": 1,
 		"player": players[0].duplicate(true),
@@ -665,6 +717,7 @@ func _save(note: String) -> void:
 		"routeSection":route_section,
 		"libraryFilter":library_filter,
 		"drawSequence":_draw_sequence,
+		"poemScrolls":poem_scrolls,
 	}
 	SaveStore.save_state(game_id, str(players[0].id), data, note, not current_poem.is_empty())
 

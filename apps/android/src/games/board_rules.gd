@@ -12,7 +12,7 @@ const HEADQUARTERS := [1,3,56,58]
 
 func create_session(context: Dictionary) -> Dictionary:
 	super.create_session(context)
-	state.merge({"turn":0,"pieces":[],"board":[],"selected":"","winner":-1,"reason":"","quietPlies":0,"moveCount":0,"hints":0,"undos":0,"hintsMax":2,"undosMax":3,"autoHintShown":false,"lineIndex":0,"mistakes":0,"winningLine":[],"lastMove":{},"log":[]},true)
+	state.merge({"turn":0,"pieces":[],"board":[],"selected":"","winner":-1,"reason":"","quietPlies":0,"moveCount":0,"hints":0,"undos":0,"hintsMax":2,"undosMax":3,"autoHintShown":false,"lineIndex":0,"mistakes":0,"winningLine":[],"lastMove":{},"log":[],"factionSides":[0,1],"factionAssigned":true,"factionLastSides":[-1,-1]},true)
 	var puzzle: Dictionary = context.get("puzzle",{})
 	if not puzzle.is_empty():
 		state.pieces = puzzle.get("pieces",[]).duplicate(true)
@@ -36,11 +36,16 @@ func create_session(context: Dictionary) -> Dictionary:
 				for copy_index in int(ARMY[kind][1]):
 					state.pieces.append({"id":"%s-%s-%s" % [side,kind,copy_index],"kind":kind,"side":side,"position":positions[cursor],"revealed":false})
 					cursor += 1
+	if str(state.gameId) == "military" and state.players.size() == 2 and state.get("puzzle", {}).is_empty():
+		state.factionSides = [-1, -1]
+		state.factionAssigned = false
+		state.factionLastSides = [-1, -1]
 	return state
 
 func restore(value: Dictionary) -> bool:
 	if not super.restore(value):
 		return false
+	var had_faction_sides := state.has("factionSides")
 	var game := str(state.get("gameId",""))
 	if not (game in ["gomoku", "jungle", "military"]):
 		return false
@@ -84,6 +89,32 @@ func restore(value: Dictionary) -> bool:
 			if game == "jungle" and position in WATER and piece.kind != "rat":
 				return false
 	state.merge({"history":[],"log":[],"selected":"","lineIndex":0,"hints":0,"undos":0,"hintsMax":2,"undosMax":3,"autoHintShown":false,"mistakes":0,"winningLine":[],"lastMove":{},"moveCount":0,"quietPlies":0},false)
+	if game == "military" and state.players.size() == 2 and state.get("puzzle", {}).is_empty():
+		var sides_valid: bool = state.get("factionSides") is Array and state.factionSides.size() == 2
+		if sides_valid:
+			for side in state.factionSides:
+				if not _whole(side) or int(side) not in [-1, 0, 1]:
+					sides_valid = false
+					break
+		if not sides_valid:
+			if had_faction_sides:
+				return false
+			state.factionSides = [0, 1]
+			state.factionAssigned = true
+		state.factionAssigned = bool(state.get("factionAssigned", true))
+		if state.factionAssigned and (int(state.factionSides[0]) < 0 or int(state.factionSides[1]) < 0 or int(state.factionSides[0]) == int(state.factionSides[1])):
+			return false
+		if not state.get("factionLastSides") is Array or state.factionLastSides.size() != 2:
+			state.factionLastSides = [-1, -1]
+		else:
+			for side in state.factionLastSides:
+				if not _whole(side) or int(side) not in [-1, 0, 1]:
+					state.factionLastSides = [-1, -1]
+					break
+	else:
+		state.factionSides = [0, 1]
+		state.factionAssigned = true
+		state.factionLastSides = [-1, -1]
 	if not state.get("history") is Array:
 		state.history = []
 	else:
@@ -96,23 +127,23 @@ func restore(value: Dictionary) -> bool:
 		state.log = []
 	else:
 		state.log = state.log.filter(func(line): return line is String).slice(0, 40)
-	if not state.get("puzzle", {}) is Dictionary:
-		state.puzzle = {}
-	elif not state.puzzle.is_empty() and not state.puzzle.get("line", []) is Array:
+	var stored_puzzle: Dictionary = state.get("puzzle", {}) if state.get("puzzle", {}) is Dictionary else {}
+	if not stored_puzzle.is_empty() and not stored_puzzle.get("line", []) is Array:
 		return false
-	if not state.get("puzzle", {}).is_empty():
-		for step in state.puzzle.get("line", []):
+	var puzzle_line: Array = stored_puzzle.get("line", [])
+	if not stored_puzzle.is_empty():
+		for step in stored_puzzle.get("line", []):
 			if not step is Dictionary or not _whole(step.get("to", -1)) or int(step.get("to", -1)) < 0 or int(step.get("to", -1)) >= (225 if game == "gomoku" else 63 if game == "jungle" else 60):
 				return false
 			if step.has("from") and (not _whole(step.get("from")) or int(step.from) < 0 or int(step.from) >= (63 if game == "jungle" else 60)):
 				return false
-		if not _whole(state.puzzle.get("targetSteps", 1)) or _integer(state.puzzle.get("targetSteps", 1)) < 1:
+		if not _whole(stored_puzzle.get("targetSteps", 1)) or _integer(stored_puzzle.get("targetSteps", 1)) < 1:
 			return false
-		if str(state.puzzle.get("hint", "")).is_empty() or str(state.puzzle.get("title", "")).is_empty():
+		if str(stored_puzzle.get("hint", "")).is_empty() or str(stored_puzzle.get("title", "")).is_empty():
 			return false
 		if str(state.get("phase", "")) == "playing" and state.lineIndex >= puzzle_line.size():
 			return false
-	var puzzle_line: Array = state.get("puzzle", {}).get("line", [])
+	state.puzzle = stored_puzzle
 	state.lineIndex = clampi(_integer(state.get("lineIndex", 0)), 0, puzzle_line.size())
 	state.moveCount = maxi(0, _integer(state.get("moveCount", 0)))
 	state.quietPlies = maxi(0, _integer(state.get("quietPlies", 0)))
@@ -132,9 +163,11 @@ func restore(value: Dictionary) -> bool:
 				clean_line.append(int(index))
 	state.winningLine = clean_line
 	var saved_last: Variant = state.get("lastMove", {})
-	if not saved_last is Dictionary or not _whole(saved_last.get("to", -1)) or int(saved_last.to) < 0 or int(saved_last.to) >= board_size:
+	var saved_to: Variant = saved_last.get("to", -1) if saved_last is Dictionary else -1
+	var saved_from: Variant = saved_last.get("from", -1) if saved_last is Dictionary else -1
+	if not saved_last is Dictionary or not _whole(saved_to) or int(saved_to) < 0 or int(saved_to) >= board_size:
 		state.lastMove = {}
-	elif saved_last.has("from") and (not _whole(saved_last.get("from")) or int(saved_last.from) < 0 or int(saved_last.from) >= board_size):
+	elif saved_last.has("from") and (not _whole(saved_from) or int(saved_from) < 0 or int(saved_from) >= board_size):
 		state.lastMove = {}
 	else:
 		state.lastMove = saved_last
@@ -193,13 +226,41 @@ func piece_by_id(identifier: String) -> Dictionary:
 			return piece
 	return {}
 
+
+func player_side(player_index: int = -1) -> int:
+	var index := int(state.turn) if player_index < 0 else player_index
+	if str(state.get("gameId", "")) != "military" or bool(state.get("factionAssigned", true)):
+		var sides: Array = state.get("factionSides", [0, 1])
+		return int(sides[index]) if index >= 0 and index < sides.size() else index
+	return -1
+
+
+func player_for_side(side: int) -> int:
+	if str(state.get("gameId", "")) == "military" and bool(state.get("factionAssigned", false)):
+		var sides: Array = state.get("factionSides", [0, 1])
+		for index in mini(sides.size(), state.players.size()):
+			if int(sides[index]) == side:
+				return index
+		return -1
+	return side
+
+
+func can_select(piece: Dictionary) -> bool:
+	if piece.is_empty() or not bool(piece.get("revealed", true)):
+		return false
+	if str(state.get("gameId", "")) == "military" and not bool(state.get("factionAssigned", true)):
+		return false
+	return int(piece.side) == player_side()
+
 func handle_input(action: Dictionary) -> Dictionary:
 	if state.phase != "playing":
 		return {"ok":false,"message":"这一局已经结束。"}
 	var destination := int(action.get("to",-1))
 	if str(action.get("type","")) == "select":
 		var selected := piece_at(destination)
-		if selected.is_empty() or not bool(selected.revealed) or int(selected.side) != int(state.turn):
+		if str(state.gameId) == "military" and not bool(state.get("factionAssigned", true)):
+			return {"ok":false,"message":"先翻两次同色棋子，确定自己的阵营。"}
+		if not can_select(selected):
 			return {"ok":false,"message":"选一枚自己的亮棋吧。"}
 		state.selected = str(selected.id)
 		return {"ok":true,"event":"select"}
@@ -226,8 +287,21 @@ func handle_input(action: Dictionary) -> Dictionary:
 		target.revealed = true
 		state.selected = ""
 		state.lastMove = {"to":destination,"kind":target.kind,"side":target.side,"flip":true}
+		var faction_now := false
+		if state.players.size() == 2 and not bool(state.get("factionAssigned", true)):
+			var player := int(state.turn)
+			var last_sides: Array = state.get("factionLastSides", [-1, -1])
+			if int(last_sides[player]) == int(target.side):
+				state.factionSides[player] = int(target.side)
+				state.factionSides[1-player] = 1-int(target.side)
+				state.factionAssigned = true
+				state.factionLastSides = [-1, -1]
+				faction_now = true
+			else:
+				last_sides[player] = int(target.side)
+				state.factionLastSides = last_sides
 		_complete_action("翻开了%s" % NAMES[target.kind])
-		return {"ok":true,"event":"flip"}
+		return {"ok":true,"event":"flip","factionAssigned":faction_now,"factionSide":int(target.side) if faction_now else -1}
 	var moving := piece_by_id(str(state.get("selected","")))
 	if moving.is_empty() or not (destination in legal_moves(moving)):
 		return {"ok":false,"message":"点亮起的位置移动。"}
@@ -255,7 +329,7 @@ func handle_input(action: Dictionary) -> Dictionary:
 	state.selected = ""
 	if str(state.gameId) == "jungle" and destination == DENS[1-side]:
 		_finish(side,"走进了对方的兽穴！")
-	if state.phase == "playing" and not _has_actions(1-side):
+	if state.phase == "playing" and not _has_actions(1-int(state.turn)):
 		_finish(side,"对方没有可进行的动作了。")
 	if int(state.quietPlies) >= 100 and str(state.gameId) == "jungle":
 		_finish(-1,"连续五十回合没有吃子，这一局和棋。")
@@ -469,10 +543,11 @@ func _army_moves(piece: Dictionary) -> Array:
 					break
 	return result
 
-func _has_actions(side: int) -> bool:
+func _has_actions(player_index: int) -> bool:
+	var faction_side := player_side(player_index)
 	for piece in state.pieces:
 		if not bool(piece.revealed) and str(state.gameId) == "military":
 			return true
-		if int(piece.side) == side and not legal_moves(piece).is_empty():
+		if int(piece.side) == faction_side and not legal_moves(piece).is_empty():
 			return true
 	return false

@@ -108,6 +108,9 @@ func _capture_games(capture: Dictionary) -> void:
 		var configured: Dictionary = meta.duplicate(true)
 		configured.modeId = str(mode.id)
 		configured.difficultyPreference = "normal"
+		# 每个尺寸使用干净的一局，避免上一个视口退出时保存的暂停态串到下一次截图。
+		save_store.data.gameSaves.erase(game_id)
+		save_store.data.sessionSaves.erase(game_id)
 		var script: GDScript = load(GAME_SCRIPTS[game_id])
 		var screen = script.new()
 		screen.setup(configured, selected)

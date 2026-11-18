@@ -225,24 +225,32 @@ func _on_download_finished(result: int, response_code: int, _headers: PackedStri
 	var request: HTTPRequest = work.request
 	request.queue_free()
 	var part := str(work.part)
-	var valid := result == HTTPRequest.RESULT_SUCCESS and response_code == 200
-	var file := FileAccess.open(part, FileAccess.READ)
-	valid = valid and file != null
+	var failure := ""
+	if result != HTTPRequest.RESULT_SUCCESS:
+		failure = "网络连接中断了，已保留下载任务；联网后可以重试。"
+	elif response_code != 200:
+		failure = "服务器暂时没有返回完整音频（HTTP %s），稍后再试。" % response_code
+	var file := FileAccess.open(part, FileAccess.READ) if failure.is_empty() else null
+	if failure.is_empty() and file == null:
+		failure = "音频没有保存成功，请检查平板空间后再试。"
 	if file != null:
-		valid = valid and file.get_length() == int(work.entry.size)
+		if file.get_length() != int(work.entry.size):
+			failure = "音频大小和清单不一致，已删除不完整文件。"
 		file.close()
-	if valid: valid = UpdateService.file_sha256(part) == str(work.entry.sha256)
-	if valid:
+	if failure.is_empty() and UpdateService.file_sha256(part) != str(work.entry.sha256):
+		failure = "音频校验没有通过，已删除文件并保留下载任务。"
+	if failure.is_empty():
 		_remove(str(work.path))
-		valid = DirAccess.rename_absolute(ProjectSettings.globalize_path(part), ProjectSettings.globalize_path(str(work.path))) == OK
-	if valid:
+		if DirAccess.rename_absolute(ProjectSettings.globalize_path(part), ProjectSettings.globalize_path(str(work.path))) != OK:
+			failure = "音频已经下载好，但保存失败；请检查平板空间后重试。"
+	if failure.is_empty():
 		_verified[str(work.path)] = str(work.entry.sha256)
 		audio_ready.emit(story_id, str(work.path))
 	else:
 		_remove(part)
 		if not (story_id in _queue): _queue.append(story_id)
 		suspended = true
-		download_failed.emit(story_id, "音频下载没有完成，已保留下载任务。联网后可以重试。")
+		download_failed.emit(story_id, failure)
 	_persist_queue()
 	call_deferred("_pump")
 

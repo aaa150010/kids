@@ -230,10 +230,10 @@ func _forget_layer(layer: Control) -> void:
 	if layer not in _stack:
 		return
 	var was_top: bool = layer == _stack.back()
-	var previous: Variant = layer.get_meta("prev_focus", null)
+	var previous: Variant = layer.get_meta("prev_focus") if layer.has_meta("prev_focus") else null
 	# 中间层被移除时，把其焦点链接续到后继层。
 	for above in _stack:
-		var focus: Variant = above.get_meta("prev_focus", null)
+		var focus: Variant = above.get_meta("prev_focus") if above.has_meta("prev_focus") else null
 		if is_instance_valid(focus) and layer.is_ancestor_of(focus):
 			above.set_meta("prev_focus", previous)
 	_stack.erase(layer)
@@ -319,7 +319,7 @@ func _button_row(actions: Array, accent: Color, card_width: float) -> Control:
 
 
 func _restore_focus(layer: Control) -> void:
-	var control: Control = layer.get_meta("prev_focus", null)
+	var control: Control = layer.get_meta("prev_focus") if layer.has_meta("prev_focus") else null
 	if is_instance_valid(control) and not control.is_queued_for_deletion() and control.is_visible_in_tree():
 		if _stack.is_empty() or _stack.back().is_ancestor_of(control):
 			control.grab_focus()

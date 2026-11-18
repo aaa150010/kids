@@ -100,6 +100,7 @@ func _build_board() -> void:
 	if mode_id == "puzzle":
 		tools.add_child(PlaygroundUI.button("关卡地图",accent,_show_map,"soft"))
 		tools.add_child(PlaygroundUI.button("看提示",accent,_hint,"soft"))
+	tools.add_child(PlaygroundUI.button("规则",accent,_show_rules,"soft"))
 	tools.add_child(PlaygroundUI.button("悔棋",accent,_request_undo,"soft"))
 	tools.add_child(PlaygroundUI.button("棋谱回放",accent,_show_replay,"soft"))
 	if game_id == "gomoku":
@@ -137,21 +138,26 @@ func _refresh(animate: bool = false) -> void:
 	for side in 2:
 		var current: bool = int(engine.state.turn) == side and str(engine.state.phase) == "playing"
 		player_panels[side].add_theme_stylebox_override("panel",PlaygroundUI.style(PlaygroundUI.mix(accent,Color.WHITE,0.85 if current else 0.94),22,accent if current else PlaygroundUI.LINE,3 if current else 1))
-		player_labels[side].text = ("现在轮到你" if current else "等一等，慢慢想") if side < players.size() else str(engine.state.get("puzzle",{}).get("title",""))
+		var role := ""
+		if game_id == "military" and bool(engine.state.get("factionAssigned", false)):
+			var faction_side := engine.player_side(side)
+			role = "\n%s方" % ("红" if faction_side == 0 else "蓝" if faction_side == 1 else "待定")
+		player_labels[side].text = (("现在轮到你" if current else "等一等，慢慢想") + role) if side < players.size() else str(engine.state.get("puzzle",{}).get("title",""))
 	if not selected.is_empty():
 		detail.text = "%s\n%s个可走位置" % [BoardRules.NAMES[selected.kind],targets.size()]
 	elif mode_id == "puzzle":
 		detail.text = "第 %s 关\n目标 %s 步\n已走 %s 步" % [level_id,int(engine.state.puzzle.get("targetSteps",1)),int(engine.state.moveCount)]
 	else:
-		detail.text = "第 %s 手\n%s" % [int(engine.state.moveCount)+1,"空交叉点落子" if game_id == "gomoku" else "红蓝双方轮流行动"]
-	status.text = str(engine.state.reason) if engine.state.phase == "finished" else "点空交叉点落子，按住可以预览" if game_id == "gomoku" else "点亮起的位置移动" if not selected.is_empty() else "先翻暗棋，或选自己的亮棋" if game_id == "military" else "先选自己的动物，再点发光格子"
+		var military_hint := "先翻开暗棋；同一人连续翻出两次同色即可定阵营。" if game_id == "military" and not bool(engine.state.get("factionAssigned", false)) else "红蓝双方轮流行动"
+		detail.text = "第 %s 手\n%s" % [int(engine.state.moveCount)+1,"空交叉点落子" if game_id == "gomoku" else military_hint]
+	status.text = str(engine.state.reason) if engine.state.phase == "finished" else "点空交叉点落子，按住可以预览" if game_id == "gomoku" else "点亮起的位置移动" if not selected.is_empty() else "先翻两次同色定阵营，再选自己的亮棋" if game_id == "military" and not bool(engine.state.get("factionAssigned", false)) else "先翻暗棋，或选自己的亮棋" if game_id == "military" else "先选自己的动物，再点发光格子"
 
 func _cell(position: int) -> void:
 	if paused or view != "board" or engine.state.phase != "playing" or (mode_id == "puzzle" and int(engine.state.turn) == 1):
 		return
 	var target := engine.piece_at(position)
 	var action := {"type":"move","to":position}
-	if game_id != "gomoku" and not target.is_empty() and bool(target.revealed) and int(target.side) == int(engine.state.turn):
+	if game_id != "gomoku" and engine.can_select(target):
 		action.type = "select"
 	var result := engine.handle_input(action)
 	if not bool(result.ok):
@@ -166,6 +172,9 @@ func _cell(position: int) -> void:
 		SfxMap.play(&"select")
 	elif event == "flip":
 		SfxMap.play(&"flip")
+		if bool(result.get("factionAssigned", false)):
+			show_toast("阵营确定：你执%s方！" % ("红" if int(result.get("factionSide", 0)) == 0 else "蓝"), 4)
+			Speech.speak("你的阵营确定了，执%s方。" % ("红" if int(result.get("factionSide", 0)) == 0 else "蓝"))
 	elif not engine.state.get("lastMove",{}).get("captured",{}).is_empty():
 		# 吃子：SfxMap 里没有 whoosh 语义事件，直接用合成音名
 		AudioFX.play("whoosh")
@@ -220,6 +229,48 @@ func _hint() -> void:
 	Speech.speak(text)
 	_save("看过提示")
 
+
+func _show_rules() -> void:
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 10)
+	var lines: Array = []
+	if game_id == "jungle":
+		lines = [
+			"棋盘：9 列 × 7 行，横向摆放；左右两端各有一座兽穴。",
+			"等级：象 8、狮 7、虎 6、豹 5、狼 4、狗 3、猫 2、鼠 1；同级可以互吃。",
+			"鼠能吃象，象不能吃鼠；只有鼠能进入蓝色河流，水中棋子只能吃水中的鼠。",
+			"狮和虎可以横竖跳过河流，但河的路径上只要有鼠就会挡住跳跃。",
+			"进入对方陷阱的棋子战力归零，任何己方棋子都可以吃掉它；不能进入自己的兽穴。",
+			"进入对方兽穴、吃光对方棋子或让对方没有合法动作即可获胜。",
+		]
+	elif game_id == "gomoku":
+		lines = [
+			"双方轮流在空交叉点落子，先连成五颗或更多同色棋子的一方获胜。",
+			"本地采用自由五子规则：不禁手，长连也算胜。",
+			"按住空交叉点可以预览落点，松手后确认；最后落子会用金色圆环标出。",
+			"残局中悔棋会同时撤回玩家这一步和固定自动应手。",
+		]
+	else:
+		lines = [
+			"开局所有棋子背面朝上，两位玩家轮流翻开一枚暗棋。",
+			"同一位玩家连续翻出两次同色棋子后确定阵营；之后只能移动自己颜色的亮棋。",
+			"每回合只能选择翻棋或走棋一次；行营内的棋子不能被攻击。",
+			"地雷不能移动，工兵可以排雷；炸弹与目标同归于尽，夺取军旗即可获胜。",
+			"铁路可以让普通棋子沿直线快速移动，工兵可以沿铁路转弯。",
+		]
+	for index in lines.size():
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		row.add_child(PlaygroundUI.chip(str(index + 1), accent))
+		var text := PlaygroundUI.label(str(lines[index]), 19, PlaygroundUI.INK_SOFT, 500, true)
+		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		row.add_child(text)
+		body.add_child(row)
+	open_modal("规则小书", body, [
+		{"text": "读给我听", "kind": "soft", "callback": func(): Speech.speak(" ".join(PackedStringArray(lines)))},
+		{"text": "知道了", "kind": "primary", "callback": func(): _close_top_modal()},
+	], "先看规则再开局")
+
 func _request_undo() -> void:
 	if paused or engine.state.phase != "playing" or engine.state.history.is_empty():
 		show_toast("现在没有可以撤回的走法")
@@ -255,8 +306,9 @@ func _show_result() -> void:
 				stars = 3
 		if mode_id == "puzzle" and int(state.winner) == 0:
 			SaveStore.complete_level(str(players[0].id),game_id,level_id,stars,mode_id)
+		var winner_player := engine.player_for_side(int(state.winner))
 		for side in players.size():
-			var outcome := "draw" if int(state.winner) < 0 else "win" if side == int(state.winner) else "loss"
+			var outcome := "draw" if int(state.winner) < 0 else "win" if side == winner_player else "loss"
 			SaveStore.record_outcome(str(players[side].id),game_id,outcome,stars if mode_id == "puzzle" else 1 if outcome == "win" else 0,0,0,{"strategy":{"correct":1 if outcome == "win" else 0,"answered":1}},str(state.get("sessionId","legacy-"+game_id+str(state.moveCount))))
 		_save("本局完成",false)
 	var content := VBoxContainer.new()

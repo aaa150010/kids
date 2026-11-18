@@ -265,7 +265,8 @@ static func button(
 	node.add_theme_stylebox_override("focus", focus)
 	node.add_theme_stylebox_override("disabled", style(mix(accent, Color.WHITE, 0.7), 18))
 	node.add_theme_color_override("font_disabled_color", Color(0.55, 0.5, 0.45, 0.75))
-	node.pressed.connect(on_pressed)
+	if on_pressed.is_valid():
+		node.pressed.connect(on_pressed)
 	# 统一按压反馈：按下缩放 + 短音效，释放回弹（W1 PressFeedback）
 	PressFeedback.attach(node, &"tap")
 	node.resized.connect(func(): node.pivot_offset = node.size * 0.5)

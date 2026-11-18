@@ -181,7 +181,8 @@ func tick(delta: float) -> bool:
 				state.mistakes = int(state.mistakes)+1
 			state.flipped = []
 			state.pending = false
-			state.currentPlayer = (int(state.currentPlayer)+1)%state.players.size()
+			if not bool(state.lastMatched):
+				state.currentPlayer = (int(state.currentPlayer)+1)%state.players.size()
 			if state.matched.size() == state.deck.size():
 				state.phase = "result"
 			changed = true

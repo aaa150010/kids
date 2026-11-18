@@ -25,20 +25,22 @@ func create(player: Dictionary, level_id: int, mode: String, seeds: Array, tutor
 		mowers.append({"row": row, "x": GardenLayout.MOWER_START_COLUMN, "previousX": GardenLayout.MOWER_START_COLUMN, "state": "ready", "age": 0.0})
 	var special := str(level.get("mode", "lawn")) if not tutorial and mode != "endless" else "lawn"
 	var cards: Array = level.get("seeds", seeds).duplicate() if special != "lawn" else seeds.duplicate()
+	var first_wave := _timing("firstWave", 18.0)
 	var state := {
 		"version": 2, "playerId": str(player.id), "player": player.duplicate(true), "levelId": level_id,
 		"mode": mode, "environment": environment, "rows": rows, "cols": COLS, "activeRows": active_rows, "special": special,
 		"tutorial": tutorial, "tutorialStep": 0, "tutorialZombieSpawned": false, "difficulty": resolved,
 		"sun": 150 if tutorial or mode == "endless" else int(level.get("initialSun", 150)), "seeds": cards,
-		"selectedSeed": "", "shovel": false, "aimingCannon": -1,
+		"selectedSeed": "", "shovel": false, "aimingCannon": -1, "handMode": "none", "handTargetUid": -1,
 		"grid": grid, "bases": bases, "shells": shells, "zombies": [], "projectiles": [], "suns": [], "coins": [],
 		"mowers": mowers, "cooldowns": {}, "graves": [], "craters": [], "ladders": [], "iceTrails": [], "totalSkySun": 0,
-		"deaths": [], "debris": [], "packets": [], "rollers": [], "vases": [], "boss": {},
+		"deaths": [], "debris": [], "packets": [], "packetLife": _timing("temporaryCardLife", 15.0), "rollers": [], "vases": [], "boss": {},
 		"phase": "playing", "time": 0.0, "waveIndex": 0, "waveCount": 2147483647 if mode == "endless" else int(level.get("waveCount", 10)),
-		"waveTimer": _timing("firstWave", 18.0), "sunTimer": 6.0, "conveyorTimer": .5, "graveTimer": 35.0,
+		"waveTimer": first_wave, "sunTimer": _timing("skySunBase", 4.25), "conveyorTimer": .5, "graveTimer": 35.0,
 		"fogCleared": 0.0, "stormTimer": 7.0, "lightning": 0.0, "score": 0, "vaseStage": 0,
 		"nextUid": 1, "eventUid": 1, "rngState": (Time.get_ticks_usec() ^ int(Time.get_unix_time_from_system())) & 0x7fffffff,
-		"waveProgressAt": 0.0, "waveDuration": 1.0, "introStep": 0, "introAge": 0.0,
+		"waveProgressAt": 0.0, "waveDuration": maxf(1.0, first_wave), "introStep": 0, "introAge": 0.0,
+		"pendingWave": 0, "waveCue": "", "waveCueRemaining": 0.0, "banner": {}, "bannerVisible": false,
 		"usedMowers": 0, "flags": 0, "bestFlags": 0, "bossSpawned": false, "events": [], "resultStars": 0, "renderPreviousX": {},
 		"zombieSpeedMultiplier": float(GameTuning.value("garden", resolved, "zombieSpeed", 1.0)),
 		"zombieHealthMultiplier": float(GameTuning.value("garden", resolved, "zombieHealth", 1.0)),
@@ -63,6 +65,16 @@ func create(player: Dictionary, level_id: int, mode: String, seeds: Array, tutor
 
 func _timing(key: String, fallback: float) -> float:
 	return float(ContentDB.garden_rules.get("timing", {}).get(key, fallback))
+
+
+func _wave_progress_span(state: Dictionary) -> float:
+	return 10.0 if str(state.get("mode", "")) == "endless" else maxf(1.0, float(state.get("waveCount", 1)))
+
+
+func _wave_progress_for(state: Dictionary, wave: int) -> float:
+	var amount := int(state.get("waveCount", 1)) if str(state.get("mode", "")) != "endless" else 10
+	var position := wave if str(state.get("mode", "")) != "endless" else ((wave - 1) % 10) + 1
+	return clampf(float(position) / maxf(1.0, float(amount)), 0.0, 1.0)
 
 
 func _definition(kind: String) -> Dictionary:
@@ -93,7 +105,7 @@ func tick(state: Dictionary, delta: float) -> Array:
 	for key in state.cooldowns.keys():
 		state.cooldowns[key] = maxf(0.0, float(state.cooldowns[key]) - delta)
 	if int(state.get("introStep", -1)) >= 0:
-		state.introAge = clampf(float(state.get("introAge", 0.0)) + delta / 0.6, 0.0, 1.0)
+		state.introAge = clampf(float(state.get("introAge", 0.0)) + delta / _timing("introStep", .6), 0.0, 1.0)
 		if float(state.introAge) >= 1.0:
 			state.introAge = 0.0
 			state.introStep = int(state.introStep) + 1
@@ -101,13 +113,23 @@ func tick(state: Dictionary, delta: float) -> Array:
 				state.introStep = -1
 			else:
 				AudioFX.play("tap")
+	if int(state.get("pendingWave", 0)) > 0:
+		state.waveCueRemaining = maxf(0.0, float(state.get("waveCueRemaining", 0.0)) - delta)
+		if float(state.waveCueRemaining) <= 0.0:
+			_spawn_wave(state, int(state.pendingWave))
+			state.pendingWave = 0
+			state.waveCue = ""
 	for key in ["waveTimer", "sunTimer", "conveyorTimer", "graveTimer", "fogCleared", "stormTimer", "lightning"]:
 		state[key] = maxf(0.0, float(state[key]) - delta)
-	if float(state.get("waveDuration", 1.0)) > 0.0:
-		state.waveProgressAt = clampf(float(state.get("waveProgressAt", 0.0)) + delta / float(state.waveDuration), 0.0, 1.0)
+	if float(state.get("waveDuration", 1.0)) > 0.0 and int(state.get("pendingWave", 0)) <= 0:
+		var wave_span := _wave_progress_span(state)
+		state.waveProgressAt = clampf(float(state.get("waveProgressAt", 0.0)) + delta / (float(state.waveDuration) * wave_span), 0.0, 1.0)
 	if bool(state.get("bannerVisible", false)):
-		state.banner.age = clampf(float(state.get("banner", {}).get("age", 0.0)) + delta, 0.0, 1.0)
-		if float(state.banner.age) >= 1.0:
+		var banner: Dictionary = state.get("banner", {})
+		var duration := maxf(0.1, float(banner.get("duration", 1.0)))
+		banner.age = minf(duration, float(banner.get("age", 0.0)) + delta)
+		state.banner = banner
+		if float(banner.age) >= duration:
 			state.bannerVisible = false
 	_update_environment(state, delta)
 	if bool(state.tutorial):
@@ -149,12 +171,27 @@ func _win(state: Dictionary) -> void:
 
 
 func _spawn_logic(state: Dictionary) -> void:
-	if not state.boss.is_empty() or float(state.waveTimer) > 0.0 or int(state.waveIndex) >= int(state.waveCount):
+	if not state.boss.is_empty() or float(state.waveTimer) > 0.0 or int(state.waveIndex) >= int(state.waveCount) or int(state.get("pendingWave", 0)) > 0:
 		return
-	state.waveIndex = int(state.waveIndex) + 1
-	var wave := int(state.waveIndex)
+	var next_wave := int(state.waveIndex) + 1
+	var cue := "final" if next_wave == int(state.waveCount) else "huge" if next_wave % 10 == 0 else ""
+	if not cue.is_empty():
+		state.pendingWave = next_wave
+		state.waveCue = cue
+		var banner_time := _timing("finalBanner", 3.0) if cue == "final" else _timing("flagBanner", 4.0)
+		state.waveCueRemaining = banner_time
+		state.banner = {"text": "最后一波！" if cue == "final" else "一大波僵尸正在接近！", "age": 0.0, "duration": banner_time}
+		state.bannerVisible = true
+		_emit(state, "flag", {"wave": next_wave, "cue": cue})
+		return
+	_spawn_wave(state, next_wave)
+
+
+func _spawn_wave(state: Dictionary, next_wave: int) -> void:
+	state.waveIndex = next_wave
+	var wave := next_wave
 	var amount := maxi(1, mini(12, 1 + wave / 2 + int(state.levelId) / 12 + int(state.spawnDelta)))
-	if wave % 10 == 0:
+	if wave % 10 == 0 or wave == int(state.waveCount):
 		amount += 3
 		_spawn_zombie(state, "flag", _random_row(state, false))
 	var candidates: Array = []
@@ -190,12 +227,9 @@ func _spawn_logic(state: Dictionary) -> void:
 	if wave % 10 == 0 or wave == int(state.waveCount):
 		state.flags = int(state.flags) + 1
 		state.bestFlags = maxi(int(state.bestFlags), int(state.flags))
-		_emit(state, "flag", {"wave": wave})
-		state.banner = {"text": "最后一波！" if wave == int(state.waveCount) else "一大波僵尸正在接近！", "age": 0.0}
-		state.bannerVisible = true
 	state.waveTimer = maxf(8.0, _timing("waveInterval", 22) - int(state.levelId) * .12) * float(state.waveIntervalMultiplier)
 	state.waveDuration = maxf(1.0, float(state.waveTimer))
-	state.waveProgressAt = clampf(float(wave - 1) / maxf(1.0, float(state.waveCount)), 0.0, 1.0)
+	state.waveProgressAt = maxf(float(state.get("waveProgressAt", 0.0)), _wave_progress_for(state, wave))
 
 
 func _spawn_zombie(state: Dictionary, kind: String, row: int, custom_health: float = 0.0, boss: bool = false, spawn_group: bool = true) -> Dictionary:
@@ -235,8 +269,12 @@ func _spawn_zombie(state: Dictionary, kind: String, row: int, custom_health: flo
 func _update_environment(state: Dictionary, delta: float) -> void:
 	if str(state.environment) in ["day", "pool"] and float(state.sunTimer) <= 0 and str(state.special) == "lawn":
 		_spawn_sun(state, _random_float(state) * 7.8, roundi(25.0 * float(state.sunMultiplier)))
-		state.sunTimer = _timing("skySun", 9.0) + _random_float(state) * 3.0
-		state.totalSkySun = int(state.get("totalSkySun", 0)) + 1
+		var sky_count := int(state.get("totalSkySun", 0))
+		state.sunTimer = minf(
+			_timing("skySunBase", 4.25) + float(sky_count) * _timing("skySunStep", .1),
+			_timing("skySunCap", 9.5) + _random_float(state) * _timing("skySunJitter", 2.74)
+		)
+		state.totalSkySun = sky_count + 1
 	if str(state.special) in ["conveyor", "bowling"] and float(state.conveyorTimer) <= 0.0 and state.packets.size() < 10:
 		var cards: Array = state.seeds
 		if not cards.is_empty():
@@ -262,6 +300,7 @@ func _update_environment(state: Dictionary, delta: float) -> void:
 	state.iceTrails = state.iceTrails.filter(func(item): return float(item.remaining) > 0)
 	for packet in state.packets:
 		packet.age = float(packet.age) + delta
+	state.packets = state.packets.filter(func(packet): return float(packet.age) < float(state.get("packetLife", 15.0)))
 
 
 func _water_row(state: Dictionary, row: int) -> bool:
@@ -407,6 +446,7 @@ func plant(state: Dictionary, row: int, col: int, kind: String) -> Dictionary:
 				state.grid[index + 1] = {}
 			state.grid[index] = planted
 	state.selectedSeed = ""
+	state.handMode = "none"
 	_emit(state, "plant", {"row": row, "col": col, "kind": kind, "water": _water_row(state, row)})
 	return {"ok": true, "kind": kind, "row": row, "col": col}
 
@@ -417,13 +457,15 @@ func shovel(state: Dictionary, row: int, col: int, target_uid: int = -1) -> Dict
 	var index := row * COLS + col
 	if col > 0 and state.grid[index].is_empty() and str(state.grid[index - 1].get("kind", "")) == "cobcannon":
 		index -= 1
-	for layer in ["bases", "shells", "grid"]:
+	for layer in ["shells", "grid", "bases"]:
 		if not state[layer][index].is_empty() and (target_uid < 0 or int(state[layer][index].get("uid", -1)) == target_uid):
 			state[layer][index] = {}
 			state.shovel = false
+			state.handMode = "none"
 			_emit(state, "shovel", {"row": row, "col": col})
 			return {"ok": true}
 	state.shovel = false
+	state.handMode = "none"
 	return {"ok": false, "reason": "这里没有植物"}
 
 
@@ -718,6 +760,7 @@ func aim_cannon(state: Dictionary, index: int, row: int, column: int) -> bool:
 	projectile.damage = 1800.0
 	plant.attackTimer = float(_definition("cobcannon").intervalSeconds)
 	state.aimingCannon = -1
+	state.handMode = "none"
 	return true
 
 
@@ -1217,10 +1260,12 @@ func handle_cell(state: Dictionary, row: int, column: int) -> Dictionary:
 					_spawn_sun(state, float(column), 25, float(row))
 				return {"ok": true}
 	if int(state.aimingCannon) >= 0:
+		state.handMode = "cannon"
 		return {"ok": aim_cannon(state, int(state.aimingCannon), row, column)}
 	var index := row * COLS + column
 	if index >= 0 and index < state.grid.size() and str(state.grid[index].get("kind", "")) == "cobcannon" and float(state.grid[index].get("attackTimer", 1)) <= 0:
 		state.aimingCannon = index
+		state.handMode = "cannon"
 		return {"ok": true}
 	return plant(state, row, column, str(state.selectedSeed))
 
@@ -1323,6 +1368,8 @@ func restore(raw: Variant, player: Dictionary = {}) -> Dictionary:
 		if int(raw.get("version", 0)) != 2:
 			return {}
 		clean.merge(raw.duplicate(true), true)
+		if clean.get("banner") is Dictionary and not clean.banner.is_empty() and not clean.banner.has("duration"):
+			clean.banner.duration = 1.0
 		if not clean.get("activeRows") is Array:
 			return {}
 		for value in clean.activeRows:
@@ -1392,10 +1439,22 @@ func restore(raw: Variant, player: Dictionary = {}) -> Dictionary:
 						return {}
 		if not clean.get("boss") is Dictionary:
 			return {}
-		if not clean.get("cooldowns") is Dictionary or not _numbers(clean, ["time", "waveIndex", "waveTimer", "waveCount", "sunTimer", "eventUid", "rngState", "nextUid", "sun", "waveProgressAt", "waveDuration", "totalSkySun"]):
+		if not clean.get("cooldowns") is Dictionary or not _numbers(clean, ["time", "waveIndex", "waveTimer", "waveCount", "sunTimer", "eventUid", "rngState", "nextUid", "sun", "waveProgressAt", "waveDuration", "totalSkySun", "packetLife", "pendingWave", "waveCueRemaining", "handTargetUid", "introStep", "introAge"]):
 			return {}
 		if not clean.get("banner", {}) is Dictionary:
 			return {}
+		if not str(clean.get("handMode", "none")) in ["none", "seed", "shovel", "cannon"] or not str(clean.get("waveCue", "")) in ["", "huge", "final"]:
+			return {}
+		if not clean.banner.is_empty() and not _numbers(clean.banner, ["age", "duration"]):
+			return {}
+		clean.introStep = clampi(int(clean.introStep), -1, 2)
+		clean.introAge = clampf(float(clean.introAge), 0.0, 1.0)
+		clean.pendingWave = clampi(int(clean.pendingWave), 0, int(clean.waveCount))
+		clean.waveCueRemaining = maxf(0.0, float(clean.waveCueRemaining))
+		clean.packetLife = clampf(float(clean.packetLife), 1.0, 60.0)
+		clean.waveProgressAt = clampf(float(clean.waveProgressAt), 0.0, 1.0)
+		if not clean.banner.is_empty():
+			clean.banner.age = clampf(float(clean.banner.age), 0.0, float(clean.banner.duration))
 		if not clean.boss.is_empty():
 			for key in ["health", "maxHealth", "phase", "timer", "row", "age", "damageStage", "attack", "ball"]:
 				if not clean.boss.has(key):

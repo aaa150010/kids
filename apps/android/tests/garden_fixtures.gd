@@ -44,6 +44,46 @@ func _run() -> void:
 		var script: GDScript = load(script_path)
 		check(script != null and script.can_instantiate(), script_path + " compiles")
 	var state := session()
+	check(is_equal_approx(float(state.packetLife), 15.0), "temporary cards use tunable fifteen second lifetime")
+	state = session(4)
+	var start_progress := float(state.waveProgressAt)
+	state.waveTimer = 999.0
+	step(state, 1.0)
+	check(float(state.waveProgressAt) > start_progress and float(state.waveProgressAt) < .02, "wave progress advances within the first wave budget")
+	state = session(4)
+	step(state, .65)
+	check(int(state.introStep) == 1, "ready cue advances to place after 0.6 seconds")
+	step(state, 1.2)
+	check(int(state.introStep) == -1, "ready place start intro finishes after three steps")
+	state = session(1)
+	state.waveIndex = 3
+	state.waveTimer = 0.0
+	state.pendingWave = 0
+	step(state, .05)
+	check(int(state.pendingWave) == 4 and str(state.waveCue) == "final", "final wave waits behind a named cue")
+	check(float(state.waveCueRemaining) > 2.9 and float(state.waveCueRemaining) <= 3.0, "final wave cue lasts three seconds")
+	var cue_restore: Dictionary = engine.restore(engine.snapshot(state))
+	check(not cue_restore.is_empty() and str(cue_restore.waveCue) == "final" and int(cue_restore.pendingWave) == 4, "pending final cue survives restore")
+	check(not cue_restore.is_empty() and float(cue_restore.banner.duration) >= 3.0 and float(cue_restore.banner.age) < 1.0, "banner keeps its full duration after restore")
+	step(cue_restore, 2.8)
+	check(int(cue_restore.waveIndex) == 3 and int(cue_restore.pendingWave) == 4, "final wave does not spawn before the cue ends")
+	step(cue_restore, .3)
+	check(int(cue_restore.waveIndex) == 4 and int(cue_restore.pendingWave) == 0, "final wave spawns when its cue ends")
+	state = session(4)
+	state.sunTimer = 0.0
+	state.totalSkySun = 5
+	step(state, .05)
+	check(int(state.totalSkySun) == 6 and float(state.sunTimer) >= 4.7 and float(state.sunTimer) <= 4.8, "sky sun interval grows with each drop")
+	state = session(10)
+	state.conveyorTimer = 999.0
+	state.packets = [{"uid": 9001, "kind": "peashooter", "age": 14.9}]
+	step(state, .2)
+	check(state.packets.is_empty(), "temporary conveyor card expires after its lifetime")
+	state = session()
+	state.handMode = "seed"
+	state.selectedSeed = "sunflower"
+	var hand_restore: Dictionary = engine.restore(engine.snapshot(state))
+	check(not hand_restore.is_empty() and str(hand_restore.handMode) == "seed" and str(hand_restore.selectedSeed) == "sunflower", "held seed state survives restore")
 	for level_id in [4, 11, 21, 31, 41]:
 		var layout_state := session(level_id)
 		var roof := str(layout_state.environment) == "roof"
@@ -124,6 +164,17 @@ func _run() -> void:
 	check(bool(engine.plant(state, 2, 0, "peashooter").ok), "main plant stacks on lily pad")
 	check(bool(engine.plant(state, 2, 0, "pumpkin").ok), "pumpkin stacks around main plant")
 	check(str(state.bases[18].kind) == "lilypad" and str(state.grid[18].kind) == "peashooter" and str(state.shells[18].kind) == "pumpkin", "three independent plant layers retained")
+	var field_script: GDScript = load("res://src/games/garden_field.gd")
+	var field: Control = field_script.new()
+	field.state = state
+	var top := GardenLayout.GRID_ORIGIN.y + 2.0 * GardenLayout.cell_height(state)
+	check(str(field._shovel_target_at(Vector2i(0, 2), Vector2(40, top + 30)).get("kind", "")) == "pumpkin", "high shovel pointer selects the shell layer")
+	check(str(field._shovel_target_at(Vector2i(0, 2), Vector2(40, top + 50)).get("kind", "")) == "peashooter", "middle shovel pointer selects the main plant")
+	check(str(field._shovel_target_at(Vector2i(0, 2), Vector2(40, top + 78)).get("kind", "")) == "lilypad", "low shovel pointer selects the base layer")
+	field.free()
+	var main_uid := int(state.grid[18].uid)
+	check(bool(engine.shovel(state, 2, 0, main_uid).ok) and state.grid[18].is_empty() and not state.shells[18].is_empty() and not state.bases[18].is_empty(), "shovel removes the exact pointer-selected plant layer")
+	state.grid[18] = engine._new_plant(state, "peashooter", 2, 0)
 	engine.shovel(state, 2, 0)
 	check(state.shells[18].is_empty() and not state.grid[18].is_empty(), "shovel removes shell first")
 	state = session()

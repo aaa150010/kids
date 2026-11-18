@@ -1,7 +1,7 @@
 class_name GardenField
 extends Control
 
-signal cell_pressed(row: int, col: int)
+signal cell_pressed(row: int, col: int, target_uid: int)
 signal sun_pressed(uid: int)
 signal coin_pressed(uid: int)
 signal seed_pressed(kind: String)
@@ -22,6 +22,7 @@ var dense_mode := false
 
 # ---- 触摸交互状态（W2：点选 + 拖拽双模式）----
 const MOUSE_POINTER := -2
+const TEMP_CARD_WARN := 5.0
 var _press_position := Vector2.ZERO
 var _gesture_dragging := false
 var _last_touch_msec := -1000
@@ -487,6 +488,10 @@ func _draw_hud() -> void:
 	if progress > 0:
 		art.draw_image(self, "original/meter-full.webp", Rect2(570, 574, 205 * progress, 20))
 	art.draw_image(self, "original/meter-head.webp", Rect2(565 + 195 * progress, 565, 25, 30), Color.WHITE, true)
+	if state.boss.is_empty() and int(state.get("waveCount", 0)) > 1:
+		for wave_mark in range(10, int(state.waveCount) + 1, 10):
+			var mark_x := 570.0 + 205.0 * float(wave_mark) / float(state.waveCount)
+			art.draw_image(self, "original/meter-flag.webp", Rect2(mark_x - 7.0, 568, 14, 24), Color(1, 1, 1, .9), true)
 	_text("第 %s 关" % int(state.levelId), Vector2(450, 590), 15, Color("#fff3cd"))
 	if int(state.get("aimingCannon", -1)) >= 0:
 		_text("点草坪选择炮击位置", Vector2(280, 96), 18, Color("#fff3b2"))
@@ -550,6 +555,12 @@ func _draw_card(kind: String, index: int) -> void:
 		_text(seconds, rect.position + Vector2(rect.size.x * .5 - 5.0 * seconds.length(), rect.size.y * .5 + 7), 18, Color("#ffffff"))
 	if pressed:
 		draw_rect(rect, Color(0, 0, 0, .1))
+	if not str(state.special) in ["lawn", "whack"] and index < state.packets.size():
+		var packet: Dictionary = state.packets[index]
+		var remaining := float(state.get("packetLife", 15.0)) - float(packet.get("age", 0.0))
+		if remaining <= TEMP_CARD_WARN:
+			var blink := .5 + .5 * sin(float(state.time) * 9.0)
+			draw_rect(rect.grow(2.0), Color(1.0, .92, .35, .25 + .45 * blink), false, 4.0)
 
 
 func _text(value: String, position: Vector2, font_size: int, tint: Color) -> void:
@@ -592,19 +603,23 @@ func _draw_preview(transform: Transform2D) -> void:
 func _draw_battle_banner() -> void:
 	if not bool(state.get("bannerVisible", false)):
 		return
+	draw_set_transform_matrix(Transform2D.IDENTITY)
 	var banner: Dictionary = state.get("banner", {})
-	var age := clampf(float(banner.get("age", 0.0)), 0.0, 1.0)
-	var alpha := 1.0 if age < 0.8 else clampf((1.0 - age) / 0.2, 0.0, 1.0)
+	var duration := maxf(0.1, float(banner.get("duration", 1.0)))
+	var age := clampf(float(banner.get("age", 0.0)), 0.0, duration)
+	var alpha := 1.0 if age < duration - 0.45 else clampf((duration - age) / 0.45, 0.0, 1.0)
 	var text := str(banner.get("text", ""))
 	var font := PlaygroundUI.font()
-	var font_size := 30
+	var font_size := 24 + int(8.0 * clampf(age / 0.18, 0.0, 1.0))
 	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	draw_string(font, (size.x - width) * 0.5, size.y * 0.44, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#c73425", alpha))
+	draw_string(font, Vector2((size.x - width) * 0.5, size.y * 0.44), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#c73425", alpha))
+	draw_set_transform_matrix(_transform())
 
 
 func _draw_intro() -> void:
 	if int(state.get("introStep", -1)) < 0:
 		return
+	draw_set_transform_matrix(Transform2D.IDENTITY)
 	var texts := ["准备", "放置", "开始"]
 	var step := clampi(int(state.introStep), 0, 2)
 	var age := clampf(float(state.introAge), 0.0, 1.0)
@@ -612,7 +627,14 @@ func _draw_intro() -> void:
 	var text := str(texts[step])
 	var font_size := 44
 	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	draw_string(font, (size.x - width) * 0.5, size.y * 0.38, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#fff3b2", 1.0 - age * 0.4))
+	draw_string(font, Vector2((size.x - width) * 0.5, size.y * 0.38), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, Color("#fff3b2", 1.0 - age * 0.4))
+	draw_set_transform_matrix(_transform())
+
+
+func shake_card(kind: String) -> void:
+	_card_error_kind = kind
+	_card_error_time = .24
+	queue_redraw()
 
 
 func _draw_ghost(transform: Transform2D) -> void:
@@ -804,7 +826,7 @@ func _on_tap(screen_pos: Vector2, index: int) -> void:
 			return
 	var cell := GardenLayout.cell_at(state, board)
 	if _cell_valid(cell):
-		_attempt_cell(cell)
+		_attempt_cell(cell, board)
 	else:
 		blank_pressed.emit() # 点空白（非格非卡非阳光）= 取消选中
 
@@ -863,20 +885,21 @@ func _on_drag_end(screen_pos: Vector2, index: int) -> void:
 		drag_kind = ""
 		var cell := GardenLayout.cell_at(state, board)
 		if _cell_valid(cell) and not _touch_consumed:
-			_attempt_cell(cell) # 松手落格种植
+			_attempt_cell(cell, board) # 松手落格种植
 		else:
 			_start_ghost_return(kind, board) # 拖回卡槽/出界松手 = 取消，回弹销毁
 	elif not _touch_consumed and not _preview_kind().is_empty():
 		var cell := GardenLayout.cell_at(state, board)
 		if _cell_valid(cell):
-			_attempt_cell(cell) # 选中卡后按住滑动，松手落格种植
+			_attempt_cell(cell, board) # 选中卡后按住滑动，松手落格种植
 
 
-func _attempt_cell(cell: Vector2i) -> void:
+func _attempt_cell(cell: Vector2i, board: Vector2) -> void:
 	var kind := _preview_kind()
 	if not kind.is_empty() and not _can_check(cell, kind).is_empty():
 		_flash_cell(cell) # 非法格不取消选中：红闪反馈，wrong 音与提示由编排层处理
-	cell_pressed.emit(cell.y, cell.x)
+	var target_uid := int(_shovel_target_at(cell, board).get("uid", -1)) if bool(state.get("shovel", false)) else -1
+	cell_pressed.emit(cell.y, cell.x, target_uid)
 
 
 func _flash_cell(cell: Vector2i) -> void:
@@ -981,11 +1004,23 @@ func _shovel_target() -> Dictionary:
 	var cell := GardenLayout.cell_at(state, drag_pos)
 	if not _cell_valid(cell):
 		return {}
+	return _shovel_target_at(cell, drag_pos)
+
+
+func _shovel_target_at(cell: Vector2i, board: Vector2) -> Dictionary:
 	var index := cell.y * 9 + cell.x
 	if state.grid[index].is_empty() and cell.x > 0 and str(state.grid[index - 1].get("kind", "")) == "cobcannon":
 		index -= 1
-	for layer in ["bases", "shells", "grid"]:
+	var candidates: Array = []
+	var cell_top := GardenLayout.GRID_ORIGIN.y + float(cell.y) * GardenLayout.cell_height(state)
+	if str(state.get("environment", "")) == "roof":
+		cell_top -= 10.0
+	var layer_centers := {"shells": cell_top + 30.0, "grid": cell_top + 50.0, "bases": cell_top + 78.0}
+	for layer in ["shells", "grid", "bases"]:
 		var plant: Dictionary = state[layer][index]
 		if not plant.is_empty():
-			return plant
-	return {}
+			candidates.append({"plant": plant, "distance": absf(board.y - float(layer_centers[layer]))})
+	if candidates.is_empty():
+		return {}
+	candidates.sort_custom(func(left, right): return float(left.distance) < float(right.distance))
+	return candidates[0].plant

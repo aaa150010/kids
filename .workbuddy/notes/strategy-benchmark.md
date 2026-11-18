@@ -13,19 +13,19 @@
 | 1 | card.gd 区分战斗卡可用态、费用和冷却；不可用卡拒绝进入手持态 | 已实现 | garden_game._card_unavailable_reason与garden_field._draw_card已有冷却遮罩及费用状态；旧笔记“无冷却可视化”已失效 |
 | 2 | hand_manager.gd 空手、角色、道具三态；切换清理旧态；右键或空白取消 | 已实现 | _cancel_selection已清空植物、铲子和瞄准；本地仍用字段组合，需验证跨输入切换互斥 |
 | 3 | hm_character.gd 跟随指针的角色与格内影子分开；落格再次校验 | 已实现 | garden_field._draw_preview/_draw_ghost已有预览，engine.plant再次can_plant；静态存在不等于拖拽真机达标 |
-| 4 | hm_item.gd 多层植物按目标切换预铲高亮，离格清理高亮，确认铲指定植物 | 待验证 | 本地shovel按shells/grid/bases固定优先级；需确认预览目标与实际删层一致，参考实现支持指针选层 |
-| 5 | shovel_in_ui.gd 点击隐藏槽位铲子，取消或结束后恢复 | 待验证 | 本地_draw_hud始终画铲子图；属于表现差异，槽位隐藏与回归动画应按实际设计核验 |
-| 6 | card_slot_norm.gd 卡片切换父节点后0.2秒飞向目标槽 | 缺失 | 本地选卡页_toggle_seed_pick重绘，未见候选卡到出战槽的飞行动画；不能把战斗卡拖拽当作选卡动画 |
+| 4 | hm_item.gd 多层植物按目标切换预铲高亮，离格清理高亮，确认铲指定植物 | 已实现 | 本地按指针纵向落点选择 shells/grid/bases，点击把目标 UID 交给 engine.shovel；预览和实际删层使用同一目标 |
+| 5 | shovel_in_ui.gd 点击隐藏槽位铲子，取消或结束后恢复 | 已实现 | `start_shovel_return` 已接入取消、成功铲除、关闭铲子三条路径，槽位图标在 0.2 秒内回飞 |
+| 6 | card_slot_norm.gd 卡片切换父节点后0.2秒飞向目标槽 | 已实现 | 选卡页新增 10 个出战槽，候选卡与槽位双向 0.2 秒飞入/回飞，飞行期间锁输入；开战再飞向战斗 HUD |
 | 7 | card_slot_battle.gd 成功用卡统一扣费和冷却，阳光setter刷新卡；紫卡基础价加同种数量×50 | 待验证 | 本地plant统一结算已具备，但cost取静态定义，未见紫卡随存量涨价；该涨价为参考项目口径，不能直接当作必需规则 |
 | 8 | card_slot_candidate.gd 按可用卡组和解锁状态生成分页，普通与模仿卡用不同选择键 | 待验证 | 本地候选卡筛选存在；未实现模仿卡独立选择键及分页同等结构，应以实际内容范围判断 |
 | 9 | sun.gd collected立即防重入，入账在飞行之前；飞行0.3秒，到达淡出0.5秒，存活10秒 | 已实现 | 本地collect_sun同样立即入账并collecting防重，field飞行0.35秒；旧笔记建议“到达才入账”不是来源事实 |
-| 10 | day_suns_manager.gd A=10×累计阳光+425，上限950加0至274随机，最终production_interval/100传入秒计时器 | 缺失 | 本地固定skySun加0至3秒随机，未按累计产出递减；旧笔记把公式直接标毫秒有单位错误：源码实际约4.25至12.24秒 |
+| 10 | day_suns_manager.gd A=10×累计阳光+425，上限950加0至274随机，最终production_interval/100传入秒计时器 | 已实现 | `garden-rules.json` 新增 base/step/cap/jitter，累计产出越多间隔越长；夹具覆盖首轮增量和恢复 |
 | 11 | plant_cell.gd 将底座、主体、外壳分层，地形位标志参与种植判定，底座移动带动上层 | 已实现 | engine.can_plant与bases/grid/shells覆盖水、屋顶、睡莲、花盆及升级前置，表达方式不同不构成缺失 |
-| 12 | zm_zombie_wave_manager.gd 旗前/旗帜/最终波分支，异步等待后校验刷新代次和运行阶段 | 待验证 | 本地_spawn_logic有旗波，按时间生成；参考按代次丢弃过期回调的做法适合回归重开/结算后不再刷怪 |
-| 13 | ui_remind_word.gd 准备/放置/开始各0.6秒，大波提示4秒再空等2秒，最终另3秒 | 待验证 | 本地flag事件有音效和画面特效；未据此确认完整三段开场及最终波独立展示时长 |
-| 14 | ui_flag_progress_bar.gd 真实值与追赶值分开，逐帧追近且旗帜上升 | 待验证 | 本地_draw_hud已有进度条，但waveIndex/waveCount按整波比例更新，未见按波内时间平滑追赶及旗帜刻度 |
+| 12 | zm_zombie_wave_manager.gd 旗前/旗帜/最终波分支，异步等待后校验刷新代次和运行阶段 | 已实现 | 旗波与最终波先写入 pendingWave/waveCue 倒计时，时间到才刷怪；重开或恢复不会执行旧回调 |
+| 13 | ui_remind_word.gd 准备/放置/开始各0.6秒，大波提示4秒再空等2秒，最终另3秒 | 已实现 | 三段开场各 0.6 秒；旗波 4 秒、最终波 3 秒，全屏居中文字按真实时长淡出，不再使用棋盘坐标偏移 |
+| 14 | ui_flag_progress_bar.gd 真实值与追赶值分开，逐帧追近且旗帜上升 | 已实现 | 进度按波内时间连续推进，旗波停顿等待提示，旗标按每 10 波绘制；夹具验证首波平滑与最终波等待 |
 | 15 | tree_pause_manager.gd 多个暂停因素取any，每次原因变化均发信号 | 待验证 | 本地paused阻止推进与field输入具备；多个模态叠加关闭一个后是否仍暂停需运行核验 |
-| 16 | component_create_sun.gd 首次产出时间随机，使用基础间隔与速度倍率分离；阳光抛出再下落 | 待验证 | 本地_update_plants分首次7秒/后续间隔；需验证倍速切换不重置既有进度，以及自动收集是否等待下落结束 |
+| 16 | component_create_sun.gd 首次产出时间随机，使用基础间隔与速度倍率分离；阳光抛出再下落 | 已实现 | 植物首次产出与后续间隔分离，倍速只改变逻辑步进；自动收集现在等阳光落到目标高度后才触发，手动点击仍立即入账 |
 | 17 | plant_005_potato_mine.gd 准备计时期间禁检测，出土动画结束才开启检测；脚本默认prepare_time为10秒 | 已实现 | 本地unarmed/remaining准备态存在，默认15秒；不能把参考默认10秒当作原版统一数值，需区分动画结束与计时结束 |
 | 18 | plant_007_chomper.gd 区分啃咬和咀嚼，动画事件发出吞噬，咀嚼时不重复咬 | 已实现 | 本地bite→digest→idle存在，目标丢失与目标重新获取的边界需回归 |
 | 19 | plant_036_coffee_bean.gd 仅调用plant_cell.coffee_bean_awake_up，不在本文件校验前置 | 待验证 | 本地can_plant验证睡眠主体、plant唤醒；本源仅6行转发，不能从该文件独立证明完整咖啡豆规则 |
@@ -98,7 +98,7 @@
 | 5 | JunqiGame.gd 工兵铁路遍历可转弯，暗子阻挡、同方阻挡；长久无吃子可判和 | 待验证 | 本地工兵BFS具备，军棋缺少quietPlies和棋阈值，只有斗兽棋使用100半回合；需明确本项目军棋和棋口径 |
 | 6 | JunqiMap.gd 明确公路/铁路邻接及可放置位置，棋盘地形图与规则共享 | 已实现 | 本地road_neighbours/rail_link/CAMPS共享给渲染，横置12×5的视觉与5列12行逻辑通过position_for转换 |
 | 7 | Piece3D.gd 维护busy，走子水平补间与上下跳并行，选中上浮0.13 | 已实现 | 本地自绘翻牌、移动和选中上浮已有，动画期间_begin拒绝新输入 |
-| 8 | main.gd 玩家阵营初始-1，翻棋前后控制busy、选择和AI，未定阵营时有独立提示 | 缺失 | 本地create_session turn=0且按piece.side选择，没有未定阵营阶段；缺少阵营确定流程，本源不能独立证明“连续两次同色”官方口径 |
+| 8 | main.gd 玩家阵营初始-1，翻棋前后控制busy、选择和AI，未定阵营时有独立提示 | 已实现 | 双人经典局从 factionSides=[-1,-1] 开始；同一玩家两次同色翻棋定阵营，异色重置，亮棋选择按阵营映射；旧存档默认红蓝固定 |
 | 9 | ai_test.gd 固定随机种子验证合法性、对贪心强度和单步时间预算 | 待验证 | 本地未提供自由AI，测试策略可供未来使用；本次仅阅读，未执行不报告外部AI测试通过 |
 | 10 | logic_test.gd 覆盖军衔表、地形、斜路、铁路、初始布阵，另断言敌方仍有地雷不得夺旗 | 待验证 | 本地任意可动子可直接夺旗；“排雷后夺旗”为参考项目变体，不应未经官方规则确认改成默认 |
 | 11 | Board.ts 检查落点和敌方占位，行营内敌子不可攻击，铁路规则单独委托 | 已实现 | 本地_can_land禁止吃行营，暗子不能直接吃；传统布阵军棋与翻翻棋信息规则需分开 |
@@ -112,7 +112,7 @@
 | 19 | RailroadNetwork.ts 工兵可探索转弯，普通子限制同线，被占位阻挡继续扩展 | 已实现 | 本地工兵BFS、普通子直线循环具备；暗子、敌子、己子的阻路都应各有局面用例 |
 | 20 | RailroadNetwork.test.ts 检查交点/非交点线路集合和是否在铁路，构造简单线路验证连通 | 待验证 | 本地铁路实现静态存在，本次未运行军棋测试，不能把参考测试通过迁移为本地通过 |
 
-最高价值事项：先明确翻翻棋定阵营规则并补相应状态；完整全局规则示意；核验炸弹对旗、地雷后夺旗、司令死亡亮旗等不同版本规则。旧笔记将Banqi“首子定色”混入军棋不具证明力，本研究不采用。传统布阵军棋资料已明确标变体，仅取共享道路、铁路和战斗表技术。
+最高价值事项：定阵营、全局规则示意与炸弹对旗已经落地；仍需在真机核验连续翻棋手感、地雷后夺旗和司令死亡亮旗等版本差异。旧笔记将 Banqi“首子定色”混入军棋不具证明力，本研究不采用。
 
 ## 交付与限制
 
@@ -126,13 +126,24 @@
 - 许可限制保持原结论：PVZ-Godot-Dream 的 API 元数据为 `NOASSERTION`，但已读取的 LICENSE 正文是自定义非商用许可，不能复制进公开分发；`neoalienson/animal_chess` 未声明可识别许可，只可读机制；pixi-gomoku 为 GPL-3.0；两份军棋仓库为 MIT。研究证据不等于代码或素材复用授权。
 - 表内状态表示静态对照结论，不表示运行或设备验收；本轮没有运行外部项目、没有执行 Godot 解析，也没有在平板上做触控验收。后续修复应引用具体 `repo + path`，不能只报“已读 20 条”。
 
-## 本轮实现对照（源码已改，运行未验证）
+## 本轮实现对照（2026-11-18 第三轮）
 
 | 参考证据 | 本地修复 | 状态 |
 |---|---|---|
-| `hsk-dream/PVZ-Godot-Dream`：`scripts/manager/hand_manager/hand_manager.gd`、`scripts/manager/hand_manager/hm_item.gd` | `garden_game.gd::_toggle_shovel` 现在切换到铲子时清除植物卡选择；`garden_field.gd::_input` 收到系统取消触点时只清除手势，不伪装成用户点空白。 | 已实现；触屏取消与手持互斥仍待设备验证 |
-| `virgoone/pixi-gomoku`：`src/screens/GameScreen.ts`、`src/ui/BoardView.ts` | `board_rules.gd::undo_player_turn` 在固定残局中撤回玩家着手和自动应手，避免回合立即自动重演；棋子/胜线/历史快照增加结构校验。 | 已实现；残局回合和悔棋仍待 Godot 运行验证 |
-| `neoalienson/animal_chess`：`lib/game/game_rules.dart`、`lib/widgets/game_board_widget.dart`；`samuelyuan/online-junqi`：`src/lib/Board.ts` | `BoardRules.restore` 校验游戏 ID、阵营、坐标、历史及最后一步；不合法历史项会从可悔棋列表剔除。 | 已实现；输入、恢复及棋盘坐标仍待设备验证 |
-| 本计划存档要求；学习/记忆簇源码对照见 `content-src/research/reading-memory-interactions.json` 与 `learning-interactions.json` | `GameSession.restore` 校验参与者快照；答题、记忆、唐诗、智慧岛和花园对外层状态增加类型/范围校验；记忆发牌按 ID 去重；故事馆按混音时间和缓存的输出延迟计算朗读位置。 | 已实现；没有执行解析、状态夹具或真机测试 |
+| `PVZ-Godot-Dream`：`hm_item.gd`、`shovel_in_ui.gd`、`card_slot_norm.gd` | 选卡页 10 个出战槽、候选卡/槽位双向飞行动画、开战飞入 HUD；铲子回飞；按指针纵向落点选择 shells/grid/bases 并把具体 UID 传给引擎。 | 已实现；三档 UI 审计通过，触屏手感待真机 |
+| `PVZ-Godot-Dream`：`day_suns_manager.gd`、`zm_zombie_wave_manager.gd`、`ui_remind_word.gd`、`ui_flag_progress_bar.gd` | 天降阳光参数源、三段 0.6 秒开场、旗波/最终波独立倒计时与音效、波内连续进度、旗标刻度、自动收集等待落地、提示层改用全屏坐标。 | 已实现；848 项花园夹具通过 |
+| `PVZ-Godot-Dream`：`card.gd`、`card_slot_battle.gd` | 临时传送带/保龄球卡 15 秒生命周期，最后 5 秒描边闪烁；不可用卡错误抖动；手持 `handMode` 与目标 UID 进入存档。 | 已实现；生命周期与恢复夹具通过 |
+| 天天军棋翻翻棋规则页；`pengpengjunqi` 翻棋状态机 | 双人经典军棋新增未定阵营阶段、连续两次同色定阵营、异色重置、阵营到玩家双向映射、角色栏红蓝显示和规则弹窗；旧存档安全回退为固定阵营。 | 已实现；自动夹具覆盖定阵营、重置、旧存档和残局 |
+| `neoalienson/animal_chess` 棋盘/规则组件；`pixi-gomoku` 规则视图与最后一步 | 斗兽棋敌方陷阱“↓”降级角标、吃子缩小淡出；三类棋补统一规则小书；空 `lastMove`、缺失 `puzzle` 的旧快照不再报错。 | 已实现；Godot 解析与棋类夹具通过 |
+| 儿童答题交互资料；GCompris 分类、规律、字词活动 | 五款学习游戏保留三选一和朗读，同时新增“把答案拖到作答区”手势与拖动 ghost；点选仍是无障碍替代路径，答题锁与手动下一题不变。 | 已实现；三档 UI 审计通过，拖拽真机精度待验证 |
+| 翻牌游戏资料 | 配对成功保留当前玩家，错配才换手；状态栏明确规则。 | 已实现；双人配对/错配夹具通过 |
+| 唐诗长文阅读与闪卡资料 | 每首诗按“首行 + 行内比例”保存语义滚动锚点，字号或拼音切换后重新落到同一行附近；未知诗 ID 锚点丢弃。 | 已实现；快照夹具通过 |
+| 故事音频下载资料 | 网络中断、HTTP 非 200、空间/写盘、大小不符、SHA-256 不符和 rename 失败分别给出可理解提示并保留重试任务。 | 已实现；网络下载流程未做真机故障注入 |
+| 共享弹窗与触控资料 | 弹窗缺少 `prev_focus` 时安全回退；无效 `Callable()` 按钮不再报连接错误；移除布局前的触摸尺寸误报，由 UI 审计按最终可见尺寸检查。 | 已实现；完整审计日志无脚本错误 |
 
-本轮修改不是“项目解析通过”。Godot 4.7.2 项目上下文、暂停/后台重入、损坏存档回退、所有 13 款的跨孩子/模式隔离及 OPPO Pad 横屏触控仍未验证；不得据此标记全面重构完成。
+## 本轮验证
+
+- Godot 4.7.2 编辑器上下文解析退出码 0；只有 Android `build-tools` 目录、`build/staging` 嵌套工程和编辑器设置写盘提示，无 GDScript 解析错误。
+- `tests/test_runner.gd` 通过：内容、棋类、答题、记忆、唐诗锚点、军棋定阵营与旧存档。
+- `tests/garden_fixtures.gd` 通过：848 项，0 失败。
+- `pnpm native:audit` 三档尺寸完成，`layout-report.txt` 为 `No visible touch-target issues found.`；桌面模拟 3000×2120、3392×2400、1180×800 均约 120 FPS。设备触控、系统手势、真实安卓性能和安装后覆盖升级仍需实体平板验证。

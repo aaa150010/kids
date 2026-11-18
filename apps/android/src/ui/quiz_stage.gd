@@ -31,6 +31,10 @@ var _sparks: Array = [] # 自绘答对星星粒子
 var _position := 0
 var _total := 0
 var _correct := 0
+var _drag_index := -1
+var _drag_pos := Vector2.ZERO
+var _drag_active := false
+var _suppress_press := false
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(420,390)
@@ -43,9 +47,13 @@ func _ready() -> void:
 	PressFeedback.attach(listen,&"select")
 	add_child(listen)
 	for index in 3:
-		var button := PlaygroundUI.button("",accent,func(): _choose(index),"soft")
+		var button := PlaygroundUI.button("",accent,Callable(),"soft")
 		button.custom_minimum_size = Vector2(96,64)
 		PressFeedback.attach(button)
+		button.pressed.connect(_choose.bind(index))
+		button.button_down.connect(_drag_begin.bind(index))
+		button.button_up.connect(_drag_release.bind(index))
+		button.gui_input.connect(_drag_input.bind(index))
 		add_child(button)
 		buttons.append(button)
 	resized.connect(_layout)
@@ -84,9 +92,63 @@ func set_progress(correct: int, position: int, total: int) -> void:
 
 func _choose(index: int) -> void:
 	# 弹窗接管输入或已经进入讲解时，忽略选项点击
-	if feedback or not _pending.is_empty() or _blocked_by_dialog():
+	if _suppress_press or feedback or not _pending.is_empty() or _blocked_by_dialog():
 		return
 	answered.emit(index)
+
+
+func _drag_begin(index: int) -> void:
+	if feedback or not _pending.is_empty() or _blocked_by_dialog():
+		return
+	_drag_index = index
+	_drag_active = false
+	_drag_pos = buttons[index].position + buttons[index].size * .5
+
+
+func _drag_input(event: InputEvent, index: int) -> void:
+	if index != _drag_index:
+		return
+	if event is InputEventScreenDrag:
+		_drag_pos = buttons[index].position + event.position
+	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		_drag_pos = buttons[index].position + event.position
+	else:
+		return
+	if _drag_pos.distance_to(buttons[index].position + buttons[index].size * .5) >= 24.0:
+		_drag_active = true
+	queue_redraw()
+
+
+func _drag_release(index: int) -> void:
+	if index != _drag_index:
+		return
+	var dropped := _drag_active and _drop_rect().has_point(_drag_pos)
+	_drag_index = -1
+	_drag_active = false
+	queue_redraw()
+	if dropped:
+		_suppress_press = true
+		answered.emit(index)
+		get_tree().create_timer(.08).timeout.connect(func(): _suppress_press = false)
+
+
+func _drop_rect() -> Rect2:
+	return Rect2(size.x * .24, size.y * .56, size.x * .52, clampf(size.y * .14, 58.0, 92.0))
+
+
+func _drop_hint() -> String:
+	match game_id:
+		"patterns":
+			return "把正确图形拖到问号框"
+		"animals":
+			return "把答案拖进分类篮"
+		"pinyin":
+			return "把拼音拖到汉字下面"
+		"workbook":
+			return "把答案拖进练习本空格"
+		_:
+			return "把数字拖进答案框"
+
 
 func _request_listen() -> void:
 	if not _pending.is_empty() or _blocked_by_dialog():
@@ -346,8 +408,10 @@ func _draw() -> void:
 		"patterns": _draw_patterns()
 		"animals": _draw_animals()
 		"workbook": _draw_workbook()
+	_draw_drop_target()
 	_draw_progress()
 	_draw_sparks()
+	_draw_drag_ghost()
 
 ## 顶部小标签 + 里程碑星（每答对 3 题点亮一颗，最多 3 颗）
 func _draw_progress() -> void:
@@ -366,6 +430,40 @@ func _draw_progress() -> void:
 		var glyph := "★" if index < lit else "☆"
 		var tint := Color("#d9a52c") if index < lit else Color("#c9bda9")
 		draw_string(font,Vector2(16+width+10+index*26,12+17+10),glyph,HORIZONTAL_ALIGNMENT_LEFT,-1,24,tint)
+
+
+func _draw_drop_target() -> void:
+	if feedback or not _pending.is_empty():
+		return
+	var rect := _drop_rect()
+	var active := _drag_active and rect.has_point(_drag_pos)
+	var tint := Color("#4a9661") if active else accent
+	draw_style_box(PlaygroundUI.style(PlaygroundUI.mix(tint,Color.WHITE,.9),20,tint,3 if active else 2),rect)
+	var font := PlaygroundUI.font()
+	var text := "松手放到这里" if active else _drop_hint()
+	var pixels := 17 if rect.size.x > 300 else 15
+	var width := font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels).x
+	draw_string(font,Vector2(rect.get_center().x-width*.5,rect.get_center().y+pixels*.35),text,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels,PlaygroundUI.mix(tint,PlaygroundUI.INK,.45))
+
+
+func _draw_drag_ghost() -> void:
+	if not _drag_active or _drag_index < 0 or _drag_index >= buttons.size():
+		return
+	var dimensions := Vector2(74,74)
+	var rect := Rect2(_drag_pos-dimensions*.5,dimensions)
+	draw_style_box(PlaygroundUI.style(PlaygroundUI.mix(accent,Color.WHITE,.45),20,accent,3,5,Color(0,0,0,.18)),rect)
+	var text := buttons[_drag_index].text
+	var symbols := ArtLibrary.symbols(text)
+	if symbols.is_empty():
+		var font := PlaygroundUI.font()
+		var pixels := 22
+		var width := font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels).x
+		draw_string(font,Vector2(rect.get_center().x-width*.5,rect.get_center().y+pixels*.35),text,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels,PlaygroundUI.INK)
+	else:
+		var side := minf(42.0,(rect.size.x-8.0)/maxf(1,symbols.size()))
+		for index in symbols.size():
+			_icon(str(symbols[index]),rect.get_center()+Vector2((index-(symbols.size()-1)*.5)*side,0),Vector2.ONE*side)
+
 
 func _draw_sparks() -> void:
 	for entry in _sparks:

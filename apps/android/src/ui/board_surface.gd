@@ -298,6 +298,20 @@ func _draw_grid(gap: float) -> void:
 				_text(str(BoardRules.NAMES[piece.kind]),draw_center,gap*0.25,tint)
 		if selected:
 			draw_arc(draw_center,gap*0.47,0,TAU,40,Color("#e6ae2e"),4,true)
+		if game_id == "jungle" and index in BoardRules.TRAPS[1-int(piece.side)]:
+			_text("↓",draw_center+Vector2(gap*0.31,gap*0.30),gap*0.24,Color("#b43b2b"))
+	var last_capture: Dictionary = state.get("lastMove",{}).get("captured",{})
+	if game_id != "gomoku" and not last_capture.is_empty() and motion < 1.0:
+		var last_to := int(state.get("lastMove",{}).get("to",-1))
+		if last_to >= 0:
+			var center := position_for(last_to)
+			var alpha := 1.0-motion
+			if game_id == "jungle":
+				var texture := ArtLibrary.texture(str(ArtLibrary.ANIMAL_TOKENS.get(str(last_capture.get("kind","")),"")))
+				if texture != null:
+					draw_texture_rect(texture,Rect2(center-Vector2(gap*0.30,gap*0.38),Vector2(gap*0.60,gap*0.56)),false,Color(1,1,1,alpha*0.75))
+			else:
+				_text(str(BoardRules.NAMES.get(str(last_capture.get("kind","")),"棋子")),center,gap*0.22,Color(0.55,0.28,0.24,alpha))
 
 func _text(value: String, center: Vector2, font_size: float, tint: Color) -> void:
 	var pixels := maxi(12,int(font_size))

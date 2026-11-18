@@ -37,6 +37,7 @@ var plant_entries: Dictionary = {}
 var zombie_entries: Dictionary = {}
 var seed_buttons: Dictionary = {}
 var seed_pick_buttons: Dictionary = {}
+var seed_loadout_buttons: Array = []
 var seed_flight_lock := false
 var seed_flight_generation := 0
 var hand_mode := "none"
@@ -92,6 +93,7 @@ func _ready() -> void:
 		speed = clampi(_integer(profile_data.get("speed", 1)), 1, 3)
 		tick_accumulator = _number(battle.get("logicAccumulator", 0.0), 0.0)
 		selected_difficulty = str(battle.get("difficulty", "auto"))
+		hand_mode = str(battle.get("handMode", "none"))
 		view = "battle"
 		_render_battle()
 		if paused:
@@ -167,7 +169,7 @@ func _process_events(events: Array) -> void:
 			"sun", "coin":
 				_play_garden_sound("points")
 			"flag":
-				_play_garden_sound("hugewave")
+				_play_garden_sound("finalwave" if str(event.get("cue", "")) == "final" else "hugewave")
 			"explode":
 				_play_garden_sound("cherrybomb")
 			"freeze":
@@ -370,7 +372,6 @@ func _render_seed_picker() -> void:
 	top.add_child(GardenSurfaces.button("难度：%s" % _difficulty_name(selected_difficulty), Color("#8d6b24"), _cycle_difficulty, "soft"))
 	outer.add_child(top)
 	seed_flight_lock = false
-	seed_flight_generation += 1
 	var split := HBoxContainer.new()
 	split.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	split.add_theme_constant_override("separation", 12)
@@ -393,6 +394,35 @@ func _render_seed_picker() -> void:
 	info.add_theme_constant_override("separation", 10)
 	info.add_child(PlaygroundUI.label("🃏 已选 %s / 10" % selected_seeds.size(), 20, accent, 700))
 	info.add_child(PlaygroundUI.label("点卡片加入或移除。开始后，左上角卡片会按顺序显示。", 14, PlaygroundUI.INK_SOFT, 500, true))
+	var loadout := GridContainer.new()
+	loadout.columns = 5
+	loadout.add_theme_constant_override("h_separation", 4)
+	loadout.add_theme_constant_override("v_separation", 4)
+	seed_loadout_buttons.clear()
+	for slot_index in 10:
+		var slot := Button.new()
+		slot.custom_minimum_size = Vector2(50, 62)
+		slot.disabled = slot_index >= selected_seeds.size()
+		slot.add_theme_stylebox_override("normal", PlaygroundUI.style(Color("#ead7aa"), 9, accent if not slot.disabled else Color("#b8ad95"), 3 if not slot.disabled else 1))
+		slot.add_theme_stylebox_override("hover", PlaygroundUI.style(Color("#fff0bf"), 9, accent, 3))
+		slot.add_theme_stylebox_override("pressed", PlaygroundUI.style(Color("#d8e6ad"), 9, accent, 3))
+		slot.add_theme_stylebox_override("disabled", PlaygroundUI.style(Color("#f2ead9"), 9, Color("#c8bda7"), 1))
+		if slot_index < selected_seeds.size():
+			var portrait := TextureRect.new()
+			portrait.texture = _plant_texture(str(selected_seeds[slot_index]))
+			portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			portrait.offset_left = 4
+			portrait.offset_right = -4
+			portrait.offset_top = 3
+			portrait.offset_bottom = -3
+			portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			slot.add_child(portrait)
+			slot.pressed.connect(_remove_seed_from_loadout.bind(slot_index))
+		seed_loadout_buttons.append(slot)
+		loadout.add_child(slot)
+	info.add_child(loadout)
 	var action := GardenSurfaces.button("开始守家 →", accent, _begin_battle)
 	action.disabled = selected_seeds.size() < 6
 	info.add_child(action)
@@ -443,16 +473,75 @@ func _seed_pick_button(kind: String) -> Button:
 func _toggle_seed_pick(kind: String) -> void:
 	if seed_flight_lock:
 		return
+	var start := Vector2(746, 38)
+	var removing_slot := selected_seeds.find(kind)
+	if removing_slot >= 0 and removing_slot < seed_loadout_buttons.size():
+		var selected_slot: Control = seed_loadout_buttons[removing_slot]
+		if is_instance_valid(selected_slot):
+			start = selected_slot.get_global_rect().get_center()
+	else:
+		var candidate: Control = seed_pick_buttons.get(kind, null)
+		if candidate != null and is_instance_valid(candidate):
+			start = candidate.get_global_rect().get_center()
 	if kind in selected_seeds:
 		selected_seeds.erase(kind)
 	elif selected_seeds.size() < 10:
 		selected_seeds.append(kind)
 	AudioFX.play("select")
 	_render_seed_picker()
+	if kind in selected_seeds:
+		var slot_index := selected_seeds.find(kind)
+		if slot_index >= 0 and slot_index < seed_loadout_buttons.size():
+			var target: Control = seed_loadout_buttons[slot_index]
+			if is_instance_valid(target):
+				_start_picker_transfer(kind, start, target.get_global_rect().get_center())
+	else:
+		_return_seed_to_picker(kind, start)
 	_save_profile("选择植物卡组")
 
 
-func _start_seed_flight(kind: String) -> void:
+func _remove_seed_from_loadout(slot_index: int) -> void:
+	if slot_index < 0 or slot_index >= selected_seeds.size() or seed_flight_lock:
+		return
+	var kind := str(selected_seeds[slot_index])
+	var start := Vector2(746, 38)
+	if slot_index < seed_loadout_buttons.size():
+		var slot: Control = seed_loadout_buttons[slot_index]
+		if is_instance_valid(slot):
+			start = slot.get_global_rect().get_center()
+	selected_seeds.remove_at(slot_index)
+	AudioFX.play("back")
+	_render_seed_picker()
+	_return_seed_to_picker(kind, start)
+	_save_profile("移除植物卡")
+
+
+func _start_picker_transfer(kind: String, start: Vector2, target: Vector2) -> void:
+	var flight := Control.new()
+	flight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flight.z_index = 90
+	var sprite := TextureRect.new()
+	sprite.texture = _plant_texture(kind)
+	sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	sprite.custom_minimum_size = Vector2(76, 92)
+	sprite.size = Vector2(76, 92)
+	sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flight.add_child(sprite)
+	flight.global_position = start - Vector2(38, 46)
+	flight.set_meta("source_generation", seed_flight_generation)
+	add_child(flight)
+	seed_flight_lock = true
+	var tween := MotionKit.tween(flight)
+	tween.tween_property(flight, "global_position", target - Vector2(38, 46), .2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(sprite, "modulate:a", .15, .08).set_delay(.12)
+	tween.tween_callback(func():
+		flight.queue_free()
+		seed_flight_lock = false
+	)
+
+
+func _start_seed_flight(kind: String, slot_index: int = -1) -> void:
 	var flight := Control.new()
 	flight.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	flight.z_index = 90
@@ -467,6 +556,10 @@ func _start_seed_flight(kind: String) -> void:
 	flight.add_child(sprite)
 	flight.set_meta("source_kind", kind)
 	flight.set_meta("source_generation", seed_flight_generation)
+	flight.set_meta("slot_index", slot_index)
+	var source_button: Button = seed_pick_buttons.get(kind, null)
+	if source_button != null and is_instance_valid(source_button):
+		flight.set_meta("start_global", source_button.get_global_rect().get_center())
 	flight.modulate.a = 0.9
 	add_child(flight)
 	call_deferred("_play_seed_flight", flight)
@@ -479,19 +572,24 @@ func _play_seed_flight(flight: Control) -> void:
 		return
 	var button: Button = seed_pick_buttons.get(kind, null)
 	if button == null or not is_instance_valid(button):
-		flight.queue_free()
-		return
-	var start := button.get_global_rect().get_center()
+		if not flight.has_meta("start_global"):
+			flight.queue_free()
+			return
+	var start: Vector2 = flight.get_meta("start_global", Vector2(746, 38))
 	var target := Vector2(746, 38)
+	var slot_index := int(flight.get_meta("slot_index", -1))
+	if is_instance_valid(field) and slot_index >= 0:
+		target = field.get_global_transform_with_canvas() * field._transform() * GardenLayout.seed_rect(slot_index).get_center()
 	flight.global_position = start - Vector2(104, 124) * 0.5
 	flight.modulate.a = 0.9
 	var tween := MotionKit.tween(flight)
 	tween.tween_property(flight, "global_position", target - Vector2(104, 124) * 0.5, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.parallel().tween_property(sprite_reference, "modulate:a", 0.0, 0.07).set_delay(0.13)
+	var sprite := flight.get_child(0) as TextureRect
+	tween.parallel().tween_property(sprite, "modulate:a", 0.0, 0.07).set_delay(0.13)
 	tween.tween_callback(flight.queue_free)
 
 
-func _return_seed_to_picker(kind: String) -> void:
+func _return_seed_to_picker(kind: String, start := Vector2(746, 38)) -> void:
 	var flight := Control.new()
 	flight.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	flight.z_index = 90
@@ -505,6 +603,7 @@ func _return_seed_to_picker(kind: String) -> void:
 	flight.add_child(sprite)
 	flight.set_meta("target_kind", kind)
 	flight.set_meta("target_generation", seed_flight_generation)
+	flight.set_meta("start_global", start)
 	flight.modulate.a = 0.9
 	add_child(flight)
 	call_deferred("_play_seed_return", flight)
@@ -520,13 +619,19 @@ func _play_seed_return(flight: Control) -> void:
 		flight.queue_free()
 		return
 	var start := Vector2(746, 38)
+	start = flight.get_meta("start_global", start)
 	var target := button.get_global_rect().get_center()
 	flight.global_position = start - Vector2(104, 124) * 0.5
 	flight.modulate.a = 0.9
+	seed_flight_lock = true
 	var tween := MotionKit.tween(flight)
 	tween.tween_property(flight, "global_position", target - Vector2(104, 124) * 0.5, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	var sprite := flight.get_child(0) as TextureRect
 	tween.parallel().tween_property(sprite, "modulate:a", 0.0, 0.07).set_delay(0.13)
-	tween.tween_callback(flight.queue_free)
+	tween.tween_callback(func():
+		flight.queue_free()
+		seed_flight_lock = false
+	)
 
 
 func _begin_battle(tutorial: bool = false) -> void:
@@ -544,8 +649,9 @@ func _begin_battle(tutorial: bool = false) -> void:
 	seed_flight_lock = true
 	seed_flight_generation += 1
 	if not tutorial:
-		for kind in selected_seeds.duplicate(true):
-			_start_seed_flight(kind)
+		for index in selected_seeds.size():
+			_start_seed_flight(str(selected_seeds[index]), index)
+		MotionKit.tween(self).tween_interval(0.26).tween_callback(func(): seed_flight_lock = false)
 	_save_profile("战斗开始")
 	_render_battle()
 	var environment := str(battle.get("environment", "day"))
@@ -648,12 +754,15 @@ func _select_battle_seed(kind: String) -> void:
 	var reason := _card_unavailable_reason(kind)
 	if not reason.is_empty():
 		AudioFX.play("wrong")
+		if is_instance_valid(field):
+			field.shake_card(kind)
 		show_toast(reason)
 		return
 	battle.selectedSeed = kind
 	battle.shovel = false
 	battle.aimingCannon = -1
 	hand_mode = "seed"
+	battle.handMode = "seed"
 	_play_garden_sound("buttonclick")
 	_save_profile("选择植物卡")
 	if is_instance_valid(field):
@@ -677,25 +786,34 @@ func _cancel_selection() -> void:
 		return
 	if str(battle.get("selectedSeed", "")).is_empty() and not bool(battle.get("shovel", false)) and int(battle.get("aimingCannon", -1)) < 0:
 		return
+	var returning_shovel := bool(battle.get("shovel", false))
 	battle.selectedSeed = ""
 	battle.shovel = false
 	battle.aimingCannon = -1
+	battle.handTargetUid = -1
 	hand_mode = "none"
+	battle.handMode = "none"
 	AudioFX.play("back")
 	if is_instance_valid(field):
+		if returning_shovel:
+			field.start_shovel_return()
 		field.set_battle(battle)
 	_save_profile("取消选择")
 
-func _battle_cell(row: int, col: int) -> void:
+func _battle_cell(row: int, col: int, target_uid: int = -1) -> void:
 	if battle.is_empty() or battle.get("phase") != "playing" or paused:
 		return
 	var digging := bool(battle.get("shovel", false))
 	var kind := str(battle.get("selectedSeed", ""))
-	var result: Dictionary = engine.shovel(battle, row, col) if digging else engine.handle_cell(battle, row, col)
+	battle.handTargetUid = target_uid if digging else -1
+	var result: Dictionary = engine.shovel(battle, row, col, target_uid) if digging else engine.handle_cell(battle, row, col)
 	if bool(result.get("ok", false)):
 		_tutorial_action("dig" if digging else "plant", kind)
 		if digging:
 			hand_mode = "none"
+			battle.handMode = "none"
+			if is_instance_valid(field):
+				field.start_shovel_return()
 		AudioFX.play("whoosh" if digging else "plant")
 		_play_garden_sound("plant_water" if str(battle.environment) in ["pool", "fog"] and row in [2, 3] else "buttonclick")
 	else:
@@ -719,11 +837,16 @@ func _collect_sun(uid: int) -> void:
 func _toggle_shovel() -> void:
 	battle.shovel = not bool(battle.get("shovel", false))
 	battle.aimingCannon = -1
+	battle.handTargetUid = -1
 	if bool(battle.get("shovel", false)):
 		battle.selectedSeed = ""
 		hand_mode = "shovel"
+		battle.handMode = "shovel"
 	else:
 		hand_mode = "none"
+		battle.handMode = "none"
+		if is_instance_valid(field):
+			field.start_shovel_return()
 	_play_garden_sound("buttonclick")
 	if is_instance_valid(field):
 		field.set_battle(battle)
@@ -780,7 +903,7 @@ func _update_hud() -> void:
 		field.set_battle(battle)
 	if not bool(battle.get("tutorial", false)) and bool(profile_data.get("autoCollectSun", false)):
 		for sun in battle.suns.duplicate():
-			if not bool(sun.get("collecting", false)):
+			if not bool(sun.get("collecting", false)) and float(sun.get("y", 0.0)) >= float(sun.get("targetY", 1.0)) - .02:
 				engine.collect_sun(battle, int(sun.uid))
 
 func _wave_text() -> String:

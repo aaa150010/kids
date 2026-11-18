@@ -221,7 +221,7 @@ func _refresh(animate: bool = true, hold: Array = []) -> void:
 			player_labels[index].text = "%s\n已找到 %s 对" % ["现在轮到你" if index == int(engine.state.currentPlayer) else "等一等，记位置",int(engine.state.scores[index])]
 		else:
 			player_labels[index].text = "没有倒计时\n提示 %s / %s 次\n已尝试 %s 次" % [int(engine.state.hints),int(engine.state.get("hintsMax",2)),int(engine.state.moves)]
-	status.text = "全部配对完成啦！" if engine.state.phase == "result" else "看看这两张图案，记住位置" if bool(engine.state.pending) else "先翻开一张卡片" if engine.state.flipped.is_empty() else "再翻一张，找一找它的朋友"
+	status.text = "全部配对完成啦！" if engine.state.phase == "result" else "看看这两张图案，记住位置" if bool(engine.state.pending) else "配对成功可以继续翻；翻错就换人" if engine.state.flipped.is_empty() else "再翻一张，找一找它的朋友"
 
 func _flip(index: int) -> void:
 	if paused:
