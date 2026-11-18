@@ -1,0 +1,1 @@
+-keep class xyz.lynote.kidsplayground.updater.UpdateInstallerPlugin { *; }

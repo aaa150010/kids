@@ -1,0 +1,382 @@
+{
+  "reviewedAt": "2026-11-18",
+  "researchIndexes": [
+    "research/strategy-interactions.json",
+    "research/learning-interactions.json",
+    "research/reading-memory-interactions.json"
+  ],
+  "researchCountingPolicy": "逐游戏以研究索引中的正文实读记录和实现对照为准；同仓库不同主题源码是技术文件而非独立项目；跨游戏通用资料单独标注；旧references条目数量不作为本轮达标证据。研究记录不等于功能验收通过。",
+  "references": [
+    {
+      "id": "godot-demos",
+      "url": "https://github.com/godotengine/godot-demo-projects",
+      "stars": 9800,
+      "license": "MIT",
+      "use": "原生组件、触摸和动画方案参考；未复制完整项目"
+    },
+    {
+      "id": "boardgame-io",
+      "url": "https://github.com/boardgameio/boardgame.io",
+      "stars": 12500,
+      "license": "MIT",
+      "use": "动作、回合和快照结构参考；无 JavaScript 运行依赖"
+    },
+    {
+      "id": "gcompris",
+      "url": "https://gcompris.net/screenshots-en.html",
+      "source": "https://github.com/gcompris/GCompris-qt",
+      "stars": 266,
+      "license": "逐文件授权",
+      "use": "口算、配对、分类和规律玩法参考；未复制 Qt 代码"
+    },
+    {
+      "id": "memory-game",
+      "url": "https://github.com/sromku/memory-game",
+      "stars": 595,
+      "license": "Apache-2.0 code; artwork separately licensed",
+      "use": "翻牌、主题地图与反馈参考；未使用该项目付费插画"
+    },
+    {
+      "id": "gobang",
+      "url": "https://github.com/lihongxun945/gobang",
+      "stars": 1800,
+      "license": "reference-only",
+      "use": "棋盘与战术练习交互参考"
+    },
+    {
+      "id": "jungle",
+      "url": "https://github.com/zyxyuanxiao/jungle",
+      "stars": 16,
+      "license": "MIT",
+      "use": "斗兽棋界面和规则参考"
+    },
+    {
+      "id": "junqi",
+      "url": "https://github.com/samuelyuan/online-junqi",
+      "stars": 16,
+      "license": "MIT",
+      "use": "公路、铁路与战斗规则参考，保留本项目翻棋变体"
+    },
+    {
+      "id": "jingmo",
+      "url": "https://github.com/hefengbao/jingmo",
+      "stars": 2200,
+      "license": "GPL-3.0",
+      "use": "诗文阅读排版参考；未复制 Android 代码"
+    },
+    {
+      "id": "chinese-poetry",
+      "url": "https://github.com/chinese-poetry/chinese-poetry",
+      "stars": 54400,
+      "license": "MIT",
+      "use": "诗词内容核对参考，保留原有四藤吟社 313 首"
+    },
+    {
+      "id": "hanzi-writer",
+      "url": "https://github.com/chanind/hanzi-writer",
+      "stars": 5100,
+      "license": "MIT",
+      "use": "识字反馈参考，无网页运行依赖"
+    },
+    {
+      "id": "pinyin-pro",
+      "url": "https://github.com/zh-lx/pinyin-pro",
+      "stars": 4800,
+      "license": "MIT",
+      "use": "拼音内容整理参考，保留已人工整理的答案"
+    },
+    {
+      "id": "kenney",
+      "url": "https://kenney.nl/assets/ui-pack",
+      "license": "CC0-1.0",
+      "use": "UI、棋盘与动物资源选型"
+    },
+    {
+      "id": "story-narration-qwen",
+      "url": "https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice",
+      "license": "Apache-2.0",
+      "use": "制作阶段合成普通话故事；App 只播放 MP3，不运行模型或语音克隆"
+    },
+    {
+      "id": "story-narration-mlx",
+      "url": "https://github.com/Blaizzy/mlx-audio",
+      "version": "0.6.5",
+      "license": "MIT",
+      "use": "批量段落制作 API 参考；模型转换权重固定 revision 6415d95f88be018ff9e46813119dc3bc12261328"
+    },
+    {
+      "id": "story-audio-godot",
+      "url": "https://docs.godotengine.org/en/stable/classes/class_audiostreammp3.html",
+      "use": "原生运行时 MP3 加载、暂停与进度控制；不引入浏览器播放器"
+    },
+    {
+      "id": "story-classics",
+      "url": "https://www.gutenberg.org/ebooks/2591",
+      "source": "https://www.gutenberg.org/ebooks/1597",
+      "use": "格林、安徒生经典情节参考；本项目另行中文改写，不使用现代译文或该站音频"
+    },
+    {
+      "id": "pvz-web",
+      "url": "https://github.com/xyxiao001/pvz-web",
+      "revision": "45fe1f404ff702ff37589d015aad0f62509d373e",
+      "license": "未声明；仅限本项目本地个人版使用",
+      "use": "植物大战僵尸一代场景、部件动画、角色与音频的固定版本来源；逐文件哈希记录在 garden-assets.json，公开分发前需替换",
+      "layoutSources": [
+        "https://github.com/xyxiao001/pvz-web/blob/45fe1f404ff702ff37589d015aad0f62509d373e/src/game/config.ts",
+        "https://github.com/xyxiao001/pvz-web/blob/45fe1f404ff702ff37589d015aad0f62509d373e/src/game/model.ts",
+        "https://github.com/xyxiao001/pvz-web/blob/45fe1f404ff702ff37589d015aad0f62509d373e/src/rendering/scene.ts"
+      ]
+    },
+    {
+      "id": "pvz-godot-dream",
+      "url": "https://github.com/hsk-dream/PVZ-Godot-Dream",
+      "license": "Custom Non-Commercial License v1.0（仅非商业；条款明确禁止公司内部使用、销售/变现及 SaaS/API 商业服务；不是标准 SPDX 许可）",
+      "accessedAt": "2026-11-18",
+      "use": "PVZ 交互主参考：卡片上下文状态机、手持管理器（hand_manager）、种植虚影判定（hm_character）、阳光飞行收集（sun.gd）、铲子预铲高亮（hm_item）、冷却遮罩、波次与大字提醒；仅参考交互与架构，不复制代码或资源"
+    },
+    {
+      "id": "godot-pvz-hytommm",
+      "url": "https://github.com/HYTommm/Godot-PVZ",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "PVZ Godot C# 复刻，爆炸粒子特效参考"
+    },
+    {
+      "id": "jspvz-wiki-card",
+      "url": "https://jspvz.fandom.com/zh/wiki/%E5%8D%A1%E7%89%87",
+      "license": "CC-BY-SA（Fandom 默认）",
+      "accessedAt": "2026-11-18",
+      "use": "PVZ 原版卡片使用规则核对：点卡再点格、点空白取消、一次性卡 15 秒消失前 5 秒闪烁"
+    },
+    {
+      "id": "pvz-wiki-cn",
+      "url": "https://wiki.pvz1.com/doku.php?id=home",
+      "accessedAt": "2026-11-18",
+      "use": "PVZ 机制与数值核对"
+    },
+    {
+      "id": "pvz-touch-edition",
+      "url": "https://www.tpzpw.com/yxgju06/992.html",
+      "accessedAt": "2026-11-18",
+      "use": "PVZ 手机版点选+拖拽双种植手势、铲子用法确认"
+    },
+    {
+      "id": "godot-core-system",
+      "url": "https://github.com/LiGameAcademy/godot_core_system",
+      "license": "MIT",
+      "accessedAt": "2026-11-18",
+      "use": "信号总线与随机选择器模式参考（PVZ-Godot-Dream 亦引用）"
+    },
+    {
+      "id": "animal-chess-flutter",
+      "url": "https://github.com/neoalienson/animal_chess",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "斗兽棋规则变体可插拔结构、选中与合法落点提示参考"
+    },
+    {
+      "id": "jungle-chess-sustech",
+      "url": "https://github.com/Layheng-Hok/Jungle-Chess",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "斗兽棋选中态、可走格高亮、陷阱降级与重复走子禁手参考"
+    },
+    {
+      "id": "animal-chess-web",
+      "url": "https://github.com/zhengxuan666/animal_chess",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "斗兽棋触屏命中区放大与响应式棋盘参考"
+    },
+    {
+      "id": "jungle-wikipedia",
+      "url": "https://en.wikipedia.org/wiki/Jungle_(board_game)",
+      "license": "CC-BY-SA",
+      "accessedAt": "2026-11-18",
+      "use": "斗兽棋规则权威核对"
+    },
+    {
+      "id": "pixi-gomoku",
+      "url": "https://github.com/virgoone/pixi-gomoku",
+      "license": "GPL-3.0（仅交互参考，不复制代码）",
+      "accessedAt": "2026-11-18",
+      "use": "五子棋落子预览、禁手标记、最后一手高亮、悔棋与移动端交互参考"
+    },
+    {
+      "id": "algovate-gomoku",
+      "url": "https://github.com/Algovate/Gomoku",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "五子棋教学/比赛/打谱模式划分与 AI 提示交互参考"
+    },
+    {
+      "id": "gomoku-game-javawan",
+      "url": "https://github.com/Javawan1976/gomoku-game",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "五子棋悔棋撤销双方各一步、最后一步红圈标记参考"
+    },
+    {
+      "id": "ttjq-fanfanqi",
+      "url": "https://ttjq.qq.com/webplat/info/news_version3/21963/21964/21965/21967/m14277/201607/489540.shtml",
+      "accessedAt": "2026-11-18",
+      "use": "天天军棋翻翻棋官方规则与交互：连续两同色定阵营、每回合翻或走一次、存活棋子点亮图标"
+    },
+    {
+      "id": "pengpengjunqi",
+      "url": "https://github.com/YuRos2/pengpengjunqi",
+      "license": "MIT（仓库 LICENSE 原文已保存于 strategy-interactions.json；提交 d272ffe324036af124f42fd47a12faef880e454b）",
+      "accessedAt": "2026-11-18",
+      "use": "Godot 4.7 军棋翻翻棋，翻/走互斥输入路由参考（同引擎同版本）"
+    },
+    {
+      "id": "app-dark-chess",
+      "url": "https://github.com/Youchenjiang/app-dark-chess",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "暗棋翻/移/吃三操作互斥与规则层分离参考"
+    },
+    {
+      "id": "army-chest-game",
+      "url": "https://github.com/Pacer-9/army-chest-game",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "军棋翻翻棋 FLIP_PIECE/MOVE_PIECE 事件协议参考"
+    },
+    {
+      "id": "gwankai-junqi",
+      "url": "https://github.com/910JQK/GwanKei",
+      "license": "GPL-3.0",
+      "accessedAt": "2026-11-18",
+      "use": "四国军棋规则实现参考"
+    },
+    {
+      "id": "godot-card-flipping",
+      "url": "https://justincalleja.com/blog/posts/godot-card-flipping",
+      "source": "https://github.com/justin-calleja/card-flipping",
+      "accessedAt": "2026-11-18",
+      "use": "Godot 翻牌动画标准曲线：scale.x 压扁换面再弹回"
+    },
+    {
+      "id": "godot-memory-madness",
+      "url": "https://github.com/thelastbucuc/Godot-Memory-Madness",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "记忆翻牌 Tween 手感（scale+rotation）与信号驱动状态参考"
+    },
+    {
+      "id": "godot-memory-game-mc",
+      "url": "https://github.com/matheuscoradinimf/godot-memory-game",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "记忆翻翻乐难度网格阶梯、匹配/不匹配音效区分与步数结算参考"
+    },
+    {
+      "id": "ecs-memory",
+      "url": "https://github.com/stranne/Stranne.EcsMemory",
+      "license": "MIT",
+      "accessedAt": "2026-11-18",
+      "use": "不匹配延迟翻回节奏与确定性状态参考"
+    },
+    {
+      "id": "micro-memory-game",
+      "url": "https://github.com/Dilumo/micro-memory_game",
+      "license": "MIT",
+      "accessedAt": "2026-11-18",
+      "use": "记忆翻翻乐计时与渐进关卡参考"
+    },
+    {
+      "id": "plume-kids-quiz",
+      "url": "https://plumestudio.com/case-studies/kids-quiz",
+      "accessedAt": "2026-11-18",
+      "use": "儿童答题题型多样性、输入方式匹配考察点、接近答案容差奖励参考"
+    },
+    {
+      "id": "everydaypsy-kids-edu",
+      "url": "https://everydaypsy.com/best-practices-for-creating-interactive-content-in-educational-apps-for-younger-students",
+      "accessedAt": "2026-11-18",
+      "use": "儿童答题即时反馈、错误不惩罚、感官负荷控制与大字体规范参考"
+    },
+    {
+      "id": "zapcode-quiz-ux",
+      "url": "https://www.zapcode.dev/learn/quiz-trivia-with-ui-ux-design",
+      "accessedAt": "2026-11-18",
+      "use": "答题防连点、选项禁用、微交互 150-250ms、题干字级层级参考"
+    },
+    {
+      "id": "originux-kids-ux",
+      "url": "https://www.originux.com/resources/blog/ux-design-for-kids-how-to-make-a-product-kids-will-love/",
+      "accessedAt": "2026-11-18",
+      "use": "儿童答错时视觉引导（箭头/高亮指向正确答案）参考"
+    },
+    {
+      "id": "monopoly-godot",
+      "url": "https://github.com/buhtig47/monopoly_godot",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "Godot 大富翁骰子动画、逐格移动、金钱数字动画标签参考（面向 Android 导出）"
+    },
+    {
+      "id": "riley-dice-game",
+      "url": "https://github.com/rebellehr1010/riley_dice_game",
+      "license": "未声明",
+      "accessedAt": "2026-11-18",
+      "use": "Godot 2D 骰子 30fps 换面动画与 rolled 信号解耦参考"
+    },
+    {
+      "id": "dice-roll-physics",
+      "url": "https://github.com/zondug/dice_roll",
+      "license": "MIT",
+      "accessedAt": "2026-11-18",
+      "use": "骰子抛掷缩放与缓动停稳表现参考"
+    },
+    {
+      "id": "guoxue-flashcard",
+      "url": "https://apps.apple.com/cn/app/id6772121595",
+      "accessedAt": "2026-11-18",
+      "use": "国学闪卡上下滑切卡、点击翻面看译文、遗忘曲线复习参考"
+    },
+    {
+      "id": "xuanji-tangshi",
+      "url": "https://app.mi.com/details?id=com.mojuetang.company",
+      "accessedAt": "2026-11-18",
+      "use": "唐诗逐句闯关、玩听看读闭环、跟读录制回放交互参考"
+    },
+    {
+      "id": "wo-ai-gushiwen",
+      "url": "https://apps.apple.com/cn/app/id1096444935",
+      "accessedAt": "2026-11-18",
+      "use": "点划勾选考字的背诵交互参考"
+    },
+    {
+      "id": "bouncebox-design",
+      "url": "https://huggingface.co/spaces/VISHAL18for4/buildai/resolve/main/designs/bouncebox-DESIGN.md",
+      "accessedAt": "2026-11-18",
+      "use": "儿童界面大圆角药丸按钮、44px 触控目标、色彩与阴影体系参考"
+    },
+    {
+      "id": "chags-age-design",
+      "url": "https://znlgis.github.io/others/CHAGS/%E7%AC%AC15%E7%AB%A0-%E9%80%82%E9%BE%84%E8%AE%BE%E8%AE%A1%E8%A7%84%E8%8C%83%E4%B8%8E%E5%AE%9E%E7%8E%B0",
+      "accessedAt": "2026-11-18",
+      "use": "适龄设计规范清单：88px 按钮、无失败惩罚、退出确认层、家长门长按 3 秒、声音可关且持久化"
+    },
+    {
+      "id": "roblox-obby-startscreen",
+      "url": "https://roblox-gui-maker.online/use-cases/obby-start-screen",
+      "accessedAt": "2026-11-18",
+      "use": "儿童游戏开始页超大 PLAY 按钮、角标设置、点击后 0.3s 淡出过渡参考"
+    },
+    {
+      "id": "exodeui-kids",
+      "url": "https://www.exodeui.com/learn/designing-ui-for-kids",
+      "accessedAt": "2026-11-18",
+      "use": "儿童 UI 每次点击给反馈、家长门、防过度刺激参考"
+    },
+    {
+      "id": "drimlike-kids-rules",
+      "url": "https://www.drimlike.com/en/blog/10-golden-rules-of-interface-design-for.html",
+      "accessedAt": "2026-11-18",
+      "use": "儿童界面十则：大按钮、少文字、表扬反馈、允许乱点探索"
+    }
+  ]
+}

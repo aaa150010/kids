@@ -1,0 +1,322 @@
+{
+  "schema_version": 1,
+  "read_date": "2026-11-18",
+  "scope": "口算碰碰船、汉字拼音找朋友、图形规律侦探、动物分类馆、数学小练本；仅交互对标，不改产品代码。",
+  "counting_policy": {
+    "unit": "本轮实际获取并读取正文的独立网页资料；本地源码用于现状对照，不计为外部参考资料。",
+    "unique_read_sources": 20,
+    "per_game_associations": 20,
+    "total_associations": 100,
+    "target_per_game": "每款至少20份独立且实际读取的资料；本轮达到20份。",
+    "shared_sources": "20份来源作为跨游戏交互对照映射至五款；每款关联20份，全局唯一来源仍为20。来源包括不同的官方源码文件、产品页、手册/API和既有通用文章，不能将五款映射数累加为唯一来源数。",
+    "read_status": "来源正文或源码已通过WebFetch读取，或在WebSearch返回的页面正文内容中直接读取；未将失败/目录截断的Godot文档链接计入，也未将未打开的链接计入。",
+    "limitations": "20份中多个源码文件来自同一GCompris项目，按独立文件/文档计数，不代表20个独立项目；产品页、手册和API文件证据权重不同。部分来源只对个别游戏高度相关，跨款映射表示可参考交互原则，不代表该活动内容直接适用。未运行本地游戏或做设备验收。"
+  },
+  "sources": [
+    {
+      "id": "L01",
+      "title": "Zap Code：Quiz & Trivia 应用的 UI/UX 设计",
+      "url": "https://www.zapcode.dev/learn/quiz-trivia-with-ui-ux-design",
+      "kind": "答题交互设计文章",
+      "body_read": true,
+      "read_evidence": "读取完整页面正文；具体读取信息层级、触控目标、答后禁用选项、进度提示、150–250ms微动效、讲解字段、响应式布局和音频可选设置。",
+      "limits": "偏通用网页答题设计，键盘与ARIA建议不直接适用于本原生Godot界面。",
+      "local_code_position": "apps/android/src/ui/quiz_stage.gd:85",
+      "gap": "可用来对照题目层级、触控目标和反馈；具体键盘与ARIA建议不直接对应本项目 Godot 控件。",
+      "status": "已读取；共享答题体验参考"
+    },
+    {
+      "id": "L02",
+      "title": "Plume Studio：儿童学习平台互动测验案例",
+      "url": "https://plumestudio.com/case-studies/kids-quiz",
+      "kind": "儿童测验案例研究",
+      "body_read": true,
+      "read_evidence": "读取完整页面正文；案例列举选择题、按倍数点击、拖拽贴标签、容差滑块、缩放比较、地图定位和分类滑动，并说明输入方式应匹配题目考察目标。",
+      "limits": "商业案例叙述，页面提及的留存预期不是独立验证结果。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:164",
+      "gap": "页面展示多种输入与题目目标匹配的案例；本地五款当前统一三选一，需按具体题库验证适配性。",
+      "status": "已读取；方向性参考，非效果验证"
+    },
+    {
+      "id": "L03",
+      "title": "Everyday Psy：低龄学习应用互动内容设计实践",
+      "url": "https://everydaypsy.com/best-practices-for-creating-interactive-content-in-educational-apps-for-younger-students",
+      "kind": "儿童教育应用设计文章",
+      "body_read": true,
+      "read_evidence": "读取工具返回的正文提炼；内容涉及即时且一致的反馈、错误后的温和重试、单屏聚焦、声音/动效控制、大字高对比、多模态提示与降低精细点击要求。",
+      "limits": "工具返回内容未提供可独立复核的完整原始网页文本；文中比例与研究说法未单独核验，未作为定量依据。",
+      "local_code_position": "apps/android/src/ui/quiz_stage.gd:388",
+      "gap": "可对照温和反馈、多模态和控件尺寸原则；本文正文来源的完整性有限，定量说法未采用。",
+      "status": "已读取工具提供正文提炼；有限证据"
+    },
+    {
+      "id": "L04",
+      "title": "OriginUX：儿童产品的 UX 设计",
+      "url": "https://www.originux.com/resources/blog/ux-design-for-kids-how-to-make-a-product-kids-will-love/",
+      "kind": "儿童产品设计文章",
+      "body_read": true,
+      "read_evidence": "读取页面正文；明确建议用声音、图片和文字组合反馈，常用图标保持一致，错误后以箭头/高亮/脉冲指向正确项，并让孩子能立即继续参与。",
+      "limits": "文章较短，属于方向性设计建议，不构成对具体控件或儿童学习成效的实验验证。",
+      "local_code_position": "apps/android/src/ui/quiz_stage.gd:388",
+      "gap": "本地已有错项摇动与正确项提示；文章建议不能代替儿童可用性或设备触控验收。",
+      "status": "已读取；共享反馈设计参考"
+    },
+    {
+      "id": "L05",
+      "title": "GCompris Guesscount QML",
+      "url": "https://raw.githubusercontent.com/KDE/gcompris/master/src/activities/guesscount/Guesscount.qml",
+      "kind": "官方活动源码",
+      "body_read": true,
+      "read_evidence": "读取完整 QML；ActivityBase、触摸舞台、答案行、等级配置、帮助/主页/等级控制与完成奖励可见。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:164",
+      "gap": "本地口算仍为三选一；该活动以算式操作行为主，不能直接证明需替换当前题型。",
+      "status": "已读取；作为共享学习交互对照"
+    },
+    {
+      "id": "L06",
+      "title": "GCompris Erase QML",
+      "url": "https://raw.githubusercontent.com/KDE/gcompris/master/src/activities/erase/Erase.qml",
+      "kind": "官方活动源码",
+      "body_read": true,
+      "read_evidence": "读取完整 QML；MultiPointTouchArea 遍历触点并调用区块 enter/leave，含音效、等级和自动/手动推进。",
+      "local_code_position": "apps/android/src/ui/quiz_stage.gd:388",
+      "gap": "本地答题为点选，不包含连续擦除或多点触控操作。",
+      "status": "已读取；共享触控交互参考"
+    },
+    {
+      "id": "L07",
+      "title": "GCompris Algorithm QML",
+      "url": "https://raw.githubusercontent.com/KDE/gcompris/master/src/activities/algorithm/Algorithm.qml",
+      "kind": "官方活动源码",
+      "body_read": true,
+      "read_evidence": "读取完整 QML；题列/答案列/候选图形分区、键盘方向与确认键、点击锁、音效、粒子反馈均可见。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:187",
+      "gap": "图形规律本地仍三选一；GCompris 该源码亦以点选补序列，不代表拖放必要。",
+      "status": "已读取；图形规律重点参考"
+    },
+    {
+      "id": "L08",
+      "title": "GCompris Categorization QML",
+      "url": "https://raw.githubusercontent.com/KDE/gcompris/master/src/activities/categorization/Categorization.qml",
+      "kind": "官方活动源码",
+      "body_read": true,
+      "read_evidence": "读取完整 QML；类别菜单、复习区、难度/模式配置、完成奖励和数据集缺省提示可见。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:191",
+      "gap": "本地动物分类现为选择题，尚无类别区域操作和数据集菜单。",
+      "status": "已读取；动物分类重点参考"
+    },
+    {
+      "id": "L09",
+      "title": "GCompris LetterInWord QML",
+      "url": "https://raw.githubusercontent.com/KDE/gcompris/master/src/activities/letter-in-word/LetterInWord.qml",
+      "kind": "官方活动源码",
+      "body_read": true,
+      "read_evidence": "读取完整 QML；语音、重复朗读按钮、字词网格、方向键/空格/确认键、输入锁和等级控制可见。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:197",
+      "gap": "本地拼音通过朗读加三选一；没有字词网格选字和键盘焦点导航。",
+      "status": "已读取；拼音识字参考"
+    },
+    {
+      "id": "L10",
+      "title": "GCompris Memory 活动入口",
+      "url": "https://raw.githubusercontent.com/KDE/gcompris/master/src/activities/memory/Memory.qml",
+      "kind": "官方活动源码",
+      "body_read": true,
+      "read_evidence": "读取完整入口文件；MemoryCommon 复用组件，活动入口注入数据集与背景资源。",
+      "local_code_position": "apps/android/src/ui/quiz_stage.gd:85",
+      "gap": "本地共用答题舞台没有配对记忆模式。",
+      "status": "已读取；共享活动架构参考"
+    },
+    {
+      "id": "L11",
+      "title": "GCompris memory.js",
+      "url": "https://raw.githubusercontent.com/KDE/gcompris/master/src/activities/memory/memory.js",
+      "kind": "官方活动源码",
+      "body_read": true,
+      "read_evidence": "读取完整脚本；随机配对、翻牌匹配、错配翻回、轮次/计分、胜负反馈和等级推进均有实现。",
+      "local_code_position": "apps/android/src/ui/quiz_stage.gd:85",
+      "gap": "本地答题不使用翻牌与记忆匹配机制。",
+      "status": "已读取；仅作游戏机制参考"
+    },
+    {
+      "id": "L12",
+      "title": "GCompris algorithm.js",
+      "url": "https://raw.githubusercontent.com/KDE/gcompris/master/src/activities/algorithm/algorithm.js",
+      "kind": "官方活动源码",
+      "body_read": true,
+      "read_evidence": "读取完整脚本；按等级生成图形规律、显示缺口、校验点选答案、错误重试、答对音效和分层推进。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:187",
+      "gap": "本地规律题无该样式的逐格补序和连续子关卡。",
+      "status": "已读取；图形规律重点参考"
+    },
+    {
+      "id": "L13",
+      "title": "GCompris categorization.js",
+      "url": "https://raw.githubusercontent.com/KDE/gcompris/master/src/activities/categorization/categorization.js",
+      "kind": "官方活动源码",
+      "body_read": true,
+      "read_evidence": "读取完整脚本；逐项将图片拖至左右区域，核对分类表，按全体放置正确数触发正误奖励，并支持难度与收藏类别。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:191",
+      "gap": "本地尚无分类拖放、分类清单或逐项纠错流程。",
+      "status": "已读取；动物分类重点参考"
+    },
+    {
+      "id": "L14",
+      "title": "GCompris guesscount.js",
+      "url": "https://raw.githubusercontent.com/KDE/gcompris/master/src/activities/guesscount/guesscount.js",
+      "kind": "官方活动源码",
+      "body_read": true,
+      "read_evidence": "读取完整脚本；按数据集构造算式任务、打乱数字、等级/子关卡推进，并对非整数或负数结果提示。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:164",
+      "gap": "本地口算采用题库答案选择，尚无算式构建/拖放运算符交互。",
+      "status": "已读取；口算重点参考"
+    },
+    {
+      "id": "L15",
+      "title": "GCompris 官方学校与数据集说明",
+      "url": "https://www.gcompris.net/schools-zh_CN.html",
+      "kind": "官方产品/教师文档",
+      "body_read": true,
+      "read_evidence": "读取页面正文；说明按儿童技能选择活动等级、控制练习数字范围及按阅读能力调节排序任务。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:97",
+      "gap": "本地难度和练习类别由配置显式控制，但尚未提供教师按个体分配数据集的工具。",
+      "status": "已读取；共享分级设计参考"
+    },
+    {
+      "id": "L16",
+      "title": "GNU GCompris 官方介绍",
+      "url": "https://www.gnu.org/software/gcompris/index-sw.html",
+      "kind": "官方项目说明",
+      "body_read": true,
+      "read_evidence": "读取页面正文；列出阅读、算术、形状等活动类别及触屏、鼠标、键盘的学习活动范围。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:97",
+      "gap": "项目范围介绍，不含五款本地游戏的具体交互验收证据。",
+      "status": "已读取；仅作产品范围参考"
+    },
+    {
+      "id": "L17",
+      "title": "KDE GCompris 官方产品页",
+      "url": "https://apps.kde.org/gcompris/",
+      "kind": "官方产品说明",
+      "body_read": true,
+      "read_evidence": "读取页面正文；列出算术、记忆、阅读等活动类别，并展示活动截图标题及项目可适配、共享属性。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:164",
+      "gap": "产品目录与截图仅用于定位活动，不替代对具体源码行为的验证。",
+      "status": "已读取；活动发现来源"
+    },
+    {
+      "id": "L18",
+      "title": "GCompris Administration Handbook",
+      "url": "http://docs.kde.org/stable_kf6/en/gcompris/gcompris/gcompris.pdf",
+      "kind": "官方使用手册",
+      "body_read": true,
+      "read_evidence": "读取可见章节正文；说明活动分类、年龄星级、提示、复述题目、手动确认、切级、配置与触屏 kiosk 选项。",
+      "local_code_position": "apps/android/src/ui/quiz_stage.gd:388",
+      "gap": "手册描述通用控制栏行为，未证明本地游戏已满足目标设备触控尺寸。",
+      "status": "已读取；共享控制与节奏参考"
+    },
+    {
+      "id": "L19",
+      "title": "GCompris Teachers Administration Handbook",
+      "url": "https://docs.kde.org/trunk_kf6/en/gcompris-teachers-handbook/gcompris-teachers-handbook/gcompris-teachers-handbook.pdf",
+      "kind": "官方教师工具手册",
+      "body_read": true,
+      "read_evidence": "读取可见章节正文；活动结果页展示首次答错、再次答对及答题明细，数据集编辑器按活动类型提供目标和难度配置。",
+      "local_code_position": "apps/android/src/games/quiz_game.gd:97",
+      "gap": "教师服务端分析与数据集编辑并非本地游戏交互，属于产品能力范围差异。",
+      "status": "已读取；仅作练习分析参考"
+    },
+    {
+      "id": "L20",
+      "title": "GCompris ActivityBase API 文档",
+      "url": "https://www.math.uni-bielefeld.de/~hkaelber/gcompris/apidocs/html/classActivityBase.html",
+      "kind": "API 文档",
+      "body_read": true,
+      "read_evidence": "读取页面正文；ActivityBase 统一处理常用键、音频、活动/菜单切换及帮助对话框，并提供 start/stop 信号。",
+      "local_code_position": "apps/android/src/ui/quiz_stage.gd:85",
+      "gap": "该 API 文档针对 Qt/QML 架构，本地使用 Godot；只用于交互职责对照。",
+      "status": "已读取；共享活动生命周期参考"
+    }
+  ],
+  "failed_or_excluded_retrievals": [
+    {"url": "https://invent.kde.org/education/gcompris/-/raw/master/src/activities/guesscount/Guesscount.qml", "reason": "WebFetch 返回 501 Not Implemented；改用 GitHub raw 源码镜像读取并计入 L05。"},
+    {"url": "https://docs.godotengine.org/en/stable/tutorials/inputs/input_examples.html", "reason": "WebFetch 只返回文档目录且正文截断；未计入来源。"},
+    {"url": "https://docs.godotengine.org/en/stable/tutorials/inputs/inputevent.html", "reason": "WebFetch 只返回目录摘要，未含该页正文；未计入来源。"},
+    {"url": "https://docs.godotengine.org/en/stable/tutorials/inputs/touchscreen_to_mouse.html", "reason": "WebFetch 返回目录内容而非目标页正文；未计入来源。"},
+    {"url": "https://docs.godotengine.org/en/stable/tutorials/ui/gui_in_3d.html", "reason": "WebFetch 返回目录内容而非目标页正文；未计入来源。"},
+    {"url": "https://docs.godotengine.org/en/stable/classes/class_control.html", "reason": "WebFetch 未返回 Control 类正文；未计入来源。"},
+    {"url": "https://raw.githubusercontent.com/KDE/gcompris/master/src/activities/memory/memory/MemoryCommon.qml", "reason": "GitHub raw 返回 404；未计入来源。"}
+  ],
+  "games": [
+    {
+      "game_id": "math",
+      "title": "口算碰碰船",
+      "document_count": 20,
+      "source_ids": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13", "L14", "L15", "L16", "L17", "L18", "L19", "L20"],
+      "local_evidence": ["apps/android/src/games/quiz_game.gd:164", "apps/android/src/ui/quiz_stage.gd:85", "apps/android/src/ui/quiz_stage.gd:388"],
+      "comparison": [
+        {"topic": "答题反馈与讲解", "reference": "正确/错误状态应清楚、鼓励性反馈并保留解释。", "current": "选择后切到feedback阶段，显示正确答案和解释，答后需点下一题；有答对星星和错项轻摇。", "status": "已实现（静态代码）"},
+        {"topic": "题型与输入匹配", "reference": "输入动作应服务于被考察概念，避免所有内容都套选择题。", "current": "口算目前为三选一；没有多题型输入。", "status": "差距明确；需产品范围决策后再评估"},
+        {"topic": "无计时与触控", "reference": "儿童答题提供清楚操作反馈、足够触控尺寸，避免不必要时间压力。", "current": "无倒计时；三个选项按钮布局按舞台宽度自适应。", "status": "已实现（尺寸仍需设备核验）"}
+      ]
+    },
+    {
+      "game_id": "pinyin",
+      "title": "汉字拼音找朋友",
+      "document_count": 20,
+      "source_ids": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13", "L14", "L15", "L16", "L17", "L18", "L19", "L20"],
+      "local_evidence": ["apps/android/src/games/quiz_game.gd:197", "apps/android/src/games/quiz_game.gd:200", "apps/android/src/ui/quiz_stage.gd:402"],
+      "comparison": [
+        {"topic": "听题与多模态反馈", "reference": "低龄界面不要只依赖文字，组合视觉、声音和简短提示。", "current": "题目朗读、再次听题入口和字母/拼音视觉主题已接入共享答题舞台。", "status": "已实现（语音行为未试听）"},
+        {"topic": "输入方式", "reference": "输入方式要与识字/拼音的学习目标吻合。", "current": "三选一识别，暂无拼音拼读或音节拖配输入。", "status": "差距明确；是否新增题型待产品评估"},
+        {"topic": "错误后的引导", "reference": "错误时以正向视觉线索引导，避免羞辱性文案。", "current": "讲解页标出正确项并保留题目说明；错误项摇动，正确项绿色脉冲。", "status": "已实现（静态代码）"}
+      ]
+    },
+    {
+      "game_id": "patterns",
+      "title": "图形规律侦探",
+      "document_count": 20,
+      "source_ids": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13", "L14", "L15", "L16", "L17", "L18", "L19", "L20"],
+      "local_evidence": ["apps/android/src/games/quiz_game.gd:187", "apps/android/src/ui/quiz_stage.gd:413", "apps/android/src/ui/quiz_stage.gd:267"],
+      "comparison": [
+        {"topic": "视觉题面与选择反馈", "reference": "突出题目本身，并用即时、可理解的结果反馈。", "current": "舞台绘制图形规律主题；讲解状态用圆环标出答案，题间使用滑出/弹入动画。", "status": "已实现（静态代码）"},
+        {"topic": "题型多样化", "reference": "拖放/排序等操作可更直接表现规律推理。", "current": "现有答案仍以三选一提交。", "status": "差距明确；需补充验证拖放是否提升理解"},
+        {"topic": "错误负担", "reference": "错误后温和提示并允许按自己的节奏学习。", "current": "答错不扣分，解释留存至手动下一题；无倒计时。", "status": "已实现（静态代码）"}
+      ]
+    },
+    {
+      "game_id": "animals",
+      "title": "动物分类馆",
+      "document_count": 20,
+      "source_ids": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13", "L14", "L15", "L16", "L17", "L18", "L19", "L20"],
+      "local_evidence": ["apps/android/src/games/quiz_game.gd:191", "apps/android/src/ui/quiz_stage.gd:423", "apps/android/src/ui/quiz_stage.gd:444"],
+      "comparison": [
+        {"topic": "视觉与知识讲解", "reference": "用图像、简短说明和一致的反馈辅助理解。", "current": "动物主题场景、符号图像、答后正确项与解释已支持。", "status": "已实现（静态代码；素材辨识度未测）"},
+        {"topic": "分类交互", "reference": "分类知识可使用拖入类别、左右分拣等动作表达。", "current": "目前统一三选一。", "status": "差距明确；需验证触屏分类交互的年龄适配"},
+        {"topic": "触控与感官控制", "reference": "避免精细点击；提供温和多模态反馈。", "current": "选项按钮宽度随布局自适应、按压反馈共用；声音/动效开关由共享设置管理。", "status": "待设备核验"}
+      ]
+    },
+    {
+      "game_id": "workbook",
+      "title": "数学小练本",
+      "document_count": 20,
+      "source_ids": ["L01", "L02", "L03", "L04", "L05", "L06", "L07", "L08", "L09", "L10", "L11", "L12", "L13", "L14", "L15", "L16", "L17", "L18", "L19", "L20"],
+      "local_evidence": ["apps/android/src/games/quiz_game.gd:97", "apps/android/src/games/quiz_game.gd:193", "apps/android/src/ui/quiz_stage.gd:431"],
+      "comparison": [
+        {"topic": "分科练习与显式难度", "reference": "练习类别与难度应清楚可控，避免暗中按成绩改难度。", "current": "基础/计算/应用/综合显式选择，轮数和星级门槛来自tuning.json。", "status": "已实现（静态代码）"},
+        {"topic": "题后解释与复习", "reference": "反馈后保留解释；复习可针对错题。", "current": "错误ID归集，错题模式过滤题池；反馈提供正确答案、解释及听讲解。", "status": "已实现（静态代码）"},
+        {"topic": "输入方式", "reference": "应用题或数量关系可探索滑块、拖拽或操作式表达。", "current": "目前仍统一三选一，练习本场景为纸页视觉。", "status": "差距明确；不同题型需分别验证可操作性"}
+      ]
+    }
+  ],
+  "summary": {
+    "unique_read_sources": 20,
+    "by_game": {"math": 20, "pinyin": 20, "patterns": 20, "animals": 20, "workbook": 20},
+    "target_met": true,
+    "highest_value_findings": [
+      "共享三选一流程已有反馈、讲解、错题保存与手动推进等基础体验；GCompris源码对照显示，分类拖放、图形点选补序、拼读网格和算式构建各自适配不同任务目标。",
+      "图形规律和动物分类已有对应官方活动源码可供深度对照；口算与练本也可参考guesscount的算式构建、数据集分级及错误提示机制。",
+      "本轮登记20份唯一来源并映射五款各20份；来源集中于GCompris，20份为独立文件/文档而非20个独立项目。Godot文档若干链接只返回目录或截断内容，未计入。"
+    ]
+  }
+}

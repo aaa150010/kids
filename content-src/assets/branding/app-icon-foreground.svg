@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="gold" x1="300" y1="220" x2="720" y2="740" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffe48d"/>
+      <stop offset=".52" stop-color="#f4c453"/>
+      <stop offset="1" stop-color="#d9972b"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(512 500) scale(.78) translate(-512 -440) rotate(7 512 440)">
+    <circle cx="512" cy="440" r="276" fill="none" stroke="#0b302a" stroke-width="34"/>
+    <circle cx="512" cy="440" r="258" fill="none" stroke="url(#gold)" stroke-width="28"/>
+    <g stroke="#ffe69a" stroke-width="19" stroke-linecap="round">
+      <path d="M512 440V182"/>
+      <path d="M512 440l223 129"/>
+      <path d="M512 440l223-129"/>
+      <path d="M512 440L289 569"/>
+      <path d="M512 440L289 311"/>
+      <path d="M512 440v258"/>
+    </g>
+    <g stroke="#0b302a" stroke-width="9">
+      <circle cx="512" cy="182" r="54" fill="#e85c66"/>
+      <circle cx="735" cy="311" r="50" fill="#6ba04d"/>
+      <circle cx="735" cy="569" r="50" fill="#4c8ac0"/>
+      <circle cx="512" cy="698" r="54" fill="#e6a733"/>
+      <circle cx="289" cy="569" r="50" fill="#b85b86"/>
+      <circle cx="289" cy="311" r="50" fill="#f0a34a"/>
+    </g>
+    <circle cx="512" cy="440" r="106" fill="#fff7dc" stroke="#0b302a" stroke-width="26"/>
+    <circle cx="512" cy="440" r="62" fill="url(#gold)" stroke="#8b5c10" stroke-width="14"/>
+    <path d="M512 360l22 57 57 23-57 22-22 58-22-58-58-22 58-23z" fill="#fff7dc"/>
+  </g>
+</svg>

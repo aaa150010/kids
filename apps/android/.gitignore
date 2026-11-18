@@ -1,0 +1,9 @@
+.godot/
+build/
+*.keystore
+*.jks
+keys/
+android/plugins/updater/build/
+android/plugins/updater/.gradle/
+android/plugins/UpdateInstaller.aar
+export_presets.cfg.build-backup

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="110" y1="80" x2="900" y2="950" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1a5b4d"/>
+      <stop offset=".55" stop-color="#12453c"/>
+      <stop offset="1" stop-color="#6f2343"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="300" y1="220" x2="720" y2="740" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffe48d"/>
+      <stop offset=".52" stop-color="#f4c453"/>
+      <stop offset="1" stop-color="#d9972b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="232" fill="url(#bg)"/>
+  <rect x="28" y="28" width="968" height="968" rx="210" fill="none" stroke="#fff7dc" stroke-width="18" opacity=".82"/>
+  <circle cx="178" cy="188" r="20" fill="#f4c453" opacity=".9"/>
+  <circle cx="858" cy="228" r="13" fill="#fff7dc" opacity=".82"/>
+  <circle cx="828" cy="782" r="22" fill="#d95f79" opacity=".9"/>
+  <path d="M806 102l9 27 27 9-27 9-9 27-9-27-27-9 27-9z" fill="#fff0b4"/>
+  <g transform="rotate(7 512 440)">
+    <circle cx="512" cy="440" r="276" fill="none" stroke="#0b302a" stroke-width="34"/>
+    <circle cx="512" cy="440" r="258" fill="none" stroke="url(#gold)" stroke-width="28"/>
+    <g stroke="#ffe69a" stroke-width="19" stroke-linecap="round">
+      <path d="M512 440V182"/>
+      <path d="M512 440l223 129"/>
+      <path d="M512 440l223-129"/>
+      <path d="M512 440L289 569"/>
+      <path d="M512 440L289 311"/>
+      <path d="M512 440v258"/>
+    </g>
+    <g stroke="#0b302a" stroke-width="9">
+      <circle cx="512" cy="182" r="54" fill="#e85c66"/>
+      <circle cx="735" cy="311" r="50" fill="#6ba04d"/>
+      <circle cx="735" cy="569" r="50" fill="#4c8ac0"/>
+      <circle cx="512" cy="698" r="54" fill="#e6a733"/>
+      <circle cx="289" cy="569" r="50" fill="#b85b86"/>
+      <circle cx="289" cy="311" r="50" fill="#f0a34a"/>
+    </g>
+    <g fill="#fff7dc" opacity=".9">
+      <circle cx="512" cy="182" r="18"/>
+      <circle cx="735" cy="311" r="16"/>
+      <circle cx="735" cy="569" r="16"/>
+      <circle cx="512" cy="698" r="18"/>
+      <circle cx="289" cy="569" r="16"/>
+      <circle cx="289" cy="311" r="16"/>
+    </g>
+    <circle cx="512" cy="440" r="106" fill="#fff7dc" stroke="#0b302a" stroke-width="26"/>
+    <circle cx="512" cy="440" r="62" fill="url(#gold)" stroke="#8b5c10" stroke-width="14"/>
+    <path d="M512 360l22 57 57 23-57 22-22 58-22-58-58-22 58-23z" fill="#fff7dc"/>
+  </g>
+  <path d="M236 754c68-42 164-63 276-63s208 21 276 63" fill="none" stroke="#0b302a" stroke-width="42" stroke-linecap="round"/>
+  <path d="M236 754c68-42 164-63 276-63s208 21 276 63" fill="none" stroke="#f4c453" stroke-width="22" stroke-linecap="round"/>
+  <g>
+    <rect x="334" y="792" width="356" height="94" rx="47" fill="#fff7dc" stroke="#0b302a" stroke-width="18"/>
+    <circle cx="410" cy="839" r="19" fill="#d95f79"/>
+    <circle cx="512" cy="839" r="19" fill="#6ba04d"/>
+    <circle cx="614" cy="839" r="19" fill="#4c8ac0"/>
+  </g>
+</svg>

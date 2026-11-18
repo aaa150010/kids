@@ -1,0 +1,9 @@
+[config]
+
+name="UpdateInstaller"
+binary_type="local"
+binary="UpdateInstaller.aar"
+
+[dependencies]
+
+remote=[]

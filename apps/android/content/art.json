@@ -1,0 +1,1352 @@
+{
+  "source": "https://github.com/hfg-gmuend/openmoji",
+  "commit": "3e01de523ddefe9c5e46a7765b15efef04bf9002",
+  "license": "CC-BY-SA-4.0",
+  "downloaded": [
+    {
+      "token": "🍎",
+      "file": "1F34E.svg"
+    },
+    {
+      "token": "🍌",
+      "file": "1F34C.svg"
+    },
+    {
+      "token": "🐟",
+      "file": "1F41F.svg"
+    },
+    {
+      "token": "🌸",
+      "file": "1F338.svg"
+    },
+    {
+      "token": "🐤",
+      "file": "1F424.svg"
+    },
+    {
+      "token": "⚽",
+      "file": "26BD.svg"
+    },
+    {
+      "token": "🍓",
+      "file": "1F353.svg"
+    },
+    {
+      "token": "🚗",
+      "file": "1F697.svg"
+    },
+    {
+      "token": "🌟",
+      "file": "1F31F.svg"
+    },
+    {
+      "token": "🦋",
+      "file": "1F98B.svg"
+    },
+    {
+      "token": "🧸",
+      "file": "1F9F8.svg"
+    },
+    {
+      "token": "🍊",
+      "file": "1F34A.svg"
+    },
+    {
+      "token": "🎈",
+      "file": "1F388.svg"
+    },
+    {
+      "token": "⭐",
+      "file": "2B50.svg"
+    },
+    {
+      "token": "🍪",
+      "file": "1F36A.svg"
+    },
+    {
+      "token": "❓",
+      "file": "2753.svg"
+    },
+    {
+      "token": "🪙",
+      "file": "1FA99.svg"
+    },
+    {
+      "token": "🐰",
+      "file": "1F430.svg"
+    },
+    {
+      "token": "📦",
+      "file": "1F4E6.svg"
+    },
+    {
+      "token": "✏️",
+      "file": "270F-FE0F.svg"
+    },
+    {
+      "token": "🌙",
+      "file": "1F319.svg"
+    },
+    {
+      "token": "🏷️",
+      "file": "1F3F7-FE0F.svg"
+    },
+    {
+      "token": "🎟️",
+      "file": "1F39F-FE0F.svg"
+    },
+    {
+      "token": "💧",
+      "file": "1F4A7.svg"
+    },
+    {
+      "token": "☀️",
+      "file": "2600-FE0F.svg"
+    },
+    {
+      "token": "⛰️",
+      "file": "26F0-FE0F.svg"
+    },
+    {
+      "token": "🪵",
+      "file": "1FAB5.svg"
+    },
+    {
+      "token": "🔥",
+      "file": "1F525.svg"
+    },
+    {
+      "token": "🧑",
+      "file": "1F9D1.svg"
+    },
+    {
+      "token": "🌾",
+      "file": "1F33E.svg"
+    },
+    {
+      "token": "👄",
+      "file": "1F444.svg"
+    },
+    {
+      "token": "✋",
+      "file": "270B.svg"
+    },
+    {
+      "token": "👂",
+      "file": "1F442.svg"
+    },
+    {
+      "token": "🌿",
+      "file": "1F33F.svg"
+    },
+    {
+      "token": "🐦",
+      "file": "1F426.svg"
+    },
+    {
+      "token": "🌳",
+      "file": "1F333.svg"
+    },
+    {
+      "token": "👁️",
+      "file": "1F441-FE0F.svg"
+    },
+    {
+      "token": "❤️",
+      "file": "2764-FE0F.svg"
+    },
+    {
+      "token": "🐞",
+      "file": "1F41E.svg"
+    },
+    {
+      "token": "🌍",
+      "file": "1F30D.svg"
+    },
+    {
+      "token": "🌧️",
+      "file": "1F327-FE0F.svg"
+    },
+    {
+      "token": "🌬️",
+      "file": "1F32C-FE0F.svg"
+    },
+    {
+      "token": "🌤️",
+      "file": "1F324-FE0F.svg"
+    },
+    {
+      "token": "☁️",
+      "file": "2601-FE0F.svg"
+    },
+    {
+      "token": "❄️",
+      "file": "2744-FE0F.svg"
+    },
+    {
+      "token": "🚪",
+      "file": "1F6AA.svg"
+    },
+    {
+      "token": "🪟",
+      "file": "1FA9F.svg"
+    },
+    {
+      "token": "📄",
+      "file": "1F4C4.svg"
+    },
+    {
+      "token": "☎️",
+      "file": "260E-FE0F.svg"
+    },
+    {
+      "token": "📚",
+      "file": "1F4DA.svg"
+    },
+    {
+      "token": "🎨",
+      "file": "1F3A8.svg"
+    },
+    {
+      "token": "🎤",
+      "file": "1F3A4.svg"
+    },
+    {
+      "token": "💃",
+      "file": "1F483.svg"
+    },
+    {
+      "token": "🐴",
+      "file": "1F434.svg"
+    },
+    {
+      "token": "🐮",
+      "file": "1F42E.svg"
+    },
+    {
+      "token": "🐑",
+      "file": "1F411.svg"
+    },
+    {
+      "token": "🐱",
+      "file": "1F431.svg"
+    },
+    {
+      "token": "🐶",
+      "file": "1F436.svg"
+    },
+    {
+      "token": "🐔",
+      "file": "1F414.svg"
+    },
+    {
+      "token": "🦆",
+      "file": "1F986.svg"
+    },
+    {
+      "token": "🐷",
+      "file": "1F437.svg"
+    },
+    {
+      "token": "🐯",
+      "file": "1F42F.svg"
+    },
+    {
+      "token": "🐘",
+      "file": "1F418.svg"
+    },
+    {
+      "token": "🦁",
+      "file": "1F981.svg"
+    },
+    {
+      "token": "🦌",
+      "file": "1F98C.svg"
+    },
+    {
+      "token": "🐼",
+      "file": "1F43C.svg"
+    },
+    {
+      "token": "🦢",
+      "file": "1F9A2.svg"
+    },
+    {
+      "token": "🌉",
+      "file": "1F309.svg"
+    },
+    {
+      "token": "⛵",
+      "file": "26F5.svg"
+    },
+    {
+      "token": "🐝",
+      "file": "1F41D.svg"
+    },
+    {
+      "token": "🏠",
+      "file": "1F3E0.svg"
+    },
+    {
+      "token": "🌱",
+      "file": "1F331.svg"
+    },
+    {
+      "token": "⛄",
+      "file": "26C4.svg"
+    },
+    {
+      "token": "🌻",
+      "file": "1F33B.svg"
+    },
+    {
+      "token": "🍂",
+      "file": "1F342.svg"
+    },
+    {
+      "token": "🛣️",
+      "file": "1F6E3-FE0F.svg"
+    },
+    {
+      "token": "🌅",
+      "file": "1F305.svg"
+    },
+    {
+      "token": "⬇️",
+      "file": "2B07-FE0F.svg"
+    },
+    {
+      "token": "🌞",
+      "file": "1F31E.svg"
+    },
+    {
+      "token": "➡️",
+      "file": "27A1-FE0F.svg"
+    },
+    {
+      "token": "⬅️",
+      "file": "2B05-FE0F.svg"
+    },
+    {
+      "token": "😊",
+      "file": "1F60A.svg"
+    },
+    {
+      "token": "💡",
+      "file": "1F4A1.svg"
+    },
+    {
+      "token": "⬆️",
+      "file": "2B06-FE0F.svg"
+    },
+    {
+      "token": "👨‍👩‍👧",
+      "file": "1F468-200D-1F469-200D-1F467.svg"
+    },
+    {
+      "token": "🔎",
+      "file": "1F50E.svg"
+    },
+    {
+      "token": "👈",
+      "file": "1F448.svg"
+    },
+    {
+      "token": "👉",
+      "file": "1F449.svg"
+    },
+    {
+      "token": "🔴",
+      "file": "1F534.svg"
+    },
+    {
+      "token": "🎯",
+      "file": "1F3AF.svg"
+    },
+    {
+      "token": "🔵",
+      "file": "1F535.svg"
+    },
+    {
+      "token": "🟢",
+      "file": "1F7E2.svg"
+    },
+    {
+      "token": "🔺",
+      "file": "1F53A.svg"
+    },
+    {
+      "token": "🟦",
+      "file": "1F7E6.svg"
+    },
+    {
+      "token": "🟣",
+      "file": "1F7E3.svg"
+    },
+    {
+      "token": "🍇",
+      "file": "1F347.svg"
+    },
+    {
+      "token": "🚌",
+      "file": "1F68C.svg"
+    },
+    {
+      "token": "🚢",
+      "file": "1F6A2.svg"
+    },
+    {
+      "token": "🟡",
+      "file": "1F7E1.svg"
+    },
+    {
+      "token": "🟠",
+      "file": "1F7E0.svg"
+    },
+    {
+      "token": "🍀",
+      "file": "1F340.svg"
+    },
+    {
+      "token": "🐠",
+      "file": "1F420.svg"
+    },
+    {
+      "token": "🟨",
+      "file": "1F7E8.svg"
+    },
+    {
+      "token": "🟩",
+      "file": "1F7E9.svg"
+    },
+    {
+      "token": "✈️",
+      "file": "2708-FE0F.svg"
+    },
+    {
+      "token": "🐻",
+      "file": "1F43B.svg"
+    },
+    {
+      "token": "🌊",
+      "file": "1F30A.svg"
+    },
+    {
+      "token": "🦊",
+      "file": "1F98A.svg"
+    },
+    {
+      "token": "🐺",
+      "file": "1F43A.svg"
+    },
+    {
+      "token": "🐒",
+      "file": "1F412.svg"
+    },
+    {
+      "token": "🦉",
+      "file": "1F989.svg"
+    },
+    {
+      "token": "🦔",
+      "file": "1F994.svg"
+    },
+    {
+      "token": "🐇",
+      "file": "1F407.svg"
+    },
+    {
+      "token": "🐿️",
+      "file": "1F43F-FE0F.svg"
+    },
+    {
+      "token": "🐬",
+      "file": "1F42C.svg"
+    },
+    {
+      "token": "🐋",
+      "file": "1F40B.svg"
+    },
+    {
+      "token": "🦈",
+      "file": "1F988.svg"
+    },
+    {
+      "token": "🐧",
+      "file": "1F427.svg"
+    },
+    {
+      "token": "🐳",
+      "file": "1F433.svg"
+    },
+    {
+      "token": "🦭",
+      "file": "1F9AD.svg"
+    },
+    {
+      "token": "🐻‍❄️",
+      "file": "1F43B-200D-2744-FE0F.svg"
+    },
+    {
+      "token": "🐃",
+      "file": "1F403.svg"
+    },
+    {
+      "token": "🐜",
+      "file": "1F41C.svg"
+    },
+    {
+      "token": "🦗",
+      "file": "1F997.svg"
+    },
+    {
+      "token": "🦃",
+      "file": "1F983.svg"
+    },
+    {
+      "token": "🦡",
+      "file": "1F9A1.svg"
+    },
+    {
+      "token": "🐆",
+      "file": "1F406.svg"
+    },
+    {
+      "token": "🕊️",
+      "file": "1F54A-FE0F.svg"
+    },
+    {
+      "token": "🦍",
+      "file": "1F98D.svg"
+    },
+    {
+      "token": "🐙",
+      "file": "1F419.svg"
+    },
+    {
+      "token": "🦦",
+      "file": "1F9A6.svg"
+    },
+    {
+      "token": "🪼",
+      "file": "1FABC.svg"
+    },
+    {
+      "token": "🦥",
+      "file": "1F9A5.svg"
+    },
+    {
+      "token": "🐢",
+      "file": "1F422.svg"
+    },
+    {
+      "token": "🐌",
+      "file": "1F40C.svg"
+    },
+    {
+      "token": "🪸",
+      "file": "1FAB8.svg"
+    },
+    {
+      "token": "🐸",
+      "file": "1F438.svg"
+    },
+    {
+      "token": "✨",
+      "file": "2728.svg"
+    },
+    {
+      "token": "🪰",
+      "file": "1FAB0.svg"
+    },
+    {
+      "token": "🐫",
+      "file": "1F42B.svg"
+    },
+    {
+      "token": "🦎",
+      "file": "1F98E.svg"
+    },
+    {
+      "token": "🦒",
+      "file": "1F992.svg"
+    },
+    {
+      "token": "🪶",
+      "file": "1FAB6.svg"
+    },
+    {
+      "token": "🦀",
+      "file": "1F980.svg"
+    },
+    {
+      "token": "🦓",
+      "file": "1F993.svg"
+    },
+    {
+      "token": "🍉",
+      "file": "1F349.svg"
+    },
+    {
+      "token": "🍐",
+      "file": "1F350.svg"
+    },
+    {
+      "token": "🍑",
+      "file": "1F351.svg"
+    },
+    {
+      "token": "🍍",
+      "file": "1F34D.svg"
+    },
+    {
+      "token": "🍒",
+      "file": "1F352.svg"
+    },
+    {
+      "token": "🥭",
+      "file": "1F96D.svg"
+    },
+    {
+      "token": "🍋",
+      "file": "1F34B.svg"
+    },
+    {
+      "token": "🫐",
+      "file": "1FAD0.svg"
+    },
+    {
+      "token": "💙",
+      "file": "1F499.svg"
+    },
+    {
+      "token": "🥝",
+      "file": "1F95D.svg"
+    },
+    {
+      "token": "🐉",
+      "file": "1F409.svg"
+    },
+    {
+      "token": "🍈",
+      "file": "1F348.svg"
+    },
+    {
+      "token": "🥥",
+      "file": "1F965.svg"
+    },
+    {
+      "token": "🍃",
+      "file": "1F343.svg"
+    },
+    {
+      "token": "🟤",
+      "file": "1F7E4.svg"
+    },
+    {
+      "token": "⚪",
+      "file": "26AA.svg"
+    },
+    {
+      "token": "🚲",
+      "file": "1F6B2.svg"
+    },
+    {
+      "token": "🌵",
+      "file": "1F335.svg"
+    },
+    {
+      "token": "🚄",
+      "file": "1F684.svg"
+    },
+    {
+      "token": "🚆",
+      "file": "1F686.svg"
+    },
+    {
+      "token": "🚁",
+      "file": "1F681.svg"
+    },
+    {
+      "token": "🚤",
+      "file": "1F6A4.svg"
+    },
+    {
+      "token": "🚕",
+      "file": "1F695.svg"
+    },
+    {
+      "token": "🚒",
+      "file": "1F692.svg"
+    },
+    {
+      "token": "🚓",
+      "file": "1F693.svg"
+    },
+    {
+      "token": "🚚",
+      "file": "1F69A.svg"
+    },
+    {
+      "token": "🚑",
+      "file": "1F691.svg"
+    },
+    {
+      "token": "🚜",
+      "file": "1F69C.svg"
+    },
+    {
+      "token": "🛴",
+      "file": "1F6F4.svg"
+    },
+    {
+      "token": "🚇",
+      "file": "1F687.svg"
+    },
+    {
+      "token": "🚀",
+      "file": "1F680.svg"
+    },
+    {
+      "token": "🛸",
+      "file": "1F6F8.svg"
+    },
+    {
+      "token": "🏍️",
+      "file": "1F3CD-FE0F.svg"
+    },
+    {
+      "token": "🛷",
+      "file": "1F6F7.svg"
+    },
+    {
+      "token": "🚡",
+      "file": "1F6A1.svg"
+    },
+    {
+      "token": "🛺",
+      "file": "1F6FA.svg"
+    },
+    {
+      "token": "🚋",
+      "file": "1F68B.svg"
+    },
+    {
+      "token": "🛶",
+      "file": "1F6F6.svg"
+    },
+    {
+      "token": "🚐",
+      "file": "1F690.svg"
+    },
+    {
+      "token": "🧽",
+      "file": "1F9FD.svg"
+    },
+    {
+      "token": "🥤",
+      "file": "1F964.svg"
+    },
+    {
+      "token": "⛴️",
+      "file": "26F4-FE0F.svg"
+    },
+    {
+      "token": "🚝",
+      "file": "1F69D.svg"
+    },
+    {
+      "token": "📏",
+      "file": "1F4CF.svg"
+    },
+    {
+      "token": "🎒",
+      "file": "1F392.svg"
+    },
+    {
+      "token": "⏰",
+      "file": "23F0.svg"
+    },
+    {
+      "token": "🪑",
+      "file": "1FA91.svg"
+    },
+    {
+      "token": "☂️",
+      "file": "2602-FE0F.svg"
+    },
+    {
+      "token": "🛏️",
+      "file": "1F6CF-FE0F.svg"
+    },
+    {
+      "token": "🧻",
+      "file": "1F9FB.svg"
+    },
+    {
+      "token": "🪥",
+      "file": "1FAA5.svg"
+    },
+    {
+      "token": "🔑",
+      "file": "1F511.svg"
+    },
+    {
+      "token": "🧼",
+      "file": "1F9FC.svg"
+    },
+    {
+      "token": "🥣",
+      "file": "1F963.svg"
+    },
+    {
+      "token": "🥄",
+      "file": "1F944.svg"
+    },
+    {
+      "token": "🍲",
+      "file": "1F372.svg"
+    },
+    {
+      "token": "🥢",
+      "file": "1F962.svg"
+    },
+    {
+      "token": "✂️",
+      "file": "2702-FE0F.svg"
+    },
+    {
+      "token": "📷",
+      "file": "1F4F7.svg"
+    },
+    {
+      "token": "📺",
+      "file": "1F4FA.svg"
+    },
+    {
+      "token": "💻",
+      "file": "1F4BB.svg"
+    },
+    {
+      "token": "🧺",
+      "file": "1F9FA.svg"
+    },
+    {
+      "token": "🧹",
+      "file": "1F9F9.svg"
+    },
+    {
+      "token": "🧱",
+      "file": "1F9F1.svg"
+    },
+    {
+      "token": "🧢",
+      "file": "1F9E2.svg"
+    },
+    {
+      "token": "🔶",
+      "file": "1F536.svg"
+    },
+    {
+      "token": "👟",
+      "file": "1F45F.svg"
+    },
+    {
+      "token": "📒",
+      "file": "1F4D2.svg"
+    },
+    {
+      "token": "🕐",
+      "file": "1F550.svg"
+    },
+    {
+      "token": "🟥",
+      "file": "1F7E5.svg"
+    },
+    {
+      "token": "🔢",
+      "file": "1F522.svg"
+    },
+    {
+      "token": "📕",
+      "file": "1F4D5.svg"
+    },
+    {
+      "token": "🍬",
+      "file": "1F36C.svg"
+    },
+    {
+      "token": "🧮",
+      "file": "1F9EE.svg"
+    },
+    {
+      "token": "🥕",
+      "file": "1F955.svg"
+    },
+    {
+      "token": "🃏",
+      "file": "1F0CF.svg"
+    },
+    {
+      "token": "💴",
+      "file": "1F4B4.svg"
+    },
+    {
+      "token": "🧵",
+      "file": "1F9F5.svg"
+    },
+    {
+      "token": "🕗",
+      "file": "1F557.svg"
+    },
+    {
+      "token": "📅",
+      "file": "1F4C5.svg"
+    },
+    {
+      "token": "📜",
+      "file": "1F4DC.svg"
+    },
+    {
+      "token": "🔤",
+      "file": "1F524.svg"
+    },
+    {
+      "token": "🥟",
+      "file": "1F95F.svg"
+    },
+    {
+      "token": "📖",
+      "file": "1F4D6.svg"
+    },
+    {
+      "token": "🈶",
+      "file": "1F236.svg"
+    },
+    {
+      "token": "🖍️",
+      "file": "1F58D-FE0F.svg"
+    },
+    {
+      "token": "✍️",
+      "file": "270D-FE0F.svg"
+    },
+    {
+      "token": "🥮",
+      "file": "1F96E.svg"
+    },
+    {
+      "token": "🏮",
+      "file": "1F3EE.svg"
+    },
+    {
+      "token": "🍙",
+      "file": "1F359.svg"
+    },
+    {
+      "token": "🎊",
+      "file": "1F38A.svg"
+    },
+    {
+      "token": "🚦",
+      "file": "1F6A6.svg"
+    },
+    {
+      "token": "🦴",
+      "file": "1F9B4.svg"
+    },
+    {
+      "token": "👃",
+      "file": "1F443.svg"
+    },
+    {
+      "token": "🕷️",
+      "file": "1F577-FE0F.svg"
+    },
+    {
+      "token": "🔌",
+      "file": "1F50C.svg"
+    },
+    {
+      "token": "👀",
+      "file": "1F440.svg"
+    },
+    {
+      "token": "🧊",
+      "file": "1F9CA.svg"
+    },
+    {
+      "token": "🌷",
+      "file": "1F337.svg"
+    },
+    {
+      "token": "🌈",
+      "file": "1F308.svg"
+    },
+    {
+      "token": "🌰",
+      "file": "1F330.svg"
+    },
+    {
+      "token": "🦇",
+      "file": "1F987.svg"
+    },
+    {
+      "token": "🌗",
+      "file": "1F317.svg"
+    },
+    {
+      "token": "🍚",
+      "file": "1F35A.svg"
+    },
+    {
+      "token": "🫁",
+      "file": "1FAC1.svg"
+    },
+    {
+      "token": "🧠",
+      "file": "1F9E0.svg"
+    },
+    {
+      "token": "🏃",
+      "file": "1F3C3.svg"
+    },
+    {
+      "token": "🌦️",
+      "file": "1F326-FE0F.svg"
+    },
+    {
+      "token": "🚸",
+      "file": "1F6B8.svg"
+    },
+    {
+      "token": "⚡",
+      "file": "26A1.svg"
+    },
+    {
+      "token": "🧲",
+      "file": "1F9F2.svg"
+    },
+    {
+      "token": "🧥",
+      "file": "1F9E5.svg"
+    },
+    {
+      "token": "🪐",
+      "file": "1FA90.svg"
+    },
+    {
+      "token": "🌕",
+      "file": "1F315.svg"
+    },
+    {
+      "token": "🌑",
+      "file": "1F311.svg"
+    },
+    {
+      "token": "🍄",
+      "file": "1F344.svg"
+    },
+    {
+      "token": "🚰",
+      "file": "1F6B0.svg"
+    },
+    {
+      "token": "🛰️",
+      "file": "1F6F0-FE0F.svg"
+    },
+    {
+      "token": "🧭",
+      "file": "1F9ED.svg"
+    },
+    {
+      "token": "🎆",
+      "file": "1F386.svg"
+    },
+    {
+      "token": "♻️",
+      "file": "267B-FE0F.svg"
+    },
+    {
+      "token": "🛍️",
+      "file": "1F6CD-FE0F.svg"
+    },
+    {
+      "token": "🧧",
+      "file": "1F9E7.svg"
+    },
+    {
+      "token": "🪨",
+      "file": "1FAA8.svg"
+    },
+    {
+      "token": "🖨️",
+      "file": "1F5A8-FE0F.svg"
+    },
+    {
+      "token": "👕",
+      "file": "1F455.svg"
+    },
+    {
+      "token": "🎹",
+      "file": "1F3B9.svg"
+    },
+    {
+      "token": "👦",
+      "file": "1F466.svg"
+    },
+    {
+      "token": "🧑‍🤝‍🧑",
+      "file": "1F9D1-200D-1F91D-200D-1F9D1.svg"
+    },
+    {
+      "token": "🧤",
+      "file": "1F9E4.svg"
+    },
+    {
+      "token": "🥈",
+      "file": "1F948.svg"
+    },
+    {
+      "token": "🐍",
+      "file": "1F40D.svg"
+    },
+    {
+      "token": "🧒",
+      "file": "1F9D2.svg"
+    },
+    {
+      "token": "👬",
+      "file": "1F46C.svg"
+    },
+    {
+      "token": "🔨",
+      "file": "1F528.svg"
+    },
+    {
+      "token": "🏯",
+      "file": "1F3EF.svg"
+    },
+    {
+      "token": "🔊",
+      "file": "1F50A.svg"
+    },
+    {
+      "token": "🖌️",
+      "file": "1F58C-FE0F.svg"
+    },
+    {
+      "token": "🌌",
+      "file": "1F30C.svg"
+    },
+    {
+      "token": "🐛",
+      "file": "1F41B.svg"
+    },
+    {
+      "token": "🛠️",
+      "file": "1F6E0-FE0F.svg"
+    },
+    {
+      "token": "💨",
+      "file": "1F4A8.svg"
+    },
+    {
+      "token": "🫱",
+      "file": "1FAF1.svg"
+    },
+    {
+      "token": "🤝",
+      "file": "1F91D.svg"
+    },
+    {
+      "token": "🕓",
+      "file": "1F553.svg"
+    },
+    {
+      "token": "🕒",
+      "file": "1F552.svg"
+    },
+    {
+      "token": "💦",
+      "file": "1F4A6.svg"
+    },
+    {
+      "token": "💌",
+      "file": "1F48C.svg"
+    },
+    {
+      "token": "🥬",
+      "file": "1F96C.svg"
+    },
+    {
+      "token": "💰",
+      "file": "1F4B0.svg"
+    },
+    {
+      "token": "🎋",
+      "file": "1F38B.svg"
+    },
+    {
+      "token": "☔",
+      "file": "2614.svg"
+    },
+    {
+      "token": "🌇",
+      "file": "1F307.svg"
+    },
+    {
+      "token": "🪭",
+      "file": "1FAAD.svg"
+    },
+    {
+      "token": "🏞️",
+      "file": "1F3DE-FE0F.svg"
+    },
+    {
+      "token": "🔟",
+      "file": "1F51F.svg"
+    },
+    {
+      "token": "🫧",
+      "file": "1FAE7.svg"
+    },
+    {
+      "token": "🚫",
+      "file": "1F6AB.svg"
+    },
+    {
+      "token": "✅",
+      "file": "2705.svg"
+    },
+    {
+      "token": "👧",
+      "file": "1F467.svg"
+    },
+    {
+      "token": "🔭",
+      "file": "1F52D.svg"
+    },
+    {
+      "token": "🧴",
+      "file": "1F9F4.svg"
+    },
+    {
+      "token": "🦠",
+      "file": "1F9A0.svg"
+    },
+    {
+      "token": "🏁",
+      "file": "1F3C1.svg"
+    },
+    {
+      "token": "🌀",
+      "file": "1F300.svg"
+    },
+    {
+      "token": "🅱️",
+      "file": "1F171-FE0F.svg"
+    },
+    {
+      "token": "🅰️",
+      "file": "1F170-FE0F.svg"
+    },
+    {
+      "token": "➕",
+      "file": "2795.svg"
+    },
+    {
+      "token": "⛺",
+      "file": "26FA.svg"
+    },
+    {
+      "token": "🕰️",
+      "file": "1F570-FE0F.svg"
+    },
+    {
+      "token": "⚙️",
+      "file": "2699-FE0F.svg"
+    },
+    {
+      "token": "🔬",
+      "file": "1F52C.svg"
+    },
+    {
+      "token": "🔧",
+      "file": "1F527.svg"
+    },
+    {
+      "token": "🧩",
+      "file": "1F9E9.svg"
+    },
+    {
+      "token": "⛲",
+      "file": "26F2.svg"
+    },
+    {
+      "token": "🦕",
+      "file": "1F995.svg"
+    },
+    {
+      "token": "🌫️",
+      "file": "1F32B-FE0F.svg"
+    },
+    {
+      "token": "🥷",
+      "file": "1F977.svg"
+    },
+    {
+      "token": "🏹",
+      "file": "1F3F9.svg"
+    },
+    {
+      "token": "⚔️",
+      "file": "2694-FE0F.svg"
+    },
+    {
+      "token": "🐭",
+      "file": "1F42D.svg"
+    },
+    {
+      "token": "🛡️",
+      "file": "1F6E1-FE0F.svg"
+    },
+    {
+      "token": "🌲",
+      "file": "1F332.svg"
+    },
+    {
+      "token": "🚩",
+      "file": "1F6A9.svg"
+    },
+    {
+      "token": "🏝️",
+      "file": "1F3DD-FE0F.svg"
+    },
+    {
+      "token": "🎓",
+      "file": "1F393.svg"
+    },
+    {
+      "token": "🔍",
+      "file": "1F50D.svg"
+    },
+    {
+      "token": "🎲",
+      "file": "1F3B2.svg"
+    },
+    {
+      "token": "💣",
+      "file": "1F4A3.svg"
+    },
+    {
+      "token": "🏆",
+      "file": "1F3C6.svg"
+    },
+    {
+      "token": "🐨",
+      "file": "1F428.svg"
+    }
+  ],
+  "missing": []
+}

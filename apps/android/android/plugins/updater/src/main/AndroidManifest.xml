@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="xyz.lynote.kidsplayground.updater">
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <application>
+        <provider
+            android:name="xyz.lynote.kidsplayground.updater.UpdateFileProvider"
+            android:authorities="${applicationId}.update-files"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+    </application>
+</manifest>

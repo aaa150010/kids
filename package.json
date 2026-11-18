@@ -1,0 +1,27 @@
+{
+  "name": "kids-playground",
+  "private": true,
+  "version": "1.3.0",
+  "type": "module",
+  "scripts": {
+    "native:content": "node scripts/native/author-stories.mjs && node scripts/native/author-garden.mjs && node scripts/native/export-content.mjs",
+    "native:garden": "node scripts/native/author-garden.mjs",
+    "native:garden:import": "node scripts/native/import-garden.mjs",
+    "native:levels": "node scripts/native/author-levels.mjs",
+    "native:icons": "node scripts/native/import-icons.mjs",
+    "native:icons:brand": "bash scripts/native/render-brand-icons.sh",
+    "native:audit": "bash scripts/native/audit-ui.sh",
+    "native:build": "bash scripts/native/build-android.sh",
+    "native:build:docker": "bash scripts/native/build-android-docker.sh",
+    "native:deploy": "bash scripts/native/deploy-android.sh",
+    "native:release:docker": "bash scripts/native/build-android-docker.sh && SKIP_BUILD=1 bash scripts/native/deploy-android.sh",
+    "native:stories": "node scripts/native/author-stories.mjs",
+    "native:stories:audio": "build/story-tools/venv/bin/python -u scripts/native/generate-story-audio.py",
+    "native:stories:prepare": "node scripts/native/prepare-story-audio-release.mjs",
+    "native:stories:deploy": "bash scripts/native/deploy-story-audio.sh",
+    "native:stories:setup": "bash scripts/native/setup-story-audio.sh"
+  },
+  "devDependencies": {
+    "pinyin-pro": "3.29.5"
+  }
+}
