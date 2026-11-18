@@ -147,3 +147,4 @@
 - `tests/test_runner.gd` 通过：内容、棋类、答题、记忆、唐诗锚点、军棋定阵营与旧存档。
 - `tests/garden_fixtures.gd` 通过：848 项，0 失败。
 - `pnpm native:audit` 三档尺寸完成，`layout-report.txt` 为 `No visible touch-target issues found.`；桌面模拟 3000×2120、3392×2400、1180×800 均约 120 FPS。设备触控、系统手势、真实安卓性能和安装后覆盖升级仍需实体平板验证。
+- Docker 测试签名 APK 构建完成：包名 `xyz.lynote.kidsplayground`，版本 5 / 1.3.1，minSdk 26、targetSdk 33、arm64-v8a + armeabi-v7a；`apksigner` 验证 v2 签名通过。产物仅供本机验证，不能覆盖正式安装，未部署服务器。

@@ -32,7 +32,9 @@
 - `tests/test_runner.gd`：通过。
 - `tests/garden_fixtures.gd`：848 项、0 失败。
 - `scripts/native/audit-ui.sh`：三档尺寸完成，`layout-report.txt` 无可见触摸目标问题，桌面模拟约 120 FPS。
-- 尚未完成：OPPO Pad 3 Pro 实机触控/系统手势/声音同步、真实安卓性能、APK 覆盖安装与自动更新回滚。APK 本地构建将在本轮后续执行，不部署 Aliyun。
+- 本地 APK：使用一次性测试签名完成 Docker 构建，`apksigner` 验证 v2 签名、包名 `xyz.lynote.kidsplayground`、版本 5 / 1.3.1、minSdk 26、targetSdk 33 和 arm64/armeabi-v7a 原生库。产物在 `build/native-test/`，不能覆盖正式安装。
+- 正式签名密钥没有进入第三方构建镜像；因此本轮没有生成可覆盖现有安装的正式签名 APK，也没有部署 Aliyun。
+- 尚未完成：OPPO Pad 3 Pro 实机触控/系统手势/声音同步、真实安卓性能、测试签名 APK 的实际安装和自动更新回滚。
 
 ## 当前接手进展（2026-11-18）
 
