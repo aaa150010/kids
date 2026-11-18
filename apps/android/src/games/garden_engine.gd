@@ -99,6 +99,8 @@ func tick(state: Dictionary, delta: float) -> Array:
 			state.introStep = int(state.introStep) + 1
 			if int(state.introStep) >= 3:
 				state.introStep = -1
+			else:
+				AudioFX.play("tap")
 	for key in ["waveTimer", "sunTimer", "conveyorTimer", "graveTimer", "fogCleared", "stormTimer", "lightning"]:
 		state[key] = maxf(0.0, float(state[key]) - delta)
 	if float(state.get("waveDuration", 1.0)) > 0.0:

@@ -39,6 +39,7 @@ var seed_buttons: Dictionary = {}
 var seed_pick_buttons: Dictionary = {}
 var seed_flight_lock := false
 var seed_flight_generation := 0
+var hand_mode := "none"
 var sun_label: Label
 var wave_label: Label
 var tutorial_label: Label
@@ -490,6 +491,44 @@ func _play_seed_flight(flight: Control) -> void:
 	tween.tween_callback(flight.queue_free)
 
 
+func _return_seed_to_picker(kind: String) -> void:
+	var flight := Control.new()
+	flight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flight.z_index = 90
+	var sprite := TextureRect.new()
+	sprite.texture = _plant_texture(kind)
+	sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	sprite.custom_minimum_size = Vector2(104, 124)
+	sprite.size = Vector2(104, 124)
+	sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	flight.add_child(sprite)
+	flight.set_meta("target_kind", kind)
+	flight.set_meta("target_generation", seed_flight_generation)
+	flight.modulate.a = 0.9
+	add_child(flight)
+	call_deferred("_play_seed_return", flight)
+
+
+func _play_seed_return(flight: Control) -> void:
+	var kind := str(flight.get_meta("target_kind", ""))
+	if int(flight.get_meta("target_generation", 0)) != seed_flight_generation:
+		flight.queue_free()
+		return
+	var button: Button = seed_pick_buttons.get(kind, null)
+	if button == null or not is_instance_valid(button):
+		flight.queue_free()
+		return
+	var start := Vector2(746, 38)
+	var target := button.get_global_rect().get_center()
+	flight.global_position = start - Vector2(104, 124) * 0.5
+	flight.modulate.a = 0.9
+	var tween := MotionKit.tween(flight)
+	tween.tween_property(flight, "global_position", target - Vector2(104, 124) * 0.5, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(sprite, "modulate:a", 0.0, 0.07).set_delay(0.13)
+	tween.tween_callback(flight.queue_free)
+
+
 func _begin_battle(tutorial: bool = false) -> void:
 	var special := str(ContentDB.garden_levels().get(str(selected_level), {}).get("mode", "lawn"))
 	if selected_seeds.size() < 6 and not tutorial and special == "lawn":
@@ -614,6 +653,7 @@ func _select_battle_seed(kind: String) -> void:
 	battle.selectedSeed = kind
 	battle.shovel = false
 	battle.aimingCannon = -1
+	hand_mode = "seed"
 	_play_garden_sound("buttonclick")
 	_save_profile("选择植物卡")
 	if is_instance_valid(field):
@@ -640,6 +680,7 @@ func _cancel_selection() -> void:
 	battle.selectedSeed = ""
 	battle.shovel = false
 	battle.aimingCannon = -1
+	hand_mode = "none"
 	AudioFX.play("back")
 	if is_instance_valid(field):
 		field.set_battle(battle)
@@ -653,6 +694,8 @@ func _battle_cell(row: int, col: int) -> void:
 	var result: Dictionary = engine.shovel(battle, row, col) if digging else engine.handle_cell(battle, row, col)
 	if bool(result.get("ok", false)):
 		_tutorial_action("dig" if digging else "plant", kind)
+		if digging:
+			hand_mode = "none"
 		AudioFX.play("whoosh" if digging else "plant")
 		_play_garden_sound("plant_water" if str(battle.environment) in ["pool", "fog"] and row in [2, 3] else "buttonclick")
 	else:
@@ -678,6 +721,9 @@ func _toggle_shovel() -> void:
 	battle.aimingCannon = -1
 	if bool(battle.get("shovel", false)):
 		battle.selectedSeed = ""
+		hand_mode = "shovel"
+	else:
+		hand_mode = "none"
 	_play_garden_sound("buttonclick")
 	if is_instance_valid(field):
 		field.set_battle(battle)

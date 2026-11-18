@@ -31,6 +31,7 @@ var _card_error_kind := ""
 var _card_error_time := 0.0
 var _shovel_return := 0.0
 var _shovel_return_from := Vector2.ZERO
+var shovel_return_requested := false
 var can_plant_check := Callable()        # 编排层注入的可种植校验，返回 "" 表示可种
 var dialog_open := false                 # 弹窗打开期间战场输入静默
 var press_target := ""                   # 按下命中的 HUD 目标："seed:i"/"shovel"/"speed"
@@ -75,6 +76,10 @@ func _process(delta: float) -> void:
 		if ghost_back >= 1:
 			ghost_back = 0 # 回弹结束，销毁 ghost
 	_card_error_time = maxf(0, _card_error_time - delta)
+	if shovel_return_requested:
+		shovel_return_requested = false
+		_shovel_return_from = drag_pos
+		_shovel_return = 0.001
 	_shovel_return = maxf(0, _shovel_return - delta / .2)
 	if not paused or cell_flash > 0 or ghost_back > 0 or _card_error_time > 0 or _shovel_return > 0 or bool(state.get("bannerVisible", false)):
 		queue_redraw()
@@ -485,6 +490,10 @@ func _draw_hud() -> void:
 	_text("第 %s 关" % int(state.levelId), Vector2(450, 590), 15, Color("#fff3cd"))
 	if int(state.get("aimingCannon", -1)) >= 0:
 		_text("点草坪选择炮击位置", Vector2(280, 96), 18, Color("#fff3b2"))
+
+
+func start_shovel_return() -> void:
+	shovel_return_requested = true
 
 
 func _draw_card(kind: String, index: int) -> void:
