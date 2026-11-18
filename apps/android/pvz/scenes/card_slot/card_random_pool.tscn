@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://pvz/scripts/ui/card/card_slot/card_random_pool.gd" id="1_peid8"]
+
+[node name="CardRandomPool" type="Node"]
+script = ExtResource("1_peid8")

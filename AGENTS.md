@@ -121,7 +121,11 @@
 
 ## 植物大战僵尸本地版
 
-- 原生塔防实现位于 `apps/android/src/games/garden_game.gd` 与 `garden_engine.gd`，仅本地个人使用，不执行公开部署；公开版必须改用原创标题和原创角色命名。
+- 核心战斗完整采用固定提交 `hsk-dream/PVZ-Godot-Dream@740691cf9b0ad02c7021efa4dae2ab5f86207585`，导入副本位于 `apps/android/pvz/`；`apps/android/src/games/garden_game.gd` 只保留大厅、选关、选卡、图鉴、教程和存档适配，`pvz_battle_host.gd` 负责 1066×600 战斗视口、触摸映射、暂停、倍速、胜负和实时快照。不得恢复已删除的 `garden_engine.gd` 自研塔防核心。
+- 上游主场景包含五类战场、完整卡槽生命周期、植物与僵尸状态机、弹道、阳光、割草机、波次、传送带、保龄球、锤僵尸、砸罐子和僵王流程。普通上游修改必须只做嵌入式适配或本项目存档/声音/难度接线，不重写成熟玩法机制。
+- 导入脚本为 `scripts/native/import-pvz-dream.py`，必须同时导入 `.gd/.tscn/.tres/.res`；`scripts/native/extract-pvz-reanim.py` 从本地花园图集生成两个编译动画所需的扁平贴图。上游编译动画缺贴图会导致场景解析失败，不能再用空 `Animation` 静默替代。
+- 1080p 以上平板显示使用整数级清晰度的 16:9 等比视口，战斗内部坐标固定为上游 `1066×600`，触摸事件由宿主换算到该视口。顶层原生栏保留返回、暂停和 1×/2×/3×，上游自己的菜单按钮隐藏，避免两套返回流程。
+- 本版本仅本地个人使用，不执行公开部署；公开版必须改用原创标题和原创角色命名。
 - 五个世界共五十关：白天花园、夜晚花园、泳池、浓雾、屋顶；包含互动教程、无尽模式、植物图鉴、实时自动保存、暂停和 1×/2×/3× 倍速。
 - 48 种植物从第一次进入起全部解锁；每关只显示本关允许的植物，玩家从中选 6–10 张卡；不设商店、金币购买或植物解锁。
 - 植物大战僵尸的星级、教程状态、无尽最高波数和战斗快照保存在统一原生存档的 `garden` 会话中；不得影响其他游戏存档。
@@ -192,7 +196,7 @@
 - 音频缓存供本机所有档案共用；清理时说明会删除共享音频，保留正文、收藏和进度。只记录听读足迹，不把读过计为答题正确或语言能力得分。
 - 验收覆盖六类数量与拼音对齐、段落音频同步、缓存校验、断网重试、批量取消/恢复、空间不足、后台暂停、重开恢复、损坏快照及儿童/其他游戏隔离。测试和 UI 审计仍需用户明确允许后运行。
 
-- 原生内容：`node scripts/native/export-content.mjs`；原生测试：`godot --headless --path apps/android --script res://tests/test_runner.gd`；原生 APK：`bash scripts/native/build-android.sh`。这些命令仍须用户明确允许后运行。
+- 原生内容：`node scripts/native/export-content.mjs`；原生测试：`godot --headless --path apps/android res://tests/test_runner.tscn`；PvZ 嵌入与战局恢复夹具：`godot --headless --path apps/android res://tests/pvz_smoke.tscn`；原生 APK：`bash scripts/native/build-android.sh`。这些命令仍须用户明确允许后运行。
 - 版本：`apps/android/version.json` 与 `apps/android/project.godot` 使用同一版本；内容版本由 `content-src/data/version.json` 提升。
 - 线上下载页与更新入口：`https://lynote.xyz/play-app/`；服务器目录是 `/opt/kids-playground/dist/play-app/`，上传 APK、内容包、`index.html`、`app-icon.png`、`latest.json` 和 `latest.sig`。
 - 每次发布后，`index.html` 必须自动显示本次 APK 的版本、大小、发布日期和下载按钮；`latest.apk` 必须切换到当前最新安装包。用户只访问下载页，不需要接触热更新清单。

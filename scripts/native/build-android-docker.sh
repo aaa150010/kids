@@ -84,7 +84,7 @@ unzip -q /root/.local/share/godot/export_templates/4.7.2.stable/android_source.z
 sed -i \
   -e "s/compileSdk         : 36/compileSdk         : 34/" \
   -e "s/minSdk             : 24/minSdk             : 26/" \
-  -e "s/targetSdk          : 36/targetSdk          : 34/" \
+  -e "s/targetSdk          : 36/targetSdk          : 33/" \
   -e "s/buildTools[[:space:]]*:[[:space:]]*'36\\.1\\.0'/buildTools         : '34.0.0'/" \
   android/build/config.gradle
 printf "4.7.2.stable\n" > android/.build_version
@@ -97,6 +97,7 @@ exec "$(dirname "$0")/gradlew.real" --offline "$@"
 OFFLINE_GRADLE
   chmod +x android/build/gradlew
 fi
+godot --headless --import --quiet --path /project
 godot --headless --editor --quit --quiet --path /project
 mkdir -p build
 godot --headless --path /project --export-release "Android" /project/build/kids-playground.apk

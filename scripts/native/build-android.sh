@@ -39,6 +39,7 @@ if [[ "${SKIP_PLUGIN_BUILD:-0}" != "1" ]]; then
     "$staging/android/plugins/UpdateInstaller.aar"
 fi
 
+"$godot_bin" --headless --import --path "$staging"
 "$godot_bin" --headless --path "$staging" --editor --quit
 mkdir -p "$staging/build"
 "$godot_bin" --headless --path "$staging" --export-release "Android" "$staging/build/kids-playground.apk"

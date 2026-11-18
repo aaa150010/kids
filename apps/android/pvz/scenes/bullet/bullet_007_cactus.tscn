@@ -1,0 +1,15 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://pvz/scenes/bullet/bullet_000_linear_base.tscn" id="1_vyo5q"]
+[ext_resource type="Script" path="res://pvz/scripts/bullet/bullet_007_cactus.gd" id="2_djihw"]
+[ext_resource type="Texture2D" path="res://pvz/assets/image-placeholder.png" id="2_je3po"]
+
+[node name="BulletLinear007Cactus" instance=ExtResource("1_vyo5q")]
+script = ExtResource("2_djihw")
+bullet_type = 7
+
+[node name="BulletBody" parent="Body" index="0"]
+texture = ExtResource("2_je3po")
+
+[node name="BulletEffect" parent="." index="2"]
+is_bullet_effect = false

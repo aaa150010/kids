@@ -1,4 +1,4 @@
-extends SceneTree
+extends Node
 
 const BoardRulesResource = preload("res://src/games/board_rules.gd")
 const QuizRulesResource = preload("res://src/games/quiz_rules.gd")
@@ -8,7 +8,7 @@ const StoryFixtures = preload("res://tests/story_fixtures.gd")
 var failures: Array[String] = []
 
 
-func _init() -> void:
+func _ready() -> void:
 	call_deferred("_run")
 
 
@@ -32,10 +32,10 @@ func all_scripts(path: String) -> Array[String]:
 
 
 func _run() -> void:
-	var content = root.get_node_or_null("/root/ContentDB")
+	var content = get_tree().root.get_node_or_null("/root/ContentDB")
 	check(content != null, "ContentDB autoload is available")
 	if content == null:
-		quit(1)
+		get_tree().quit(1)
 		return
 	for script_path in all_scripts("res://src"):
 		var script: GDScript = load(script_path)
@@ -51,7 +51,7 @@ func _run() -> void:
 		"res://assets/branding/app-icon-background-432.png",
 	]:
 		check(FileAccess.file_exists(icon_path), "%s is bundled" % icon_path)
-	var runtime_quality := root.get_node_or_null("/root/RuntimeQuality")
+	var runtime_quality := get_tree().root.get_node_or_null("/root/RuntimeQuality")
 	check(runtime_quality != null and int(runtime_quality.target_fps) >= 60, "runtime quality targets high refresh")
 	for game_id in content.game_map:
 		check(not GameTuning.definition(str(game_id)).is_empty(), "%s has a tuning definition" % game_id)
@@ -74,7 +74,6 @@ func _run() -> void:
 	for game_id in ["jungle", "gomoku", "military"]:
 		check(content.puzzles.get(game_id, []).size() > 0, "%s puzzle fixtures are loaded" % game_id)
 
-	var engine = load("res://src/games/garden_engine.gd").new()
 	var fake_player = {
 		"id": "test-player",
 		"name": "测试小朋友",
@@ -82,30 +81,17 @@ func _run() -> void:
 		"avatar": "🦊",
 		"color": "#d56c29",
 	}
-	var battle: Dictionary = engine.create(
-		fake_player,
-		1,
-		"adventure",
-		["peashooter", "sunflower", "wallnut", "cherrybomb", "potatomine", "snowpea"],
-		false
-	)
-	check(int(battle.rows) == 5, "day garden has five lanes")
-	check(is_equal_approx(float(battle.zombieSpeedMultiplier), 1.0), "standard garden difficulty uses baseline zombie speed")
-	var easy_battle: Dictionary = engine.create(fake_player, 1, "adventure", ["peashooter"], false, "easy")
-	check(float(easy_battle.zombieSpeedMultiplier) < 1.0, "easy garden slows zombies")
-	check(int(easy_battle.spawnDelta) == -1, "easy garden reduces wave size")
-	check(int(battle.sun) >= 50, "battle starts with sun")
-	var planted: Dictionary = engine.plant(battle, 2, 1, "peashooter")
-	check(bool(planted.ok), "peashooter can be planted")
-	check(int(battle.sun) < 150, "planting spends sun")
-	battle.cooldowns.peashooter = 0.0
-	battle.sun = 1000
-	var sunflower: Dictionary = engine.plant(battle, 2, 0, "sunflower")
-	check(bool(sunflower.ok), "sunflower can be planted")
-	var removed: Dictionary = engine.shovel(battle, 2, 1)
-	check(bool(removed.ok), "plant can be removed with shovel")
-	engine.tick(battle, 1.0)
-	check(battle.phase == "playing", "battle remains active after one tick")
+	for level_number in range(1, 51):
+		var mapped: Dictionary = PvZLevelFactory.build(level_number, "adventure", [], "normal")
+		var level: ResourceLevelData = mapped.get("level")
+		check(level != null, "PvZ level %s maps into the upstream resource format" % level_number)
+		check(level.max_wave >= 10 and level.max_wave % 10 == 0, "PvZ level %s keeps complete upstream flag blocks" % level_number)
+		check(str(mapped.get("scene", "")).begins_with("res://pvz/scenes/main/MainGame"), "PvZ level %s selects an embedded upstream scene" % level_number)
+	var easy_level: ResourceLevelData = PvZLevelFactory.build(1, "adventure", ["sunflower"], "easy").get("level")
+	var challenge_level: ResourceLevelData = PvZLevelFactory.build(1, "adventure", ["sunflower"], "challenge").get("level")
+	check(easy_level.start_sun > challenge_level.start_sun, "younger PvZ difficulty starts with more sun")
+	check(PvZLevelFactory.plant_type("peashooter") == CharacterRegistry.PlantType.P001PeaShooterSingle, "peashooter maps to the upstream plant registry")
+	check(PvZLevelFactory.zombie_type("digger") == CharacterRegistry.ZombieType.Z018Digger, "digger maps to the upstream zombie registry")
 
 	var pack_data: Array = content.garden.get("plantAlmanac", [])
 	for entry in pack_data:
@@ -308,7 +294,7 @@ func _run() -> void:
 	check(not poetry_screen.poem_scrolls.has("missing-poem"), "poetry drops scroll anchors for unknown poems")
 	poetry_screen.free()
 
-	var save_store := root.get_node_or_null("/root/SaveStore")
+	var save_store := get_tree().root.get_node_or_null("/root/SaveStore")
 	check(save_store != null, "SaveStore autoload is available")
 	var difficulty_profile: Dictionary = save_store.add_profile("测试难度", 8, "🐼", "#2878c8") if save_store != null else {}
 	check(not difficulty_profile.is_empty(), "temporary profile can be created for save tests")
@@ -321,7 +307,7 @@ func _run() -> void:
 
 	if failures.is_empty():
 		print("Native content, board, quiz and memory checks passed.")
-		quit(0)
+		get_tree().quit(0)
 	else:
 		print("Native checks failed: %d" % failures.size())
-		quit(1)
+		get_tree().quit(1)

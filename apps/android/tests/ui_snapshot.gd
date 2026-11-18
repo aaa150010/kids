@@ -101,6 +101,9 @@ func _capture_games(capture: Dictionary) -> void:
 		var game_id := str(meta.id)
 		if not GAME_SCRIPTS.has(game_id):
 			continue
+		var selected_games := OS.get_environment("KIDS_UI_GAMES")
+		if not selected_games.is_empty() and not (game_id in selected_games.split(",", false)):
+			continue
 		var mode := _screenshot_mode(game_id)
 		var minimum := int(mode.get("player_range", [1, 2])[0])
 		var selected: Array = save_store.profiles().slice(0, maxi(1, minimum))
@@ -116,6 +119,9 @@ func _capture_games(capture: Dictionary) -> void:
 		screen.setup(configured, selected)
 		viewport.add_child(screen)
 		await _frames(12)
+		if game_id == "garden":
+			# PvZ 的选卡/入场演出在 60 帧内完成，截图必须看正式战斗而非过渡页。
+			await create_timer(3.4, true, false, true).timeout
 		print("capturing ",game_id," ",capture.label)
 		_audit(screen, game_id)
 		await _sample_performance("%s-%s" % [game_id, capture.label])

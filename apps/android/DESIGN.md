@@ -13,7 +13,7 @@
 - `src/ui/interaction/` 是全局交互层：`GestureRecognizer`（tap/长按/拖拽状态机）、`InteractionController`（输入优先级仲裁：弹窗500>拖拽400>选中300>棋盘100）、`DragController`（跟手 ghost 与落点/回弹）、`SelectableGroup`（选中态）、`DialogManager`（统一弹窗）、`PressFeedback`（按压回弹）、`SfxMap`（语义事件→合成音效映射）。
 - main 作为 `main_hub` 组暴露 `ipc` 与 `dialogs`；游戏与自绘表面通过 `get_first_node_in_group("main_hub")` 访问，弹窗打开期间用 `ipc.is_blocked_by_dialog()` 静默游戏输入。
 - 弹窗规范：S/M/L 三档按屏幕比例（0.38/0.56/0.74，含像素上限与安全边距），圆角 28、2px 描边、遮罩 0.38、进出 scale+淡入约 200/160ms、按钮高 60 字号 22、双按钮等宽、关闭后焦点还原；返回键统一先关弹窗栈顶。
-- 自绘表面（garden_field、board_surface、quiz_stage）输入统一走手势状态机，触摸与鼠标双通道并去重；触摸抬起/暂停/弹窗时必须清理 hover 与按压残留。
+- 自绘表面（board_surface、quiz_stage）输入统一走手势状态机，触摸与鼠标双通道并去重；触摸抬起/暂停/弹窗时必须清理 hover 与按压残留。PvZ 使用上游 `SubViewport` 的 1066×600 原生输入坐标，由宿主把桌面/平板指针换算进去。
 - 大厅：`SmoothScrollContainer` 提供阻尼惯性与边界回弹；封面经 `LobbyCoverCache` 后台线程加载；排序为增量重排（不整树重建），长按进入拖拽排序，普通滑动即滚动。
 
 ## 游戏视觉分组
@@ -54,6 +54,7 @@
 - Kenney UI、棋盘和动物包为 CC0；OpenMoji 图案为 CC-BY-SA-4.0；Noto CJK 字体为 OFL-1.1。
 - 植物大战僵尸当前角色与关卡素材只用于本地个人版，公开分发前必须替换标题、角色和素材。
 - 植物大战僵尸的固定版本素材由 `node scripts/native/import-garden.mjs` 下载并按 Git blob 与 SHA-256 校验；表现索引由 `content-src/data/garden-presentation.json` 描述，规则数据由 `content-src/data/garden-rules.json` 描述。
-- 战斗表现使用原生 Canvas 部件动画：植物动作以 `plant-motion/*.json` 驱动，僵尸动作以 `actor-motion/*.json` 驱动，动作素材缺失时显示错误并回退到已烘焙片段。玩家与普通僵尸不显示血条，伤害通过护具掉落、断臂、掉头和死亡动作表达。
-- 花园审计入口为 `KIDS_PLAYGROUND_AUDIT=1` 下的 `tests/garden_fixtures.gd` 与 `tests/garden_audit.gd`；前者使用内存存档和规则夹具，后者只用合法操作回放生成三档尺寸截图、回放录像和性能报告。
+- 战斗实现固定为 `hsk-dream/PVZ-Godot-Dream@740691cf9b0ad02c7021efa4dae2ab5f86207585` 的导入副本 `apps/android/pvz/`。`PvZLevelFactory` 只把本项目的 50 关转换成上游 `ResourceLevelData`，`PvZBattleHost` 只负责视口、触摸、暂停、倍速、胜负和快照；不得再维护第二套塔防引擎。
+- 卡牌、植物、僵尸、弹道、阳光、割草机、波次、迷你模式和 Boss 均由上游状态机与动画资源驱动。`scripts/native/extract-pvz-reanim.py` 负责补齐两个编译动画依赖的扁平贴图。
+- PvZ 审计入口为 `KIDS_PLAYGROUND_AUDIT=1` 下的 `tests/pvz_smoke.gd` 与 `tests/ui_snapshot.gd`；前者覆盖 50 关映射、五类特殊关启动、种植、僵尸/阳光/罐子/植物快照恢复，后者生成三档尺寸截图和性能报告。
 - Godot 升级前在独立分支运行规则、存档、两档平板和更新回归，不直接覆盖稳定版本。

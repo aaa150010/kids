@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ResourceBodyChange" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://pvz/scripts/resources/resource_body_change.gd" id="1_vr3wb"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/wallnutcracked2.tres" id="2_j88ei"]
+
+[resource]
+script = ExtResource("1_vr3wb")
+sprite_chage = Array[NodePath]([NodePath("../Body/BodyCorrect/Anim_face")])
+sprite_chage_texture = Array[Texture2D]([ExtResource("2_j88ei")])
+sprite_appear = Array[NodePath]([])
+sprite_disappear = Array[NodePath]([])
+node_drop = NodePath("")

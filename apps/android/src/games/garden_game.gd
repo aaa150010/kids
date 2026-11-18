@@ -1,7 +1,6 @@
 class_name NativeGardenGame
 extends NativeGameScreen
 
-const ENGINE := preload("res://src/games/garden_engine.gd")
 const TUTORIAL_TEXT := [
 	"点一下发光的阳光，把它收进口袋。",
 	"选向日葵卡片，再点一块空草坪。",
@@ -27,34 +26,28 @@ const PLAYABLE_PLANTS := [
 var profile_data: Dictionary = {}
 var view := "home"
 var battle: Dictionary = {}
-var engine: GardenBattleEngine
-var field: GardenField
+var battle_host: PvZBattleHost
+var pending_pvz_resume: Dictionary = {}
 var speed := 1
 var selected_level := 1
 var selected_mode := "adventure"
 var selected_seeds: Array = []
 var plant_entries: Dictionary = {}
 var zombie_entries: Dictionary = {}
-var seed_buttons: Dictionary = {}
 var seed_pick_buttons: Dictionary = {}
 var seed_loadout_buttons: Array = []
 var seed_flight_lock := false
 var seed_flight_generation := 0
-var hand_mode := "none"
-var sun_label: Label
-var wave_label: Label
 var tutorial_label: Label
-var hud_clock := 0.0
-var save_clock := 0.0
+var tutorial_banner: Control
+var speed_button: Button
+var _tutorial_event_callable: Callable
 var reported_battle := false
-var use_speed_button: Button
 var selected_difficulty := "auto"
-var tick_accumulator := 0.0
 
 
 func _ready() -> void:
 	build_shell()
-	engine = ENGINE.new()
 	_load_entries()
 	profile_data = SaveStore.load_state(game_id, [str(players[0].id)])
 	selected_level = clampi(_integer(profile_data.get("selectedLevel", 1)), 1, 50)
@@ -77,34 +70,41 @@ func _ready() -> void:
 			"reported": false,
 		}
 	selected_difficulty = difficulty_pref if GameTuning.supports(game_id) else "auto"
-	if profile_data.get("battle") is Dictionary and not profile_data.battle.is_empty():
-		battle = engine.restore(profile_data.battle, players[0])
-		paused = bool(profile_data.get("paused", false))
-		if battle.is_empty():
-			selected_level = clampi(_integer(profile_data.battle.get("levelId", 1)), 1, 50)
-			var environment := str(ContentDB.garden_levels().get(str(selected_level), {}).get("environment", "day"))
-			selected_seeds = ContentDB.garden_rules.get("decks", {}).get(environment, PLAYABLE_PLANTS.slice(0, 8)).duplicate()
-			_begin_battle(false)
-			return
-		selected_level = clampi(_integer(battle.get("levelId", 1)), 1, 50)
-		selected_mode = str(battle.mode)
-		if battle.get("player") is Dictionary:
-			players = [battle.player.duplicate(true)]
-		speed = clampi(_integer(profile_data.get("speed", 1)), 1, 3)
-		tick_accumulator = _number(battle.get("logicAccumulator", 0.0), 0.0)
-		selected_difficulty = str(battle.get("difficulty", "auto"))
-		hand_mode = str(battle.get("handMode", "none"))
+	pause_changed.connect(_on_pause_changed)
+	var resume: Variant = profile_data.get("pvzBattle", {})
+	if resume is Dictionary and not resume.is_empty():
+		pending_pvz_resume = resume.duplicate(true)
+		selected_level = clampi(_integer(pending_pvz_resume.get("levelId", selected_level)), 1, 50)
+		selected_mode = str(pending_pvz_resume.get("mode", selected_mode))
+		var restored_seeds: Variant = pending_pvz_resume.get("selectedSeeds", selected_seeds)
+		if restored_seeds is Array:
+			selected_seeds = restored_seeds.filter(func(kind): return kind is String and ContentDB.garden_plants().has(str(kind))).slice(0, 10)
+		speed = clampi(_integer(pending_pvz_resume.get("speed", 1)), 1, 3)
+		battle = {
+			"levelId": selected_level,
+			"mode": selected_mode,
+			"phase": "playing",
+			"reference": true,
+		}
 		view = "battle"
 		_render_battle()
-		if paused:
-			call_deferred("toggle_pause", true)
+		return
+	if profile_data.get("battle") is Dictionary and not profile_data.battle.is_empty():
+		# 旧原生引擎的局内快照无法无损映射到上游角色实例；保留关卡与卡组并从本关开局继续。
+		var legacy: Dictionary = profile_data.battle
+		selected_level = clampi(_integer(legacy.get("levelId", 1)), 1, 50)
+		selected_mode = str(legacy.get("mode", "adventure"))
+		var legacy_seeds: Variant = legacy.get("seeds", selected_seeds)
+		if legacy_seeds is Array:
+			selected_seeds = legacy_seeds.filter(func(kind): return kind is String and ContentDB.garden_plants().has(str(kind))).slice(0, 10)
+		profile_data.battle = {}
+		_begin_battle(false)
 	elif not bool(profile_data.get("tutorialSeen", false)):
 		_begin_battle(true)
 	elif str(profile_data.get("view", "home")) == "choose" and not selected_seeds.is_empty():
 		_render_seed_picker()
 	else:
 		_render_home()
-	pause_changed.connect(_on_pause_changed)
 	call_deferred("_start_garden_music")
 
 
@@ -116,35 +116,14 @@ func _load_entries() -> void:
 
 
 func _process(delta: float) -> void:
-	if view != "battle" or battle.is_empty() or battle.get("phase") != "playing" or paused:
+	if battle_host != null:
 		return
-	tick_accumulator += delta * speed
-	var events: Array = []
-	var steps := 0
-	while tick_accumulator >= 1.0 / 30.0 and steps < 8:
-		events.append_array(engine.tick(battle, 1.0 / 30.0))
-		tick_accumulator -= 1.0 / 30.0
-		steps += 1
-	battle.logicAccumulator = tick_accumulator
-	if is_instance_valid(field):
-		field.set_battle(battle, clampf(tick_accumulator / (1.0 / 30.0), 0.0, 1.0))
-	_process_events(events)
-	hud_clock += delta
-	save_clock += delta
-	if hud_clock >= 0.18:
-		hud_clock = 0.0
-		_update_hud()
-	if save_clock >= 2.0:
-		save_clock = 0.0
-		_save_profile("战斗中")
-	if battle.get("phase") in ["won", "lost"]:
-		_finish_battle()
 
 
 func _notification(what: int) -> void:
 	if OS.get_environment("KIDS_PLAYGROUND_AUDIT") == "1":
 		return
-	if not is_inside_tree() or engine == null:
+	if not is_inside_tree():
 		return
 	if what in [NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST]:
 		if view == "battle" and not battle.is_empty():
@@ -154,47 +133,10 @@ func _notification(what: int) -> void:
 			SaveStore.flush()
 		AudioFX.stop_all()
 
-func _process_events(events: Array) -> void:
-	for event in events:
-		if is_instance_valid(field):
-			field.add_effect(event)
-		match str(event.get("type", "")):
-			"mower":
-				_play_garden_sound("lawnmower")
-				show_toast("割草机启动了！")
-			"eat":
-				_play_garden_sound("chomp")
-			"plant":
-				_play_garden_sound("plant_water" if bool(event.get("water", false)) else "buttonclick")
-			"sun", "coin":
-				_play_garden_sound("points")
-			"flag":
-				_play_garden_sound("finalwave" if str(event.get("cue", "")) == "final" else "hugewave")
-			"explode":
-				_play_garden_sound("cherrybomb")
-			"freeze":
-				_play_garden_sound("frozen")
-			"fume":
-				_play_garden_sound("fume")
-			"hypnotize":
-				_play_garden_sound("mindcontrolled")
-			"vase":
-				_play_garden_sound("vase_breaking")
-			"coffee":
-				_play_garden_sound("coffee")
-			"thunder":
-				_play_garden_sound("thunder")
-			"win":
-				_play_garden_sound("winmusic")
-			"lost":
-				_play_garden_sound("losemusic")
-			"shoot":
-				AudioFX.play("shoot")
-			"hit":
-				_play_garden_sound("bonk")
-
 func _render_home() -> void:
 	view = "home"
+	if is_instance_valid(speed_button):
+		speed_button.visible = false
 	PlaygroundUI.clear(content_root)
 	var row := HBoxContainer.new()
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -281,6 +223,8 @@ func _almanac_preview() -> Control:
 
 func _render_levels() -> void:
 	view = "levels"
+	if is_instance_valid(speed_button):
+		speed_button.visible = false
 	PlaygroundUI.clear(content_root)
 	var outer := VBoxContainer.new()
 	outer.add_theme_constant_override("separation", 10)
@@ -352,6 +296,8 @@ func _start_endless() -> void:
 
 func _render_seed_picker() -> void:
 	view = "choose"
+	if is_instance_valid(speed_button):
+		speed_button.visible = false
 	PlaygroundUI.clear(content_root)
 	var outer := VBoxContainer.new()
 	outer.add_theme_constant_override("separation", 8)
@@ -541,54 +487,6 @@ func _start_picker_transfer(kind: String, start: Vector2, target: Vector2) -> vo
 	)
 
 
-func _start_seed_flight(kind: String, slot_index: int = -1) -> void:
-	var flight := Control.new()
-	flight.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	flight.z_index = 90
-	var sprite_reference := TextureRect.new()
-	var sprite := sprite_reference
-	sprite.texture = _plant_texture(kind)
-	sprite.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	sprite.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	sprite.custom_minimum_size = Vector2(104, 124)
-	sprite.size = Vector2(104, 124)
-	sprite.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	flight.add_child(sprite)
-	flight.set_meta("source_kind", kind)
-	flight.set_meta("source_generation", seed_flight_generation)
-	flight.set_meta("slot_index", slot_index)
-	var source_button: Button = seed_pick_buttons.get(kind, null)
-	if source_button != null and is_instance_valid(source_button):
-		flight.set_meta("start_global", source_button.get_global_rect().get_center())
-	flight.modulate.a = 0.9
-	add_child(flight)
-	call_deferred("_play_seed_flight", flight)
-
-
-func _play_seed_flight(flight: Control) -> void:
-	var kind := str(flight.get_meta("source_kind", ""))
-	if int(flight.get_meta("source_generation", 0)) != seed_flight_generation:
-		flight.queue_free()
-		return
-	var button: Button = seed_pick_buttons.get(kind, null)
-	if button == null or not is_instance_valid(button):
-		if not flight.has_meta("start_global"):
-			flight.queue_free()
-			return
-	var start: Vector2 = flight.get_meta("start_global", Vector2(746, 38))
-	var target := Vector2(746, 38)
-	var slot_index := int(flight.get_meta("slot_index", -1))
-	if is_instance_valid(field) and slot_index >= 0:
-		target = field.get_global_transform_with_canvas() * field._transform() * GardenLayout.seed_rect(slot_index).get_center()
-	flight.global_position = start - Vector2(104, 124) * 0.5
-	flight.modulate.a = 0.9
-	var tween := MotionKit.tween(flight)
-	tween.tween_property(flight, "global_position", target - Vector2(104, 124) * 0.5, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	var sprite := flight.get_child(0) as TextureRect
-	tween.parallel().tween_property(sprite, "modulate:a", 0.0, 0.07).set_delay(0.13)
-	tween.tween_callback(flight.queue_free)
-
-
 func _return_seed_to_picker(kind: String, start := Vector2(746, 38)) -> void:
 	var flight := Control.new()
 	flight.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -640,232 +538,102 @@ func _begin_battle(tutorial: bool = false) -> void:
 		show_toast("至少选 6 张植物卡")
 		return
 	var seeds := ["sunflower", "peashooter", "wallnut", "cherrybomb", "potatomine"] if tutorial else selected_seeds
-	battle = engine.create(players[0], selected_level, "tutorial" if tutorial else selected_mode, seeds, tutorial, selected_difficulty)
-	battle["sessionId"] = "%s-%s-%s" % [game_id, Time.get_unix_time_from_system(), randi()]
+	if tutorial:
+		selected_mode = "tutorial"
+	battle = {
+		"levelId": selected_level,
+		"mode": "tutorial" if tutorial else selected_mode,
+		"seeds": seeds.duplicate(),
+		"tutorial": tutorial,
+		"tutorialStep": 0,
+		"phase": "playing",
+		"sessionId": "%s-%s-%s" % [game_id, Time.get_unix_time_from_system(), randi()],
+		"reference": true,
+	}
 	speed = 1
-	tick_accumulator = 0.0
 	reported_battle = false
-	field = null
-	seed_flight_lock = true
-	seed_flight_generation += 1
-	if not tutorial:
-		for index in selected_seeds.size():
-			_start_seed_flight(str(selected_seeds[index]), index)
-		MotionKit.tween(self).tween_interval(0.26).tween_callback(func(): seed_flight_lock = false)
+	pending_pvz_resume = {}
 	_save_profile("战斗开始")
 	_render_battle()
-	var environment := str(battle.get("environment", "day"))
-	call_deferred("_start_garden_music")
 
 
 func _render_battle() -> void:
 	view = "battle"
+	if is_instance_valid(speed_button):
+		speed_button.visible = true
+		speed_button.text = "⏩ %s×" % speed
 	PlaygroundUI.clear(content_root)
-	seed_buttons.clear()
-	sun_label = null
-	wave_label = null
 	tutorial_label = null
+	tutorial_banner = null
 	var outer := VBoxContainer.new()
-	outer.add_theme_constant_override("separation", 5)
+	outer.add_theme_constant_override("separation", 6)
 	outer.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	content_root.add_child(outer)
-	field = GardenField.new()
-	field.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	field.cell_pressed.connect(_battle_cell)
-	field.sun_pressed.connect(_collect_sun)
-	field.coin_pressed.connect(func(uid: int):
-		if engine.collect_coin(battle, uid):
-			_save_profile("收集金币")
-	)
-	field.seed_pressed.connect(_select_battle_seed)
-	field.shovel_pressed.connect(_toggle_shovel)
-	field.speed_pressed.connect(_cycle_speed)
-	field.blank_pressed.connect(_cancel_selection)
-	# 注入可种植校验，战场用它做实时预览（绿/红格框）
-	field.can_plant_check = func(row: int, col: int, kind: String) -> String:
-		return engine.can_plant(battle, row, col, kind) if not battle.is_empty() else "战斗未开始"
-	field.speed = speed
-	field.paused = paused
-	field.set_battle(battle)
-	outer.add_child(field)
+	var resume := pending_pvz_resume.duplicate(true)
+	pending_pvz_resume = {}
+	battle_host = PvZBattleHost.new()
+	battle_host.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	battle_host.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	battle_host.autosave_due.connect(_save_profile)
+	battle_host.battle_finished.connect(_on_reference_battle_finished)
+	battle_host.battle_ready.connect(_on_reference_battle_ready)
+	outer.add_child(battle_host)
+	var context := {
+		"levelId": selected_level,
+		"mode": str(battle.get("mode", selected_mode)),
+		"environment": str(ContentDB.garden_levels().get(str(selected_level), {}).get("environment", "day")),
+		"seeds": battle.get("seeds", selected_seeds).duplicate(),
+		"difficulty": _resolved_difficulty(),
+		"speed": speed,
+		"profileId": str(players[0].id),
+	}
+	if not battle_host.start(context, resume):
+		battle_host.queue_free()
+		battle_host = null
+		show_toast("战斗场景没有加载成功，请重新进入这一关。")
+		_render_home()
+		return
 	if bool(battle.get("tutorial", false)):
-		var step := int(battle.get("tutorialStep", 0))
-		var tutorial_panel := GardenSurfaces.panel(Color("#fff5c9"), 12, Color("#a78b4c"), 1)
-		var tutorial_row := HBoxContainer.new()
-		tutorial_row.add_theme_constant_override("separation", 10)
-		tutorial_label = PlaygroundUI.label("小课堂 %s / 8 · %s" % [mini(step + 1, 8), TUTORIAL_TEXT[mini(step, TUTORIAL_TEXT.size() - 1)]], 16, PlaygroundUI.INK, 700, true)
-		tutorial_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tutorial_row.add_child(tutorial_label)
-		if step >= 3 and step < 8:
-			tutorial_row.add_child(GardenSurfaces.button("跳过教程", Color("#8f7550"), _skip_tutorial, "ghost"))
-		if step == 5:
-			tutorial_row.add_child(GardenSurfaces.button("启动割草机", Color("#d1842c"), _tutorial_mower))
-		tutorial_panel.add_child(tutorial_row)
-		outer.add_child(tutorial_panel)
-	if battle.get("phase") in ["won", "lost"]:
-		call_deferred("_finish_battle")
-
-func _battle_seed_button(kind: String) -> Button:
-	var definition: Dictionary = ContentDB.garden_plants()[kind]
-	var button := Button.new()
-	button.custom_minimum_size = Vector2(104, 106)
-	button.add_theme_stylebox_override("normal",PlaygroundUI.style(PlaygroundUI.mix(accent,Color.WHITE,0.86),16,PlaygroundUI.mix(accent,Color.WHITE,0.28),2,3,Color(0,0,0,0.12)))
-	button.add_theme_stylebox_override("hover",PlaygroundUI.style(PlaygroundUI.mix(accent,Color.WHITE,0.78),16,accent,3))
-	button.add_theme_stylebox_override("pressed",PlaygroundUI.style(PlaygroundUI.mix(accent,Color.WHITE,0.7),16,accent,3))
-	var column := VBoxContainer.new()
-	column.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	column.offset_left = 5
-	column.offset_right = -5
-	column.offset_top = 5
-	column.offset_bottom = -5
-	column.alignment = BoxContainer.ALIGNMENT_CENTER
-	column.add_theme_constant_override("separation",1)
-	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var icon := TextureRect.new()
-	icon.texture = _plant_texture(kind)
-	icon.custom_minimum_size = Vector2(0,52)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
-	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	column.add_child(icon)
-	var name_label := PlaygroundUI.label(str(definition.name),12,PlaygroundUI.INK,700,true)
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.max_lines_visible = 1
-	name_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	column.add_child(name_label)
-	var cost_label := PlaygroundUI.label("☀ %s" % int(definition.cost),12,accent,700)
-	cost_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	column.add_child(cost_label)
-	button.add_child(column)
-	button.pressed.connect(_select_battle_seed.bind(kind))
-	return button
+		_build_tutorial_banner(outer)
 
 
-func _select_battle_seed(kind: String) -> void:
-	if battle.is_empty() or battle.get("phase") != "playing" or paused:
+func _on_reference_battle_ready() -> void:
+	if not is_instance_valid(battle_host) or not is_instance_valid(battle_host.battle):
 		return
-	# 再点同一张卡 = 取消选中
-	if str(battle.get("selectedSeed", "")) == kind and not bool(battle.get("shovel", false)):
-		_cancel_selection()
-		return
-	# 不可用卡（阳光不足/冷却中）不进入选中态，直接提示原因
-	var reason := _card_unavailable_reason(kind)
-	if not reason.is_empty():
-		AudioFX.play("wrong")
-		if is_instance_valid(field):
-			field.shake_card(kind)
-		show_toast(reason)
-		return
-	battle.selectedSeed = kind
-	battle.shovel = false
-	battle.aimingCannon = -1
-	hand_mode = "seed"
-	battle.handMode = "seed"
-	_play_garden_sound("buttonclick")
-	_save_profile("选择植物卡")
-	if is_instance_valid(field):
-		field.set_battle(battle)
+	_tutorial_event_callable = _on_tutorial_event
+	EventBus.event_pushed.connect(_tutorial_event_callable)
+	var slot := battle_host.battle.card_manager.card_slot_battle
+	if slot != null:
+		for card in slot.curr_cards:
+			if is_instance_valid(card) and not card.signal_card_use_end.is_connected(_on_tutorial_card_used):
+				card.signal_card_use_end.connect(_on_tutorial_card_used)
+	if bool(battle.get("tutorial", false)):
+		for row in battle_host.battle.plant_cell_manager.all_plant_cells:
+			for cell in row:
+				if cell is PlantCell and not cell.signal_plant_free.is_connected(_on_tutorial_plant_removed):
+					cell.signal_plant_free.connect(_on_tutorial_plant_removed)
+	if paused:
+		battle_host.set_paused(true)
+	if bool(battle.get("tutorial", false)):
+		_refresh_tutorial_banner()
+	_save_profile("战斗已就绪")
 
 
-func _card_unavailable_reason(kind: String) -> String:
-	if str(battle.get("special", "")) in ["conveyor", "bowling", "vase"]:
-		return "" # 传送带/保龄球/砸罐模式的卡不耗阳光、无冷却
-	var definition: Dictionary = ContentDB.garden_plants().get(kind, {})
-	if int(battle.get("sun", 0)) < int(definition.get("cost", 0)):
-		return "阳光不够"
-	if float(battle.get("cooldowns", {}).get(kind, 0)) > 0:
-		return "还在冷却"
-	return ""
-
-
-func _cancel_selection() -> void:
-	# 三条取消路径共用：再点同卡 / 点空白 / 返回键
-	if battle.is_empty():
-		return
-	if str(battle.get("selectedSeed", "")).is_empty() and not bool(battle.get("shovel", false)) and int(battle.get("aimingCannon", -1)) < 0:
-		return
-	var returning_shovel := bool(battle.get("shovel", false))
-	battle.selectedSeed = ""
-	battle.shovel = false
-	battle.aimingCannon = -1
-	battle.handTargetUid = -1
-	hand_mode = "none"
-	battle.handMode = "none"
-	AudioFX.play("back")
-	if is_instance_valid(field):
-		if returning_shovel:
-			field.start_shovel_return()
-		field.set_battle(battle)
-	_save_profile("取消选择")
-
-func _battle_cell(row: int, col: int, target_uid: int = -1) -> void:
-	if battle.is_empty() or battle.get("phase") != "playing" or paused:
-		return
-	var digging := bool(battle.get("shovel", false))
-	var kind := str(battle.get("selectedSeed", ""))
-	battle.handTargetUid = target_uid if digging else -1
-	var result: Dictionary = engine.shovel(battle, row, col, target_uid) if digging else engine.handle_cell(battle, row, col)
-	if bool(result.get("ok", false)):
-		_tutorial_action("dig" if digging else "plant", kind)
-		if digging:
-			hand_mode = "none"
-			battle.handMode = "none"
-			if is_instance_valid(field):
-				field.start_shovel_return()
-		AudioFX.play("whoosh" if digging else "plant")
-		_play_garden_sound("plant_water" if str(battle.environment) in ["pool", "fog"] and row in [2, 3] else "buttonclick")
-	else:
-		AudioFX.play("wrong")
-		show_toast(str(result.get("reason", "这里不能操作")))
-	_process_events(battle.get("events", []))
-	battle.events = []
-	field.set_battle(battle)
-	_save_profile("铲除植物" if digging else "草坪操作")
-
-func _collect_sun(uid: int) -> void:
-	var result: Dictionary = engine.collect_sun(battle, uid)
-	if bool(result.get("ok", false)):
-		AudioFX.play("sun")
-		_tutorial_action("sun")
-		field.set_battle(battle)
-		_update_hud()
-		_save_profile("收集阳光")
-
-
-func _toggle_shovel() -> void:
-	battle.shovel = not bool(battle.get("shovel", false))
-	battle.aimingCannon = -1
-	battle.handTargetUid = -1
-	if bool(battle.get("shovel", false)):
-		battle.selectedSeed = ""
-		hand_mode = "shovel"
-		battle.handMode = "shovel"
-	else:
-		hand_mode = "none"
-		battle.handMode = "none"
-		if is_instance_valid(field):
-			field.start_shovel_return()
-	_play_garden_sound("buttonclick")
-	if is_instance_valid(field):
-		field.set_battle(battle)
-	_save_profile("选择铲子")
-
-func _show_selected_plant() -> void:
-	var kind := str(battle.get("selectedSeed", ""))
-	if kind.is_empty() or not plant_entries.has(kind):
-		return
-	_show_almanac_detail(plant_entries[kind])
+func _resolved_difficulty() -> String:
+	if selected_difficulty != "auto":
+		return selected_difficulty
+	return GameTuning.resolve("auto", players)
 
 
 func _cycle_speed() -> void:
 	speed = 2 if speed == 1 else 3 if speed == 2 else 1
+	if is_instance_valid(battle_host):
+		battle_host.set_speed(speed)
+	if is_instance_valid(speed_button):
+		speed_button.text = "⏩ %s×" % speed
 	if bool(battle.get("tutorial", false)):
 		_tutorial_action("speed")
 	AudioFX.play("select")
-	if is_instance_valid(field):
-		field.speed = speed
 	_save_profile("切换倍速")
 
 
@@ -889,34 +657,33 @@ func _difficulty_name(value: String) -> String:
 
 func _toggle_auto_collect() -> void:
 	profile_data.autoCollectSun = not bool(profile_data.get("autoCollectSun", false))
+	Global.config_service.auto_collect_sun = bool(profile_data.autoCollectSun)
 	AudioFX.play("select")
 	_save_profile("自动拾取阳光")
-	_render_battle()
+	show_toast("阳光落地后会直接收进口袋" if bool(profile_data.autoCollectSun) else "阳光需要手动点击收集")
 
 
-func _update_hud() -> void:
-	if battle.is_empty():
+func _build_tutorial_banner(parent: VBoxContainer) -> void:
+	tutorial_banner = GardenSurfaces.panel(Color("#fff5c9"), 12, Color("#a78b4c"), 1)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 10)
+	tutorial_label = PlaygroundUI.label("", 16, PlaygroundUI.INK, 700, true)
+	tutorial_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(tutorial_label)
+	if int(battle.get("tutorialStep", 0)) >= 3:
+		row.add_child(GardenSurfaces.button("跳过教程", Color("#8f7550"), _skip_tutorial, "ghost"))
+	if int(battle.get("tutorialStep", 0)) == 5:
+		row.add_child(GardenSurfaces.button("启动割草机", Color("#d1842c"), _tutorial_mower))
+	tutorial_banner.add_child(row)
+	parent.add_child(tutorial_banner)
+	_refresh_tutorial_banner()
+
+
+func _refresh_tutorial_banner() -> void:
+	if not bool(battle.get("tutorial", false)) or not is_instance_valid(tutorial_label):
 		return
-	if is_instance_valid(field):
-		field.speed = speed
-		field.paused = paused
-		field.set_battle(battle)
-	if not bool(battle.get("tutorial", false)) and bool(profile_data.get("autoCollectSun", false)):
-		for sun in battle.suns.duplicate():
-			if not bool(sun.get("collecting", false)) and float(sun.get("y", 0.0)) >= float(sun.get("targetY", 1.0)) - .02:
-				engine.collect_sun(battle, int(sun.uid))
-
-func _wave_text() -> String:
-	if battle.get("tutorial", false):
-		return "花园小课堂 · 跟着下方提示操作"
-	var current := int(battle.get("waveIndex", 0))
-	var total := int(battle.get("waveCount", 0))
-	var flags := int(battle.get("flags", 0))
-	if battle.get("mode") == "endless":
-		return "无尽模式 · 第 %s 波 · 旗 %s · 最高 %s" % [int(current), int(flags), int(profile_data.get("bestEndless", 0))]
-	if int(battle.get("levelId", 0)) == 50:
-		return "屋顶决战 · 僵尸博士首领战"
-	return "第 %s 关 · 波次 %s / %s · 旗 %s" % [int(battle.get("levelId", 1)), int(current), int(total), int(flags)]
+	var step := clampi(int(battle.get("tutorialStep", 0)), 0, TUTORIAL_TEXT.size() - 1)
+	tutorial_label.text = "🎓 小课堂 %s / 8 · %s" % [mini(step + 1, 8), TUTORIAL_TEXT[step]]
 
 
 func _tutorial_action(action: String, kind: String = "") -> void:
@@ -942,38 +709,77 @@ func _tutorial_action(action: String, kind: String = "") -> void:
 		next = 8
 	if next != step:
 		battle.tutorialStep = next
-		if is_instance_valid(tutorial_label):
-			tutorial_label.text = "🎓 小课堂 %s / 8  ·  %s" % [mini(next + 1, 8), TUTORIAL_TEXT[mini(next, TUTORIAL_TEXT.size() - 1)]]
+		_refresh_tutorial_banner()
 		Speech.speak(TUTORIAL_TEXT[mini(next, TUTORIAL_TEXT.size() - 1)])
 		_save_profile("花园小课堂")
 		if next >= 8:
-			profile_data.tutorialSeen = true
-			battle = {}
-			_save_profile("花园小课堂完成", false)
-			call_deferred("_complete_tutorial")
+			call_deferred("_finish_reference_tutorial")
 		elif next in [5, 6]:
-			call_deferred("_render_battle")
+			call_deferred("_rebuild_tutorial_banner")
+
+
+func _rebuild_tutorial_banner() -> void:
+	if not bool(battle.get("tutorial", false)) or not is_instance_valid(tutorial_banner):
+		return
+	var parent := tutorial_banner.get_parent()
+	tutorial_banner.queue_free()
+	tutorial_banner = null
+	if parent is VBoxContainer:
+		_build_tutorial_banner(parent)
+
+
+func _on_tutorial_event(event_name: String, payload: Array) -> void:
+	if event_name == "add_sun_value" and int(battle.get("tutorialStep", 0)) == 0:
+		_tutorial_action("sun")
+
+
+func _on_tutorial_plant_removed(_cell: PlantCell, _plant_type: int) -> void:
+	if int(battle.get("tutorialStep", 0)) == 3:
+		_tutorial_action("dig")
+
+
+func _on_tutorial_card_used(card: Card) -> void:
+	if not bool(battle.get("tutorial", false)) or card == null or card.card_reference == null:
+		return
+	var kind := PvZLevelFactory.plant_kind(card.card_reference.content_id)
+	_tutorial_action("plant", kind)
+	call_deferred("_rebind_tutorial_cards")
+
+
+func _rebind_tutorial_cards() -> void:
+	if not is_instance_valid(battle_host) or not is_instance_valid(battle_host.battle):
+		return
+	var slot := battle_host.battle.card_manager.card_slot_battle
+	if slot == null:
+		return
+	for card in slot.curr_cards:
+		if is_instance_valid(card) and not card.signal_card_use_end.is_connected(_on_tutorial_card_used):
+			card.signal_card_use_end.connect(_on_tutorial_card_used)
 
 
 func _tutorial_mower() -> void:
 	if not bool(battle.get("tutorial", false)) or int(battle.get("tutorialStep", 0)) != 5:
 		return
-	engine.trigger_mower(battle, 2)
+	if is_instance_valid(battle_host):
+		battle_host.trigger_tutorial_mower(2)
 	AudioFX.play("mower")
 	_tutorial_action("mower")
-	field.set_battle(battle)
 
 
 func _skip_tutorial() -> void:
 	if int(battle.get("tutorialStep", 0)) < 3:
 		return
 	profile_data.tutorialSeen = true
-	battle = {}
+	_dispose_reference_battle()
 	_save_profile("跳过花园小课堂")
 	_render_home()
 
 
-func _complete_tutorial() -> void:
+func _finish_reference_tutorial() -> void:
+	profile_data.tutorialSeen = true
+	profile_data.pvzBattle = {}
+	_dispose_reference_battle()
+	_save_profile("花园小课堂完成", false)
 	_render_home()
 	var content := VBoxContainer.new()
 	content.add_theme_constant_override("separation", 8)
@@ -985,32 +791,38 @@ func _complete_tutorial() -> void:
 	AudioFX.play("win")
 
 
-func _finish_battle() -> void:
+func _on_reference_battle_finished(won: bool, summary: Dictionary) -> void:
+	_finish_battle(won, summary)
+
+
+func _finish_battle(won: bool, summary: Dictionary) -> void:
 	if battle.is_empty() or reported_battle:
 		return
 	reported_battle = true
-	var won: bool = str(battle.get("phase", "")) == "won"
-	var stars := int(battle.get("resultStars", 0))
+	var stars := int(summary.get("stars", 0))
+	var wave := int(summary.get("wave", 0))
+	var total := int(summary.get("waveCount", 1))
+	var flags := int(summary.get("flags", 0))
 	if won:
 		if battle.get("mode") == "endless":
-			profile_data.bestEndless = maxi(int(profile_data.get("bestEndless", 0)), int(battle.get("flags", 0)))
+			profile_data.bestEndless = maxi(int(profile_data.get("bestEndless", 0)), flags)
 		else:
 			var level_key := str(battle.get("levelId", 1))
 			profile_data.stars[level_key] = maxi(int(profile_data.get("stars", {}).get(level_key, 0)), stars)
-		var outcome := "win"
 		SaveStore.record_outcome(
 			str(players[0].id),
 			game_id,
-			outcome,
+			"win",
 			stars,
-			int(battle.get("waveIndex", 0)),
-			maxi(1, int(battle.get("waveCount", 1))),
-			{"strategy": {"correct": int(battle.get("waveIndex", 0)), "answered": maxi(1, int(battle.get("waveCount", 1)))}},
+			wave,
+			maxi(1, total),
+			{"strategy": {"correct": wave, "answered": maxi(1, total)}},
 			str(battle.get("sessionId", ""))
 		)
 	else:
 		SaveStore.record_outcome(str(players[0].id), game_id, "loss", 0, 0, 0, {}, str(battle.get("sessionId", "")))
-	profile_data.battle = {}
+	battle["phase"] = "won" if won else "lost"
+	profile_data.pvzBattle = {}
 	_save_profile("战斗结束", false)
 	AudioFX.play("win" if won else "wrong")
 	var content := VBoxContainer.new()
@@ -1020,15 +832,33 @@ func _finish_battle() -> void:
 	if won and battle.get("mode") != "endless":
 		content.add_child(PlaygroundUI.label("获得 %s 颗星" % stars, 19, Color("#b6861c"), 700))
 	if battle.get("mode") == "endless":
-		content.add_child(PlaygroundUI.label("到达第 %s 波 · %s 面旗" % [battle.get("waveIndex", 0), battle.get("flags", 0)], 18, PlaygroundUI.INK_SOFT, 700))
+		content.add_child(PlaygroundUI.label("到达第 %s 波 · %s 面旗" % [wave, flags], 18, PlaygroundUI.INK_SOFT, 700))
+	var tutorial := bool(battle.get("tutorial", false))
+	var replay := func():
+		_close_top_modal()
+		_dispose_reference_battle()
+		_begin_battle(tutorial)
 	open_modal("战斗结束", content, [
-		{"text": "花园首页", "kind": "soft", "callback": func(): _close_top_modal(); battle = {}; _render_home()},
-		{"text": "再打一次", "kind": "primary", "callback": func(): _close_top_modal(); _begin_battle(bool(battle.get("tutorial", false)))},
+		{"text": "花园首页", "kind": "soft", "callback": func(): _close_top_modal(); _dispose_reference_battle(); _render_home()},
+		{"text": "再打一次", "kind": "primary", "callback": replay},
 	], "进度已自动保存")
+
+
+func _dispose_reference_battle() -> void:
+	if _tutorial_event_callable.is_valid() and EventBus.event_pushed.is_connected(_tutorial_event_callable):
+		EventBus.event_pushed.disconnect(_tutorial_event_callable)
+	if is_instance_valid(battle_host):
+		battle_host.cleanup()
+		battle_host.queue_free()
+	battle_host = null
+	battle = {}
+	paused = false
 
 
 func _render_almanac(tab: String) -> void:
 	view = "almanac"
+	if is_instance_valid(speed_button):
+		speed_button.visible = false
 	PlaygroundUI.clear(content_root)
 	var outer := VBoxContainer.new()
 	outer.add_theme_constant_override("separation", 9)
@@ -1126,12 +956,13 @@ func toggle_pause(force: Variant = null) -> void:
 
 
 func _on_pause_changed(is_paused: bool) -> void:
-	if is_instance_valid(field):
-		field.paused = is_paused
-		if is_paused:
-			field.cancel_interaction() # 暂停时清理悬停与拖拽残留
+	if is_instance_valid(battle_host):
+		battle_host.set_paused(is_paused)
+	if is_paused:
+		AudioFX.stop_music()
 	_save_profile("暂停" if is_paused else "继续战斗")
-	if not is_paused:
+	SaveStore.flush()
+	if not is_paused and not is_instance_valid(battle_host):
 		call_deferred("_start_garden_music")
 
 func _confirm_restart() -> void:
@@ -1142,6 +973,7 @@ func _confirm_restart() -> void:
 	var restart := func():
 		_close_top_modal()
 		paused = false
+		_dispose_reference_battle()
 		_begin_battle(tutorial)
 	open_modal("重开这次战斗？", content, [
 		{"text": "继续战斗", "kind": "soft", "callback": func(): _close_top_modal()},
@@ -1157,10 +989,6 @@ func _handle_back() -> void:
 		_render_home()
 		return
 	if view == "battle" and not battle.is_empty() and battle.get("phase") == "playing":
-		if not str(battle.get("selectedSeed", "")).is_empty() or bool(battle.get("shovel", false)) or int(battle.get("aimingCannon", -1)) >= 0:
-			# 返回键先取消选中/铲子/瞄准，而不是直接弹暂停
-			_cancel_selection()
-			return
 		_save_profile("暂停")
 		_confirm_exit()
 		return
@@ -1168,9 +996,13 @@ func _handle_back() -> void:
 
 
 func _save_profile(note: String, resume: bool = true) -> void:
-	if engine == null or players.is_empty():
+	if players.is_empty():
 		return
-	profile_data.battle = engine.snapshot(battle) if not battle.is_empty() and battle.get("phase") == "playing" else {}
+	profile_data.battle = {}
+	if is_instance_valid(battle_host) and not battle.is_empty() and battle.get("phase") == "playing":
+		profile_data.pvzBattle = battle_host.snapshot_state()
+	else:
+		profile_data.pvzBattle = {}
 	profile_data.speed = speed
 	profile_data.view = view
 	profile_data.selectedLevel = selected_level
@@ -1180,8 +1012,10 @@ func _save_profile(note: String, resume: bool = true) -> void:
 	profile_data.updatedAt = Time.get_unix_time_from_system()
 	var note_text := note
 	if view == "battle" and not battle.is_empty():
-		note_text = "第 %s 关 · 第 %s 波" % [battle.get("levelId", 1), battle.get("waveIndex", 0)] if battle.get("mode") != "endless" else "无尽 · 第 %s 波" % battle.get("waveIndex", 0)
-	SaveStore.save_state(game_id, str(players[0].id), profile_data, note_text, resume and not battle.is_empty() and battle.get("phase") == "playing")
+		var snapshot: Dictionary = profile_data.get("pvzBattle", {})
+		note_text = "第 %s 关 · 第 %s 波" % [battle.get("levelId", 1), int(snapshot.get("wave", 0)) + 1] if battle.get("mode") != "endless" else "无尽 · 第 %s 波" % (int(snapshot.get("wave", 0)) + 1)
+	var resumable: bool = resume and not profile_data.get("pvzBattle", {}).is_empty() and str(battle.get("phase", "")) == "playing"
+	SaveStore.save_state(game_id, str(players[0].id), profile_data, note_text, resumable)
 
 
 func _integer(value: Variant) -> int:
@@ -1194,21 +1028,10 @@ func _integer(value: Variant) -> int:
 	return 0
 
 
-func _number(value: Variant, fallback: float) -> float:
-	if value is int or value is float:
-		return float(value) if is_finite(float(value)) else fallback
-	if value is String and value.is_valid_float():
-		var parsed := float(value)
-		return parsed if is_finite(parsed) else fallback
-	return fallback
-
-
-func _play_garden_sound(name: String) -> void:
-	AudioFX.play_file("res://assets/garden/original/" + name + ".mp3")
-
-
 func _start_garden_music() -> void:
 	if paused:
+		return
+	if is_instance_valid(battle_host):
 		return
 	var theme := "menu"
 	if view == "battle" and not battle.is_empty():
@@ -1232,6 +1055,10 @@ func _build_topbar() -> Control:
 	var title := PlaygroundUI.label("植物大战僵尸", 23, PlaygroundUI.INK, 700)
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(title)
+	speed_button = GardenSurfaces.button("⏩ %s×" % speed, accent, _cycle_speed, "soft")
+	speed_button.custom_minimum_size = Vector2(94, 48)
+	speed_button.visible = view == "battle"
+	row.add_child(speed_button)
 	var pause := GardenSurfaces.button("Ⅱ 暂停", accent, toggle_pause, "soft")
 	pause.custom_minimum_size = Vector2(108, 48)
 	row.add_child(pause)
@@ -1240,8 +1067,6 @@ func _build_topbar() -> Control:
 
 
 func open_modal(title: String, content: Control, actions: Array, eyebrow: String = "", dismissible: bool = true) -> Control:
-	if is_instance_valid(field):
-		field.set_dialog_open(true) # 弹窗打开期间战场输入静默
 	var layer := Control.new()
 	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	layer.z_index = 60
@@ -1328,5 +1153,3 @@ func _close_top_modal() -> void:
 	var layer: Control = _modal_stack.pop_back()
 	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	MotionKit.fade_out_and_free(layer, self, MotionKit.MODAL_OUT)
-	if is_instance_valid(field) and _modal_stack.is_empty():
-		field.set_dialog_open(false)

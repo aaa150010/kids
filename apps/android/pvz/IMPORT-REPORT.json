@@ -1,0 +1,12 @@
+{
+  "upstream": "https://github.com/hsk-dream/PVZ-Godot-Dream",
+  "commit": "740691cf9b0ad02c7021efa4dae2ab5f86207585",
+  "frameTextures": 901,
+  "assetHits": {
+    "frame": 13494,
+    "local": 1538,
+    "placeholder": 3171
+  },
+  "semanticImageAssets": 449,
+  "semanticAudioAssets": 36
+}

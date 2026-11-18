@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://pvz/shaders/my_shader/body_mask.gdshader" id="1_3mq5g"]
+
+[resource]
+shader = ExtResource("1_3mq5g")
+shader_parameter/cutoff_y = 0.0

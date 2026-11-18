@@ -27,7 +27,7 @@ async function ensureUpdateKey() {
     await writeFile(updatePrivate, pair.privateKey, { mode: 0o600 })
     await chmod(updatePrivate, 0o600)
     await writeFile(updatePublic, pair.publicKey)
-  } else if (!existsSync(updatePublic)) {
+  } else {
     const privateKey = await readFile(updatePrivate, 'utf8')
     const { createPublicKey } = await import('node:crypto')
     const publicKey = createPublicKey(privateKey).export({ type: 'spki', format: 'pem' })

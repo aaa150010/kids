@@ -1,0 +1,167 @@
+[gd_scene load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://pvz/scripts/util/speed_timer.gd" id="speed_timer"]
+[ext_resource type="PackedScene" path="res://pvz/scenes/character/plant/plant_000_base.tscn" id="1_rdg00"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/peashooterbackleaf.tres" id="2_43sbo"]
+[ext_resource type="Script" path="res://pvz/scripts/character/plant/plant_039_mari_gold.gd" id="2_n70fy"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/peashooterbackleaflefttip.tres" id="3_n70fy"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/peashooterbackleafrighttip.tres" id="4_k746y"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/peashooterstalkbottom.tres" id="5_5omrt"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/peashooterstalktop.tres" id="6_kriex"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/peashooterfrontleaf.tres" id="7_q31kj"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/peashooterfrontleafrighttip.tres" id="8_ufngy"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/peashooterfrontleaflefttip.tres" id="9_y3c1e"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/marigoldpetals.tres" id="10_swbfu"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/marigoldhead.tres" id="11_wclar"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/marigoldmouth.tres" id="12_d18mp"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/marigoldeyebrow1.tres" id="13_lluj0"]
+[ext_resource type="Texture2D" path="res://pvz/assets/atlas/marigoldeyebrow2.tres" id="14_sy65w"]
+[ext_resource type="Texture2D" path="res://pvz/assets/image-placeholder.png" id="15_kn14o"]
+[ext_resource type="Animation" path="res://pvz/animation/character/plant/039_mari_gold/MariGold_idle.tres" id="16_j316d"]
+[ext_resource type="Script" path="res://pvz/scripts/character/components/component_create_coin.gd" id="17_43sbo"]
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_6m1dl"]
+_data = {
+&"MariGold_idle": ExtResource("16_j316d")
+}
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_rdg00"]
+animation = &"MariGold_idle"
+
+[sub_resource type="AnimationNodeTimeScale" id="AnimationNodeTimeScale_43sbo"]
+
+[sub_resource type="AnimationNodeBlendTree" id="AnimationNodeBlendTree_rdg00"]
+graph_offset = Vector2(-89.4546, 45.0909)
+nodes/Animation/node = SubResource("AnimationNodeAnimation_rdg00")
+nodes/Animation/position = Vector2(20, 160)
+nodes/TimeScale/node = SubResource("AnimationNodeTimeScale_43sbo")
+nodes/TimeScale/position = Vector2(240, 140)
+nodes/output/position = Vector2(420, 140)
+node_connections = [&"TimeScale", 0, &"Animation", &"output", 0, &"TimeScale"]
+
+[node name="Plant039MariGold" instance=ExtResource("1_rdg00")]
+script = ExtResource("2_n70fy")
+plant_type = 39
+
+[node name="BodyCorrect" parent="Body" index="0"]
+position = Vector2(-41, -68)
+
+[node name="Backleaf" type="Sprite2D" parent="Body/BodyCorrect" index="0"]
+position = Vector2(27.5, 55.52)
+scale = Vector2(0.603798, 0.445204)
+texture = ExtResource("2_43sbo")
+centered = false
+
+[node name="Backleaf_left_tip" type="Sprite2D" parent="Body/BodyCorrect" index="1"]
+position = Vector2(24.18, 56.8399)
+rotation = -0.0959808
+scale = Vector2(0.648796, 0.515)
+texture = ExtResource("3_n70fy")
+centered = false
+
+[node name="Backleaf_right_tip" type="Sprite2D" parent="Body/BodyCorrect" index="2"]
+position = Vector2(48.42, 55.3399)
+rotation = 0.117277
+scale = Vector2(0.641002, 0.486803)
+texture = ExtResource("4_k746y")
+centered = false
+
+[node name="Stalk_bottom" type="Sprite2D" parent="Body/BodyCorrect" index="3"]
+position = Vector2(42.0603, 50.8401)
+rotation = 0.540032
+scale = Vector2(0.5598, 0.556592)
+skew = -0.0785398
+texture = ExtResource("5_5omrt")
+centered = false
+
+[node name="Stalk_top" type="Sprite2D" parent="Body/BodyCorrect" index="4"]
+position = Vector2(44.181, 38.2803)
+rotation = 0.619993
+scale = Vector2(0.5572, 0.735387)
+skew = -0.0767943
+texture = ExtResource("6_kriex")
+centered = false
+
+[node name="Frontleaf" type="Sprite2D" parent="Body/BodyCorrect" index="5"]
+position = Vector2(21.7, 56.48)
+scale = Vector2(0.599202, 0.488197)
+texture = ExtResource("7_q31kj")
+centered = false
+
+[node name="Frontleaf_right_tip" type="Sprite2D" parent="Body/BodyCorrect" index="6"]
+position = Vector2(57.8002, 57.08)
+rotation = -0.00487562
+scale = Vector2(0.60419, 0.535399)
+texture = ExtResource("8_ufngy")
+centered = false
+
+[node name="Frontleaf_tip_left" type="Sprite2D" parent="Body/BodyCorrect" index="7"]
+position = Vector2(19.4, 62.5401)
+rotation = -0.0942677
+scale = Vector2(0.520791, 0.580603)
+texture = ExtResource("9_y3c1e")
+centered = false
+
+[node name="Marigold_petals" type="Sprite2D" parent="Body/BodyCorrect" index="8"]
+position = Vector2(21.2204, 5.92065)
+scale = Vector2(0.7, 0.666394)
+texture = ExtResource("10_swbfu")
+centered = false
+
+[node name="Anim_face" type="Sprite2D" parent="Body/BodyCorrect" index="9"]
+position = Vector2(33.5805, 15.6803)
+scale = Vector2(0.7, 0.7)
+texture = ExtResource("11_wclar")
+centered = false
+
+[node name="Marigold_mouth" type="Sprite2D" parent="Body/BodyCorrect" index="10"]
+position = Vector2(40.8207, 27.6399)
+rotation = 0.124987
+scale = Vector2(0.7, 0.958643)
+texture = ExtResource("12_d18mp")
+centered = false
+
+[node name="Marigold_eyebrow1" type="Sprite2D" parent="Body/BodyCorrect" index="11"]
+position = Vector2(39.7606, 20.1002)
+rotation = 0.180154
+scale = Vector2(0.4898, 0.4898)
+texture = ExtResource("13_lluj0")
+centered = false
+
+[node name="Marigold_eyebrow2" type="Sprite2D" parent="Body/BodyCorrect" index="12"]
+position = Vector2(53.1404, 18.8805)
+rotation = -0.10265
+scale = Vector2(0.488, 0.488)
+texture = ExtResource("14_sy65w")
+centered = false
+
+[node name="Marigold_blink" type="Sprite2D" parent="Body/BodyCorrect" index="13"]
+visible = false
+position = Vector2(31.4, 20.3)
+scale = Vector2(0.7, 0.7)
+texture = ExtResource("15_kn14o")
+centered = false
+
+[node name="Marker2DCreateCoin" type="Marker2D" parent="Body" index="1"]
+position = Vector2(0, -63)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." index="8"]
+libraries = {
+&"": SubResource("AnimationLibrary_6m1dl")
+}
+
+[node name="AnimationTree" type="AnimationTree" parent="." index="9"]
+tree_root = SubResource("AnimationNodeBlendTree_rdg00")
+advance_expression_base_node = NodePath("..")
+anim_player = NodePath("../AnimationPlayer")
+parameters/TimeScale/scale = 0.5
+
+[node name="CreateCoinComponent" type="Node2D" parent="." index="10" node_paths=PackedStringArray("marker_2d_create_coin")]
+script = ExtResource("17_43sbo")
+marker_2d_create_coin = NodePath("../Body/Marker2DCreateCoin")
+
+[node name="CreateCoinTimer" type="Timer" parent="CreateCoinComponent" index="0"]
+script = ExtResource("speed_timer")
+one_shot = true
+
+[connection signal="timeout" from="CreateCoinComponent/CreateCoinTimer" to="CreateCoinComponent" method="_on_create_coin_timer_timeout"]

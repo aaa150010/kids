@@ -1,0 +1,181 @@
+{
+  "character": {
+    "Throw": [
+      "res://assets/garden/pvz-audio/SFX/plant/throw1.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/plant/throw2.ogg.res"
+    ],
+    "Throw1": [
+      "res://assets/garden/pvz-audio/SFX/plant/throw1.ogg.res"
+    ],
+    "CherryBomb": [
+      "res://assets/garden/pvz-audio/SFX/plant/cherrybomb.ogg.res"
+    ],
+    "PotatoMine": [
+      "res://assets/garden/pvz-audio/SFX/plant/potato_mine.ogg.res"
+    ],
+    "BigChomp": [
+      "res://assets/garden/pvz-audio/SFX/plant/bigchomp.ogg.res"
+    ],
+    "Puff": [
+      "res://assets/garden/pvz-audio/SFX/plant/puff.ogg.res"
+    ],
+    "PlantGrow": [
+      "res://assets/garden/pvz-audio/SFX/plant/plantgrow.ogg.res"
+    ],
+    "Fume": [
+      "res://assets/garden/pvz-audio/SFX/plant/fume.ogg.res"
+    ],
+    "GraveBusterChomp": [
+      "res://assets/garden/pvz-audio/SFX/plant/gravebusterchomp.ogg.res"
+    ],
+    "MindControlled": [
+      "res://assets/garden/pvz-audio/SFX/plant/mindcontrolled.ogg.res"
+    ],
+    "Frozen": [
+      "res://assets/garden/pvz-audio/SFX/plant/frozen.ogg.res"
+    ],
+    "Chomp": [
+      "res://assets/garden/pvz-audio/SFX/zombie/chomp.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/zombie/chomp2.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/zombie/chompsoft.ogg.res"
+    ],
+    "Shoop": [
+      "res://assets/garden/pvz-audio/SFX/zombie/shoop.ogg.res"
+    ],
+    "Rarrgh": [
+      "res://assets/garden/pvz-audio/SFX/zombie/newspaper_rarrgh.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/zombie/newspaper_rarrgh2.ogg.res"
+    ],
+    "Rip": [
+      "res://assets/garden/pvz-audio/SFX/zombie/newspaper_rip.ogg.res"
+    ],
+    "Dancer": [
+      "res://assets/garden/pvz-audio/SFX/zombie/dancer.ogg.res"
+    ]
+  },
+  "dave": {
+    "crazydaveshort": [
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydaveshort1.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydaveshort2.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydaveshort3.ogg.res"
+    ],
+    "crazydavelong": [
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydavelong1.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydavelong2.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydavelong3.ogg.res"
+    ],
+    "crazydaveextralong": [
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydaveextralong1.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydaveextralong2.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydaveextralong3.ogg.res"
+    ],
+    "crazydavecrazy": [
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydavecrazy.ogg.res"
+    ],
+    "crazydavescream": [
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydavescream2.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/carzy/crazydavescream.ogg.res"
+    ]
+  },
+  "other": {
+    "gravebutton": [
+      "res://assets/garden/pvz-audio/SFX/button/gravebutton.ogg.res"
+    ],
+    "bleep": [
+      "res://assets/garden/pvz-audio/SFX/button/bleep.ogg.res"
+    ],
+    "tap": [
+      "res://assets/garden/pvz-audio/SFX/button/tap.ogg.res"
+    ],
+    "buttonclick": [
+      "res://assets/garden/pvz-audio/SFX/button/buttonclick.ogg.res"
+    ],
+    "pause": [
+      "res://assets/garden/pvz-audio/SFX/button/pause.ogg.res"
+    ],
+    "points": [
+      "res://assets/garden/pvz-audio/SFX/button/points.ogg.res"
+    ],
+    "buzzer": [
+      "res://assets/garden/pvz-audio/SFX/card_and_shovel/buzzer.ogg.res"
+    ],
+    "seedlift": [
+      "res://assets/garden/pvz-audio/SFX/card_and_shovel/seedlift.ogg.res"
+    ],
+    "shovel": [
+      "res://assets/garden/pvz-audio/SFX/card_and_shovel/shovel.ogg.res"
+    ],
+    "tap2": [
+      "res://assets/garden/pvz-audio/SFX/card_and_shovel/tap2.ogg.res"
+    ],
+    "siren": [
+      "res://assets/garden/pvz-audio/SFX/progress/siren.ogg.res"
+    ],
+    "awooga": [
+      "res://assets/garden/pvz-audio/SFX/progress/awooga.ogg.res"
+    ],
+    "finalwave": [
+      "res://assets/garden/pvz-audio/SFX/progress/finalwave.ogg.res"
+    ],
+    "hugewave": [
+      "res://assets/garden/pvz-audio/SFX/progress/hugewave.ogg.res"
+    ],
+    "readysetplant": [
+      "res://assets/garden/pvz-audio/SFX/progress/readysetplant.ogg.res"
+    ],
+    "scream": [
+      "res://assets/garden/pvz-audio/SFX/progress/scream.ogg.res"
+    ],
+    "winmusic": [
+      "res://assets/garden/pvz-audio/SFX/progress/winmusic.ogg.res"
+    ],
+    "gravestone_rumble": [
+      "res://assets/garden/pvz-audio/SFX/zombie/gravestone_rumble.ogg.res"
+    ],
+    "plant1": [
+      "res://assets/garden/pvz-audio/SFX/plant_create/plant.ogg.res"
+    ],
+    "plant2": [
+      "res://assets/garden/pvz-audio/SFX/plant_create/plant2.ogg.res"
+    ],
+    "plant_water": [
+      "res://assets/garden/pvz-audio/SFX/plant_create/plant_water.ogg.res"
+    ],
+    "lawnmower": [
+      "res://assets/garden/pvz-audio/SFX/item/lawnmower.ogg.res"
+    ],
+    "bonk": [
+      "res://assets/garden/pvz-audio/SFX/item/bonk.ogg.res"
+    ],
+    "dirt_rise": [
+      "res://assets/garden/pvz-audio/SFX/zombie/dirt_rise.ogg.res"
+    ],
+    "bugspray": [
+      "res://assets/garden/pvz-audio/SFX/garden/bugspray.ogg.res"
+    ]
+  },
+  "be_attack": {
+    "Plastic": [
+      "res://assets/garden/pvz-audio/SFX/bullet/plastichit.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/bullet/plastichit2.ogg.res"
+    ],
+    "Shield": [
+      "res://assets/garden/pvz-audio/SFX/bullet/shieldhit1.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/bullet/shieldhit2.ogg.res"
+    ]
+  },
+  "bullet": {
+    "Pea": [
+      "res://assets/garden/pvz-audio/SFX/bullet/splat1.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/bullet/splat2.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/bullet/splat3.ogg.res"
+    ],
+    "PeaFire": [
+      "res://assets/garden/pvz-audio/SFX/bullet/firepea.ogg.res"
+    ],
+    "Bowling": [
+      "res://assets/garden/pvz-audio/SFX/bullet/bowlingimpact.ogg.res",
+      "res://assets/garden/pvz-audio/SFX/bullet/bowlingimpact2.ogg.res"
+    ]
+  }
+}
