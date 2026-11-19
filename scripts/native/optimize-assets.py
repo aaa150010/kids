@@ -99,10 +99,6 @@ report = {
     "entries": entries, "excludedAssets": [entry["source"] for entry in entries],
     "beforeBytes": sum(entry["sourceBytes"] for entry in entries),
     "afterBytes": sum(entry["outputBytes"] for entry in entries),
-    "gardenAudit": {
-        "action": "全部保留原尺寸与文件，未删除任何 garden 资源",
-        "reason": "garden_art.gd draw_actor 按 plant-motion/actor-motion/giant-motion 动态读取 JSON 和同名 WebP；_draw_rig 使用 frames 坐标乘 2 采样，不能单独缩图。低质量分支还使用 animations 图集，不能按静态字符串缺失判为未引用。",
-    },
 }
 outputs = {entry["output"] for entry in entries}
 excluded = set(report["excludedAssets"])

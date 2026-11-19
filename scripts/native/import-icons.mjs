@@ -10,7 +10,7 @@ if (!commitResponse.ok) throw new Error(`OpenMoji source: ${commitResponse.statu
 const { sha } = await commitResponse.json()
 const segments = new Intl.Segmenter('zh',{granularity:'grapheme'})
 const tokens = new Set()
-for (const name of ['quizzes','memory','workbook','island']) {
+for (const name of ['quizzes','memory','workbook']) {
   const text = await readFile(resolve(root,'content-src/data',name+'.json'),'utf8')
   for (const {segment} of segments.segment(text)) if (/\p{Extended_Pictographic}/u.test(segment)) tokens.add(segment)
 }

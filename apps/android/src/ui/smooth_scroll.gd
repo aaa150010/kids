@@ -36,10 +36,12 @@ static func create() -> ScrollContainer:
 
 
 func _ready() -> void:
-	# 原生 ScrollContainer 只负责裁切和滚动条，触摸位移由本类唯一处理。
+	# 原生 ScrollContainer 只负责裁切，滚动条始终隐藏，触摸位移由本类唯一处理。
 	scroll_deadzone = 1000000
+	vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	set_process(false) # 无惯性时不开帧回调
 	get_v_scroll_bar().value_changed.connect(_on_bar_value_changed)
+	get_v_scroll_bar().visible = false
 	_scroll_pos = float(scroll_vertical)
 
 

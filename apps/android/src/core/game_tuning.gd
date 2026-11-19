@@ -13,8 +13,6 @@ const FALLBACK := {
 	"jungle": {"kind":"board","hintSeconds":{"easy":10,"normal":18,"challenge":0},"hints":{"easy":3,"normal":2,"challenge":1},"undos":{"easy":99,"normal":3,"challenge":1}},
 	"gomoku": {"kind":"board","hintSeconds":{"easy":10,"normal":18,"challenge":0},"hints":{"easy":3,"normal":2,"challenge":1},"undos":{"easy":99,"normal":3,"challenge":1}},
 	"military": {"kind":"board","hintSeconds":{"easy":10,"normal":18,"challenge":0},"hints":{"easy":3,"normal":2,"challenge":1},"undos":{"easy":99,"normal":3,"challenge":1}},
-	"island": {"kind":"island","startCash":{"easy":1800,"normal":1500,"challenge":1200},"passBonus":{"easy":350,"normal":250,"challenge":150},"energyTarget":{"easy":2,"normal":3,"challenge":4}},
-	"garden": {"kind":"garden","zombieSpeed":{"easy":0.8,"normal":1.0,"challenge":1.15},"zombieHealth":{"easy":0.8,"normal":1.0,"challenge":1.15},"sunMultiplier":{"easy":1.25,"normal":1.0,"challenge":0.9},"spawnDelta":{"easy":-1,"normal":0,"challenge":1},"waveInterval":{"easy":1.15,"normal":1.0,"challenge":0.9}},
 	"poetry": {"kind":"poetry","difficultyEnabled":false},
 	"stories": {"kind":"stories","difficultyEnabled":false},
 }

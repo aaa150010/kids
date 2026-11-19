@@ -6,17 +6,13 @@ var games: Array[Dictionary] = []
 var game_map: Dictionary = {}
 var quizzes: Dictionary = {}
 var memory: Dictionary = {}
-var island: Dictionary = {}
-var garden: Dictionary = {}
-var garden_rules: Dictionary = {}
-var garden_presentation: Dictionary = {}
-var garden_adventure: Dictionary = {}
 var poems: Array = []
 var workbook_questions: Array = []
 var content_version: int = 1
 var chapters: Dictionary = {}
 var puzzles: Dictionary = {}
 var tuning: Dictionary = {}
+var military: Dictionary = {}
 var stories: Array = []
 var story_map: Dictionary = {}
 var story_audio: Dictionary = {}
@@ -34,16 +30,12 @@ func _load_json_files() -> void:
 		game_map[str(item.get("id", ""))] = item
 	quizzes = _json_dictionary("quizzes.json")
 	memory = _json_dictionary("memory.json")
-	island = _json_dictionary("island.json")
-	garden = _json_dictionary("garden.json")
-	garden_rules = _json_dictionary("garden-rules.json")
-	garden_presentation = _json_dictionary("garden-presentation.json")
-	garden_adventure = _json_dictionary("garden-adventure.json")
 	poems = _json_array("poems.json")
 	workbook_questions = _json_array("workbook.json")
 	chapters = _json_dictionary("chapters.json")
 	puzzles = _json_dictionary("puzzles.json")
 	tuning = _json_dictionary("tuning.json")
+	military = _json_dictionary("military.json")
 	stories = _json_array("stories.json").filter(func(entry): return entry is Dictionary and not str(entry.get("id", "")).is_empty())
 	story_map.clear()
 	for entry in stories:
@@ -170,37 +162,6 @@ func random_poem(age: int, excluded_id: String = "") -> Dictionary:
 	return pool.pick_random()
 
 
-func characters() -> Array:
-	return island.get("characters", [])
-
-
-func board_tiles() -> Array:
-	return island.get("board", [])
-
-
-func island_questions() -> Array:
-	return island.get("questions", [])
-
-
-func island_challenges() -> Array:
-	return island.get("challenges", [])
-
-
-func garden_plants() -> Dictionary:
-	return garden.get("plants", {})
-
-
-func garden_levels() -> Dictionary:
-	return garden.get("levels", {})
-
-
-func garden_almanac() -> Dictionary:
-	return {
-		"plants": garden.get("plantAlmanac", []),
-		"zombies": garden.get("zombieAlmanac", []),
-	}
-
-
 func memory_cards() -> Array:
 	return memory.get("cards", [])
 
@@ -228,3 +189,11 @@ func mode(game_id: String, mode_id: String) -> Dictionary:
 func level(game_id: String, level_id: int) -> Dictionary:
 	var entries: Array = chapters.get(game_id, [])
 	return entries[level_id-1].duplicate(true) if level_id > 0 and level_id <= entries.size() else {}
+
+
+func military_formations() -> Array:
+	return military.get("formations", [])
+
+
+func military_puzzles() -> Array:
+	return military.get("puzzles", [])

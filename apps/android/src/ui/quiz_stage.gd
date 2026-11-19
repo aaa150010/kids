@@ -31,10 +31,6 @@ var _sparks: Array = [] # 自绘答对星星粒子
 var _position := 0
 var _total := 0
 var _correct := 0
-var _drag_index := -1
-var _drag_pos := Vector2.ZERO
-var _drag_active := false
-var _suppress_press := false
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(420,390)
@@ -51,9 +47,6 @@ func _ready() -> void:
 		button.custom_minimum_size = Vector2(96,64)
 		PressFeedback.attach(button)
 		button.pressed.connect(_choose.bind(index))
-		button.button_down.connect(_drag_begin.bind(index))
-		button.button_up.connect(_drag_release.bind(index))
-		button.gui_input.connect(_drag_input.bind(index))
 		add_child(button)
 		buttons.append(button)
 	resized.connect(_layout)
@@ -92,62 +85,9 @@ func set_progress(correct: int, position: int, total: int) -> void:
 
 func _choose(index: int) -> void:
 	# 弹窗接管输入或已经进入讲解时，忽略选项点击
-	if _suppress_press or feedback or not _pending.is_empty() or _blocked_by_dialog():
-		return
-	answered.emit(index)
-
-
-func _drag_begin(index: int) -> void:
 	if feedback or not _pending.is_empty() or _blocked_by_dialog():
 		return
-	_drag_index = index
-	_drag_active = false
-	_drag_pos = buttons[index].position + buttons[index].size * .5
-
-
-func _drag_input(event: InputEvent, index: int) -> void:
-	if index != _drag_index:
-		return
-	if event is InputEventScreenDrag:
-		_drag_pos = buttons[index].position + event.position
-	elif event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		_drag_pos = buttons[index].position + event.position
-	else:
-		return
-	if _drag_pos.distance_to(buttons[index].position + buttons[index].size * .5) >= 24.0:
-		_drag_active = true
-	queue_redraw()
-
-
-func _drag_release(index: int) -> void:
-	if index != _drag_index:
-		return
-	var dropped := _drag_active and _drop_rect().has_point(_drag_pos)
-	_drag_index = -1
-	_drag_active = false
-	queue_redraw()
-	if dropped:
-		_suppress_press = true
-		answered.emit(index)
-		get_tree().create_timer(.08).timeout.connect(func(): _suppress_press = false)
-
-
-func _drop_rect() -> Rect2:
-	return Rect2(size.x * .24, size.y * .56, size.x * .52, clampf(size.y * .14, 58.0, 92.0))
-
-
-func _drop_hint() -> String:
-	match game_id:
-		"patterns":
-			return "把正确图形拖到问号框"
-		"animals":
-			return "把答案拖进分类篮"
-		"pinyin":
-			return "把拼音拖到汉字下面"
-		"workbook":
-			return "把答案拖进练习本空格"
-		_:
-			return "把数字拖进答案框"
+	answered.emit(index)
 
 
 func _request_listen() -> void:
@@ -175,7 +115,7 @@ func _apply(data: Dictionary) -> void:
 	totals = data.totals
 	if not feedback:
 		_feedback_played = false
-	_tokens = ArtLibrary.symbols(str(question.get("visual","")))
+	_tokens = _visual_tokens(str(question.get("visual","")))
 	prompt.text = str(question.get("prompt",""))
 	prompt.modulate.a = 1.0
 	prompt.scale = Vector2.ONE
@@ -275,8 +215,7 @@ func _play_out() -> void:
 		button.disabled = true
 	listen.disabled = true
 	_sparks.clear()
-	# 语义事件借用：翻题滑出使用 whoosh 音
-	SfxMap.play(&"drag_start")
+	SfxMap.play(&"move")
 	var items := _content_items()
 	for entry in items:
 		var control: Control = entry
@@ -321,31 +260,48 @@ func _content_items() -> Array:
 	items.append_array(buttons)
 	return items
 
+
+func _visual_tokens(text: String) -> Array:
+	var value := text.strip_edges()
+	if value.is_empty():
+		return []
+	var tokens := ArtLibrary.symbols(value)
+	if tokens.is_empty():
+		return []
+	var stripped := value
+	for character in [" ", "\t", "\n", "、", "，", "。", "？", "?", "！", "!", ",", "."]:
+		stripped = stripped.replace(character, "")
+	var joined := "".join(PackedStringArray(tokens))
+	return tokens if stripped.length() <= joined.length() + 2 else []
+
+
 func _tween_kill() -> void:
 	if _tween != null and is_instance_valid(_tween):
 		_tween.kill()
 	_tween = null
 
-## 比例布局：题面 0.16~0.40，选项 0.78，听题按钮右上；任何尺寸都不重叠
+## 友好布局：题卡在上、视觉居中、三个答案卡整齐排在底部
 func _layout() -> void:
 	if prompt == null:
 		return
 	var pad := clampf(size.x*0.04,16.0,36.0)
-	listen.size = Vector2(clampf(size.x*0.13,84.0,112.0),52)
+	listen.size = Vector2(clampf(size.x*0.13,84.0,120.0),clampf(size.y*0.06,48.0,64.0))
 	listen.position = Vector2(size.x-listen.size.x-16,12)
-	var prompt_top := maxf(size.y*0.16,listen.size.y+20)
-	var options_top := size.y*0.78
-	var prompt_height := clampf(size.y*0.24,48.0,maxf(48.0,options_top-prompt_top-8.0))
+	var prompt_top := maxf(size.y*0.115,listen.size.y+18)
+	var options_top := size.y*0.77
+	var prompt_height := clampf(size.y*0.23,56.0,maxf(56.0,options_top-prompt_top-8.0))
 	prompt.position = Vector2(pad,prompt_top)
 	prompt.size = Vector2(size.x-pad*2,prompt_height)
 	prompt.pivot_offset = prompt.size*0.5
 	var gap := clampf(size.x*0.012,6.0,14.0)
 	var width := (size.x-pad*2-gap*2)/3.0
-	var height := clampf(size.y*0.11,64.0,84.0)
+	var height := clampf(size.y*0.17,88.0,164.0)
+	var answer_font := clampi(int(size.y*0.026),20,30)
 	for index in buttons.size():
 		buttons[index].position = Vector2(pad+index*(width+gap),options_top)
 		buttons[index].size = Vector2(width,height)
 		buttons[index].pivot_offset = buttons[index].size*0.5
+		buttons[index].add_theme_font_size_override("font_size",answer_font)
 	_fit_prompt()
 
 ## 题面文字超宽或超高时自动缩字号，保证短窗口也完整显示
@@ -353,11 +309,11 @@ func _fit_prompt() -> void:
 	var text := str(question.get("prompt",""))
 	if text.is_empty():
 		return
-	var fitted := 30
+	var fitted := clampi(int(size.y*0.038),26,46)
 	if size.x < 560 or size.y < 470:
-		fitted = 26
+		fitted = mini(fitted,26)
 	if size.x < 460 or size.y < 400:
-		fitted = 22
+		fitted = mini(fitted,22)
 	var available := maxf(40.0,prompt.size.x)
 	var font := PlaygroundUI.font()
 	while fitted > 16:
@@ -408,10 +364,12 @@ func _draw() -> void:
 		"patterns": _draw_patterns()
 		"animals": _draw_animals()
 		"workbook": _draw_workbook()
-	_draw_drop_target()
+	var prompt_card := Rect2(prompt.position-Vector2(14,10),prompt.size+Vector2(28,20))
+	draw_style_box(PlaygroundUI.style(Color(1,1,1,0.76),24,PlaygroundUI.mix(accent,Color.WHITE,0.5),2,4,Color(0,0,0,0.08)),prompt_card)
+	var visual_card := Rect2(size.x*0.16,size.y*0.37,size.x*0.68,size.y*0.24)
+	draw_style_box(PlaygroundUI.style(Color(1,1,1,0.36),24,PlaygroundUI.mix(accent,Color.WHITE,0.65),1),visual_card)
 	_draw_progress()
 	_draw_sparks()
-	_draw_drag_ghost()
 
 ## 顶部小标签 + 里程碑星（每答对 3 题点亮一颗，最多 3 颗）
 func _draw_progress() -> void:
@@ -430,39 +388,6 @@ func _draw_progress() -> void:
 		var glyph := "★" if index < lit else "☆"
 		var tint := Color("#d9a52c") if index < lit else Color("#c9bda9")
 		draw_string(font,Vector2(16+width+10+index*26,12+17+10),glyph,HORIZONTAL_ALIGNMENT_LEFT,-1,24,tint)
-
-
-func _draw_drop_target() -> void:
-	if feedback or not _pending.is_empty():
-		return
-	var rect := _drop_rect()
-	var active := _drag_active and rect.has_point(_drag_pos)
-	var tint := Color("#4a9661") if active else accent
-	draw_style_box(PlaygroundUI.style(PlaygroundUI.mix(tint,Color.WHITE,.9),20,tint,3 if active else 2),rect)
-	var font := PlaygroundUI.font()
-	var text := "松手放到这里" if active else _drop_hint()
-	var pixels := 17 if rect.size.x > 300 else 15
-	var width := font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels).x
-	draw_string(font,Vector2(rect.get_center().x-width*.5,rect.get_center().y+pixels*.35),text,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels,PlaygroundUI.mix(tint,PlaygroundUI.INK,.45))
-
-
-func _draw_drag_ghost() -> void:
-	if not _drag_active or _drag_index < 0 or _drag_index >= buttons.size():
-		return
-	var dimensions := Vector2(74,74)
-	var rect := Rect2(_drag_pos-dimensions*.5,dimensions)
-	draw_style_box(PlaygroundUI.style(PlaygroundUI.mix(accent,Color.WHITE,.45),20,accent,3,5,Color(0,0,0,.18)),rect)
-	var text := buttons[_drag_index].text
-	var symbols := ArtLibrary.symbols(text)
-	if symbols.is_empty():
-		var font := PlaygroundUI.font()
-		var pixels := 22
-		var width := font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels).x
-		draw_string(font,Vector2(rect.get_center().x-width*.5,rect.get_center().y+pixels*.35),text,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels,PlaygroundUI.INK)
-	else:
-		var side := minf(42.0,(rect.size.x-8.0)/maxf(1,symbols.size()))
-		for index in symbols.size():
-			_icon(str(symbols[index]),rect.get_center()+Vector2((index-(symbols.size()-1)*.5)*side,0),Vector2.ONE*side)
 
 
 func _draw_sparks() -> void:

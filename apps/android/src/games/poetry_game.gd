@@ -84,6 +84,7 @@ var library_filter := "all"
 var _draw_sequence := 0
 var poem_scrolls: Dictionary = {}
 var poem_scroll: ScrollContainer = null
+var profile_panel: Control
 var poem_line_labels: Array[Label] = []
 # 当前诗卡与待播放的入场动画（"flip" 抽诗翻面 / "pop" 换一首弹入 / "" 直接显示）
 var _card: Control = null
@@ -97,7 +98,12 @@ func _ready() -> void:
 	var player: Dictionary = players[0]
 	var stored := SaveStore.load_state(game_id, [str(player.id)])
 	_restore_snapshot(stored, str(player.id))
-	poem_font_size = clampi(_integer(SaveStore.settings().get("poetryFontSize", 30)), 24, 40)
+	var saved_font := _integer(SaveStore.settings().get("poetryFontSize", 0))
+	var responsive_font := 38 if get_viewport_rect().size.y >= 1000 else 32
+	var resolved_font := saved_font
+	if saved_font <= 0 or (saved_font == 30 and get_viewport_rect().size.y >= 760):
+		resolved_font = responsive_font
+	poem_font_size = clampi(resolved_font, 24, 46)
 	_render()
 	call_deferred("begin_lesson")
 
@@ -191,7 +197,8 @@ func _render() -> void:
 	var row := HBoxContainer.new()
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	row.add_theme_constant_override("separation", 14)
-	row.add_child(_profile_panel())
+	profile_panel = _profile_panel()
+	row.add_child(profile_panel)
 	var main_panel := PlaygroundUI.panel(Color(1, 1, 1, 0.76), 28, PlaygroundUI.mix(accent, Color.WHITE, 0.55), 1)
 	main_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	main_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -211,6 +218,7 @@ func _render() -> void:
 		main_box.add_child(_draw_view())
 	row.add_child(main_panel)
 	content_root.add_child(row)
+	_on_immersive_changed(immersive)
 	if not has_card_intro:
 		MotionKit.tween(self).tween_property(main_panel,"modulate:a",1.0,0.18)
 
@@ -279,6 +287,11 @@ func _tabs() -> Control:
 	return row
 
 
+func _on_immersive_changed(value: bool) -> void:
+	if profile_panel != null and is_instance_valid(profile_panel):
+		profile_panel.visible = not value
+
+
 func _draw_view() -> Control:
 	var transition := _pending_transition
 	_pending_transition = ""
@@ -304,6 +317,7 @@ func _draw_view() -> Control:
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	poem_scroll = scroll
 	poem_line_labels.clear()
 	var front_style := PlaygroundUI.style(Color("#fffaf0"), 22, Color("#d6c29b"), 2)
@@ -329,7 +343,7 @@ func _draw_view() -> Control:
 	meta.add_child(spacer)
 	meta.add_child(PlaygroundUI.chip("适合 %s" % players[0].name, accent))
 	column.add_child(meta)
-	var title := PlaygroundUI.label(str(current_poem.get("title", "")), 38, PlaygroundUI.INK, 700, true)
+	var title := PlaygroundUI.label(str(current_poem.get("title", "")), 44 if poem_font_size >= 36 else 38, PlaygroundUI.INK, 700, true)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(title)
 	var author := PlaygroundUI.label("唐 · %s" % str(current_poem.get("author", "")), 16, PlaygroundUI.INK_SOFT, 500)
@@ -338,9 +352,23 @@ func _draw_view() -> Control:
 	var text := VBoxContainer.new()
 	text.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	text.alignment = BoxContainer.ALIGNMENT_CENTER
-	text.add_theme_constant_override("separation", 5)
-	var line_labels: Array = []
-	for line in current_poem.get("lines", []):
+	text.add_theme_constant_override("separation", 16 if poem_font_size >= 36 else 10)
+	var reveal_blocks: Array = []
+	var raw_lines: Array = current_poem.get("lines", [])
+	var pinyin_lines: Array = current_poem.get("linesPinyin", []) if current_poem.get("linesPinyin") is Array else []
+	for index in raw_lines.size():
+		var line: Variant = raw_lines[index]
+		var line_block := VBoxContainer.new()
+		line_block.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		line_block.add_theme_constant_override("separation", 1)
+		if not hide_text and index < pinyin_lines.size():
+			var pinyin_text := str(pinyin_lines[index]).strip_edges()
+			if not pinyin_text.is_empty():
+				var pinyin_size := clampi(int(round(float(poem_font_size) * 0.52)), 14, 24)
+				var pinyin_label := PlaygroundUI.label(pinyin_text, pinyin_size, PlaygroundUI.INK_SOFT, 500, true)
+				pinyin_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				pinyin_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+				line_block.add_child(pinyin_label)
 		var line_label := PlaygroundUI.label(
 			"••••••" if hide_text else str(line),
 			poem_font_size if not hide_text else poem_font_size + 4,
@@ -349,56 +377,14 @@ func _draw_view() -> Control:
 			true
 		)
 		line_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		line_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		line_block.add_child(line_label)
 		if transition == "flip":
-			line_label.modulate.a = 0.0
-		line_labels.append(line_label)
+			line_block.modulate.a = 0.0
+		reveal_blocks.append(line_block)
 		poem_line_labels.append(line_label)
-		text.add_child(line_label)
+		text.add_child(line_block)
 	column.add_child(text)
-	var tools := HBoxContainer.new()
-	tools.alignment = BoxContainer.ALIGNMENT_CENTER
-	tools.add_theme_constant_override("separation", 10)
-	var read_button := _btn("🔊 朗读", accent, _read_poem, "soft")
-	read_button.disabled = hide_text
-	tools.add_child(read_button)
-	tools.add_child(_btn("👀 显示正文" if hide_text else "🙈 遮住正文", accent, _toggle_text, "soft"))
-	tools.add_child(_btn("🎲 换一首", accent, draw_poem, "soft"))
-	column.add_child(tools)
-	var font_controls := HBoxContainer.new()
-	font_controls.alignment = BoxContainer.ALIGNMENT_CENTER
-	font_controls.add_theme_constant_override("separation", 8)
-	font_controls.add_child(PlaygroundUI.label("诗文字号 %s" % poem_font_size, 14, PlaygroundUI.INK_SOFT, 500))
-	font_controls.add_child(_btn("A−", accent, _adjust_poem_font.bind(-2), "ghost"))
-	font_controls.add_child(_btn("A+", accent, _adjust_poem_font.bind(2), "ghost"))
-	column.add_child(font_controls)
-	if not evaluation.is_empty():
-		var result_row := HBoxContainer.new()
-		result_row.add_theme_constant_override("separation", 14)
-		var message := PlaygroundUI.panel(PlaygroundUI.mix(accent, Color.WHITE, 0.86), 20, PlaygroundUI.mix(accent, Color.WHITE, 0.45), 2)
-		message.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		var message_copy := VBoxContainer.new()
-		message_copy.add_child(PlaygroundUI.label("⭐ 已记作会背啦" if evaluation == "known" else "📖 已放进待复习", 22, accent, 700))
-		message_copy.add_child(PlaygroundUI.label("可以再读一遍原诗，准备好再继续。", 15, PlaygroundUI.INK_SOFT, 500))
-		message.add_child(message_copy)
-		result_row.add_child(message)
-		var next_button := _btn("下一首 →", accent, _next_poem)
-		next_button.custom_minimum_size = Vector2(190, 60)
-		next_button.add_theme_font_size_override("font_size", 22)
-		result_row.add_child(next_button)
-		column.add_child(result_row)
-	else:
-		var evaluate_row := HBoxContainer.new()
-		evaluate_row.add_theme_constant_override("separation", 14)
-		var review := _btn("📖 再复习", Color("#a36b24"), func(): evaluate_poem("review"), "soft")
-		var known := _btn("⭐ 背对了", accent, func(): evaluate_poem("known"))
-		# 家长单手好按：高度 64，字号不小于 24
-		for button in [review, known]:
-			button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			button.custom_minimum_size = Vector2(0, 64)
-			button.add_theme_font_size_override("font_size", 26)
-		evaluate_row.add_child(review)
-		evaluate_row.add_child(known)
-		column.add_child(evaluate_row)
 	# 卡背：藤紫 + 📜 印章，翻面前先给孩子一个"抽签"的期待
 	if transition == "flip":
 		var back_face := CenterContainer.new()
@@ -417,7 +403,7 @@ func _draw_view() -> Control:
 		poem_card.set_meta("face_back", back_face)
 	poem_card.set_meta("face_front", column)
 	poem_card.set_meta("face_style", front_style)
-	poem_card.set_meta("face_lines", line_labels)
+	poem_card.set_meta("face_lines", reveal_blocks)
 	_card = poem_card
 	scroll.add_child(poem_card)
 	call_deferred("_restore_poem_scroll")
@@ -426,7 +412,60 @@ func _draw_view() -> Control:
 		call_deferred("_play_card_flip", poem_card)
 	elif transition == "pop":
 		call_deferred("_pop_card_in", poem_card)
-	return scroll
+	var page := VBoxContainer.new()
+	page.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	page.add_theme_constant_override("separation", 10)
+	page.add_child(scroll)
+	page.add_child(_poem_tools())
+	page.add_child(_evaluation_row())
+	return page
+
+
+func _poem_tools() -> Control:
+	var tools := HBoxContainer.new()
+	tools.alignment = BoxContainer.ALIGNMENT_CENTER
+	tools.add_theme_constant_override("separation", 10)
+	var read_button := _btn("🔊 朗读", accent, _read_poem, "soft")
+	read_button.disabled = hide_text
+	tools.add_child(read_button)
+	tools.add_child(_btn("👀 显示正文" if hide_text else "🙈 遮住正文", accent, _toggle_text, "soft"))
+	tools.add_child(_btn("🎲 换一首", accent, draw_poem, "soft"))
+	var smaller := _btn("A−", accent, _adjust_poem_font.bind(-2), "ghost")
+	var larger := _btn("A+", accent, _adjust_poem_font.bind(2), "ghost")
+	smaller.custom_minimum_size = Vector2(58, 48)
+	larger.custom_minimum_size = Vector2(58, 48)
+	tools.add_child(smaller)
+	tools.add_child(larger)
+	return tools
+
+
+func _evaluation_row() -> Control:
+	if not evaluation.is_empty():
+		var result_row := HBoxContainer.new()
+		result_row.add_theme_constant_override("separation", 14)
+		var message := PlaygroundUI.panel(PlaygroundUI.mix(accent, Color.WHITE, 0.86), 20, PlaygroundUI.mix(accent, Color.WHITE, 0.45), 2)
+		message.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var message_copy := VBoxContainer.new()
+		message_copy.add_child(PlaygroundUI.label("⭐ 已记作会背啦" if evaluation == "known" else "📖 已放进待复习", 22, accent, 700))
+		message_copy.add_child(PlaygroundUI.label("可以再读一遍原诗，准备好再继续。", 15, PlaygroundUI.INK_SOFT, 500))
+		message.add_child(message_copy)
+		result_row.add_child(message)
+		var next_button := _btn("下一首 →", accent, _next_poem)
+		next_button.custom_minimum_size = Vector2(190, 60)
+		next_button.add_theme_font_size_override("font_size", 22)
+		result_row.add_child(next_button)
+		return result_row
+	var evaluate_row := HBoxContainer.new()
+	evaluate_row.add_theme_constant_override("separation", 14)
+	var review := _btn("📖 再复习", Color("#a36b24"), func(): evaluate_poem("review"), "soft")
+	var known := _btn("⭐ 背对了", accent, func(): evaluate_poem("known"))
+	for button in [review, known]:
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.custom_minimum_size = Vector2(0, 64)
+		button.add_theme_font_size_override("font_size", 26)
+	evaluate_row.add_child(review)
+	evaluate_row.add_child(known)
+	return evaluate_row
 
 
 func _restore_poem_scroll() -> void:
@@ -525,6 +564,7 @@ func _library_view() -> Control:
 	library_scroll = scroll
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	scroll.value_changed.connect(func(value: float): library_scroll_y = int(value))
 	var list := VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -669,7 +709,7 @@ func _read_poem() -> void:
 
 
 func _adjust_poem_font(delta: int) -> void:
-	poem_font_size = clampi(poem_font_size + delta, 24, 40)
+	poem_font_size = clampi(poem_font_size + delta, 24, 46)
 	SaveStore.set_setting("poetryFontSize", poem_font_size)
 	_save("调整诗文字号")
 	_render()
@@ -842,6 +882,7 @@ func _route_view() -> Control:
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation",10)
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL

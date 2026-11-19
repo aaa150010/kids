@@ -40,8 +40,8 @@ func _run() -> void:
 	for script_path in all_scripts("res://src"):
 		var script: GDScript = load(script_path)
 		check(script != null and script.can_instantiate(), "%s parses and can be instantiated" % script_path)
-	check(content.games.size() == 13, "catalog contains 13 entries including the story library")
-	check(content.tuning.get("games", {}).size() == 13, "tuning covers all catalog entries")
+	check(content.games.size() == 11, "catalog contains 11 entries including the story library")
+	check(content.tuning.get("games", {}).size() == 11, "tuning covers all catalog entries")
 	StoryFixtures.new().run(content, Callable(self, "check"))
 	for icon_path in [
 		"res://assets/branding/app-icon-192.png",
@@ -64,15 +64,14 @@ func _run() -> void:
 	check(GameTuning.stars("math", "normal", 8, 8) == 3, "perfect quiz earns three stars")
 	check(content.workbook_questions.size() >= 100, "workbook bank is loaded")
 	check(content.poems.size() >= 300, "poetry bank is loaded")
-	check(content.garden_levels().size() == 50, "garden contains 50 levels")
-	check(content.garden_plants().size() >= 48, "garden contains at least 48 plant definitions")
-	check(content.garden.get("zombieAlmanac", []).size() >= 25, "garden zombie almanac is loaded")
 	for game_id in ["math", "pinyin", "patterns", "animals"]:
 		check(content.quizzes.get(game_id, []).size() > 0, "%s questions are loaded" % game_id)
-	for game_id in ["island", "jungle", "gomoku", "military", "memory", "math", "pinyin", "patterns", "animals", "workbook"]:
+	for game_id in ["jungle", "gomoku", "memory", "math", "pinyin", "patterns", "animals", "workbook"]:
 		check(content.chapters.get(game_id, []).size() > 0, "%s adventure levels are loaded" % game_id)
-	for game_id in ["jungle", "gomoku", "military"]:
+	for game_id in ["jungle", "gomoku"]:
 		check(content.puzzles.get(game_id, []).size() > 0, "%s puzzle fixtures are loaded" % game_id)
+	check(content.military_formations().size() == 3, "military has three preset formations")
+	check(content.military_puzzles().size() == 24, "military has 24 fixed endgame puzzles")
 
 	var fake_player = {
 		"id": "test-player",
@@ -81,22 +80,6 @@ func _run() -> void:
 		"avatar": "🦊",
 		"color": "#d56c29",
 	}
-	for level_number in range(1, 51):
-		var mapped: Dictionary = PvZLevelFactory.build(level_number, "adventure", [], "normal")
-		var level: ResourceLevelData = mapped.get("level")
-		check(level != null, "PvZ level %s maps into the upstream resource format" % level_number)
-		check(level.max_wave >= 10 and level.max_wave % 10 == 0, "PvZ level %s keeps complete upstream flag blocks" % level_number)
-		check(str(mapped.get("scene", "")).begins_with("res://pvz/scenes/main/MainGame"), "PvZ level %s selects an embedded upstream scene" % level_number)
-	var easy_level: ResourceLevelData = PvZLevelFactory.build(1, "adventure", ["sunflower"], "easy").get("level")
-	var challenge_level: ResourceLevelData = PvZLevelFactory.build(1, "adventure", ["sunflower"], "challenge").get("level")
-	check(easy_level.start_sun > challenge_level.start_sun, "younger PvZ difficulty starts with more sun")
-	check(PvZLevelFactory.plant_type("peashooter") == CharacterRegistry.PlantType.P001PeaShooterSingle, "peashooter maps to the upstream plant registry")
-	check(PvZLevelFactory.zombie_type("digger") == CharacterRegistry.ZombieType.Z018Digger, "digger maps to the upstream zombie registry")
-
-	var pack_data: Array = content.garden.get("plantAlmanac", [])
-	for entry in pack_data:
-		check(not str(entry.get("name", "")).is_empty(), "every almanac plant has a name")
-
 	var fake_player_two: Dictionary = fake_player.duplicate(true)
 	fake_player_two.id = "test-player-two"
 	var board_rules = BoardRulesResource.new()
@@ -131,9 +114,8 @@ func _run() -> void:
 	check(bool(gomoku_move.ok) and gomoku_state.phase == "finished", "gomoku puzzle completes at the prepared line")
 	check(gomoku_state.winningLine.size() >= 5, "gomoku puzzle exposes a winning line")
 
-	var military_levels: Array = content.puzzles.get("military", [])
-	var military_puzzle: Dictionary = military_levels[0]
-	var military_rules = BoardRulesResource.new()
+	var military_puzzle: Dictionary = content.military_puzzles()[0]
+	var military_rules = MilitaryRules.new()
 	var military_state: Dictionary = military_rules.create_session({
 		"gameId": "military",
 		"modeId": "puzzle",
@@ -141,58 +123,36 @@ func _run() -> void:
 		"seed": 44,
 		"puzzle": military_puzzle,
 	})
-	check(bool(military_rules.handle_input({"type":"select","to":5}).ok), "military engineer can be selected")
-	check(bool(military_rules.handle_input({"type":"move","to":6}).ok) and military_state.phase == "finished", "military engineer clears a mine in a puzzle")
-	check(bool(military_state.get("factionAssigned", true)), "military puzzle starts with assigned factions")
+	var military_from := int(military_puzzle.pieces[0].position)
+	var military_flag := int(military_puzzle.pieces[1].position)
+	check(bool(military_rules.handle_input({"type":"select","position":military_from}).ok), "military puzzle piece can be selected")
+	check(bool(military_rules.handle_input({"type":"move","to":military_flag}).ok) and military_state.phase == "finished", "military puzzle captures the flag")
+	check(int(military_state.winner) == 0, "military puzzle awards the attacking player")
 
-	var military_classic = BoardRulesResource.new()
+	var military_classic = MilitaryRules.new()
 	var military_classic_state: Dictionary = military_classic.create_session({
 		"gameId": "military",
 		"modeId": "classic",
 		"players": [fake_player, fake_player_two],
 		"seed": 47,
 	})
-	check(not bool(military_classic_state.factionAssigned), "military classic waits for faction assignment")
-	var hidden_by_side := {"0": [], "1": []}
-	for piece in military_classic_state.pieces:
-		if not bool(piece.revealed):
-			hidden_by_side[str(int(piece.side))].append(int(piece.position))
-	check(hidden_by_side["0"].size() >= 3 and hidden_by_side["1"].size() >= 2, "military classic has enough hidden pieces to assign factions")
-	var flip_one: Dictionary = military_classic.handle_input({"type":"move","to":int(hidden_by_side["0"][0])})
-	var flip_two: Dictionary = military_classic.handle_input({"type":"move","to":int(hidden_by_side["1"][0])})
-	var flip_three: Dictionary = military_classic.handle_input({"type":"move","to":int(hidden_by_side["0"][1])})
-	check(bool(flip_one.ok) and bool(flip_two.ok) and bool(flip_three.ok), "military flips alternate between players")
-	check(bool(military_classic_state.factionAssigned) and bool(flip_three.get("factionAssigned", false)), "two same-side flips assign the player faction")
-	check(int(military_classic_state.factionSides[0]) == 0 and int(military_classic_state.factionSides[1]) == 1, "assigned factions split both sides")
-	check(int(military_classic.player_side(0)) == 0 and int(military_classic.player_for_side(1)) == 1, "military faction mapping is symmetric")
-
-	var reset_game = BoardRulesResource.new()
-	var reset_state: Dictionary = reset_game.create_session({
-		"gameId": "military",
-		"modeId": "classic",
-		"players": [fake_player, fake_player_two],
-		"seed": 47,
-	})
-	var reset_zero: Array = []
-	var reset_one: Array = []
-	for piece in reset_state.pieces:
-		if not bool(piece.revealed):
-			if int(piece.side) == 0:
-				reset_zero.append(int(piece.position))
-			else:
-				reset_one.append(int(piece.position))
-	reset_game.handle_input({"type":"move","to":int(reset_zero[0])})
-	reset_game.handle_input({"type":"move","to":int(reset_one[0])})
-	reset_game.handle_input({"type":"move","to":int(reset_one[1])})
-	check(not bool(reset_state.factionAssigned) and int(reset_state.factionLastSides[0]) == 1, "an opposite flip resets that player's faction streak")
-
-	var legacy_military = BoardRulesResource.new()
-	var legacy_save: Dictionary = reset_game.snapshot()
-	legacy_save.erase("factionSides")
-	legacy_save.erase("factionAssigned")
-	legacy_save.erase("factionLastSides")
-	check(legacy_military.restore(legacy_save), "legacy military snapshot still restores")
-	check(bool(legacy_military.state.factionAssigned) and int(legacy_military.state.factionSides[0]) == 0, "legacy military saves default to fixed factions")
+	check(military_classic_state.phase == "playing" and military_classic_state.pieces.size() == 50, "military classic starts immediately with both formations")
+	check(bool(military_classic_state.revealAll), "military classic reveals both sides from the start")
+	check(not bool(military_classic_state.needsHandoff), "military classic skips the device handoff")
+	var military_snapshot: Dictionary = military_classic.snapshot()
+	var restored_military = MilitaryRules.new()
+	check(restored_military.restore(military_snapshot), "military snapshot restores")
+	var legacy_military = MilitaryRules.new()
+	var legacy_save: Dictionary = military_snapshot.duplicate(true)
+	legacy_save.militaryVersion = 2
+	legacy_save.revealAll = false
+	legacy_save.needsHandoff = true
+	check(legacy_military.restore(legacy_save), "military v2 snapshot migrates")
+	check(bool(legacy_military.state.revealAll) and not bool(legacy_military.state.needsHandoff), "military v2 hidden snapshot opens up")
+	var old_military = MilitaryRules.new()
+	var old_save: Dictionary = military_snapshot.duplicate(true)
+	old_save.erase("militaryVersion")
+	check(not old_military.restore(old_save), "legacy flipping chess snapshot is rejected safely")
 
 	var quiz = QuizRulesResource.new()
 	var quiz_pool: Array = content.questions("math", 5).slice(0, 2)

@@ -4,9 +4,9 @@
   "version": "1.3.0",
   "type": "module",
   "scripts": {
-    "native:content": "node scripts/native/author-stories.mjs && node scripts/native/author-garden.mjs && node scripts/native/export-content.mjs",
-    "native:garden": "node scripts/native/author-garden.mjs",
-    "native:garden:import": "node scripts/native/import-garden.mjs",
+    "native:content": "node scripts/native/author-stories.mjs && node scripts/native/author-poem-pinyin.mjs && node scripts/native/author-military.mjs && node scripts/native/export-content.mjs",
+    "native:military": "node scripts/native/author-military.mjs",
+    "native:poetry:pinyin": "node scripts/native/author-poem-pinyin.mjs",
     "native:levels": "node scripts/native/author-levels.mjs",
     "native:icons": "node scripts/native/import-icons.mjs",
     "native:icons:brand": "bash scripts/native/render-brand-icons.sh",

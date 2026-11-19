@@ -1,7 +1,6 @@
 extends SceneTree
 
 const GAME_SCRIPTS := {
-	"island": "res://src/games/island_game.gd",
 	"jungle": "res://src/games/board_game.gd",
 	"poetry": "res://src/games/poetry_game.gd",
 	"math": "res://src/games/quiz_game.gd",
@@ -10,8 +9,7 @@ const GAME_SCRIPTS := {
 	"patterns": "res://src/games/quiz_game.gd",
 	"animals": "res://src/games/quiz_game.gd",
 	"gomoku": "res://src/games/board_game.gd",
-	"military": "res://src/games/board_game.gd",
-	"garden": "res://src/games/garden_game.gd",
+	"military": "res://src/games/military_game.gd",
 	"workbook": "res://src/games/quiz_game.gd",
 	"stories": "res://src/games/story_game.gd",
 }
@@ -49,7 +47,10 @@ func _run() -> void:
 		save_store.add_profile("小搭档", 9, "🐼", "#2878c8")
 	output_dir = ProjectSettings.globalize_path("res://").path_join("../../build/ui-audit")
 	DirAccess.make_dir_recursive_absolute(output_dir)
+	var requested_size := OS.get_environment("KIDS_UI_SIZE")
 	for dimensions in SIZES:
+		if not requested_size.is_empty() and str(dimensions.label) != requested_size:
+			continue
 		await _capture_lobby(dimensions)
 		if OS.get_environment("KIDS_UI_LOBBY_ONLY") != "1":
 			await _capture_games(dimensions)
@@ -119,13 +120,21 @@ func _capture_games(capture: Dictionary) -> void:
 		screen.setup(configured, selected)
 		viewport.add_child(screen)
 		await _frames(12)
-		if game_id == "garden":
-			# PvZ 的选卡/入场演出在 60 帧内完成，截图必须看正式战斗而非过渡页。
-			await create_timer(3.4, true, false, true).timeout
+		if screen.has_method("_finish_lesson"):
+			screen.call("_finish_lesson")
+			await _frames(3)
+		if game_id == "military" and screen.has_method("preview_ready"):
+			screen.call("preview_ready")
+			await _frames(4)
 		print("capturing ",game_id," ",capture.label)
 		_audit(screen, game_id)
 		await _sample_performance("%s-%s" % [game_id, capture.label])
 		await _save(viewport, capture, game_id)
+		if game_id == "poetry":
+			screen.call("draw_poem", "")
+			await _frames(16)
+			_audit(screen, "poetry-drawn")
+			await _save(viewport, capture, "poetry-drawn")
 		if game_id == "stories" and not content.stories.is_empty():
 			screen.call("_open_story", str(content.stories[0].id), false)
 			await _frames(12)
@@ -144,7 +153,7 @@ func _screenshot_mode(game_id: String) -> Dictionary:
 	var preferred: String = str({
 		"math":"practice", "pinyin":"practice", "patterns":"practice", "animals":"practice",
 		"workbook":"classic", "memory":"classic", "jungle":"classic", "gomoku":"classic",
-		"military":"classic", "island":"classic", "poetry":"classic", "garden":"classic",
+		"military":"classic", "poetry":"classic",
 	}.get(game_id,"classic"))
 	for mode in modes:
 		if str(mode.id) == str(preferred):

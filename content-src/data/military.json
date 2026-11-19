@@ -1,0 +1,858 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "reference": "code-fans/kriegspiel",
+    "commit": "8bf90e36839d53370d4fd73ad1f0320d491b527a",
+    "license": "MIT (README)"
+  },
+  "formations": [
+    {
+      "id": "balanced",
+      "name": "均衡",
+      "cells": [
+        [
+          0,
+          "mine"
+        ],
+        [
+          1,
+          "flag"
+        ],
+        [
+          2,
+          "mine"
+        ],
+        [
+          3,
+          "platoon"
+        ],
+        [
+          4,
+          "bomb"
+        ],
+        [
+          5,
+          "company"
+        ],
+        [
+          6,
+          "mine"
+        ],
+        [
+          7,
+          "engineer"
+        ],
+        [
+          8,
+          "colonel"
+        ],
+        [
+          9,
+          "battalion"
+        ],
+        [
+          10,
+          "company"
+        ],
+        [
+          12,
+          "corps"
+        ],
+        [
+          14,
+          "division"
+        ],
+        [
+          15,
+          "battalion"
+        ],
+        [
+          16,
+          "engineer"
+        ],
+        [
+          18,
+          "platoon"
+        ],
+        [
+          19,
+          "brigade"
+        ],
+        [
+          20,
+          "brigade"
+        ],
+        [
+          22,
+          "platoon"
+        ],
+        [
+          24,
+          "division"
+        ],
+        [
+          25,
+          "colonel"
+        ],
+        [
+          26,
+          "bomb"
+        ],
+        [
+          27,
+          "company"
+        ],
+        [
+          28,
+          "commander"
+        ],
+        [
+          29,
+          "engineer"
+        ]
+      ]
+    },
+    {
+      "id": "assault",
+      "name": "突击",
+      "cells": [
+        [
+          0,
+          "company"
+        ],
+        [
+          1,
+          "mine"
+        ],
+        [
+          2,
+          "bomb"
+        ],
+        [
+          3,
+          "flag"
+        ],
+        [
+          4,
+          "engineer"
+        ],
+        [
+          5,
+          "mine"
+        ],
+        [
+          6,
+          "corps"
+        ],
+        [
+          7,
+          "mine"
+        ],
+        [
+          8,
+          "battalion"
+        ],
+        [
+          9,
+          "engineer"
+        ],
+        [
+          10,
+          "battalion"
+        ],
+        [
+          12,
+          "colonel"
+        ],
+        [
+          14,
+          "brigade"
+        ],
+        [
+          15,
+          "brigade"
+        ],
+        [
+          16,
+          "bomb"
+        ],
+        [
+          18,
+          "commander"
+        ],
+        [
+          19,
+          "company"
+        ],
+        [
+          20,
+          "division"
+        ],
+        [
+          22,
+          "platoon"
+        ],
+        [
+          24,
+          "engineer"
+        ],
+        [
+          25,
+          "platoon"
+        ],
+        [
+          26,
+          "platoon"
+        ],
+        [
+          27,
+          "colonel"
+        ],
+        [
+          28,
+          "division"
+        ],
+        [
+          29,
+          "company"
+        ]
+      ]
+    },
+    {
+      "id": "defense",
+      "name": "防守",
+      "cells": [
+        [
+          0,
+          "engineer"
+        ],
+        [
+          1,
+          "company"
+        ],
+        [
+          2,
+          "bomb"
+        ],
+        [
+          3,
+          "flag"
+        ],
+        [
+          4,
+          "brigade"
+        ],
+        [
+          5,
+          "mine"
+        ],
+        [
+          6,
+          "engineer"
+        ],
+        [
+          7,
+          "mine"
+        ],
+        [
+          8,
+          "bomb"
+        ],
+        [
+          9,
+          "mine"
+        ],
+        [
+          10,
+          "division"
+        ],
+        [
+          12,
+          "brigade"
+        ],
+        [
+          14,
+          "colonel"
+        ],
+        [
+          15,
+          "company"
+        ],
+        [
+          16,
+          "battalion"
+        ],
+        [
+          18,
+          "division"
+        ],
+        [
+          19,
+          "platoon"
+        ],
+        [
+          20,
+          "platoon"
+        ],
+        [
+          22,
+          "corps"
+        ],
+        [
+          24,
+          "commander"
+        ],
+        [
+          25,
+          "colonel"
+        ],
+        [
+          26,
+          "engineer"
+        ],
+        [
+          27,
+          "company"
+        ],
+        [
+          28,
+          "battalion"
+        ],
+        [
+          29,
+          "platoon"
+        ]
+      ]
+    }
+  ],
+  "puzzles": [
+    {
+      "id": 1,
+      "title": "左侧铁路 · 工兵",
+      "hint": "点工兵，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-1-a",
+          "kind": "engineer",
+          "side": 0,
+          "position": 50
+        },
+        {
+          "id": "puzzle-1-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 55
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "左侧铁路 · 炸弹",
+      "hint": "点炸弹，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-2-a",
+          "kind": "bomb",
+          "side": 0,
+          "position": 50
+        },
+        {
+          "id": "puzzle-2-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 55
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "左侧铁路 · 司令",
+      "hint": "点司令，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-3-a",
+          "kind": "commander",
+          "side": 0,
+          "position": 50
+        },
+        {
+          "id": "puzzle-3-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 55
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "左侧铁路 · 排长",
+      "hint": "点排长，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-4-a",
+          "kind": "platoon",
+          "side": 0,
+          "position": 50
+        },
+        {
+          "id": "puzzle-4-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 55
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "右侧铁路 · 工兵",
+      "hint": "点工兵，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-5-a",
+          "kind": "engineer",
+          "side": 0,
+          "position": 54
+        },
+        {
+          "id": "puzzle-5-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 59
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "右侧铁路 · 炸弹",
+      "hint": "点炸弹，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-6-a",
+          "kind": "bomb",
+          "side": 0,
+          "position": 54
+        },
+        {
+          "id": "puzzle-6-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 59
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "右侧铁路 · 司令",
+      "hint": "点司令，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-7-a",
+          "kind": "commander",
+          "side": 0,
+          "position": 54
+        },
+        {
+          "id": "puzzle-7-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 59
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "右侧铁路 · 排长",
+      "hint": "点排长，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-8-a",
+          "kind": "platoon",
+          "side": 0,
+          "position": 54
+        },
+        {
+          "id": "puzzle-8-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 59
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "左上小路 · 工兵",
+      "hint": "点工兵，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-9-a",
+          "kind": "engineer",
+          "side": 0,
+          "position": 40
+        },
+        {
+          "id": "puzzle-9-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 45
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "左上小路 · 炸弹",
+      "hint": "点炸弹，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-10-a",
+          "kind": "bomb",
+          "side": 0,
+          "position": 40
+        },
+        {
+          "id": "puzzle-10-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 45
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "左上小路 · 司令",
+      "hint": "点司令，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-11-a",
+          "kind": "commander",
+          "side": 0,
+          "position": 40
+        },
+        {
+          "id": "puzzle-11-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 45
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "左上小路 · 排长",
+      "hint": "点排长，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-12-a",
+          "kind": "platoon",
+          "side": 0,
+          "position": 40
+        },
+        {
+          "id": "puzzle-12-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 45
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "title": "右上小路 · 工兵",
+      "hint": "点工兵，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-13-a",
+          "kind": "engineer",
+          "side": 0,
+          "position": 44
+        },
+        {
+          "id": "puzzle-13-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 49
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "title": "右上小路 · 炸弹",
+      "hint": "点炸弹，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-14-a",
+          "kind": "bomb",
+          "side": 0,
+          "position": 44
+        },
+        {
+          "id": "puzzle-14-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 49
+        }
+      ]
+    },
+    {
+      "id": 15,
+      "title": "右上小路 · 司令",
+      "hint": "点司令，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-15-a",
+          "kind": "commander",
+          "side": 0,
+          "position": 44
+        },
+        {
+          "id": "puzzle-15-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 49
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "title": "右上小路 · 排长",
+      "hint": "点排长，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-16-a",
+          "kind": "platoon",
+          "side": 0,
+          "position": 44
+        },
+        {
+          "id": "puzzle-16-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 49
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "title": "大本营左门 · 工兵",
+      "hint": "点工兵，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-17-a",
+          "kind": "engineer",
+          "side": 0,
+          "position": 56
+        },
+        {
+          "id": "puzzle-17-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 61
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "title": "大本营左门 · 炸弹",
+      "hint": "点炸弹，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-18-a",
+          "kind": "bomb",
+          "side": 0,
+          "position": 56
+        },
+        {
+          "id": "puzzle-18-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 61
+        }
+      ]
+    },
+    {
+      "id": 19,
+      "title": "大本营左门 · 司令",
+      "hint": "点司令，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-19-a",
+          "kind": "commander",
+          "side": 0,
+          "position": 56
+        },
+        {
+          "id": "puzzle-19-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 61
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "大本营左门 · 排长",
+      "hint": "点排长，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-20-a",
+          "kind": "platoon",
+          "side": 0,
+          "position": 56
+        },
+        {
+          "id": "puzzle-20-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 61
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "title": "大本营右门 · 工兵",
+      "hint": "点工兵，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-21-a",
+          "kind": "engineer",
+          "side": 0,
+          "position": 58
+        },
+        {
+          "id": "puzzle-21-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 63
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "title": "大本营右门 · 炸弹",
+      "hint": "点炸弹，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-22-a",
+          "kind": "bomb",
+          "side": 0,
+          "position": 58
+        },
+        {
+          "id": "puzzle-22-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 63
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "title": "大本营右门 · 司令",
+      "hint": "点司令，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-23-a",
+          "kind": "commander",
+          "side": 0,
+          "position": 58
+        },
+        {
+          "id": "puzzle-23-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 63
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "title": "大本营右门 · 排长",
+      "hint": "点排长，再点红色军旗；一步夺旗就能过关。",
+      "goal": "capture_flag",
+      "targetSteps": 1,
+      "revealAll": true,
+      "pieces": [
+        {
+          "id": "puzzle-24-a",
+          "kind": "platoon",
+          "side": 0,
+          "position": 58
+        },
+        {
+          "id": "puzzle-24-f",
+          "kind": "flag",
+          "side": 1,
+          "position": 63
+        }
+      ]
+    }
+  ]
+}

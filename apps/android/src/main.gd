@@ -1,7 +1,6 @@
 extends Control
 
 const GAME_SCRIPTS := {
-	"island": "res://src/games/island_game.gd",
 	"jungle": "res://src/games/board_game.gd",
 	"poetry": "res://src/games/poetry_game.gd",
 	"math": "res://src/games/quiz_game.gd",
@@ -10,23 +9,20 @@ const GAME_SCRIPTS := {
 	"patterns": "res://src/games/quiz_game.gd",
 	"animals": "res://src/games/quiz_game.gd",
 	"gomoku": "res://src/games/board_game.gd",
-	"military": "res://src/games/board_game.gd",
-	"garden": "res://src/games/garden_game.gd",
+	"military": "res://src/games/military_game.gd",
 	"workbook": "res://src/games/quiz_game.gd",
 	"stories": "res://src/games/story_game.gd",
 }
 const MUSIC_THEMES := {
-	"island": "garden",
 	"jungle": "forest",
 	"poetry": "poetry",
 	"math": "water",
-	"pinyin": "garden",
+	"pinyin": "forest",
 	"memory": "rainbow",
 	"patterns": "rainbow",
 	"animals": "forest",
 	"gomoku": "lobby",
 	"military": "night",
-	"garden": "garden",
 	"workbook": "math",
 	"stories": "poetry",
 }
@@ -169,30 +165,36 @@ func _rebuild_lobby() -> void:
 	margin.add_theme_constant_override("margin_top", int(maxf(12.0,float(safe.top)+8.0)))
 	margin.add_theme_constant_override("margin_bottom", int(maxf(12.0,float(safe.bottom)+8.0)))
 	lobby_root.add_child(margin)
-	var layout := VBoxContainer.new()
-	layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	layout.add_theme_constant_override("separation", 10)
-	margin.add_child(layout)
-	layout.add_child(_lobby_header())
+	scroll = SmoothScrollContainer.create()
+	var page_scroll := scroll
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	margin.add_child(scroll)
+	var page := VBoxContainer.new()
+	page.name = "LobbyPage"
+	page.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page.custom_minimum_size.x = maxf(1.0, page_scroll.size.x)
+	page.add_theme_constant_override("separation", 10)
+	scroll.add_child(page)
+	page_scroll.resized.connect(func(): page.custom_minimum_size.x = maxf(1.0, page_scroll.size.x))
+	page.add_child(_lobby_header())
 	_heading_row = _lobby_heading() as HBoxContainer
-	layout.add_child(_heading_row)
+	page.add_child(_heading_row)
 	# 排序说明条槽位：隐藏时不占布局间距，切换排序只增删内部节点
 	_sort_note_holder = VBoxContainer.new()
 	_sort_note_holder.visible = sorting
 	var sort_note := _sort_note()
 	if sort_note != null:
 		_sort_note_holder.add_child(sort_note)
-	layout.add_child(_sort_note_holder)
-	scroll = SmoothScrollContainer.create()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	layout.add_child(scroll)
+	page.add_child(_sort_note_holder)
 	card_grid = GridContainer.new()
 	card_grid.columns = _columns()
 	card_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	card_grid.add_theme_constant_override("h_separation", int(metrics.gap))
 	card_grid.add_theme_constant_override("v_separation", int(metrics.gap))
-	scroll.add_child(card_grid)
+	page.add_child(card_grid)
 	_game_order = SaveStore.lobby_order(ContentDB.default_order())
 	for meta in ContentDB.ordered_games(_game_order):
 		var game_id := str(meta.id)
@@ -213,7 +215,10 @@ func _rebuild_lobby() -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(spacer)
 	footer.add_child(PlaygroundUI.button("👨‍👩‍👧 管理儿童档案", Color("#167d74"), _show_profile_manager, "ghost"))
-	layout.add_child(footer)
+	page.add_child(footer)
+	var bottom_spacer := Control.new()
+	bottom_spacer.custom_minimum_size.y = 8
+	page.add_child(bottom_spacer)
 	AudioFX.start_music("lobby")
 	PlaygroundUI.fade_in(lobby_root, 0.18, 0.0)
 	if sorting:
@@ -740,7 +745,18 @@ func _show_profile_form(existing: Dictionary) -> void:
 	name_section.add_child(PlaygroundUI.label("孩子怎么称呼？", 16, PlaygroundUI.INK, 700))
 	var name_edit := PlaygroundUI.text_field("孩子的名字", str(existing.get("name", "")), brand)
 	name_section.add_child(name_edit)
-	content.add_child(name_section)
+	var form_columns := HBoxContainer.new()
+	form_columns.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	form_columns.add_theme_constant_override("separation", 22)
+	var form_left := VBoxContainer.new()
+	form_left.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	form_left.add_theme_constant_override("separation", 14)
+	var form_right := VBoxContainer.new()
+	form_right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	form_right.add_theme_constant_override("separation", 14)
+	form_columns.add_child(form_left)
+	form_columns.add_child(form_right)
+	form_left.add_child(name_section)
 	var age_group := ButtonGroup.new()
 	var age_row := HFlowContainer.new()
 	age_row.add_theme_constant_override("h_separation", 8)
@@ -754,7 +770,7 @@ func _show_profile_form(existing: Dictionary) -> void:
 			age == starting_age,
 			Vector2(72, 50)
 		))
-	content.add_child(_profile_form_section("年龄", "会用来匹配适合孩子的题目难度", age_row))
+	form_left.add_child(_profile_form_section("年龄", "会用来匹配适合孩子的题目难度", age_row))
 	var avatar_group := ButtonGroup.new()
 	var avatar_row := HFlowContainer.new()
 	avatar_row.add_theme_constant_override("h_separation", 8)
@@ -769,7 +785,7 @@ func _show_profile_form(existing: Dictionary) -> void:
 			Vector2(58, 54),
 			27
 		))
-	content.add_child(_profile_form_section("头像", "每个孩子都可以选自己的小动物", avatar_row))
+	form_right.add_child(_profile_form_section("头像", "每个孩子都可以选自己的小动物", avatar_row))
 	var color_names := {
 		"#d56c29": "橙色",
 		"#2878c8": "湖蓝",
@@ -797,7 +813,8 @@ func _show_profile_form(existing: Dictionary) -> void:
 		)
 		color_button.tooltip_text = str(color)
 		color_row.add_child(color_button)
-	content.add_child(_profile_form_section("代表色", "会用在档案卡片和本局玩家标识上", color_row))
+	form_right.add_child(_profile_form_section("代表色", "会用在档案卡片和本局玩家标识上", color_row))
+	content.add_child(form_columns)
 	var save_profile := func():
 		var name := name_edit.text.strip_edges()
 		if name.is_empty():
@@ -824,7 +841,7 @@ func _show_profile_form(existing: Dictionary) -> void:
 		],
 		"名字和年龄会用于开局",
 		false,
-		{"width": 920.0, "min_height": 560.0, "scroll": false, "separation": 18}
+		{"size": "L", "width": 1000.0, "fit_content": true, "scroll": false, "separation": 16}
 	)
 
 
@@ -954,7 +971,7 @@ func _open_modal(
 		opts["dismissible"] = dismissible
 		opts["accent"] = Color("#167d74")
 		if not opts.has("width"):
-			opts["width"] = 780.0
+			opts["width"] = 840.0
 		var managed: Control = dialogs.show_dialog(opts)
 		modal_stack.append(managed)
 		return managed
@@ -973,8 +990,7 @@ func _open_modal(
 	layer.add_child(center)
 	var card := PlaygroundUI.panel(PlaygroundUI.PAPER, 30, Color("#d8c9a9"), 2)
 	var modal_width := minf(float(options.get("width", 780.0)), maxf(360.0, viewport_size.x - metrics.margin * 4.0))
-	var modal_height := minf(float(options.get("min_height", 0.0)), viewport_size.y * 0.82)
-	card.custom_minimum_size = Vector2(modal_width, modal_height)
+	card.custom_minimum_size = Vector2(modal_width, 0.0)
 	card.modulate.a = 0.0
 	card.scale = Vector2(0.97, 0.97)
 	center.add_child(card)
@@ -988,6 +1004,7 @@ func _open_modal(
 	if bool(options.get("scroll", true)):
 		var content_scroll := ScrollContainer.new()
 		content_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		content_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 		content_scroll.add_child(content)
 		var max_height := minf(float(options.get("max_content_height", 430.0)), viewport_size.y * 0.46)
 		var desired_content_height := clampf(content.get_combined_minimum_size().y + 8.0, 72.0, max_height)

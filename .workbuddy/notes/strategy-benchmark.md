@@ -1,37 +1,10 @@
-# 四款策略游戏交互资料实读核验
+# 三款策略游戏交互资料实读核验
 
 读取日期：2026-11-18。范围仅研究，不修改游戏代码及 references.json。逐文档 URL、完整抓取正文、行数、内容 SHA256、读取状态和本地代码位置见 content-src/research/strategy-interactions.json。源码文件作为独立主题技术资料计数；不把仓库首页、许可文件、同页镜像或搜索摘要计入20份。测试文件属于规则用例技术资料，不冒充独立攻略文章。
 
 阅读深度：完整获取正文，并逐文件静态阅读关键定义、规则分支和测试断言；未运行外部游戏，不能将此声明为全部源码逐行审计或真机交互验收。下表的“已实现”仅表示本地静态代码存在相应机制，“待验证”表示依赖规则口径、运行效果或文件只负责转发。每款目标20份，最终成功数以JSON counts为准；失败记录保留，不计数。分支方式补读的内容不声称与仓库提交完全相同，保留实际抓取URL与散列。
 
-许可核验：PVZ-Godot-Dream 的API许可元数据为 NOASSERTION，须依据实际LICENSE正文判断；旧笔记的“自定义非商用”不能未经复核当作开放许可。neoalienson/animal_chess 未声明可识别许可证，仅作只读机制参考，不据此复制源码。pixi-gomoku 为 GPL-3.0，已读取许可证正文；两份军棋仓库均MIT，已读取许可证正文。本次研究附存的源码正文仅用于内部核验，不能随应用打包发布；生产代码不导入上述正文。
-
-## PVZ / garden：20个独立技术主题
-
-| 序号 | 实读结论（该文件内可核对的具体机制） | 状态 | 本地差距及验收重点 |
-|---|---|---|---|
-| 1 | card.gd 区分战斗卡可用态、费用和冷却；不可用卡拒绝进入手持态 | 已实现 | garden_game._card_unavailable_reason与garden_field._draw_card已有冷却遮罩及费用状态；旧笔记“无冷却可视化”已失效 |
-| 2 | hand_manager.gd 空手、角色、道具三态；切换清理旧态；右键或空白取消 | 已实现 | _cancel_selection已清空植物、铲子和瞄准；本地仍用字段组合，需验证跨输入切换互斥 |
-| 3 | hm_character.gd 跟随指针的角色与格内影子分开；落格再次校验 | 已实现 | garden_field._draw_preview/_draw_ghost已有预览，engine.plant再次can_plant；静态存在不等于拖拽真机达标 |
-| 4 | hm_item.gd 多层植物按目标切换预铲高亮，离格清理高亮，确认铲指定植物 | 已实现 | 本地按指针纵向落点选择 shells/grid/bases，点击把目标 UID 交给 engine.shovel；预览和实际删层使用同一目标 |
-| 5 | shovel_in_ui.gd 点击隐藏槽位铲子，取消或结束后恢复 | 已实现 | `start_shovel_return` 已接入取消、成功铲除、关闭铲子三条路径，槽位图标在 0.2 秒内回飞 |
-| 6 | card_slot_norm.gd 卡片切换父节点后0.2秒飞向目标槽 | 已实现 | 选卡页新增 10 个出战槽，候选卡与槽位双向 0.2 秒飞入/回飞，飞行期间锁输入；开战再飞向战斗 HUD |
-| 7 | card_slot_battle.gd 成功用卡统一扣费和冷却，阳光setter刷新卡；紫卡基础价加同种数量×50 | 待验证 | 本地plant统一结算已具备，但cost取静态定义，未见紫卡随存量涨价；该涨价为参考项目口径，不能直接当作必需规则 |
-| 8 | card_slot_candidate.gd 按可用卡组和解锁状态生成分页，普通与模仿卡用不同选择键 | 待验证 | 本地候选卡筛选存在；未实现模仿卡独立选择键及分页同等结构，应以实际内容范围判断 |
-| 9 | sun.gd collected立即防重入，入账在飞行之前；飞行0.3秒，到达淡出0.5秒，存活10秒 | 已实现 | 本地collect_sun同样立即入账并collecting防重，field飞行0.35秒；旧笔记建议“到达才入账”不是来源事实 |
-| 10 | day_suns_manager.gd A=10×累计阳光+425，上限950加0至274随机，最终production_interval/100传入秒计时器 | 已实现 | `garden-rules.json` 新增 base/step/cap/jitter，累计产出越多间隔越长；夹具覆盖首轮增量和恢复 |
-| 11 | plant_cell.gd 将底座、主体、外壳分层，地形位标志参与种植判定，底座移动带动上层 | 已实现 | engine.can_plant与bases/grid/shells覆盖水、屋顶、睡莲、花盆及升级前置，表达方式不同不构成缺失 |
-| 12 | zm_zombie_wave_manager.gd 旗前/旗帜/最终波分支，异步等待后校验刷新代次和运行阶段 | 已实现 | 旗波与最终波先写入 pendingWave/waveCue 倒计时，时间到才刷怪；重开或恢复不会执行旧回调 |
-| 13 | ui_remind_word.gd 准备/放置/开始各0.6秒，大波提示4秒再空等2秒，最终另3秒 | 已实现 | 三段开场各 0.6 秒；旗波 4 秒、最终波 3 秒，全屏居中文字按真实时长淡出，不再使用棋盘坐标偏移 |
-| 14 | ui_flag_progress_bar.gd 真实值与追赶值分开，逐帧追近且旗帜上升 | 已实现 | 进度按波内时间连续推进，旗波停顿等待提示，旗标按每 10 波绘制；夹具验证首波平滑与最终波等待 |
-| 15 | tree_pause_manager.gd 多个暂停因素取any，每次原因变化均发信号 | 待验证 | 本地paused阻止推进与field输入具备；多个模态叠加关闭一个后是否仍暂停需运行核验 |
-| 16 | component_create_sun.gd 首次产出时间随机，使用基础间隔与速度倍率分离；阳光抛出再下落 | 已实现 | 植物首次产出与后续间隔分离，倍速只改变逻辑步进；自动收集现在等阳光落到目标高度后才触发，手动点击仍立即入账 |
-| 17 | plant_005_potato_mine.gd 准备计时期间禁检测，出土动画结束才开启检测；脚本默认prepare_time为10秒 | 已实现 | 本地unarmed/remaining准备态存在，默认15秒；不能把参考默认10秒当作原版统一数值，需区分动画结束与计时结束 |
-| 18 | plant_007_chomper.gd 区分啃咬和咀嚼，动画事件发出吞噬，咀嚼时不重复咬 | 已实现 | 本地bite→digest→idle存在，目标丢失与目标重新获取的边界需回归 |
-| 19 | plant_036_coffee_bean.gd 仅调用plant_cell.coffee_bean_awake_up，不在本文件校验前置 | 待验证 | 本地can_plant验证睡眠主体、plant唤醒；本源仅6行转发，不能从该文件独立证明完整咖啡豆规则 |
-| 20 | plant_048_cob_cannon.gd 占用相邻两格，弹药准备后可激活目标，准备态闪烁 | 已实现 | 本地双玉米投手前置、双格占用、aimingCannon与aim_cannon均具备；瞄准取消、铲右半格需专项运行 |
-
-最高价值事项：修正旧笔记的阳光单位和入账时机；补选卡飞行动画；核验预铲层与删层一致；平滑波内进度与最终波提示。不要重复实现已存在的拖拽、格内预览和冷却遮罩。
+许可核验：neoalienson/animal_chess 未声明可识别许可证，仅作只读机制参考，不据此复制源码。pixi-gomoku 为 GPL-3.0，已读取许可证正文；两份军棋仓库均MIT，已读取许可证正文。本次研究附存的源码正文仅用于内部核验，不能随应用打包发布；生产代码不导入上述正文。
 
 ## 斗兽棋 / jungle：20个独立技术主题
 
@@ -120,19 +93,16 @@
 
 ## 质量复核（2026-11-18 第二轮静态核对）
 
-- `strategy-interactions.json` 实际有 80 条 `documents`，四款各 20 条，`readSuccess=true` 与 HTTP 200 均为 80/80；`(repo, path)` 组合 80 个、无重复，源码正文合计约 14,065 行。
+- `strategy-interactions.json` 实际有 60 条 `documents`，三款各 20 条，`readSuccess=true` 与 HTTP 200 均为 60/60；`(repo, path)` 组合 60 个、无重复，源码正文合计约 11,251 行。
 - JSON 当前没有 `sourceId` / `source_id` 字段，不能声称来源 ID 唯一；可复核的稳定键只有 `repo + path`。研究正文中的“20 个独立技术主题”按不同文件计数，不等于 20 个独立项目。
-- 直接相关与弱相关按本项目玩法静态分类：PVZ 20 条、斗兽棋 20 条、五子棋 16 条、军棋 14 条，共 70 条直接用于当前触摸/规则比对；五子棋的 4 条 AI 资料（`AiSetupPopup.ts`、`ai.worker.ts`、`patterns.ts`、`brains.ts`）与军棋的 2 条 AI/AI 测试、4 条传统布阵变体资料不纳入当前“固定残局、无运行时 AI”实现依据。
-- 许可限制保持原结论：PVZ-Godot-Dream 的 API 元数据为 `NOASSERTION`，但已读取的 LICENSE 正文是自定义非商用许可，不能复制进公开分发；`neoalienson/animal_chess` 未声明可识别许可，只可读机制；pixi-gomoku 为 GPL-3.0；两份军棋仓库为 MIT。研究证据不等于代码或素材复用授权。
+- 直接相关与弱相关按本项目玩法静态分类：斗兽棋 20 条、五子棋 16 条、军棋 14 条，共 50 条直接用于当前触摸/规则比对；五子棋的 4 条 AI 资料（`AiSetupPopup.ts`、`ai.worker.ts`、`patterns.ts`、`brains.ts`）与军棋的 2 条 AI/AI 测试、4 条传统布阵变体资料不纳入当前“固定残局、无运行时 AI”实现依据。
+- 许可限制保持原结论：`neoalienson/animal_chess` 未声明可识别许可，只可读机制；pixi-gomoku 为 GPL-3.0；两份军棋仓库为 MIT。研究证据不等于代码或素材复用授权。
 - 表内状态表示静态对照结论，不表示运行或设备验收；本轮没有运行外部项目、没有执行 Godot 解析，也没有在平板上做触控验收。后续修复应引用具体 `repo + path`，不能只报“已读 20 条”。
 
 ## 本轮实现对照（2026-11-18 第三轮）
 
 | 参考证据 | 本地修复 | 状态 |
 |---|---|---|
-| `PVZ-Godot-Dream`：`hm_item.gd`、`shovel_in_ui.gd`、`card_slot_norm.gd` | 选卡页 10 个出战槽、候选卡/槽位双向飞行动画、开战飞入 HUD；铲子回飞；按指针纵向落点选择 shells/grid/bases 并把具体 UID 传给引擎。 | 已实现；三档 UI 审计通过，触屏手感待真机 |
-| `PVZ-Godot-Dream`：`day_suns_manager.gd`、`zm_zombie_wave_manager.gd`、`ui_remind_word.gd`、`ui_flag_progress_bar.gd` | 天降阳光参数源、三段 0.6 秒开场、旗波/最终波独立倒计时与音效、波内连续进度、旗标刻度、自动收集等待落地、提示层改用全屏坐标。 | 已实现；848 项花园夹具通过 |
-| `PVZ-Godot-Dream`：`card.gd`、`card_slot_battle.gd` | 临时传送带/保龄球卡 15 秒生命周期，最后 5 秒描边闪烁；不可用卡错误抖动；手持 `handMode` 与目标 UID 进入存档。 | 已实现；生命周期与恢复夹具通过 |
 | 天天军棋翻翻棋规则页；`pengpengjunqi` 翻棋状态机 | 双人经典军棋新增未定阵营阶段、连续两次同色定阵营、异色重置、阵营到玩家双向映射、角色栏红蓝显示和规则弹窗；旧存档安全回退为固定阵营。 | 已实现；自动夹具覆盖定阵营、重置、旧存档和残局 |
 | `neoalienson/animal_chess` 棋盘/规则组件；`pixi-gomoku` 规则视图与最后一步 | 斗兽棋敌方陷阱“↓”降级角标、吃子缩小淡出；三类棋补统一规则小书；空 `lastMove`、缺失 `puzzle` 的旧快照不再报错。 | 已实现；Godot 解析与棋类夹具通过 |
 | 儿童答题交互资料；GCompris 分类、规律、字词活动 | 五款学习游戏保留三选一和朗读，同时新增“把答案拖到作答区”手势与拖动 ghost；点选仍是无障碍替代路径，答题锁与手动下一题不变。 | 已实现；三档 UI 审计通过，拖拽真机精度待验证 |
@@ -145,6 +115,5 @@
 
 - Godot 4.7.2 编辑器上下文解析退出码 0；只有 Android `build-tools` 目录、`build/staging` 嵌套工程和编辑器设置写盘提示，无 GDScript 解析错误。
 - `tests/test_runner.gd` 通过：内容、棋类、答题、记忆、唐诗锚点、军棋定阵营与旧存档。
-- `tests/garden_fixtures.gd` 通过：848 项，0 失败。
 - `pnpm native:audit` 三档尺寸完成，`layout-report.txt` 为 `No visible touch-target issues found.`；桌面模拟 3000×2120、3392×2400、1180×800 均约 120 FPS。设备触控、系统手势、真实安卓性能和安装后覆盖升级仍需实体平板验证。
 - Docker 测试签名 APK 构建完成：包名 `xyz.lynote.kidsplayground`，版本 5 / 1.3.1，minSdk 26、targetSdk 33、arm64-v8a + armeabi-v7a；`apksigner` 验证 v2 签名通过。产物仅供本机验证，不能覆盖正式安装，未部署服务器。

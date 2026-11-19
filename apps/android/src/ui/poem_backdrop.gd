@@ -14,8 +14,5 @@ func _draw() -> void:
 	var image := ArtLibrary.texture(token)
 	if image != null:
 		draw_texture_rect(image,Rect2(size.x-185,18,160,160),false,Color(0.7,0.58,0.78,0.18))
-	var lantern := ArtLibrary.texture("🏮")
-	if lantern != null:
-		draw_texture_rect(lantern,Rect2(10,size.y-170,108,140),false,Color(1,1,1,0.22))
 	var hills := PackedVector2Array([Vector2(0,size.y),Vector2(0,size.y-60),Vector2(size.x*0.25,size.y-130),Vector2(size.x*0.45,size.y-50),Vector2(size.x*0.7,size.y-100),Vector2(size.x,size.y-30),Vector2(size.x,size.y)])
 	draw_colored_polygon(hills,Color(0.48,0.37,0.61,0.06))

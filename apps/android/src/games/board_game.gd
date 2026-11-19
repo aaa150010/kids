@@ -7,11 +7,14 @@ var status: Label
 var detail: Label
 var player_labels: Array[Label] = []
 var player_panels: Array[PanelContainer] = []
+var game_header: Control
+var game_tools: Control
 var view := "board"
 var replay_index := 0
 var replay_surface: BoardSurface
 var replay_label: Label
 var _idle_seconds := 0.0
+var _last_immersive_turn := -1
 
 func _ready() -> void:
 	build_shell()
@@ -78,55 +81,89 @@ func _build_board() -> void:
 	PlaygroundUI.clear(content_root)
 	player_labels.clear()
 	player_panels.clear()
-	var row := HBoxContainer.new()
-	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	row.add_theme_constant_override("separation",16)
-	row.add_child(_player_column(0))
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation", 10)
+	header.add_child(_player_chip(0))
+	var middle := CenterContainer.new()
+	middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	middle.add_child(PlaygroundUI.chip("自由五子 · 无禁手" if game_id == "gomoku" else "鼠吃象 · 狮虎跳河", accent))
+	header.add_child(middle)
+	header.add_child(_player_chip(1))
+	content_root.add_child(header)
+	game_header = header
 	surface = BoardSurface.new()
 	surface.game_id = game_id
 	surface.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	surface.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	surface.cell_pressed.connect(_cell)
 	surface.previewed.connect(func(): lesson_action("select"))
-	row.add_child(surface)
-	row.add_child(_player_column(1))
-	content_root.add_child(row)
+	content_root.add_child(surface)
 	status = PlaygroundUI.label("",22,accent,700,true)
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content_root.add_child(status)
+	detail = PlaygroundUI.label("",16,PlaygroundUI.INK_SOFT,500,true)
+	detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	content_root.add_child(detail)
 	var tools := HFlowContainer.new()
 	tools.alignment = FlowContainer.ALIGNMENT_CENTER
 	tools.add_theme_constant_override("h_separation",12)
 	if mode_id == "puzzle":
 		tools.add_child(PlaygroundUI.button("关卡地图",accent,_show_map,"soft"))
 		tools.add_child(PlaygroundUI.button("看提示",accent,_hint,"soft"))
-	tools.add_child(PlaygroundUI.button("规则",accent,_show_rules,"soft"))
 	tools.add_child(PlaygroundUI.button("悔棋",accent,_request_undo,"soft"))
 	tools.add_child(PlaygroundUI.button("棋谱回放",accent,_show_replay,"soft"))
 	if game_id == "gomoku":
 		tools.add_child(PlaygroundUI.button("显示手数",accent,func(): surface.show_numbers = not surface.show_numbers; surface.queue_redraw(),"soft"))
 	tools.add_child(PlaygroundUI.button("重新开始",accent,_confirm_restart,"ghost"))
 	content_root.add_child(tools)
+	game_tools = tools
+	_on_immersive_changed(immersive)
 
-func _player_column(side: int) -> Control:
-	var panel := PlaygroundUI.panel(PlaygroundUI.mix(accent,Color.WHITE,0.88),22,PlaygroundUI.mix(accent,Color.WHITE,0.4),2)
-	panel.custom_minimum_size.x = 176
-	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation",14)
-	panel.add_child(column)
+func _player_chip(side: int) -> Control:
+	var panel := PlaygroundUI.panel(PlaygroundUI.mix(accent,Color.WHITE,0.88),18,PlaygroundUI.mix(accent,Color.WHITE,0.4),2)
+	panel.custom_minimum_size = Vector2(230,60)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation",10)
+	panel.add_child(row)
 	var token := str(players[side].get("avatar","🦊")) if side < players.size() else "🎯"
-	column.add_child(ArtLibrary.picture(token,Vector2(105,105)))
+	row.add_child(ArtLibrary.picture(token,Vector2(46,48)))
+	var copy := VBoxContainer.new()
+	copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	copy.add_theme_constant_override("separation",1)
 	var name := str(players[side].name) if side < players.size() else "本关目标"
-	column.add_child(PlaygroundUI.label(name,23,PlaygroundUI.INK,700,true))
-	var text := PlaygroundUI.label("",18,PlaygroundUI.INK_SOFT,500,true)
-	column.add_child(text)
+	copy.add_child(PlaygroundUI.label(name,18,PlaygroundUI.INK,700,true))
+	var text := PlaygroundUI.label("",14,PlaygroundUI.INK_SOFT,500,true)
+	copy.add_child(text)
+	row.add_child(copy)
 	player_labels.append(text)
 	player_panels.append(panel)
-	if side == 1:
-		detail = PlaygroundUI.label("",17,PlaygroundUI.INK_SOFT,500,true)
-		column.add_child(detail)
 	return panel
+
+
+func _extra_topbar_actions(row: HBoxContainer) -> void:
+	var rules := PlaygroundUI.button("规则", accent, show_game_rules, "soft")
+	rules.custom_minimum_size = Vector2(70,48)
+	rules.add_theme_font_size_override("font_size", 17)
+	row.add_child(rules)
+
+
+func show_game_rules() -> void:
+	_show_rules()
+
+
+func _on_immersive_changed(value: bool) -> void:
+	if game_header != null and is_instance_valid(game_header):
+		game_header.visible = not value
+	if status != null and is_instance_valid(status):
+		status.visible = not value
+	if detail != null and is_instance_valid(detail):
+		detail.visible = not value
+	if game_tools != null and is_instance_valid(game_tools):
+		game_tools.visible = not value
+	if value:
+		_last_immersive_turn = int(engine.state.get("turn", 0)) if not engine.state.is_empty() else -1
+
 
 func _refresh(animate: bool = false) -> void:
 	if surface == null or not is_instance_valid(surface):
@@ -135,14 +172,23 @@ func _refresh(animate: bool = false) -> void:
 	var targets: Array = engine.legal_moves(selected) if not selected.is_empty() else []
 	surface.interactive = not paused and view == "board" and engine.state.phase == "playing" and not (mode_id == "puzzle" and int(engine.state.turn) == 1)
 	surface.update_state(engine.state,targets,animate)
+	if immersive and str(engine.state.phase) == "playing" and int(engine.state.turn) != _last_immersive_turn:
+		_last_immersive_turn = int(engine.state.turn)
+		var who := str(players[int(engine.state.turn)].get("name","")) if int(engine.state.turn) < players.size() else ""
+		var hint := "轮到你"
+		if not who.is_empty():
+			hint = "%s · 轮到你" % who
+		show_toast(hint, 1.1)
 	for side in 2:
 		var current: bool = int(engine.state.turn) == side and str(engine.state.phase) == "playing"
 		player_panels[side].add_theme_stylebox_override("panel",PlaygroundUI.style(PlaygroundUI.mix(accent,Color.WHITE,0.85 if current else 0.94),22,accent if current else PlaygroundUI.LINE,3 if current else 1))
-		var role := ""
-		if game_id == "military" and bool(engine.state.get("factionAssigned", false)):
-			var faction_side := engine.player_side(side)
-			role = "\n%s方" % ("红" if faction_side == 0 else "蓝" if faction_side == 1 else "待定")
-		player_labels[side].text = (("现在轮到你" if current else "等一等，慢慢想") + role) if side < players.size() else str(engine.state.get("puzzle",{}).get("title",""))
+		if side < players.size():
+			var prefix := "现在轮到你" if current else "等一等，慢慢想"
+			if str(engine.state.phase) == "finished":
+				prefix = "本局结束"
+			player_labels[side].text = prefix
+		else:
+			player_labels[side].text = "本关目标"
 	if not selected.is_empty():
 		detail.text = "%s\n%s个可走位置" % [BoardRules.NAMES[selected.kind],targets.size()]
 	elif mode_id == "puzzle":

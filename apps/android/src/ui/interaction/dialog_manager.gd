@@ -2,25 +2,22 @@ class_name DialogManager
 extends Node
 
 ## 统一弹窗管理（由 main 实例化，通过 main_hub 组的 dialogs 属性访问）
-## 三档尺寸：S / M / L，圆角 28px、2px 描边、柔和阴影、纸质暖色底
+## 三档宽度：S / M / L，高度随内容展开；固定标题、正文、操作区，不显示内部滚动条
 ## 弹窗栈：close_top() 关栈顶；关闭后焦点恢复到打开前控件
 ## opts 支持的键：
 ##   title(String) / body(Control|String) / buttons(Array[{text,kind,callback}])
-##   size("S"|"M"|"L") / width(float 覆盖) / min_height(float 覆盖)
+##   size("S"|"M"|"L") / width(float 覆盖)
 ##   accent(Color) / eyebrow(String) / dismissible(bool, 供返回键判断)
 ##   mask_close(bool, 点遮罩关闭，默认 false) / scroll(bool) / separation(int)
-##   max_content_height(float) / on_close(Callable)
+##   max_content_height(float) / fit_content(bool) / on_close(Callable)
 
 signal dialog_opened(layer: Control)
 signal dialog_closed(layer: Control)
 
-const SIZE_RATIOS := {
-	"S": Vector2(0.38, 0.32),
-	"M": Vector2(0.56, 0.52),
-	"L": Vector2(0.74, 0.68),
-}
-const MAX_SIZE := Vector2(1080.0, 760.0) # 像素上限
-const MIN_SIZE := Vector2(360.0, 240.0)
+const SIZE_RATIOS := {"S": 0.38, "M": 0.56, "L": 0.78}
+const MAX_WIDTH := 1120.0
+const MIN_WIDTH := 360.0
+const MAX_HEIGHT := 900.0
 const SAFE_MARGIN := 24.0        # 距屏幕边缘安全边距
 const DIM_ALPHA := 0.38          # 遮罩不透明度
 const ANIM_IN := 0.20            # 进场 180–220ms
@@ -75,35 +72,44 @@ func show_dialog(opts: Dictionary) -> Control:
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(center)
 	var card := PanelContainer.new()
-	card.add_theme_stylebox_override("panel", PlaygroundUI.style(
+	var panel_style := PlaygroundUI.style(
 		PlaygroundUI.PAPER, 28, PlaygroundUI.mix(accent, Color.WHITE, 0.55), 2, 12, Color(0, 0, 0, 0.22)
-	))
+	)
+	panel_style.content_margin_left = 24
+	panel_style.content_margin_right = 24
+	panel_style.content_margin_top = 20
+	panel_style.content_margin_bottom = 20
+	card.add_theme_stylebox_override("panel", panel_style)
 	var card_size := _card_size(str(opts.get("size", "M")), viewport_size, opts)
-	card.custom_minimum_size = card_size
+	card.custom_minimum_size = Vector2(card_size.x, 0.0)
 	layer.set_meta("card", card)
 	layer.set_meta("options", opts.duplicate())
 	layer.focus_mode = Control.FOCUS_ALL
 	center.add_child(card)
-	# 外层滚动隔离内容最小尺寸，三档尺寸同时约束实际面板大小。
-	var viewport_scroll := ScrollContainer.new()
-	viewport_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	viewport_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
-	card.add_child(viewport_scroll)
 	var column := VBoxContainer.new()
 	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	column.add_theme_constant_override("separation", int(opts.get("separation", 14)))
-	viewport_scroll.add_child(column)
-	if bool(opts.get("dismissible", true)):
-		var close_row := HBoxContainer.new()
-		close_row.alignment = BoxContainer.ALIGNMENT_END
-		close_row.add_child(PlaygroundUI.button("关闭 ×", accent, func(): close_layer(layer, true), "ghost"))
-		column.add_child(close_row)
+	column.add_theme_constant_override("separation", int(opts.get("separation", 16)))
+	card.add_child(column)
 	var eyebrow := str(opts.get("eyebrow", ""))
-	if not eyebrow.is_empty():
-		column.add_child(PlaygroundUI.label(eyebrow, 14, accent, 700))
 	var title := str(opts.get("title", ""))
-	if not title.is_empty():
-		column.add_child(PlaygroundUI.label(title, 30, PlaygroundUI.INK, 700, true))
+	var dismissible := bool(opts.get("dismissible", true))
+	if dismissible or not eyebrow.is_empty() or not title.is_empty():
+		var header := HBoxContainer.new()
+		header.add_theme_constant_override("separation", 16)
+		var heading := VBoxContainer.new()
+		heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		heading.add_theme_constant_override("separation", 3)
+		if not eyebrow.is_empty():
+			heading.add_child(PlaygroundUI.label(eyebrow, 14, accent, 700))
+		if not title.is_empty():
+			heading.add_child(PlaygroundUI.label(title, 30, PlaygroundUI.INK, 700, true))
+		header.add_child(heading)
+		if dismissible:
+			var close := PlaygroundUI.icon_button("×", accent, func(): close_layer(layer, true), "关闭")
+			close.focus_mode = Control.FOCUS_NONE
+			header.add_child(close)
+		column.add_child(header)
+		column.add_child(PlaygroundUI.separator(PlaygroundUI.mix(accent, Color.WHITE, 0.78)))
 	var body_value: Variant = opts.get("body")
 	var body: Control
 	if body_value is Control:
@@ -112,16 +118,23 @@ func show_dialog(opts: Dictionary) -> Control:
 		# 允许直接传文本
 		body = PlaygroundUI.label("" if body_value == null else str(body_value), 16, PlaygroundUI.INK_SOFT, 500, true)
 	body.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	if opts.has("max_content_height") and bool(opts.get("scroll", true)):
-		var scroll := ScrollContainer.new()
-		scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-		scroll.add_child(body)
-		scroll.custom_minimum_size.y = minf(maxf(0.0, float(opts["max_content_height"])), card_size.y * 0.5)
-		column.add_child(scroll)
-	else:
+	var fit_content := bool(opts.get("fit_content", false))
+	if fit_content or not bool(opts.get("scroll", true)):
+		# 表单弹窗按内容自然展开，不套滚动框。
 		column.add_child(body)
+	else:
+		var body_scroll := ScrollContainer.new()
+		body_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+		body_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+		body_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		body_scroll.add_child(body)
+		body_scroll.custom_minimum_size.y = minf(maxf(52.0, body.get_combined_minimum_size().y), _body_limit(viewport_size, opts))
+		column.add_child(body_scroll)
+		layer.set_meta("body_scroll", body_scroll)
+		layer.set_meta("body", body)
 	var buttons: Array = opts.get("buttons", [])
 	if not buttons.is_empty():
+		column.add_child(PlaygroundUI.separator(PlaygroundUI.mix(accent, Color.WHITE, 0.82)))
 		column.add_child(_button_row(buttons, accent, card_size.x))
 	var prev_focus := get_viewport().gui_get_focus_owner()
 	if prev_focus != null:
@@ -137,7 +150,9 @@ func show_dialog(opts: Dictionary) -> Control:
 	animation.set_parallel(true)
 	animation.tween_property(card, "modulate:a", 1.0, ANIM_IN)
 	animation.tween_property(card, "scale", Vector2.ONE, ANIM_IN).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	var focusables := card.find_children("*", "BaseButton", true, false)
+	var focusables := card.find_children("*", "BaseButton", true, false).filter(
+		func(control): return (control as Control).focus_mode != Control.FOCUS_NONE
+	)
 	if not focusables.is_empty():
 		focusables[0].call_deferred("grab_focus")
 	_claim_ipc()
@@ -253,8 +268,14 @@ func _resize_dialogs() -> void:
 		var card: Control = layer.get_meta("card")
 		var opts: Dictionary = layer.get_meta("options")
 		var target := _card_size(str(opts.get("size", "M")), get_viewport().get_visible_rect().size, opts)
-		card.custom_minimum_size = target
-		card.size = target
+		card.custom_minimum_size = Vector2(target.x, 0.0)
+		if layer.has_meta("body_scroll"):
+			var body_scroll: ScrollContainer = layer.get_meta("body_scroll")
+			var body: Control = layer.get_meta("body")
+			body_scroll.custom_minimum_size.y = minf(
+				maxf(52.0, body.get_combined_minimum_size().y),
+				_body_limit(get_viewport().get_visible_rect().size, opts)
+			)
 
 
 func _guard_focus(control: Control) -> void:
@@ -283,17 +304,20 @@ func top_layer() -> Control:
 
 
 func _card_size(tier: String, viewport_size: Vector2, opts: Dictionary) -> Vector2:
-	var ratio: Vector2 = SIZE_RATIOS.get(tier, SIZE_RATIOS["M"])
-	var avail := (viewport_size - Vector2.ONE * SAFE_MARGIN * 2.0).max(Vector2.ONE)
-	var target := Vector2(
-		clampf(viewport_size.x * ratio.x, minf(MIN_SIZE.x, avail.x), minf(MAX_SIZE.x, avail.x)),
-		clampf(viewport_size.y * ratio.y, minf(MIN_SIZE.y, avail.y), minf(MAX_SIZE.y, avail.y))
-	)
+	var ratio := float(SIZE_RATIOS.get(tier, SIZE_RATIOS["M"]))
+	var available := maxf(MIN_WIDTH, viewport_size.x - SAFE_MARGIN * 2.0)
+	var width := clampf(viewport_size.x * ratio, minf(MIN_WIDTH, available), minf(MAX_WIDTH, available))
 	if opts.has("width"):
-		target.x = clampf(float(opts["width"]), minf(MIN_SIZE.x, avail.x), minf(MAX_SIZE.x, avail.x))
-	if opts.has("min_height"):
-		target.y = clampf(float(opts["min_height"]), 0.0, avail.y * 0.9)
-	return target
+		width = clampf(float(opts["width"]), minf(MIN_WIDTH, available), minf(MAX_WIDTH, available))
+	return Vector2(width, 0.0)
+
+
+func _body_limit(viewport_size: Vector2, opts: Dictionary) -> float:
+	var max_card_height := minf(maxf(320.0, viewport_size.y - SAFE_MARGIN * 2.0), MAX_HEIGHT)
+	var limit := maxf(180.0, max_card_height - 240.0)
+	if opts.has("max_content_height"):
+		limit = minf(limit, maxf(120.0, float(opts["max_content_height"])))
+	return limit
 
 
 func _button_row(actions: Array, accent: Color, card_width: float) -> Control:
@@ -302,8 +326,8 @@ func _button_row(actions: Array, accent: Color, card_width: float) -> Control:
 	row.add_theme_constant_override("h_separation", 12)
 	row.add_theme_constant_override("v_separation", 10)
 	var pair := actions.size() == 2
-	# 双按钮等宽，且不小于 200px
-	var pair_width := maxf(BUTTON_PAIR_MIN, (card_width - 96.0) * 0.5)
+	# 宽屏不再把两个操作拉满整行，保持紧凑的玩具按钮比例。
+	var pair_width := clampf((card_width - 72.0) * 0.5, BUTTON_PAIR_MIN, 240.0)
 	for action in actions:
 		var button := PlaygroundUI.button(
 			str(action.get("text", "好")),

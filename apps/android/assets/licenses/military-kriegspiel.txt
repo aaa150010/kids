@@ -1,0 +1,9 @@
+军棋规则参考来源
+
+Repository: https://github.com/code-fans/kriegspiel
+Commit: 8bf90e36839d53370d4fd73ad1f0320d491b527a
+Referenced files: src/core/constants.py, board.py, rules_engine.py, game_state.py, layout_validator.py
+License stated in the repository README: MIT License
+
+本项目的 Godot 实现只移植棋类规则与棋盘坐标思路，不引入上游 Python、Pygame、
+网络、AI 或界面素材。

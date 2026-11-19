@@ -10,8 +10,15 @@ var game_meta: Dictionary = {}
 var players: Array = []
 var accent := Color("#167d74")
 var paused := false
+var immersive := false
 var content_root: VBoxContainer
 var overlay_root: Control
+var topbar: Control
+var layout_root: VBoxContainer
+var _immersive_bar: HBoxContainer
+var _immersive_controls_generation := 0
+var _immersive_tap_times: Array = []
+var _immersive_tap_position := Vector2.ZERO
 var toast_label: Label
 var settings_button: Button
 var _modal_stack: Array[Control] = []
@@ -55,11 +62,15 @@ func build_shell() -> void:
 	margin.add_theme_constant_override("margin_top", int(maxf(10.0,float(safe.top)+6.0)))
 	margin.add_theme_constant_override("margin_bottom", int(maxf(14.0,float(safe.bottom)+8.0)))
 	add_child(margin)
-	var layout := VBoxContainer.new()
-	layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	layout.add_theme_constant_override("separation", 12)
-	margin.add_child(layout)
-	layout.add_child(_build_topbar())
+	layout_root = VBoxContainer.new()
+	layout_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layout_root.add_theme_constant_override("separation", 12)
+	margin.add_child(layout_root)
+	topbar = _build_topbar()
+	layout_root.add_child(topbar)
+	immersive = true
+	topbar.visible = false
+	layout_root.add_theme_constant_override("separation", 6)
 	lesson_banner = PlaygroundUI.panel(PlaygroundUI.mix(accent, Color.WHITE, 0.85), 18, accent, 2)
 	var lesson_row := HBoxContainer.new()
 	lesson_label = PlaygroundUI.label("", 18, PlaygroundUI.INK, 700, true)
@@ -67,16 +78,17 @@ func build_shell() -> void:
 	lesson_row.add_child(lesson_label)
 	lesson_row.add_child(PlaygroundUI.button("跳过教学", accent, _finish_lesson, "soft"))
 	lesson_banner.add_child(lesson_row)
-	layout.add_child(lesson_banner)
+	layout_root.add_child(lesson_banner)
 	lesson_banner.hide()
 	content_root = VBoxContainer.new()
 	content_root.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	content_root.add_theme_constant_override("separation", 12)
-	layout.add_child(content_root)
+	layout_root.add_child(content_root)
 	overlay_root = Control.new()
 	overlay_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(overlay_root)
+	_build_immersive_bar()
 	toast_label = PlaygroundUI.label("", 18, Color.WHITE, 700)
 	toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	toast_label.z_index = 80
@@ -85,6 +97,35 @@ func build_shell() -> void:
 	toast_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	toast_label.position = Vector2(0, 24)
 	add_child(toast_label)
+
+
+func _build_immersive_bar() -> void:
+	_immersive_bar = HBoxContainer.new()
+	_immersive_bar.anchor_left = 1.0
+	_immersive_bar.anchor_right = 1.0
+	_immersive_bar.anchor_top = 0.0
+	_immersive_bar.anchor_bottom = 0.0
+	_immersive_bar.offset_left = -360.0
+	_immersive_bar.offset_right = -16.0
+	_immersive_bar.offset_top = 12.0
+	_immersive_bar.offset_bottom = 60.0
+	_immersive_bar.alignment = BoxContainer.ALIGNMENT_END
+	_immersive_bar.add_theme_constant_override("separation", 8)
+	_immersive_bar.z_index = 60
+	var rules := PlaygroundUI.button("规则", accent, show_game_rules, "soft")
+	rules.custom_minimum_size = Vector2(70, 48)
+	rules.add_theme_font_size_override("font_size", 17)
+	_immersive_bar.add_child(rules)
+	var pause := PlaygroundUI.button("Ⅱ 暂停", accent, toggle_pause, "soft")
+	pause.custom_minimum_size = Vector2(96, 48)
+	pause.add_theme_font_size_override("font_size", 17)
+	_immersive_bar.add_child(pause)
+	var exit := PlaygroundUI.button("退出全屏", accent, func(): set_immersive(false), "primary")
+	exit.custom_minimum_size = Vector2(112, 48)
+	exit.add_theme_font_size_override("font_size", 17)
+	_immersive_bar.add_child(exit)
+	_immersive_bar.visible = false
+	add_child(_immersive_bar)
 
 
 func _build_topbar() -> Control:
@@ -111,10 +152,81 @@ func _build_topbar() -> Control:
 	row.add_child(title_box)
 	if compact and GameTuning.supports(game_id):
 		row.add_child(PlaygroundUI.chip(GameTuning.label(difficulty), accent))
+	_extra_topbar_actions(row)
+	var fullscreen := PlaygroundUI.button("全屏", accent, func(): set_immersive(true), "soft")
+	fullscreen.custom_minimum_size = Vector2(64, 48)
+	fullscreen.add_theme_font_size_override("font_size", 16)
+	row.add_child(fullscreen)
 	var pause := PlaygroundUI.button("Ⅱ  暂停", accent, toggle_pause, "soft")
 	pause.custom_minimum_size = Vector2(108, 48)
 	row.add_child(pause)
 	return bar
+
+
+func _extra_topbar_actions(_row: HBoxContainer) -> void:
+	pass
+
+
+func show_game_rules() -> void:
+	show_help()
+
+
+func set_immersive(value: bool) -> void:
+	if immersive == value:
+		return
+	immersive = value
+	if topbar != null and is_instance_valid(topbar):
+		topbar.visible = not value
+	if lesson_banner != null and is_instance_valid(lesson_banner):
+		lesson_banner.visible = lesson_visible and not value
+	if _immersive_bar != null and is_instance_valid(_immersive_bar):
+		_immersive_bar.visible = false
+	_immersive_controls_generation += 1
+	_immersive_tap_times.clear()
+	if layout_root != null:
+		layout_root.add_theme_constant_override("separation", 6 if value else 12)
+	_on_immersive_changed(value)
+	checkpoint("进入沉浸模式" if value else "退出沉浸模式")
+	AudioFX.play("tap")
+
+
+func _on_immersive_changed(_value: bool) -> void:
+	pass
+
+
+func _show_immersive_controls() -> void:
+	if not immersive or _immersive_bar == null or not is_instance_valid(_immersive_bar):
+		return
+	_immersive_controls_generation += 1
+	var generation := _immersive_controls_generation
+	_immersive_bar.visible = true
+	_immersive_bar.modulate.a = 1.0
+	await get_tree().create_timer(4.0).timeout
+	if generation == _immersive_controls_generation and immersive and is_instance_valid(_immersive_bar):
+		_immersive_bar.visible = false
+
+
+func _notice_immersive_tap(position: Vector2) -> void:
+	if not immersive:
+		return
+	var now := Time.get_ticks_msec()
+	if _immersive_tap_times.is_empty() or position.distance_to(_immersive_tap_position) > 56.0:
+		_immersive_tap_times.clear()
+		_immersive_tap_position = position
+	_immersive_tap_times = _immersive_tap_times.filter(func(stamp: int) -> bool: return now - stamp <= 720)
+	_immersive_tap_times.append(now)
+	if _immersive_tap_times.size() >= 3:
+		_immersive_tap_times.clear()
+		_show_immersive_controls()
+
+
+func _input(event: InputEvent) -> void:
+	if not immersive:
+		return
+	if event is InputEventScreenTouch and not event.pressed:
+		_notice_immersive_tap(event.position)
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
+		_notice_immersive_tap(event.position)
 
 
 func _player_pill(player: Dictionary, first: bool) -> Control:
@@ -161,8 +273,7 @@ func show_help() -> void:
 		{"text": "再读一遍", "kind": "soft", "callback": func(): Speech.repeat()},
 		{"text": "知道啦", "kind": "primary", "callback": func(): _close_top_modal()},
 	]
-	if game_id != "garden":
-		actions.insert(0, {"text": "重玩小课堂", "kind": "soft", "callback": func(): _close_top_modal(); begin_lesson(true)})
+	actions.insert(0, {"text": "重玩小课堂", "kind": "soft", "callback": func(): _close_top_modal(); begin_lesson(true)})
 	open_modal("怎么玩", content, actions, "小玩家指南")
 
 
@@ -319,6 +430,7 @@ func _open_modal_fallback(
 	var content_scroll := ScrollContainer.new()
 	content_scroll.custom_minimum_size.y = minf(430.0, size.y * 0.50)
 	content_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	content_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	content_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content_scroll.add_child(content)
@@ -425,6 +537,9 @@ func _handle_back() -> void:
 		elif bool(top.get_meta("dismissible", true)):
 			_close_top_modal()
 		return
+	if immersive:
+		set_immersive(false)
+		return
 	if paused:
 		toggle_pause(false)
 		return
@@ -481,6 +596,7 @@ func level_map(on_chosen: Callable) -> Control:
 	var scroll := ScrollContainer.new()
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	var grid := GridContainer.new()
 	grid.columns = 6
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -500,15 +616,22 @@ func level_map(on_chosen: Callable) -> Control:
 
 
 func begin_lesson(force: bool = false) -> void:
-	if game_id == "garden" or players.is_empty():
+	if players.is_empty():
 		return
+	if not force:
+		return
+	if immersive:
+		set_immersive(false)
 	if not force and bool(SaveStore.learning(str(players[0].id),game_id,mode_id).tutorialSeen):
 		return
 	lesson_step = 0
 	if game_id in ["math","pinyin","patterns","animals","workbook"]:
 		lesson_actions = ["listen","answer","next"]
 		lesson_texts = ["点听题，听听这一题在问什么。","点一个答案，看看正确答案与讲解。","读完讲解，再点下面的下一题。"]
-	elif game_id in ["jungle","gomoku","military"]:
+	elif game_id == "military":
+		lesson_actions = ["select","move","pause"]
+		lesson_texts = ["双方棋子全部明示，红方先走。","点自己的棋子，再点亮起的位置移动。","点暂停，军棋会自动保存，回来继续。"]
+	elif game_id in ["jungle","gomoku"]:
 		lesson_actions = ["select","move","pause"]
 		lesson_texts = ["点一枚自己的棋子；五子棋请按住空交叉点。","点亮起的位置，走出第一步。","试试上方暂停按钮，进度会自动保存。"]
 	elif game_id == "memory":
@@ -538,7 +661,7 @@ func lesson_action(action: String) -> void:
 
 
 func _show_lesson_step() -> void:
-	lesson_banner.show()
+	lesson_banner.visible = not immersive
 	lesson_label.text = "小课堂 %s/%s  ·  %s" % [lesson_step+1,lesson_actions.size(),lesson_texts[lesson_step]]
 	Speech.speak(str(lesson_texts[lesson_step]))
 

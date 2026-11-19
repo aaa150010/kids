@@ -83,7 +83,7 @@
       "url": "https://github.com/zh-lx/pinyin-pro",
       "stars": 4800,
       "license": "MIT",
-      "use": "拼音内容整理参考，保留已人工整理的答案"
+      "use": "故事与古诗逐字、逐句拼音制作；古诗读音以制作阶段生成结果为准"
     },
     {
       "id": "kenney",
@@ -116,58 +116,11 @@
       "use": "格林、安徒生经典情节参考；本项目另行中文改写，不使用现代译文或该站音频"
     },
     {
-      "id": "pvz-web",
-      "url": "https://github.com/xyxiao001/pvz-web",
-      "revision": "45fe1f404ff702ff37589d015aad0f62509d373e",
-      "license": "未声明；仅限本项目本地个人版使用",
-      "use": "植物大战僵尸一代场景、部件动画、角色与音频的固定版本来源；逐文件哈希记录在 garden-assets.json，公开分发前需替换",
-      "layoutSources": [
-        "https://github.com/xyxiao001/pvz-web/blob/45fe1f404ff702ff37589d015aad0f62509d373e/src/game/config.ts",
-        "https://github.com/xyxiao001/pvz-web/blob/45fe1f404ff702ff37589d015aad0f62509d373e/src/game/model.ts",
-        "https://github.com/xyxiao001/pvz-web/blob/45fe1f404ff702ff37589d015aad0f62509d373e/src/rendering/scene.ts"
-      ]
-    },
-    {
-      "id": "pvz-godot-dream",
-      "url": "https://github.com/hsk-dream/PVZ-Godot-Dream",
-      "revision": "740691cf9b0ad02c7021efa4dae2ab5f86207585",
-      "releaseUsedForAudio": "https://github.com/hsk-dream/PVZ-Godot-Dream/releases/download/v0.3.0/PVZ-Godot_dream_exe_20250712.zip",
-      "license": "Custom Non-Commercial License v1.0（仅非商业；条款明确禁止公司内部使用、销售/变现及 SaaS/API 商业服务；不是标准 SPDX 许可）",
-      "accessedAt": "2026-11-18",
-      "use": "本会话经用户明确要求完整采用：固定提交的脚本、场景、资源、卡槽、植物/僵尸状态机、弹道、波次和迷你模式导入 apps/android/pvz/；v0.3.0 发布 PCK 中可读取的音频资源导入 apps/android/assets/garden/pvz-audio/。仅随本项目本地个人版使用，公开分发前替换；非商业许可与原始 PvZ 权利归属见 content-src/licenses/pvz-godot-dream.txt"
-    },
-    {
-      "id": "godot-pvz-hytommm",
-      "url": "https://github.com/HYTommm/Godot-PVZ",
-      "license": "未声明",
-      "accessedAt": "2026-11-18",
-      "use": "PVZ Godot C# 复刻，爆炸粒子特效参考"
-    },
-    {
-      "id": "jspvz-wiki-card",
-      "url": "https://jspvz.fandom.com/zh/wiki/%E5%8D%A1%E7%89%87",
-      "license": "CC-BY-SA（Fandom 默认）",
-      "accessedAt": "2026-11-18",
-      "use": "PVZ 原版卡片使用规则核对：点卡再点格、点空白取消、一次性卡 15 秒消失前 5 秒闪烁"
-    },
-    {
-      "id": "pvz-wiki-cn",
-      "url": "https://wiki.pvz1.com/doku.php?id=home",
-      "accessedAt": "2026-11-18",
-      "use": "PVZ 机制与数值核对"
-    },
-    {
-      "id": "pvz-touch-edition",
-      "url": "https://www.tpzpw.com/yxgju06/992.html",
-      "accessedAt": "2026-11-18",
-      "use": "PVZ 手机版点选+拖拽双种植手势、铲子用法确认"
-    },
-    {
       "id": "godot-core-system",
       "url": "https://github.com/LiGameAcademy/godot_core_system",
       "license": "MIT",
       "accessedAt": "2026-11-18",
-      "use": "信号总线与随机选择器模式参考（PVZ-Godot-Dream 亦引用）"
+      "use": "信号总线与随机选择器模式参考"
     },
     {
       "id": "animal-chess-flutter",
@@ -379,6 +332,14 @@
       "url": "https://www.drimlike.com/en/blog/10-golden-rules-of-interface-design-for.html",
       "accessedAt": "2026-11-18",
       "use": "儿童界面十则：大按钮、少文字、表扬反馈、允许乱点探索"
+    },
+    {
+      "id": "code-fans-kriegspiel",
+      "url": "https://github.com/code-fans/kriegspiel",
+      "commit": "8bf90e36839d53370d4fd73ad1f0320d491b527a",
+      "license": "MIT (README)",
+      "accessedAt": "2026-11-19",
+      "use": "二人陆战棋 5×13 棋盘、25 子、铁路、行营、大本营、炸弹/地雷/工兵与军旗规则的参考；本项目用 GDScript 重写，不引入 Python、联网、AI 或界面素材"
     }
   ]
 }

@@ -5,6 +5,7 @@ static var cache: Dictionary = {}
 static var manifest: Array = []
 static var indexed := false
 const ANIMAL_TOKENS := {"elephant":"🐘","lion":"🦁","tiger":"🐯","leopard":"🐆","wolf":"🐺","dog":"🐶","cat":"🐱","rat":"🐭"}
+const JUNGLE_PIECES := ["elephant", "lion", "tiger", "leopard", "wolf", "dog", "cat", "rat"]
 const KENNEY := {"🐘":"elephant","🐼":"panda","🐧":"penguin","🐰":"rabbit","🐇":"rabbit","🐒":"monkey","🐵":"monkey","🐍":"snake","🐷":"pig","🐖":"pig","🦒":"giraffe","🦜":"parrot","🦛":"hippo"}
 
 static func texture(token: String) -> Texture2D:
@@ -31,6 +32,16 @@ static func _hex(value: int) -> String:
 	while value > 0:
 		result = digits[value % 16] + result
 		value = int(value / 16)
+	return result
+
+
+static func jungle_piece(kind: String) -> Texture2D:
+	var key := "jungle:" + kind
+	if cache.has(key):
+		return cache[key]
+	var path := "res://assets/jungle/" + kind + ".webp"
+	var result: Texture2D = load(path) if ResourceLoader.exists(path) else null
+	cache[key] = result
 	return result
 
 static func symbols(text: String) -> Array:

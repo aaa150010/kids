@@ -9,9 +9,11 @@ var feedback_text: Label
 var next_button: Button
 var player_labels: Array[Label] = []
 var player_panels: Array[PanelContainer] = []
+var game_controls: Control
 var view := "question"
 var family := "mixed"
 var _last_question := ""
+var _last_immersive_player := -1
 
 func _ready() -> void:
 	build_shell()
@@ -100,6 +102,7 @@ func _build_session() -> void:
 			controls.add_child(PlaygroundUI.button(str(entry[1]),accent,_change_family.bind(target),"primary" if family == target else "soft"))
 	controls.add_child(PlaygroundUI.button("重新开始",accent,_confirm_restart,"ghost"))
 	content_root.add_child(controls)
+	game_controls = controls
 	var row := HBoxContainer.new()
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	row.add_theme_constant_override("separation",14)
@@ -127,6 +130,7 @@ func _build_session() -> void:
 	var scroll := ScrollContainer.new()
 	scroll.custom_minimum_size.y = 72
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	feedback_text = PlaygroundUI.label("",20,PlaygroundUI.INK_SOFT,500,true)
 	feedback_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(feedback_text)
@@ -144,6 +148,7 @@ func _build_session() -> void:
 	actions.add_child(next_button)
 	column.add_child(actions)
 	content_root.add_child(feedback_panel)
+	_on_immersive_changed(immersive)
 
 func _player_panel(index: int) -> Control:
 	var panel := PlaygroundUI.panel(PlaygroundUI.mix(accent,Color.WHITE,0.9),24,PlaygroundUI.LINE)
@@ -161,6 +166,17 @@ func _player_panel(index: int) -> Control:
 	player_panels.append(panel)
 	return panel
 
+
+func _on_immersive_changed(value: bool) -> void:
+	if game_controls != null and is_instance_valid(game_controls):
+		game_controls.visible = not value
+	for panel in player_panels:
+		if panel != null and is_instance_valid(panel):
+			panel.visible = not value
+	if value:
+		_last_immersive_player = int(engine.state.get("currentPlayer", 0)) if not engine.state.is_empty() else -1
+
+
 func _refresh() -> void:
 	if engine.state.get("phase","") == "empty":
 		feedback_panel.hide()
@@ -172,6 +188,13 @@ func _refresh() -> void:
 		return
 	var question := engine.question()
 	var current := int(engine.state.currentPlayer)
+	if immersive and current != _last_immersive_player:
+		_last_immersive_player = current
+		var who := str(players[current].get("name","")) if current < players.size() else ""
+		var hint := "轮到你"
+		if not who.is_empty():
+			hint = "%s · 轮到你" % who
+		show_toast(hint, 1.1)
 	var progress := SaveStore.learning(str(players[current].id),game_id,mode_id)
 	if not (str(question.id) in progress.recentIds):
 		progress.recentIds.append(str(question.id))

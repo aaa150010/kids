@@ -293,16 +293,7 @@ func start_music(theme: String) -> void:
 		return
 	_theme = theme
 	if not _music_cache.has(theme):
-		if theme.begins_with("garden:"):
-			var path := "res://assets/garden/music/" + theme.trim_prefix("garden:") + ".mp3"
-			if ResourceLoader.exists(path):
-				var stream: AudioStreamMP3 = load(path).duplicate()
-				stream.loop = true
-				_music_cache[theme] = stream
-			else:
-				_music_cache[theme] = _build_music("garden")
-		else:
-			_music_cache[theme] = _build_music(theme)
+		_music_cache[theme] = _build_music(theme)
 	var old_index := _active_music
 	var next_index := 1 - _active_music
 	var old_player := _music_players[old_index]
@@ -356,7 +347,6 @@ func set_music_duck(active: bool, reason: StringName = &"story") -> void:
 func _build_music(theme: String) -> AudioStreamWAV:
 	var roots := {
 		"lobby": 261.63,
-		"garden": 293.66,
 		"night": 196.0,
 		"pool": 329.63,
 		"fog": 174.61,

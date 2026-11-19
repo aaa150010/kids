@@ -55,8 +55,12 @@ var card_theme := "animals"
 var view := "table"
 var cards: Array[MemoryCard] = []
 var player_labels: Array[Label] = []
+var player_panels: Array[PanelContainer] = []
+var game_header: Control
+var game_tools: Control
 var status: Label
 var _save_clock := 0.0
+var _last_immersive_player := -1
 
 func _ready() -> void:
 	build_shell()
@@ -123,6 +127,7 @@ func _build_table() -> void:
 	PlaygroundUI.clear(content_root)
 	cards.clear()
 	player_labels.clear()
+	player_panels.clear()
 	var tools := HFlowContainer.new()
 	tools.add_theme_constant_override("h_separation",12)
 	if mode_id == "adventure":
@@ -136,16 +141,23 @@ func _build_table() -> void:
 		tools.add_child(PlaygroundUI.button("看一对提示",accent,_hint,"soft"))
 	tools.add_child(PlaygroundUI.button("重新开始",accent,_confirm_restart,"ghost"))
 	content_root.add_child(tools)
-	var row := HBoxContainer.new()
-	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	row.add_theme_constant_override("separation",16)
-	row.add_child(_player_panel(0))
+	game_tools = tools
+	var header := HBoxContainer.new()
+	header.add_theme_constant_override("separation",10)
+	header.add_child(_player_chip(0))
+	var middle := CenterContainer.new()
+	middle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	middle.add_child(PlaygroundUI.chip("配对成功继续翻",accent))
+	header.add_child(middle)
+	header.add_child(_player_chip(1))
+	content_root.add_child(header)
+	game_header = header
 	var table := PlaygroundUI.panel(Color("#f7e6ee"),28,Color("#c992ad"),3)
 	table.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	table.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var grid_scroll := ScrollContainer.new()
 	grid_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	grid_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	grid_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	grid_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	table.add_child(grid_scroll)
@@ -166,12 +178,22 @@ func _build_table() -> void:
 		card.set_card_theme(card_theme)
 		card.pressed.connect(_flip.bind(index))
 		cards.append(card)
-	row.add_child(table)
-	row.add_child(_player_panel(1))
-	content_root.add_child(row)
+	content_root.add_child(table)
 	status = PlaygroundUI.label("",22,accent,700,true)
 	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content_root.add_child(status)
+	_on_immersive_changed(immersive)
+
+
+func _on_immersive_changed(value: bool) -> void:
+	if game_header != null and is_instance_valid(game_header):
+		game_header.visible = not value
+	if status != null and is_instance_valid(status):
+		status.visible = not value
+	if game_tools != null and is_instance_valid(game_tools):
+		game_tools.visible = not value
+	if value:
+		_last_immersive_player = int(engine.state.get("currentPlayer", 0)) if not engine.state.is_empty() else -1
 
 func _layout_memory_grid(scroll: ScrollContainer, grid: GridContainer, card_count: int) -> void:
 	if not is_instance_valid(scroll) or not is_instance_valid(grid) or card_count <= 0:
@@ -189,18 +211,23 @@ func _layout_memory_grid(scroll: ScrollContainer, grid: GridContainer, card_coun
 	grid.columns = clampi(maxi(columns_for_height, balanced_columns), 1, max_columns)
 
 
-func _player_panel(index: int) -> Control:
-	var panel := PlaygroundUI.panel(PlaygroundUI.mix(accent,Color.WHITE,0.9),24,PlaygroundUI.LINE)
-	panel.custom_minimum_size.x = 150
-	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation",16)
-	panel.add_child(column)
-	column.add_child(ArtLibrary.picture(str(players[index].get("avatar","🦊")) if index < players.size() else "💡",Vector2(90,100)))
-	column.add_child(PlaygroundUI.label(str(players[index].name) if index < players.size() else "记住位置",22,PlaygroundUI.INK,700,true))
-	var score := PlaygroundUI.label("",19,PlaygroundUI.INK_SOFT,500,true)
-	column.add_child(score)
+func _player_chip(index: int) -> Control:
+	var panel := PlaygroundUI.panel(PlaygroundUI.mix(accent,Color.WHITE,0.9),18,PlaygroundUI.LINE)
+	panel.custom_minimum_size = Vector2(230,60)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation",10)
+	panel.add_child(row)
+	row.add_child(ArtLibrary.picture(str(players[index].get("avatar","🦊")) if index < players.size() else "💡",Vector2(46,48)))
+	var copy := VBoxContainer.new()
+	copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	copy.add_theme_constant_override("separation",1)
+	copy.add_child(PlaygroundUI.label(str(players[index].name) if index < players.size() else "记住位置",18,PlaygroundUI.INK,700,true))
+	var score := PlaygroundUI.label("",14,PlaygroundUI.INK_SOFT,500,true)
+	copy.add_child(score)
+	row.add_child(copy)
 	player_labels.append(score)
+	player_panels.append(panel)
 	return panel
 
 func _refresh(animate: bool = true, hold: Array = []) -> void:
@@ -217,10 +244,25 @@ func _refresh(animate: bool = true, hold: Array = []) -> void:
 		var face_up: bool = paired or index in flipped or index in peek_indices
 		cards[index].show_face(face_up,paired,paused or bool(engine.state.pending) or float(engine.state.peekRemaining)>0 or engine.state.phase != "playing",animate)
 	for index: int in 2:
+		var current: bool = index < players.size() and int(engine.state.currentPlayer) == index and str(engine.state.phase) == "playing"
+		if index < player_panels.size():
+			player_panels[index].add_theme_stylebox_override("panel",PlaygroundUI.style(
+				PlaygroundUI.mix(accent,Color.WHITE,0.84 if current else 0.94),
+				18,
+				accent if current else PlaygroundUI.LINE,
+				3 if current else 1
+			))
 		if index < players.size():
 			player_labels[index].text = "%s\n已找到 %s 对" % ["现在轮到你" if index == int(engine.state.currentPlayer) else "等一等，记位置",int(engine.state.scores[index])]
 		else:
-			player_labels[index].text = "没有倒计时\n提示 %s / %s 次\n已尝试 %s 次" % [int(engine.state.hints),int(engine.state.get("hintsMax",2)),int(engine.state.moves)]
+			player_labels[index].text = "提示 %s / %s\n已尝试 %s 次" % [int(engine.state.hints),int(engine.state.get("hintsMax",2)),int(engine.state.moves)]
+	if immersive and str(engine.state.phase) == "playing" and int(engine.state.currentPlayer) != _last_immersive_player:
+		_last_immersive_player = int(engine.state.currentPlayer)
+		var who := str(players[_last_immersive_player].get("name","")) if _last_immersive_player < players.size() else ""
+		var hint := "轮到你"
+		if not who.is_empty():
+			hint = "%s · 轮到你" % who
+		show_toast(hint, 1.1)
 	status.text = "全部配对完成啦！" if engine.state.phase == "result" else "看看这两张图案，记住位置" if bool(engine.state.pending) else "配对成功可以继续翻；翻错就换人" if engine.state.flipped.is_empty() else "再翻一张，找一找它的朋友"
 
 func _flip(index: int) -> void:

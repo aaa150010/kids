@@ -33,6 +33,7 @@ const LONG_PRESS_TIME := 0.45
 func _ready() -> void:
 	custom_minimum_size = Vector2(400,340)
 	mouse_filter = Control.MOUSE_FILTER_STOP
+	clip_contents = true
 	resized.connect(queue_redraw)
 
 func _notification(what: int) -> void:
@@ -43,7 +44,8 @@ func _notification(what: int) -> void:
 func metrics() -> Dictionary:
 	var columns := 15 if game_id == "gomoku" else 9 if game_id == "jungle" else 12
 	var rows := 15 if game_id == "gomoku" else 7 if game_id == "jungle" else 5
-	var spacing := minf((size.x-70)/float(columns if game_id != "gomoku" else 14),(size.y-70)/float(rows if game_id != "gomoku" else 14))
+	var padding := 24.0
+	var spacing := minf((size.x-padding)/float(columns if game_id != "gomoku" else 14),(size.y-padding)/float(rows if game_id != "gomoku" else 14))
 	var extent := Vector2(columns if game_id != "gomoku" else 14,rows if game_id != "gomoku" else 14)*spacing
 	var origin := (size-extent)*0.5
 	if game_id != "gomoku":
@@ -286,15 +288,27 @@ func _draw_grid(gap: float) -> void:
 			if flip_width > 0.45:
 				_text("?",draw_center,gap*0.4*flip_width,Color("#fff6d6"))
 			continue
-		var rect := Rect2(draw_center-Vector2(gap*0.38*flip_width,gap*0.4),Vector2(gap*0.76*flip_width,gap*0.8))
-		draw_style_box(PlaygroundUI.style(Color("#fff9ec"),28 if game_id == "jungle" else 12,tint,3,4,Color(0,0,0,0.15)),rect)
-		if flip_width > 0.6:
-			if game_id == "jungle":
-				var texture := ArtLibrary.texture(str(ArtLibrary.ANIMAL_TOKENS.get(piece.kind,"")))
-				if texture != null:
-					draw_texture_rect(texture,Rect2(draw_center-Vector2(gap*0.28,gap*0.35),Vector2(gap*0.56,gap*0.52)),false)
-				_text("%s %s" % [BoardRules.NAMES[piece.kind],BoardRules.ANIMALS[piece.kind]],draw_center+Vector2(0,gap*0.23),gap*0.19,tint)
-			else:
+		if game_id == "jungle":
+			var shadow_center := draw_center + Vector2(0, gap * 0.37)
+			draw_circle(shadow_center, gap * 0.32, Color(0, 0, 0, 0.16))
+			draw_circle(draw_center, gap * 0.43, Color(tint, 0.16))
+			draw_arc(draw_center, gap * 0.43, 0, TAU, 40, tint, 3.5, true)
+			var texture := ArtLibrary.jungle_piece(str(piece.kind))
+			if texture != null:
+				draw_texture_rect(texture, Rect2(draw_center - Vector2(gap * 0.41, gap * 0.44), Vector2(gap * 0.82, gap * 0.82)), false)
+			var badge_center := draw_center + Vector2(gap * 0.30, gap * 0.28)
+			draw_circle(badge_center, gap * 0.15, tint)
+			_text(str(BoardRules.ANIMALS[piece.kind]), badge_center, gap * 0.13, Color.WHITE)
+			var opposite_badge := draw_center + Vector2(-gap * 0.30, -gap * 0.28)
+			draw_set_transform(opposite_badge, PI, Vector2.ONE)
+			draw_circle(Vector2.ZERO, gap * 0.15, tint)
+			_text(str(BoardRules.ANIMALS[piece.kind]), Vector2.ZERO, gap * 0.13, Color.WHITE)
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			_text(str(BoardRules.NAMES[piece.kind]), draw_center + Vector2(0, gap * 0.40), gap * 0.16, tint)
+		else:
+			var rect := Rect2(draw_center-Vector2(gap*0.38*flip_width,gap*0.4),Vector2(gap*0.76*flip_width,gap*0.8))
+			draw_style_box(PlaygroundUI.style(Color("#fff9ec"),12,tint,3,4,Color(0,0,0,0.15)),rect)
+			if flip_width > 0.6:
 				_text(str(BoardRules.NAMES[piece.kind]),draw_center,gap*0.25,tint)
 		if selected:
 			draw_arc(draw_center,gap*0.47,0,TAU,40,Color("#e6ae2e"),4,true)
@@ -307,7 +321,7 @@ func _draw_grid(gap: float) -> void:
 			var center := position_for(last_to)
 			var alpha := 1.0-motion
 			if game_id == "jungle":
-				var texture := ArtLibrary.texture(str(ArtLibrary.ANIMAL_TOKENS.get(str(last_capture.get("kind","")),"")))
+				var texture := ArtLibrary.jungle_piece(str(last_capture.get("kind","")))
 				if texture != null:
 					draw_texture_rect(texture,Rect2(center-Vector2(gap*0.30,gap*0.38),Vector2(gap*0.60,gap*0.56)),false,Color(1,1,1,alpha*0.75))
 			else:

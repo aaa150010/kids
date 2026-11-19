@@ -19,13 +19,13 @@ func _number(value: Variant, fallback: float = 0.0) -> float:
 func create_session(player: Dictionary, catalog: Dictionary, learning: Dictionary = {}) -> Dictionary:
 	library = catalog
 	state = {
-		"schemaVersion": 1, "gameId": "stories", "modeId": "classic",
+		"schemaVersion": 2, "gameId": "stories", "modeId": "classic",
 		"player": player.duplicate(true), "phase": "library", "seed": randi(),
 		"storyId": "", "category": "all", "filter": "age", "query": "", "page": 0,
-		"pinyin": int(player.get("age", 8)) <= 6, "fontSize": 28,
+		"pinyin": true, "fontSize": 28,
 		"favorites": [], "recent": [], "bookmarks": {}, "completed": [],
 	}
-	for key in ["pinyin", "fontSize", "favorites", "recent", "bookmarks", "completed"]:
+	for key in ["fontSize", "favorites", "recent", "bookmarks", "completed"]:
 		if learning.has(key):
 			state[key] = learning[key].duplicate(true) if learning[key] is Array or learning[key] is Dictionary else learning[key]
 	_sanitize()
@@ -33,7 +33,8 @@ func create_session(player: Dictionary, catalog: Dictionary, learning: Dictionar
 
 
 func restore(value: Dictionary) -> bool:
-	if int(_number(value.get("schemaVersion", 0))) != 1 or str(value.get("gameId", "")) != "stories":
+	var schema := int(_number(value.get("schemaVersion", 0)))
+	if schema not in [1, 2] or str(value.get("gameId", "")) != "stories":
 		return false
 	if not value.get("player") is Dictionary or str(value.player.get("id", "")) != str(state.player.id):
 		return false
@@ -43,6 +44,9 @@ func restore(value: Dictionary) -> bool:
 	for key in state.keys():
 		if value.has(key):
 			state[key] = value[key].duplicate(true) if value[key] is Array or value[key] is Dictionary else value[key]
+	state.schemaVersion = 2
+	if schema == 1:
+		state.pinyin = true
 	_sanitize()
 	return true
 

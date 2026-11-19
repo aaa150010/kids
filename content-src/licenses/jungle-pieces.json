@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "title": "斗兽棋 2.5D 玩具棋子素材",
+  "createdAt": "2026-11-19",
+  "origin": "本项目原创生成，未使用第三方角色、商标或现成游戏素材",
+  "tool": "OpenAI image generation",
+  "usage": "仅用于童心游乐场斗兽棋棋子表现，源文件保存在 content-src/assets/jungle/",
+  "files": [
+    "content-src/assets/jungle/elephant.webp",
+    "content-src/assets/jungle/lion.webp",
+    "content-src/assets/jungle/tiger.webp",
+    "content-src/assets/jungle/leopard.webp",
+    "content-src/assets/jungle/wolf.webp",
+    "content-src/assets/jungle/dog.webp",
+    "content-src/assets/jungle/cat.webp",
+    "content-src/assets/jungle/rat.webp"
+  ]
+}

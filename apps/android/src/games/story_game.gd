@@ -13,6 +13,7 @@ var _stream_story_id := ""
 var _pending_play := ""
 var _cards_root: VBoxContainer
 var _reader_scroll: ScrollContainer
+var reader_tools: Control
 var _paragraphs: Array[PanelContainer] = []
 var _audio_label: Label
 var _play_button: Button
@@ -91,6 +92,17 @@ func _render() -> void:
 
 func _story() -> Dictionary:
 	return ContentDB.story(str(session.state.get("storyId", "")))
+
+
+func _pinyin_text(values: Variant) -> String:
+	if not values is Array:
+		return ""
+	var parts := PackedStringArray()
+	for value in values:
+		var text := str(value).strip_edges()
+		if not text.is_empty():
+			parts.append(text)
+	return " ".join(parts)
 
 
 func _resume_position(story_id: String) -> float:
@@ -192,6 +204,7 @@ func _render_cards() -> void:
 	session.state.page = clampi(int(session.state.page), 0, page_count - 1)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var grid := GridContainer.new()
 	grid.columns = 3 if get_viewport_rect().size.x >= 1450.0 else 2
@@ -204,7 +217,15 @@ func _render_cards() -> void:
 		var column := VBoxContainer.new()
 		column.add_theme_constant_override("separation", 8)
 		card.add_child(column)
-		column.add_child(PlaygroundUI.label(str(CATEGORY_ICONS.get(str(story.category), "📖")) + " " + str(story.title), 24, accent, 700, true))
+		var title_box := VBoxContainer.new()
+		title_box.add_theme_constant_override("separation", 1)
+		var title_pinyin := _pinyin_text(story.get("titlePinyin", []))
+		if not title_pinyin.is_empty():
+			var pinyin_label := PlaygroundUI.label(title_pinyin, 14, PlaygroundUI.INK_SOFT, 500, true)
+			pinyin_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+			title_box.add_child(pinyin_label)
+		title_box.add_child(PlaygroundUI.label(str(CATEGORY_ICONS.get(str(story.category), "📖")) + " " + str(story.title), 24, accent, 700, true))
+		column.add_child(title_box)
 		var opening := str(story.paragraphs[0].text) if not story.paragraphs.is_empty() else "翻开故事，一起听读。"
 		column.add_child(PlaygroundUI.label(opening.left(48) + ("……" if opening.length() > 48 else ""), 18, PlaygroundUI.INK_SOFT, 500, true))
 		var tools := HBoxContainer.new()
@@ -277,8 +298,10 @@ func _render_reader() -> void:
 	tools.add_child(PlaygroundUI.button("字号：%s" % {28:"大",34:"更大",40:"最大"}[int(session.state.fontSize)], accent, func(): _capture_reading(); session.handle_input({"type":"font"}); _save("调整字号"); _render(), "soft"))
 	tools.add_child(PlaygroundUI.button("跟随朗读", accent, func(): _follow_audio = true; _update_highlight(true), "soft"))
 	content_root.add_child(tools)
+	reader_tools = tools
 	_reader_scroll = ScrollContainer.new()
 	_reader_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_reader_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	_reader_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var paper := VBoxContainer.new()
 	paper.add_theme_constant_override("separation", 12)
@@ -314,7 +337,13 @@ func _render_reader() -> void:
 	)
 	content_root.add_child(_reader_scroll)
 	content_root.add_child(_build_player())
+	_on_immersive_changed(immersive)
 	_restore_reading.call_deferred()
+
+
+func _on_immersive_changed(value: bool) -> void:
+	if reader_tools != null and is_instance_valid(reader_tools):
+		reader_tools.visible = not value
 
 
 func _build_player() -> Control:

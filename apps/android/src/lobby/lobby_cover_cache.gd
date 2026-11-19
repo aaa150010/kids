@@ -3,7 +3,7 @@ extends RefCounted
 
 ## 大厅封面异步缓存：后台线程解码全部封面图，卡片直接取缓存，避免首帧同步解码卡顿
 ## 用法：
-##   LobbyCoverCache.warmup(["res://assets/covers/island.png", ...])  # 进大厅前调一次
+##   LobbyCoverCache.warmup(["res://assets/covers/jungle.png", ...])  # 进大厅前调一次
 ##   LobbyCoverCache.poll()                                           # main._process 每帧调用
 ##   var tex := LobbyCoverCache.texture(path)                         # 命中返回 Texture2D，未命中 null
 ##   LobbyCoverCache.request(path, func(texture): ...)                # 未命中时注册回填回调

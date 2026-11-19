@@ -5,104 +5,6 @@
 
 ---
 
-## 1. 植物大战僵尸（garden，重点）
-
-主参考 **PVZ-Godot-Dream**（Godot 4.7，自定义非商用许可，禁止商用；仅作交互与架构参考，不复制代码与资源）。以下源码路径均指该仓库。
-
-### 1.1 卡片选择状态机
-
-- **细节**：卡片按用途分四种上下文（图鉴 Catalog / 选卡 Selection / 战斗 Battle / 图鉴详情 Almanac），点击行为由 `card_context` 分发；战斗中点击不可用卡片播放 `buzzer` 提示音，可用则发 `main_game_click_card` 事件进入"手持"状态。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/ui/card/card.gd>（`CardContext` 枚举、`_on_button_pressed`）
-  现状差距：`garden_game.gd:539 _select_battle_seed` 只是记录 `selectedSeed`，无上下文区分、无不可点击音效。
-  实现要点：卡片节点维护 `state = idle/selected/cooling/disabled`；点击冷却中或阳光不足的卡播放闷音 buzzer + 卡片轻微左右抖动（2 次、±4px、共 0.2s），不做其他响应。
-
-- **细节**：手持管理器是真正的三态状态机 `Null / Character / Item(铲子)`，进入新状态前调旧状态的 `exit_status()` 清理预览；右键或左键点空白处取消手持并播放 `tap2`。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/manager/hand_manager/hand_manager.gd>
-  现状差距：选中种子与铲子是两个独立布尔字段（`_select_battle_seed` 里手动互斥），点空白不能取消选择。
-  实现要点：抽象 `HandState` 状态机（空手/持植物卡/持铲子），统一切换入口保证互斥；触屏上"再次点击已选卡片"或"点草坪外区域"= 取消，取消时播放轻音效。
-
-- **细节**：选卡阶段（开战前）卡片在候选区与出战槽之间用 0.2s Tween 移动，移动期间 `mouse_filter = IGNORE` 屏蔽点击，结束恢复 `PASS`；卡槽满时点击播放 buzzer。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/ui/card/card_slot/card_slot_norm/card_slot_norm.gd>（`move_card_to`）
-  现状差距：`_render_seed_picker` 选卡为即时切换，无飞行动画。
-  实现要点：选卡页点击候补卡 → 卡片复制一个 TextureRect 残影，Tween global_position 0.2s 飞入出战槽后销毁残影；动画期间锁定输入。
-
-### 1.2 拖拽种植 + 格子高亮
-
-- **细节**：选中卡片后生成两个预览：跟手的不透明静态图 `characte_static`（z_index=1 跟随指针）+ 格子内的半透明虚影 `characte_static_shadow`（`modulate.a = 0.5`）。进入格子时校验种植条件，**可种才显示虚影，不可种虚影 alpha=0**；紫卡（升级卡）还会让可升级的已有植物做明暗呼吸提示。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/manager/hand_manager/hm_character.gd>（`click_card` / `_update_cell_shadow` / `start_preplant_purple_light`）
-  现状差距：我们点卡片后没有任何跟手预览，点格子直接尝试种植，失败才 toast 报错（`garden_game.gd:548 _battle_cell`）。
-  实现要点：选中卡片后 ① 卡片本身 scale→1.12 + 偏移上浮 4px 表示"已拿起"；② 生成跟手半透明 ghost（alpha 0.85）跟随触摸点；③ 手指/指针所在格做判定：可种 → 格内显示 alpha 0.5 的植物虚影 + 格子描边绿色；不可种 → 虚影隐藏 + 格子描边红色（儿童版建议始终给虚影，用红绿描边区分可/不可）。
-
-- **细节**：点击格子确认种植前**重验**一次卡片可用性（冷却、阳光、条件），任何一步失败播 buzzer 且不扣阳光不进冷却；成功后发一次 `signal_card_use_end` 统一结算（扣阳光 + 开始冷却）。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/manager/hand_manager/hm_character.gd>（`click_cell`）、<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/ui/card/card_slot/card_slot_norm/card_slot_battle.gd>（`card_use_end`）
-  现状差距：我们的失败提示是 toast 文字，成人化；结算散落在 engine 里。
-  实现要点：种植动作走"预校验 → 执行 → 统一结算"三步；失败反馈 = buzzer 音效 + 目标格红色闪烁 0.3s（不用文字 toast，儿童不认字）。
-
-- **细节**：种植地形条件用位掩码（草地 2 / 花盆 4 / 水 8 / 睡莲 16 / 屋顶 32），格子初始化时按类型赋 `curr_condition`，植物条件与之按位与判定。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/main_game_item/plant_cell.gd>（`init_condition`）
-  现状差距：`garden_engine.gd` 的种植校验逻辑较散。
-  实现要点：格子持有一个 condition 位掩码字段，种植校验 = `(plant.need & cell.condition) != 0`，方便后续加泳池/屋顶。
-
-### 1.3 阳光收集
-
-- **细节**：阳光点击后 ① 立即 `collected = true` 防重复点击并销毁 Button（防连点）② 播放 `points` 音效 ③ Tween 0.3s EASE_OUT 飞向左上角卡槽阳光位（`marker_2d_sun_target`，含摄像机偏移修正）④ 到达后 0.5s 渐隐再 free。天降阳光未收集 10s 后 1s 渐隐消失；阳光面值决定 scale（value/25）。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/ui/main_game_ui/sun.gd>
-  现状差距：`_collect_sun` 点击即消失入账，无飞行动画、无自然消失机制不明。
-  实现要点：阳光点击 → 禁用输入 → 飞向 HUD 阳光数字（0.3s EASE_OUT）→ 到达瞬间数字跳动放大 1.3 倍回弹 + 入账；未被点击的阳光 8~10s 后渐隐消失。开启自动收集时等下落 tween 结束自动触发同一流程（参考 `on_sun_tween_finished` + `auto_collect_sun` 配置）。
-
-- **细节**：天降阳光间隔随已产出总量递增（`A = 10×总量+425`ms，上限 950+rand(274)），即越到后期天降越慢，逼玩家种向日葵。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/manager/day_suns_manager.gd>（`change_production_interval`）
-  现状差距：需确认我们天降阳光是否恒定节奏。
-  实现要点：儿童版可降低强度但保留"递减"节奏，避免后期躺平。
-
-### 1.4 铲子流程
-
-- **细节**：点 UI 铲子 → 铲子图标从槽位消失、真实铲子跟随指针；悬停有植物的格子时目标植物做"预铲"高亮（`be_shovel_look`），同格多棵植物按指针位置选择预铲目标；点击确认铲除播 `plant2` 音效；取消（点空白/右键）后铲子图标回到槽位。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/manager/hand_manager/hm_item.gd>、<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/ui/card/shovel_in_ui.gd>
-  现状差距：`_toggle_shovel` 是开关式，无悬停预铲高亮、无跟手铲子。
-  实现要点：铲子激活 = 跟手铲子图标 + 悬停格子中有植物时植物做白描边/微颤（预铲高亮）；点击即铲；再点空白或铲子槽取消，铲子 Tween 飞回槽位 0.2s。
-
-### 1.5 冷却遮罩与费用状态
-
-- **细节**：冷却用 `_cool_mask`（进度遮罩）从上到下消退，`judge_card_ready` 综合"是否出战卡 / 阳光够不够 / 冷却中 / 紫卡前置"四项决定 `is_can_click`；不可用 = 遮罩常显；冷却结束瞬间若阳光够则遮罩隐藏变亮。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/ui/card/card.gd>（`judge_card_ready` / `card_cool` / `_process`）
-  现状差距：需确认卡片是否有冷却进度可视化（当前 `_battle_seed_button` 只有三态 stylebox）。
-  实现要点：卡片上叠一个深色半透明遮罩 Control，高度 = 剩余冷却比例（每帧或 0.1s 刷新）；阳光不足时整卡饱和度降低（modulate 变灰暗）但无遮罩——两种不可用状态视觉可区分。
-
-- **细节**：阳光变化时遍历所有出战卡调 `judge_sun_enough` 刷新可用态；紫卡价格 = 基础价 + 50×场上同种数量，每次植物数量变化后下一帧刷新。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/ui/card/card_slot/card_slot_norm/card_slot_battle.gd>（`sun_value` setter、`update_card_purple_sun_cost`）
-  实现要点：阳光入账/扣除都走 setter 统一广播刷新卡片状态，不要在各处手动刷 UI。
-
-### 1.6 波次 / HUD / 提示
-
-- **细节**：波次分四类（普通/旗前/旗帜/最终），`curr_wave % 10 == 8` 旗前、`==9` 旗帜；旗帜波前播 4s "一大波僵尸正在接近" 大字 + `hugewave` 音效，最终波再追加 3s 红字 "最后一波" + `finalwave` 音效；开局依次显示 准备→放置→开始 各 0.6s。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/manager/zombie_manager/zm_zombie_wave_manager.gd>、<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/ui/main_game_ui/ui_remind_word.gd>
-  现状差距：`_wave_text` 只是 HUD 文本，无全屏大字提示。
-  实现要点：旗帜波触发全屏居中大字（scale 0.8→1.0 弹入，停留 2~3s，渐隐）+ 音效；开局 Ready-Set-Plant 三段各 0.6s 顺序显示。
-
-- **细节**：关卡进度条每波占 `100/(max_wave-1)`，旗帜波在该处显示旗帜图标；每秒按当波预算时间推进进度。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/manager/zombie_manager/zm_zombie_wave_manager.gd>（`set_progress_bar`）、`scripts/ui/main_game_ui/ui_flag_progress_bar.gd`
-  现状差距：需确认我们是否有可视化进度条。
-  实现要点：右下角（手机版布局）横向进度条 + 旗帜刻度，平滑每秒推进；旗帜到达时旗帜图标弹跳一次。
-
-- **细节**：手持临时卡期间屏蔽其他卡片输入（`mouse_filter_stop`），防止多点触控误触；全局有 `tree_pause_manager` 保证暂停时冷却/波次计时全部冻结。
-  来源：<https://github.com/hsk-dream/PVZ-Godot-Dream/blob/main/scripts/ui/card/card.gd>（`mouse_filter_start/stop`）
-  实现要点：任何"拿起"状态期间锁其他卡片输入；所有计时器用 `create_timer(x, false)`（process_always=false）保证暂停一致。
-
-### 1.7 其他 PVZ 参考
-
-- jspvz wiki「卡片」词条：确认原版规则——点卡→点格种植、点空白取消、传送带/种子雨卡片一次性且 15s 未用消失（剩 5s 开始闪烁）。<https://jspvz.fandom.com/zh/wiki/%E5%8D%A1%E7%89%87>
-  实现要点：临时卡（如有奖励卡）消失前 5s 开始 alpha 0.5↔1.0 正弦闪烁（参考 `card.gd` 的 `card_blink_start`）。
-- 手机版操作确认：支持"点选卡片再点格子"与"拖拽到格子"两种方式，拖拽在密集布防时效率更高。<https://www.tpzpw.com/yxgju06/992.html>
-  实现要点：两种手势都支持：点-点（选中→点格）为默认，按住卡片拖出超过 24px 视为拖拽，松手在格子上即种植、松在空处即取消。
-- PVZ 中文 wiki（机制数值参考）：<https://wiki.pvz1.com/doku.php?id=home>
-- HYTommm/Godot-PVZ（C# 版，粒子特效参考，樱桃炸弹爆炸）：<https://github.com/HYTommm/Godot-PVZ>
-- 信号总线/随机选择器模式参考 LiGameAcademy/godot_core_system：<https://github.com/LiGameAcademy/godot_core_system>
-- B 站 Godot4.3 PVZ 制作教程（已完结，逐集对应模块）：<https://www.bilibili.com/video/BV1AdBtY9Ec5/>
-- 已有素材来源 pvz-web（本地个人版，公开分发前需替换，见 references.json）。
-
----
-
 ## 2. 斗兽棋（board，animal）
 
 - **细节**：Flutter 版 animal_chess 把规则做成可插拔 variant（鼠入兽穴、狮虎跳河、狗入河等开关），棋子组件与棋盘组件分离，选中后由 controller 计算合法落点。
@@ -257,7 +159,7 @@
 
 - **细节**：弹窗与退出——游戏内左上角返回 + 确认层（"现在回去吗？/ 再玩一会"），防止误触中断；破坏性操作（清档）长按 3 秒。
   来源：同上适龄设计规范
-  现状差距：`garden_game.gd:878 _handle_back` 有返回处理。
+  现状差距：返回处理分散在各游戏页面，尚未完全统一。
   实现要点：所有游戏统一封装"确认弹窗"组件：大图标 + 两个超大按钮（继续玩 / 回去），误触遮罩不关闭（防小孩乱点关掉）。
 
 - **细节**：开始页要点——超大 PLAY 按钮（≥200×80）、点击后 0.3s 淡出过渡再进游戏（遮盖加载）、角标按钮（设置/商店）≥64×64 放角落不放汉堡菜单。
@@ -273,7 +175,6 @@
 
 | 模块 | 参考 | 数量 |
 |---|---|---|
-| PVZ | PVZ-Godot-Dream（主）、HYTommm/Godot-PVZ、jspvz wiki、PVZ 中文 wiki、触屏版操作文章×2、godot_core_system、B 站教程 | 8 |
 | 斗兽棋 | neoalienson/animal_chess、Layheng-Hok/Jungle-Chess、zhengxuan666/animal_chess、Wikipedia Jungle | 4 |
 | 五子棋 | virgoone/pixi-gomoku、Algovate/Gomoku、Javawan1976/gomoku-game、V2EX 介绍帖 | 4 |
 | 军棋翻翻乐 | 天天军棋官方、YuRos2/pengpengjunqi、Youchenjiang/app-dark-chess、910JQK/GwanKei、Pacer-9/army-chest-game | 5 |
