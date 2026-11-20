@@ -16,7 +16,9 @@ try {
 } catch (error) {
   if (error.code !== 'ENOENT') throw error
 }
-const legacyRuntimeAssetRoots = new Set(['covers', 'icons', 'kenney', 'jungle'])
+// The illustrated covers and seated jungle characters are first-party assets.
+// Keep exporting them; third-party icon and animal packs remain excluded.
+const legacyRuntimeAssetRoots = new Set(['icons', 'kenney'])
 const sourceAssets = resolve(source, 'assets')
 await rm(resolve(target, 'assets'), { recursive: true, force: true })
 await cp(sourceAssets, resolve(target, 'assets'), {

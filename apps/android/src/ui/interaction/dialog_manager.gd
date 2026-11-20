@@ -24,7 +24,7 @@ const ANIM_IN := 0.20            # 进场 180–220ms
 const ANIM_OUT := 0.16
 const BUTTON_HEIGHT := 60.0      # 主按钮高度 56–64px
 const BUTTON_FONT := 22          # 按钮字号下限
-const BUTTON_PAIR_MIN := 200.0   # 双按钮等宽最小值
+const BUTTON_PAIR_MIN := 220.0   # 双按钮等宽最小值
 const DEFAULT_ACCENT := Color("#167d74")
 
 var _stack: Array[Control] = []
@@ -348,7 +348,7 @@ func _button_row(actions: Array, accent: Color, card_width: float) -> Control:
 	row.add_theme_constant_override("v_separation", 10)
 	var pair := actions.size() == 2
 	# 宽屏不再把两个操作拉满整行，保持紧凑的玩具按钮比例。
-	var pair_width := clampf((card_width - 72.0) * 0.5, BUTTON_PAIR_MIN, 240.0)
+	var pair_width := clampf((card_width - 72.0) * 0.5, BUTTON_PAIR_MIN, 280.0)
 	for action in actions:
 		var kind := str(action.get("kind", "primary"))
 		var button: Button
@@ -370,7 +370,12 @@ func _button_row(actions: Array, accent: Color, card_width: float) -> Control:
 			)
 		button.custom_minimum_size.y = BUTTON_HEIGHT
 		button.add_theme_font_size_override("font_size", BUTTON_FONT)
-		button.custom_minimum_size.x = pair_width if pair else maxf(button.custom_minimum_size.x, 160.0)
+		if pair:
+			button.custom_minimum_size.x = pair_width
+		elif actions.size() > 2 and card_width >= 760.0:
+			button.custom_minimum_size.x = clampf((card_width - 72.0) * 0.5, BUTTON_PAIR_MIN, 280.0)
+		else:
+			button.custom_minimum_size.x = maxf(button.custom_minimum_size.x, 160.0)
 		row.add_child(button)
 	return row
 

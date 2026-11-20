@@ -206,12 +206,10 @@ func _refresh() -> void:
 	stage.set_progress(int(engine.state.scores[current]),int(engine.state.positions[current]),int(totals[current]))
 	stage.player_name = str(players[current].get("name","")) if current < players.size() else ""
 	stage.update_question(question,int(engine.state.selected),engine.state.phase == "feedback",engine.state.scores,totals)
-	for index in 2:
-		if index < players.size():
+	for index in mini(2, players.size()):
+		if index < player_labels.size() and index < player_panels.size():
 			player_labels[index].text = "%s\n第 %s / %s 题\n得分 %s" % ["现在轮到你" if index == current else "等待下一轮",mini(int(engine.state.positions[index])+1,int(totals[index])),int(totals[index]),int(engine.state.scores[index])]
 			player_panels[index].add_theme_stylebox_override("panel",PlaygroundUI.style(PlaygroundUI.mix(accent,Color.WHITE,0.86 if index == current else 0.95),24,accent if index == current else PlaygroundUI.LINE,3 if index == current else 1))
-		else:
-			player_labels[index].text = "没有倒计时\n可以反复听题\n答后还有小讲解"
 	var showing_answer: bool = engine.state.phase == "feedback"
 	# 留出固定讲解位置，答题后题干与选项不因新增面板而跳动。
 	feedback_panel.show()

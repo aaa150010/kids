@@ -394,37 +394,19 @@ func _open_pause_tools() -> void:
 	MotionKit.set_paused_tree(self, true)
 	pause_changed.emit(true)
 	AudioFX.play("pause")
-	var panel := VBoxContainer.new()
-	panel.add_theme_constant_override("separation", 12)
-	var saved := HBoxContainer.new()
-	saved.add_theme_constant_override("separation", 9)
-	saved.add_child(ArtLibrary.semantic_picture("check", "ui", Vector2(26, 26)))
-	saved.add_child(PlaygroundUI.label(
-		"已保存，可以放心休息" if not _resume_on_start else "已接着上次进度，准备好再继续",
-		16,
-		PlaygroundUI.INK_SOFT,
-		600,
-		true
-	))
-	panel.add_child(saved)
-	var summary := PlaygroundUI.panel(PlaygroundUI.mix(accent, Color.WHITE, 0.88), 18, PlaygroundUI.mix(accent, Color.WHITE, 0.5), 1)
-	var summary_row := HBoxContainer.new()
-	summary_row.add_theme_constant_override("separation", 10)
-	summary_row.add_child(ArtLibrary.semantic_picture("pause", "ui", Vector2(34, 34)))
 	var summary_text := PlaygroundUI.label(
 		"%s · %s" % [
 			str(game_meta.get("title", "小游戏")),
 			str(ContentDB.mode(game_id, mode_id).get("name", "正在玩")),
 		],
-		18,
+		20,
 		PlaygroundUI.INK,
-		700,
+		600,
 		true
 	)
 	summary_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	summary_row.add_child(summary_text)
-	summary.add_child(summary_row)
-	panel.add_child(summary)
+	summary_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var pause_status := "已保存，可以放心休息" if not _resume_on_start else "已接着上次进度，准备好再继续"
 	var actions := [
 		{"text": "继续游戏", "icon": "play", "kind": "primary", "callback": func(): _close_top_modal()},
 		{"text": "怎么玩", "icon": "rules", "kind": "soft", "callback": func(): show_help()},
@@ -435,7 +417,7 @@ func _open_pause_tools() -> void:
 		{"text": "重开本局", "icon": "restart", "kind": "soft", "callback": func(): _confirm_restart()},
 		{"text": "回游戏大厅", "icon": "home", "kind": "soft", "callback": func(): _confirm_exit()},
 	])
-	_pause_root_layer = open_modal("暂停一下", panel, actions, "轻点两侧纸边也可以打开这里", false)
+	_pause_root_layer = open_modal("暂停一下", summary_text, actions, pause_status, false)
 	_pause_root_layer.set_meta("pause_root", true)
 	_pause_root_layer.set_meta("pause_seat", _pause_origin_seat)
 	_layout_pause_rails()
@@ -536,7 +518,8 @@ func open_modal(
 	eyebrow: String = "",
 	dismissible: bool = true
 ) -> Control:
-	var angle := _overlay_angle()
+	# System tools stay upright even when the board is seated from its short edge.
+	var angle := 0.0
 	var manager := _dialog_manager()
 	if manager != null:
 		if not manager.dialog_closed.is_connected(_on_dialog_closed):
@@ -549,8 +532,8 @@ func open_modal(
 			"eyebrow": eyebrow,
 			"dismissible": dismissible,
 			"accent": accent,
-			"size": "M",
-			"facing_angle": angle,
+			"size": "L",
+			"facing_angle": 0.0,
 		})
 		_modal_stack.append(layer)
 		_layout_pause_rails()

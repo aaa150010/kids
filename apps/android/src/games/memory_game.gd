@@ -238,17 +238,33 @@ func _layout_memory_grid(scroll: Control, grid: GridContainer, card_count: int) 
 		return
 	const GAP := 12.0
 	var best_columns := 2
-	var best_side := 0.0
-	for columns in range(2, mini(card_count,12)+1):
+	var best_size := Vector2.ZERO
+	var best_score := -INF
+	for columns in range(2, mini(card_count, 12) + 1):
 		var rows := ceili(float(card_count)/float(columns))
-		var width := (viewport_size.x-GAP*float(columns-1))/float(columns)
-		var height := (viewport_size.y-GAP*float(rows-1))/float(rows)
-		var side := minf(width/0.78,height)
-		if side > best_side:
-			best_side = side
+		var width := (viewport_size.x - GAP * float(columns - 1)) / float(columns)
+		var height := (viewport_size.y - GAP * float(rows - 1)) / float(rows)
+		if width < 96.0 or height < 86.0:
+			continue
+		var score := minf(width / 150.0, height / 108.0) + minf(width / 250.0, height / 170.0) * 0.35
+		if score > best_score:
+			best_score = score
 			best_columns = columns
+			best_size = Vector2(width, height)
+	if best_size == Vector2.ZERO:
+		var fallback_rows := ceili(float(card_count) / float(best_columns))
+		best_size = Vector2(
+			(viewport_size.x - GAP * float(best_columns - 1)) / float(best_columns),
+			maxf(86.0, (viewport_size.y - GAP * float(fallback_rows - 1)) / float(fallback_rows))
+		)
 	grid.columns = best_columns
-	grid.size = viewport_size
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("h_separation", int(GAP))
+	grid.add_theme_constant_override("v_separation", int(GAP))
+	for card in grid.get_children():
+		if card is Control:
+			card.custom_minimum_size = best_size
 
 
 func _player_chip(index: int) -> Control:

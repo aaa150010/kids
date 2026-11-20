@@ -308,7 +308,11 @@ func _draw_grid(gap: float) -> void:
 			draw_circle(draw_center, gap * 0.43, Color(tint, 0.16))
 			draw_arc(draw_center, gap * 0.43, 0, TAU, 40, tint, 3.5, true)
 			draw_set_transform(draw_center, piece_angle, Vector2.ONE)
-			_draw_jungle_animal(str(piece.kind), gap * 0.34, tint)
+			var texture := ArtLibrary.jungle_piece(str(piece.kind))
+			if texture != null:
+				draw_texture_rect(texture, Rect2(Vector2(-gap * 0.39, -gap * 0.39), Vector2(gap * 0.78, gap * 0.78)), false)
+			else:
+				_draw_jungle_animal(str(piece.kind), gap * 0.34, tint)
 			var badge_center := Vector2(gap * 0.30, gap * 0.28)
 			draw_circle(badge_center, gap * 0.15, tint)
 			_text(str(BoardRules.ANIMALS[piece.kind]), badge_center, gap * 0.13, Color.WHITE)
@@ -337,7 +341,14 @@ func _draw_grid(gap: float) -> void:
 			var center := position_for(last_to)
 			var alpha := 1.0-motion
 			if game_id == "jungle":
-				_text(str(BoardRules.NAMES.get(str(last_capture.get("kind","")),"棋子")),center,gap*0.2,Color(0.55,0.28,0.24,alpha))
+				var texture := ArtLibrary.jungle_piece(str(last_capture.get("kind","")))
+				if texture != null:
+					var capture_angle := TabletopLayout.facing_angle(int(last_capture.get("side", 0)), face_to_face)
+					draw_set_transform(center, capture_angle, Vector2.ONE)
+					draw_texture_rect(texture, Rect2(Vector2(-gap * 0.30, -gap * 0.34), Vector2(gap * 0.60, gap * 0.60)), false, Color(1, 1, 1, alpha * 0.75))
+					draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+				else:
+					_text(str(BoardRules.NAMES.get(str(last_capture.get("kind","")),"棋子")),center,gap*0.2,Color(0.55,0.28,0.24,alpha))
 			else:
 				_text(str(BoardRules.NAMES.get(str(last_capture.get("kind","")),"棋子")),center,gap*0.22,Color(0.55,0.28,0.24,alpha))
 	if rules_safe_participants().size() > 0:

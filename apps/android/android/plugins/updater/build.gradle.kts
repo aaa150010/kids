@@ -29,5 +29,7 @@ base {
 }
 
 dependencies {
-    compileOnly("org.godotengine:godot:4.7.2-stable")
+    val godotAar = providers.environmentVariable("GODOT_LIB_AAR")
+        .orElse("../../build/libs/release/godot-lib.template_release.aar")
+    compileOnly(files(godotAar))
 }

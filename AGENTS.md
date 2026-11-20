@@ -148,7 +148,18 @@
 ### 安卓构建与更新
 
 - 原生内容由 `node scripts/native/export-content.mjs` 从 `content-src/` 导出到 `apps/android/content/` 与 `apps/android/assets/`，不得在 Godot 中另抄一份题库。
-- 本地构建：`bash scripts/native/build-android.sh`；Docker 构建：`bash scripts/native/build-android-docker.sh`；本地构建后上传：`bash scripts/native/deploy-android.sh`。构建前必须经用户明确允许。
+- 发布默认只走本机流程：`pnpm native:build`，核验后执行 `SKIP_BUILD=1 pnpm native:deploy`。Docker 构建只作为本机工具链损坏时的后备方案。构建与上传都必须先经用户明确允许。
+- 本机构建脚本会自动按以下顺序解析工具链，发布时不要先手工猜路径：
+  1. Godot：`$GODOT_BIN` → `$HOME/Library/Caches/KidsPlayground/tools/Godot.app/Contents/MacOS/Godot` → `PATH` 中的 `godot`。
+  2. Gradle：`$GRADLE_BIN` → `PATH` → `$HOME/Library/Caches/KidsPlayground/gradle/wrapper/dists/**/bin/gradle`。
+  3. JDK：`$JAVA_HOME` → HBuilderX 自带 Corretto 17 → Android Studio JBR 17。当前 Android Gradle Plugin 8.7.3 必须使用 JDK 17，不使用 Java 21+。
+  4. Android SDK：`$ANDROID_HOME` / `$ANDROID_SDK_ROOT` → `$HOME/Library/Caches/KidsPlayground/android-sdk`；必须有 `platform-tools`、`platforms/android-34`、`build-tools/34.0.0`。
+- 新机器或工具链缺失时，先运行 `pnpm native:build:setup`。该脚本使用本机 JDK 17 安装最小 Android SDK 组件；下载地址与版本固定，不要求手工修改 Godot 编辑器设置。
+- 更新插件的 Godot Java API 依赖必须使用导出模板内的 `android/build/libs/release/godot-lib.template_release.aar`；不要改回 Maven 坐标 `org.godotengine:godot:4.7.2-stable`，该坐标在当前构建路径不可用。
+- 构建脚本会在任何 Gradle/Godot 长任务开始前检查 Godot、Gradle、JDK、SDK、导出模板和签名材料，并明确打印最终采用的四个工具路径。失败时先按这个前置检查补环境，不要重复执行整条发布命令试运气。
+- `CHECK_ONLY=1 pnpm native:build` 只做工具链检查并立即退出；确认通过后再执行正式构建。Godot 使用构建临时 HOME 和自动写入的 SDK/JDK 配置，不依赖编辑器设置碰巧指向哪里。
+- 本机构建插件使用已缓存的 Gradle 依赖和导出模板 AAR，并以 `--offline` 编译；正常发布不需要临时下载依赖。只有缓存缺失时，才先运行 `pnpm native:build:setup` 或联网预热一次，不要把联网下载混进日常发布流程。
+- 标准发布顺序固定为：版本与内容版本检查 → 本机构建 → 本地包名/版本/签名/ABI/SHA-256/更新签名核验 → `SKIP_BUILD=1 pnpm native:deploy` → 公网 `latest.json`、APK、内容包和下载页核验。构建成功后不要重复构建再上传。
 - APK 和内容签名材料保存在 `$HOME/Library/Application Support/KidsPlayground/keys/`，不得写入仓库；只有公钥可以随 App 打包。丢失 APK 私钥会导致现有安装无法覆盖升级，必须单独备份。
 - 固定下载页为 `https://lynote.xyz/play-app/`，服务端目录为 `/opt/kids-playground/dist/play-app/`；页面直接链接最新版 APK，并同时保留固定链接 `https://lynote.xyz/play-app/latest.apk` 供安卓自动更新和人工下载。
 - 旧网页版 `/play/` 不再提供游戏页面，统一跳转到 `/play-app/` 下载页；旧静态文件只能归档，不得继续作为网页版游戏发布。
@@ -158,12 +169,12 @@
 - 升级 Godot 时必须先建立升级分支，运行原生规则与存档夹具、OPPO Pad 3 Pro 12.1 英寸横屏、1180×800 兼容横屏、离线启动、APK 覆盖安装和后进先出更新回滚检查；不得直接覆盖稳定引擎版本。
 - 运行时手感基线由 `apps/android/DESIGN.md` 和 `apps/android/tests/ui_snapshot.gd` 维护：大改后的截图验收经用户授权后，只生成 OPPO Pad 3 Pro 的 3000×2120 主基线，并记录 120 FPS 桌面压力数据；1180×800、3392×2400 仅在用户明确指定时截图。没有实体平板时必须明确标注系统手势和真机性能尚未验证。
 - 本机已安装官方 Godot `4.7.2` 桌面运行器，固定路径为 `$HOME/Library/Caches/KidsPlayground/tools/Godot.app/Contents/MacOS/Godot`。需要查看或验证原生 UI 时直接运行 `pnpm native:audit`，不要只靠无头启动猜界面。
-- 在沙箱中运行 Godot 导入或 UI 审计时，必须先指定可写的临时 HOME（例如 `HOME=/private/tmp/godot-home`，并把 `GODOT_BIN` 设为绝对路径），不要让它写 `~/Library/Application Support/Godot`；否则 macOS 沙箱会拦截配置写入并误报为审计失败。
+- 本机 UI 审计直接运行 `pnpm native:audit`。若 macOS 沙箱阻止 Godot 写入设置，使用独立可写 HOME，并把 `GODOT_BIN` 固定为绝对路径；只把临时 HOME 用于审计，不要把 Android 构建导出模板或 SDK 指向临时目录。
 - UI 审计默认只输出 `build/ui-audit/3000x2120/`，同时生成 `layout-report.txt` 和 `performance-report.txt`；修改大厅卡片、游戏场景、暂停弹窗或动效后，在已获授权的截图验收中重新生成并查看关键截图。其他尺寸目录只在用户明确指定时生成。
 
 ## 斗兽棋规则基线
 
-- 采用俯视 2D 棋盘与 Q 版 SVG 动物棋子，不使用 3D 场景或 WebGL 绘制棋盘；棋子名称、等级、队伍颜色和合法落点必须清楚，左右玩家都保持正向可读。
+- 采用俯视 2D 棋盘与 Q 版原创角色棋子，不使用 3D 场景或 WebGL 绘制棋盘；棋子名称、等级、队伍颜色和合法落点必须清楚，左右玩家都保持正向可读。
 - 逻辑棋盘 7×9，屏幕横向展示，双方兽穴在左右；玩家 1 先走。
 - 等级：象 8、狮 7、虎 6、豹 5、狼 4、狗 3、猫 2、鼠 1；大吃小、同级可吃。
 - 鼠可吃象，象不能吃鼠；仅鼠可入河，水陆互不能吃，水中鼠可吃水中鼠。

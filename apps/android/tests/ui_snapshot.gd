@@ -190,7 +190,7 @@ func _capture_games(capture: Dictionary) -> void:
 			await _sample_performance("stories-reading-%s" % capture.label)
 			await _save(viewport, capture, "stories-reading")
 		screen.call("toggle_pause", true)
-		await _frames(5)
+		await _frames(14)
 		await _save(viewport, capture, game_id + "-pause")
 		viewport.queue_free()
 		await _frames(2)
@@ -303,11 +303,15 @@ func _next_board_move(engine: RefCounted, game_id: String) -> Dictionary:
 			var occupant: Dictionary = engine.call("piece_at", int(target))
 			if occupant.is_empty():
 				return {"from": from, "to": int(target)}
+		if not targets.is_empty():
+			return {"from": from, "to": int(targets[0])}
 	return {}
 
 
 func _capture_board_play(viewport: SubViewport, capture: Dictionary, screen: Control, game_id: String) -> void:
 	var engine: RefCounted = screen.get("engine")
+	if screen.has_method("_finish_lesson"):
+		screen.call("_finish_lesson")
 	if game_id in ["chess", "military"]:
 		_audit_touch_mouse_dedup(_board_for(screen, game_id), game_id)
 		if fatal_failure:
@@ -317,11 +321,21 @@ func _capture_board_play(viewport: SubViewport, capture: Dictionary, screen: Con
 		_fail("%s: no opening move available" % game_id)
 		return
 	if first.has("from"):
-		screen.call("_cell", int(first.from))
+		var select_action := {"type": "select", "to": int(first.from)}
+		var select_result: Dictionary = engine.call("handle_input", select_action)
+		if not bool(select_result.get("ok", false)):
+			_fail("%s: the opening piece could not be selected" % game_id)
+			return
+		screen.call("_refresh")
 		await _frames(4)
 		_audit_board(screen, game_id)
 		await _save(viewport, capture, game_id + "-selected")
-	screen.call("_cell", int(first.to))
+	var move_action := {"type": "move", "to": int(first.to)}
+	var move_result: Dictionary = engine.call("handle_input", move_action)
+	if not bool(move_result.get("ok", false)):
+		_fail("%s: the opening move was rejected" % game_id)
+		return
+	screen.call("_refresh", true)
 	await _frames(48)
 	if int((engine.get("state") as Dictionary).get("turn", -1)) != 1:
 		_fail("%s: the first move did not hand over to player 2" % game_id)

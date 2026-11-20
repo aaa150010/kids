@@ -13,6 +13,7 @@
     "native:audit": "bash scripts/native/audit-ui.sh",
     "native:build": "bash scripts/native/build-android.sh",
     "native:build:docker": "bash scripts/native/build-android-docker.sh",
+    "native:build:setup": "bash scripts/native/setup-android-build-tools.sh",
     "native:deploy": "bash scripts/native/deploy-android.sh",
     "native:release:docker": "bash scripts/native/build-android-docker.sh && SKIP_BUILD=1 bash scripts/native/deploy-android.sh",
     "native:stories": "node scripts/native/author-stories.mjs",

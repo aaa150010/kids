@@ -294,13 +294,15 @@ func _confirm_next_puzzle() -> void:
 		return
 	open_modal("换一道新题？", PlaygroundUI.label("当前这道题的填写会被替换。已经完成的关卡和其他游戏会保留。", 20, PlaygroundUI.INK_SOFT, 500, true), [
 		{"text":"继续这题", "kind":"soft", "callback":func(): _close_top_modal()},
-		{"text":"换一题", "kind":"primary", "callback":func():
-			_close_top_modal()
-			_create((_puzzle_index + 1) % maxi(1, _puzzles().size()))
-			_build_session()
-			_refresh()
-		},
+		{"text":"换一题", "kind":"primary", "callback":_change_puzzle},
 	], "当前这题会被替换")
+
+
+func _change_puzzle() -> void:
+	_close_top_modal()
+	_create((_puzzle_index + 1) % maxi(1, _puzzles().size()))
+	_build_session()
+	_refresh()
 
 
 func _restart() -> void:

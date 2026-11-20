@@ -19,6 +19,7 @@ const COVER_SLOTS := {
 	"jungle":0,"poetry":1,"math":2,"pinyin":3,"memory":4,"patterns":5,"animals":6,
 	"gomoku":7,"chess":8,"sudoku":9,"military":10,"workbook":11,"stories":12,
 }
+const JUNGLE_PIECES := ["elephant","lion","tiger","leopard","wolf","dog","cat","rat"]
 const AVATAR_NAMES := {
 	"🦊":"小狐狸","🐼":"小熊猫","🐯":"小老虎","🐰":"小兔子","🐻":"小熊",
 	"🦁":"小狮子","🐧":"小企鹅","🐨":"小考拉","🦉":"猫头鹰","🐬":"小海豚",
@@ -77,9 +78,15 @@ static func semantic_picture(name: String, kind: String = "ui", minimum: Vector2
 static func cover_texture(game_id: String) -> Texture2D:
 	if not COVER_SLOTS.has(game_id):
 		return null
-	var cache_key := "original-cover:" + game_id
+	var cache_key := "illustrated-cover:" + game_id
 	if cache.has(cache_key):
 		return cache[cache_key]
+	var illustrated_path := "res://assets/covers/" + game_id + ".webp"
+	if ResourceLoader.exists(illustrated_path):
+		var illustrated: Texture2D = load(illustrated_path)
+		if illustrated != null:
+			cache[cache_key] = illustrated
+			return illustrated
 	var path := "res://assets/original/covers/covers.svg"
 	if not ResourceLoader.exists(path):
 		cache[cache_key] = null
@@ -95,6 +102,18 @@ static func cover_texture(game_id: String) -> Texture2D:
 	atlas.region = Rect2(Vector2(float(slot % 4) * cell.x, float(int(slot / 4)) * cell.y), cell)
 	cache[cache_key] = atlas
 	return atlas
+
+
+static func jungle_piece(kind: String) -> Texture2D:
+	if not kind in JUNGLE_PIECES:
+		return null
+	var cache_key := "jungle-piece:" + kind
+	if cache.has(cache_key):
+		return cache[cache_key]
+	var path := "res://assets/jungle/" + kind + ".webp"
+	var result: Texture2D = load(path) if ResourceLoader.exists(path) else null
+	cache[cache_key] = result
+	return result
 
 
 static func profile_picture(profile: Dictionary, minimum: Vector2 = Vector2(42, 42)) -> Control:
