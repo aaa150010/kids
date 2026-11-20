@@ -110,8 +110,8 @@ func _ready() -> void:
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	add_theme_stylebox_override("normal",PlaygroundUI.style(Color("#fff9ee"),20,Color("#ca8dad"),2,4,Color(0,0,0,0.12)))
-	add_theme_stylebox_override("hover",PlaygroundUI.style(Color("#fffdf7"),20,Color("#c05b8f"),3))
-	add_theme_stylebox_override("pressed",PlaygroundUI.style(Color("#f5dfeb"),20,Color("#c05b8f"),3))
+	add_theme_stylebox_override("hover",PlaygroundUI.style(PlaygroundUI.TOOL_HOVER,20,Color("#8ead28"),3))
+	add_theme_stylebox_override("pressed",PlaygroundUI.style(PlaygroundUI.TOOL_PRESSED,20,Color("#8ead28"),3))
 	add_theme_stylebox_override("disabled",PlaygroundUI.style(Color("#eaf2df"),20,Color("#9bb67b"),2))
 	face = VBoxContainer.new()
 	face.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

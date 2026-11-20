@@ -18,7 +18,7 @@ try {
 }
 // The illustrated covers and seated jungle characters are first-party assets.
 // Keep exporting them; third-party icon and animal packs remain excluded.
-const legacyRuntimeAssetRoots = new Set(['icons', 'kenney'])
+const legacyRuntimeAssetRoots = new Set(['icons', 'kenney', 'story_sprites', 'stories'])
 const sourceAssets = resolve(source, 'assets')
 await rm(resolve(target, 'assets'), { recursive: true, force: true })
 await cp(sourceAssets, resolve(target, 'assets'), {

@@ -5,12 +5,15 @@ import { pinyin, customPinyin } from 'pinyin-pro'
 
 const root = resolve(import.meta.dirname, '../..')
 const source = resolve(root, 'content-src/stories')
+const layoutFile = resolve(source, 'story-layout.json')
+const illustrationManifest = JSON.parse(await readFile(resolve(root, 'content-src/data/story-illustrations.json'), 'utf8'))
 const counts = { idiom: 200, myth: 80, folk: 80, fable: 80, history: 60, fairy: 100 }
 const draft = process.argv.includes('--draft')
 const textOnly = process.argv.includes('--text-only')
 const sha = text => createHash('sha256').update(text).digest('hex')
 const bookNames = { '史记':'史記', '左传':'春秋左氏傳', '汉书':'漢書', '后汉书':'後漢書', '晋书':'晉書', '宋史':'宋史', '列子':'列子', '庄子':'莊子', '韩非子':'韓非子', '战国策':'戰國策', '淮南子':'淮南子', '山海经':'山海經', '世说新语':'世說新語', '说苑':'說苑', '吕氏春秋':'呂氏春秋', '论语':'論語', '孟子':'孟子', '荀子':'荀子', '礼记':'禮記', '尚书':'尚書', '周易':'周易', '资治通鉴':'資治通鑑', '西游记':'西遊記', '封神演义':'封神演義', '梦溪笔谈':'夢溪筆談', '天工开物':'天工開物', '徐霞客游记':'徐霞客遊記', '本草纲目':'本草綱目', '竹取物语':'竹取物語' }
 const overrides = JSON.parse(await readFile(resolve(source, 'pronunciation.json'), 'utf8'))
+const layouts = JSON.parse(await readFile(layoutFile, 'utf8'))
 customPinyin(overrides)
 
 function annotate(text) {
@@ -40,9 +43,28 @@ for (const [category, expected] of Object.entries(counts)) {
     if (titles.has(title) || bodies.has(body)) throw new Error(`故事重复：${title}`)
     titles.add(title); bodies.add(body)
     if (category === 'idiom' && (!meaning || !example)) throw new Error(`成语缺少释义或例句：${title}`)
-    const paragraphs = body.split('~').filter(Boolean).map(text => ({ text, role: 'story' }))
-    if (meaning) paragraphs.push({ text: `词语小口袋：${meaning}`, role: 'meaning' })
-    if (example) paragraphs.push({ text: `试着用一用：${example}`, role: 'example' })
+    const storyId = `${category}-${sha(title).slice(0, 12)}`
+    const layout = layouts[storyId]
+    if (!layout || !Array.isArray(layout.paragraphIds)) throw new Error(`缺少故事排版元数据：${title}`)
+    const bodyParagraphs = body.split('~').filter(Boolean)
+    if (layout.paragraphIds.length !== bodyParagraphs.length) throw new Error(`段落元数据数量不一致：${title}`)
+    if (new Set(layout.paragraphIds).size !== layout.paragraphIds.length) throw new Error(`段落 ID 重复：${title}`)
+    const paragraphs = bodyParagraphs.map((text, index) => ({ id: layout.paragraphIds[index], text, role: 'story' }))
+    if (meaning) paragraphs.push({ id: 'meaning', text: `词语小口袋：${meaning}`, role: 'meaning' })
+    if (example) paragraphs.push({ id: 'example', text: `试着用一用：${example}`, role: 'example' })
+    const paragraphIds = new Set(paragraphs.map(paragraph => paragraph.id).filter(Boolean))
+    if (!Array.isArray(layout.illustrations) || layout.illustrations.length < 2 || layout.illustrations.length > 3) {
+      throw new Error(`每篇需要 2–3 张插画：${title}`)
+    }
+    for (const illustration of layout.illustrations) {
+      if (!paragraphIds.has(illustration.paragraphId)) throw new Error(`插画锚点不存在：${title}`)
+      if (!['left', 'right'].includes(illustration.side)) throw new Error(`插画方向无效：${title}`)
+      const remoteKey = String(illustration.asset).split(`/assets/stories/${storyId}/`)[1] ?? ''
+      const remoteAsset = illustrationManifest.assets?.[`${storyId}/${remoteKey}`]
+      if (!remoteKey || !remoteAsset?.sha256 || Number(remoteAsset?.size) <= 0) {
+        throw new Error(`插画远程清单缺失：${title}`)
+      }
+    }
     for (const paragraph of paragraphs) paragraph.pinyin = annotate(paragraph.text)
     const narration = [title + '。', ...paragraphs.map(paragraph => paragraph.text)].join('\n')
     const book = sourceLabel.match(/《([^》]+)》/)?.[1]
@@ -52,10 +74,24 @@ for (const [category, expected] of Object.entries(counts)) {
     if (sourceLabel.includes('安徒生')) sourceUrl = 'https://www.gutenberg.org/ebooks/1597'
     if (sourceLabel.includes('原创')) sourceUrl = ''
     stories.push({
-      id: `${category}-${sha(title).slice(0, 12)}`, category, title, titlePinyin: annotate(title),
+      id: storyId, category, title, titlePinyin: annotate(title),
       minAge: Number(age), origin: sourceLabel.includes('原创') ? '童心原创' : '经典故事·儿童改写',
       sourceLabel, sourceUrl, editorialNote: sourceLabel.includes('原创') ? '本项目原创故事。' : category === 'idiom' ? '词语出处与释义参考上列来源，叙事情境为儿童改写或新编。' : category === 'history' ? '依据史传或流传轶事改写；传说与史实请结合出处阅读。' : category === 'myth' ? '神话是古人想象世界的故事。' : '依据传统情节重新编写的儿童中文版本。',
-      paragraphs, narration, narrationSha256: sha(narration),
+      contentRevision: Number(layout.revision ?? 2),
+      paragraphs,
+      illustrations: layout.illustrations.map(illustration => {
+        const filename = String(illustration.asset).split('/').at(-1)
+        const remote = illustrationManifest.assets[`${storyId}/${filename}`]
+        return {
+          ...illustration,
+          asset: '',
+          remoteUrl: `${illustrationManifest.baseUrl}${storyId}/${filename}`,
+          sha256: remote.sha256,
+          size: remote.size,
+        }
+      }),
+      legacyParagraphMap: layout.legacyParagraphMap ?? [],
+      narration, narrationSha256: sha(narration),
       searchText: [title, sourceLabel, body, meaning].join(' '),
     })
   }

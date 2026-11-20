@@ -51,6 +51,7 @@ func _run() -> void:
 		save_store.add_profile("小搭档", 9, "🐼", "#2878c8")
 	output_dir = ProjectSettings.globalize_path("res://").path_join("../../build/ui-audit")
 	DirAccess.make_dir_recursive_absolute(output_dir)
+	_seed_story_illustrations()
 	var requested_size := OS.get_environment("KIDS_UI_SIZE")
 	var capture_sizes: Array = SIZES.duplicate()
 	if requested_size == str(COMPACT_SIZE.label):
@@ -77,6 +78,26 @@ func _run() -> void:
 	print("UI snapshots saved to: ", output_dir)
 	print(report)
 	quit(0 if issues.is_empty() else 1)
+
+
+func _seed_story_illustrations() -> void:
+	var stories: Array = content.stories
+	if stories.is_empty():
+		return
+	var story: Dictionary = stories[0]
+	var cache_dir := ProjectSettings.globalize_path("user://story-images/")
+	DirAccess.make_dir_recursive_absolute(cache_dir)
+	for illustration in story.get("illustrations", []):
+		var source := str(illustration.get("remoteUrl", ""))
+		var marker := "/story-images/"
+		var split := source.find(marker)
+		if split < 0:
+			continue
+		source = ProjectSettings.globalize_path("res://../../content-src/assets/stories/") + source.substr(split + marker.length())
+		var destination := cache_dir + str(illustration.get("sha256", "")) + ".webp"
+		if FileAccess.file_exists(source):
+			DirAccess.copy_absolute(source, destination)
+			illustration.asset = source
 
 
 func _fail(message: String) -> void:
@@ -321,7 +342,9 @@ func _capture_board_play(viewport: SubViewport, capture: Dictionary, screen: Con
 		_fail("%s: no opening move available" % game_id)
 		return
 	if first.has("from"):
-		var select_action := {"type": "select", "to": int(first.from)}
+		var select_action := {"type": "select", "position": int(first.from)}
+		if game_id == "jungle":
+			select_action["to"] = int(first.from)
 		var select_result: Dictionary = engine.call("handle_input", select_action)
 		if not bool(select_result.get("ok", false)):
 			_fail("%s: the opening piece could not be selected" % game_id)
@@ -335,7 +358,10 @@ func _capture_board_play(viewport: SubViewport, capture: Dictionary, screen: Con
 	if not bool(move_result.get("ok", false)):
 		_fail("%s: the opening move was rejected" % game_id)
 		return
-	screen.call("_refresh", true)
+	if game_id in ["jungle", "gomoku"]:
+		screen.call("_refresh", true)
+	else:
+		screen.call("_refresh")
 	await _frames(48)
 	if int((engine.get("state") as Dictionary).get("turn", -1)) != 1:
 		_fail("%s: the first move did not hand over to player 2" % game_id)

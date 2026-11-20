@@ -181,7 +181,7 @@ static func _content_texture(value: String) -> Texture2D:
 		hash_value = (hash_value * 31 + value.unicode_at(index)) % 1000003
 	var accents := [
 		Color("#d56c29"), Color("#2878c8"), Color("#64a244"), Color("#8657a7"),
-		Color("#c05b8f"), Color("#b69014"), Color("#a72e40"), Color("#167d74"),
+		Color("#8ead28"), Color("#b69014"), Color("#2c6a4b"), Color("#167d74"),
 	]
 	var tint: Color = accents[hash_value % accents.size()]
 	var soft := tint.lerp(Color.WHITE, 0.80)

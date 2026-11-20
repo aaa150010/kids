@@ -5,7 +5,7 @@ signal cell_pressed(position: int)
 
 var rules: SudokuRules
 var interactive := true
-var accent := Color("#6b2764")
+var accent := Color("#51418f")
 var _touch_index := -1
 var _touch_guard_msec := -1000
 var _press_point := Vector2.ZERO

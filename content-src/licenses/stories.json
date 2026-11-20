@@ -1,10 +1,10 @@
 {
   "name": "中外故事馆",
-  "edition": "2026-11-19",
+  "edition": "2026-11-20",
   "text": "本项目重新编写的儿童中文叙述与原创童话、寓言、成语情境。经典改写依据古籍、传统口述情节和公有领域经典作品，不复制现代中文译文；出处随各篇保存。标为传说的内容不作为确证史实。",
-  "artwork": "content-src/assets/covers/stories.svg 为本项目原创矢量绘本封面。",
+  "artwork": "故事馆封面与正文情节插画均为本项目原创绘本素材；正文插画按故事下载并缓存到本机，不进入 APK 或内容包。不复制参考图片中的水印、人物或场景。",
   "pronunciation": {"tool":"pinyin-pro","version":"3.29.5","license":"MIT","url":"https://github.com/zh-lx/pinyin-pro","use":"仅制作阶段生成拼音数据，词组校订保存在 pronunciation.json；不随 App 运行 JavaScript。"},
   "narration": {"provider":"Android System TTS","license":"平板系统自带","use":"App 运行时通过 Godot DisplayServer.tts_* 调用平板自带中文语音；不预生成、不下载 MP3、不调用云端合成。"},
   "classicReferences": ["https://zh.wikisource.org/wiki/韓非子","https://zh.wikisource.org/wiki/戰國策","https://zh.wikisource.org/wiki/列子","https://zh.wikisource.org/wiki/莊子","https://zh.wikisource.org/wiki/孟子","https://zh.wikisource.org/wiki/淮南子","https://zh.wikisource.org/wiki/山海經","https://zh.wikisource.org/wiki/史記","https://zh.wikisource.org/wiki/後漢書","https://zh.wikisource.org/wiki/世說新語","https://zh.wikisource.org/wiki/晉書","https://zh.wikisource.org/wiki/宋史","https://zh.wikisource.org/wiki/本草綱目","https://www.gutenberg.org/ebooks/21","https://www.gutenberg.org/ebooks/2591","https://www.gutenberg.org/ebooks/1597"],
-  "editorialStatus": "600 篇正文已扩写为完整多段故事并重新生成逐字拼音；朗读仅使用 Android 系统 TTS，不随 App 分发或下载 MP3。尚未逐篇人工审校、项目测试或真机播放验收。"
+  "editorialStatus": "600 篇故事已完成完整正文、稳定段落 ID 和 2–3 个情节插画锚点。系统朗读仅使用 Android TTS，不随 App 分发或下载 MP3；插画独立部署并按需缓存。正文质量、项目测试和真机验收仍以当前发布前审计结果为准。"
 }

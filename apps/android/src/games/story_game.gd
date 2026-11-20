@@ -10,10 +10,12 @@ var _audio_active := false
 var _cards_root: VBoxContainer
 var _reader_scroll: ScrollContainer
 var reader_tools: Control
-var _paragraphs: Array[PanelContainer] = []
+var _article_text: StoryText
+var _paragraph_ids: Array[String] = []
 var _audio_label: Label
 var _audio_icon: Control
 var _play_button: Button
+var _follow_button: Button
 var _time_label: Label
 var _search_timer: Timer
 var _update_clock := 0.0
@@ -28,6 +30,8 @@ var _reading_save_clock := 0.0
 var _tts_mode := false
 var _tts_paragraph := 0
 var _tts_wait := 0.0
+var _illustration_state_label: Label
+var _illustration_retry: Button
 
 
 func _ready() -> void:
@@ -64,7 +68,10 @@ func _render() -> void:
 	_audio_icon = null
 	_play_button = null
 	_time_label = null
-	_paragraphs.clear()
+	_illustration_state_label = null
+	_illustration_retry = null
+	_article_text = null
+	_paragraph_ids.clear()
 	_highlighted = -1
 	_tts_mode = false
 	_tts_paragraph = 0
@@ -304,47 +311,148 @@ func _open_story(story_id: String, _listen: bool = false) -> void:
 	if not session.handle_input({"type":"open", "id":story_id}): return
 	_reader_scroll = null
 	_tts_mode = true
-	var story_paragraphs: Array = _story().get("paragraphs", [])
-	_tts_paragraph = clampi(int(session.bookmark().get("paragraph", 0)), 0, maxi(0, story_paragraphs.size() - 1))
+	_refresh_paragraph_ids()
+	_sync_listening_index()
 	_tts_wait = 0.0
-	_follow_audio = true
+	_follow_audio = session.follow_reading()
 	lesson_action("open_story")
 	_save("阅读《%s》" % _story().title)
 	_render()
+
+
+func _refresh_paragraph_ids() -> void:
+	_paragraph_ids.clear()
+	var paragraphs: Variant = _story().get("paragraphs", [])
+	if not paragraphs is Array:
+		return
+	for index in paragraphs.size():
+		var paragraph: Variant = paragraphs[index]
+		_paragraph_ids.append(str(paragraph.get("id", "p%d" % index)) if paragraph is Dictionary else "p%d" % index)
+
+
+func _sync_listening_index() -> void:
+	var identifier := session.listening_paragraph_id()
+	var index := _paragraph_ids.find(identifier)
+	_tts_paragraph = index if index >= 0 else 0
+
+
+func _paragraph_id_for_index(index: int) -> String:
+	if _paragraph_ids.is_empty():
+		return ""
+	return _paragraph_ids[clampi(index, 0, _paragraph_ids.size() - 1)]
+
+
+func _article_offset_in_scroll() -> float:
+	if not is_instance_valid(_article_text) or not is_instance_valid(_reader_scroll):
+		return 0.0
+	var content := _reader_scroll.get_child(0) as Control
+	if content == null:
+		return 0.0
+	return _article_text.global_position.y - content.global_position.y
+
+
+func _visible_article_range() -> Vector2:
+	var offset := _article_offset_in_scroll()
+	var top := float(_reader_scroll.scroll_vertical) + offset
+	return Vector2(top, top + _reader_scroll.size.y)
+
+
+func _resume_follow_reading() -> void:
+	_follow_audio = true
+	session.set_follow_reading(true)
+	_update_highlight(true)
+	_refresh_player()
+	_save("恢复跟随系统朗读")
 
 
 func _render_reader() -> void:
 	_restoring_reading = true
 	var story := _story()
 	_tts_mode = true
-	var story_paragraphs: Array = story.get("paragraphs", [])
-	_tts_paragraph = clampi(int(session.bookmark().get("paragraph", 0)), 0, maxi(0, story_paragraphs.size() - 1))
+	_refresh_paragraph_ids()
+	_sync_listening_index()
+	_follow_audio = session.follow_reading()
 	_tts_wait = 0.0
-	_reader_scroll = ScrollContainer.new()
+	_reader_scroll = SmoothScrollContainer.create()
 	_reader_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	_reader_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	_reader_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var paper := VBoxContainer.new()
-	paper.add_theme_constant_override("separation", 12)
-	paper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var page_frame := CenterContainer.new()
+	page_frame.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page_frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_reader_scroll.add_child(page_frame)
+	var paper := PlaygroundUI.panel(PlaygroundUI.PAPER, 28, PlaygroundUI.mix(accent, Color.WHITE, 0.6), 2)
+	paper.custom_minimum_size.x = minf(1280.0, get_viewport_rect().size.x - 80.0)
+	page_frame.add_child(paper)
+	var page_margin := MarginContainer.new()
+	page_margin.add_theme_constant_override("margin_left", 38)
+	page_margin.add_theme_constant_override("margin_right", 38)
+	page_margin.add_theme_constant_override("margin_top", 32)
+	page_margin.add_theme_constant_override("margin_bottom", 28)
+	paper.add_child(page_margin)
+	var reading_column := VBoxContainer.new()
+	reading_column.add_theme_constant_override("separation", 14)
+	reading_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	page_margin.add_child(reading_column)
 	var title := StoryText.new()
-	title.configure({"text":str(story.title), "pinyin":story.get("titlePinyin", [])}, bool(session.state.pinyin), 34)
-	paper.add_child(title)
-	paper.add_child(PlaygroundUI.label("%s · %s" % [CATEGORY_NAMES.get(str(story.category), "故事"), story.get("origin", "经典故事·儿童改写")], 16, PlaygroundUI.INK_SOFT, 500, true))
-	for paragraph in story.get("paragraphs", []):
-		var panel := PlaygroundUI.panel(PlaygroundUI.PAPER, 20, PlaygroundUI.mix(accent, Color.WHITE, 0.85), 1)
-		var body := StoryText.new()
-		body.configure(paragraph, bool(session.state.pinyin), int(session.state.fontSize))
-		panel.add_child(body)
-		paper.add_child(panel)
-		_paragraphs.append(panel)
-	paper.add_child(PlaygroundUI.label("故事出处：%s\n%s" % [str(story.get("sourceLabel", "经典故事")), str(story.get("editorialNote", "传统故事的儿童中文改写。"))], 14, PlaygroundUI.INK_SOFT, 500, true))
-	_reader_scroll.add_child(paper)
+	title.configure({"text":str(story.title), "pinyin":story.get("titlePinyin", [])}, bool(session.state.pinyin), 42)
+	title.custom_minimum_size.y = 76
+	reading_column.add_child(title)
+	reading_column.add_child(PlaygroundUI.label(
+		"%s · %s" % [CATEGORY_NAMES.get(str(story.category), "故事"), story.get("origin", "经典故事·儿童改写")],
+		17,
+		PlaygroundUI.INK_SOFT,
+		600,
+		true
+	))
+	_article_text = StoryText.new()
+	if not StoryImages.story_ready.is_connected(_on_story_images_ready):
+		StoryImages.story_ready.connect(_on_story_images_ready)
+	if not StoryImages.story_failed.is_connected(_on_story_images_failed):
+		StoryImages.story_failed.connect(_on_story_images_failed)
+	_article_text.highlight_tint = PlaygroundUI.mix(accent, Color.WHITE, 0.86)
+	var state_before_request: Dictionary = StoryImages.story_state(story)
+	var prepared_illustrations: Array = StoryImages.prepare_story(story)
+	var illustration_state: Dictionary = StoryImages.story_state(story)
+	illustration_state["loading"] = bool(illustration_state.get("loading", false)) or (
+		not bool(state_before_request.get("ready", false))
+		and prepared_illustrations.size() < int(state_before_request.get("total", 0))
+	)
+	_article_text.configure_article(
+		story.get("paragraphs", []),
+		prepared_illustrations,
+		bool(session.state.pinyin),
+		int(session.state.fontSize)
+	)
+	reading_column.add_child(_article_text)
+	if not bool(illustration_state.get("ready", false)):
+		var illustration_row := HBoxContainer.new()
+		illustration_row.add_theme_constant_override("separation", 12)
+		_illustration_state_label = PlaygroundUI.label(_illustration_status_text(illustration_state), 15, PlaygroundUI.INK_SOFT, 600, true)
+		_illustration_state_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		illustration_row.add_child(_illustration_state_label)
+		_illustration_retry = PlaygroundUI.semantic_icon_button("repeat", "重试插画", accent, func(): StoryImages.retry(_story()), "soft", 16)
+		_illustration_retry.visible = not bool(illustration_state.get("loading", false))
+		_illustration_retry.disabled = bool(illustration_state.get("loading", false))
+		illustration_row.add_child(_illustration_retry)
+		reading_column.add_child(illustration_row)
+	reading_column.add_child(PlaygroundUI.label(
+		"故事出处：%s\n%s" % [
+			str(story.get("sourceLabel", "经典故事")),
+			str(story.get("editorialNote", "传统故事的儿童中文改写。")),
+		],
+		15,
+		PlaygroundUI.INK_SOFT,
+		500,
+		true
+	))
+	reading_column.add_child(_build_reader_footer())
 	_reader_scroll.get_v_scroll_bar().value_changed.connect(func(_value: float):
 		if not _programmatic_scroll and not _restoring_reading:
 			_follow_audio = false
-			if not (_tts_mode and _audio_active):
-				_capture_reading()
+			session.set_follow_reading(false)
+			_capture_reading()
+			_refresh_player()
 			_reading_dirty = true
 			_reading_save_clock = 0.0
 	)
@@ -356,6 +464,34 @@ func _render_reader() -> void:
 	content_root.add_child(_build_player())
 	_on_immersive_changed(immersive)
 	_restore_reading.call_deferred()
+
+
+func _illustration_status_text(state: Dictionary) -> String:
+	var cached := int(state.get("cached", 0))
+	var total := int(state.get("total", 0))
+	if bool(state.get("ready", false)):
+		return "插画已准备好 · 已保存到本机" if total > 0 else ""
+	if bool(state.get("loading", false)):
+		return "正在下载插画 %s/%s · 正文可先阅读" % [cached, total]
+	return "插画尚未下载 · 正文和系统朗读可继续使用"
+
+
+func _on_story_images_ready(story_id: String) -> void:
+	if str(session.state.storyId) != story_id or not is_inside_tree():
+		return
+	_capture_reading()
+	_save("插画下载完成")
+	_render()
+
+
+func _on_story_images_failed(story_id: String, message: String) -> void:
+	if str(session.state.storyId) != story_id or not is_inside_tree():
+		return
+	if is_instance_valid(_illustration_state_label):
+		_illustration_state_label.text = "%s · 点重试插画，正文不受影响" % message
+	if is_instance_valid(_illustration_retry):
+		_illustration_retry.visible = true
+		_illustration_retry.disabled = false
 
 
 func _on_immersive_changed(_value: bool) -> void:
@@ -373,14 +509,8 @@ func _build_player() -> Control:
 	_play_button = PlaygroundUI.semantic_icon_button("listen", "系统朗读", accent, _toggle_audio, "primary")
 	row.add_child(_play_button)
 	row.add_child(PlaygroundUI.semantic_icon_button("settings", "阅读设置", accent, _show_reading_settings, "soft"))
-	var finish := PlaygroundUI.semantic_icon_button("check", "读完啦", accent, func(): _mark_complete(); show_toast("这篇读过啦，故事还会留在这里。"), "soft")
-	finish.custom_minimum_size = Vector2(108, 48)
-	finish.add_theme_font_size_override("font_size", 17)
-	row.add_child(finish)
-	var next_story := PlaygroundUI.semantic_icon_button("next", "下一篇", accent, _next_story, "soft")
-	next_story.custom_minimum_size = Vector2(104, 48)
-	next_story.add_theme_font_size_override("font_size", 17)
-	row.add_child(next_story)
+	_follow_button = PlaygroundUI.semantic_icon_button("search", "跟着听", accent, _resume_follow_reading, "soft")
+	row.add_child(_follow_button)
 	_time_label = PlaygroundUI.label("", 17, PlaygroundUI.INK_SOFT)
 	_time_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -397,6 +527,26 @@ func _build_player() -> Control:
 	column.add_child(status_row)
 	_refresh_player()
 	return panel
+
+
+func _build_reader_footer() -> Control:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_END
+	row.add_theme_constant_override("separation", 10)
+	var note := PlaygroundUI.label("读完这一篇，再决定下一次翻开哪一页。", 16, PlaygroundUI.INK_SOFT, 500, true)
+	note.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(note)
+	row.add_child(PlaygroundUI.semantic_icon_button(
+		"check",
+		"读完啦",
+		accent,
+		func():
+			_mark_complete()
+			show_toast("这篇读过啦，故事还会留在这里。"),
+		"soft"
+	))
+	row.add_child(PlaygroundUI.semantic_icon_button("next", "下一篇", accent, _next_story, "primary"))
+	return row
 
 
 func _show_reading_settings() -> void:
@@ -433,7 +583,7 @@ func _show_reading_settings() -> void:
 		"search",
 		"跟随朗读位置",
 		accent,
-		func(): _follow_audio = true; _update_highlight(true); _close_top_modal(),
+		func(): _follow_audio = true; session.set_follow_reading(true); _update_highlight(true); _refresh_player(); _close_top_modal(),
 		"soft"
 	))
 	open_modal("阅读设置", box, [{"text":"回到暂停","icon":"back","kind":"primary","callback":func(): _close_top_modal()}], "设置只影响当前儿童")
@@ -478,8 +628,7 @@ func _request_play() -> void:
 
 
 func _story_paragraph_count() -> int:
-	var paragraphs: Variant = _story().get("paragraphs", [])
-	return paragraphs.size() if paragraphs is Array else 0
+	return _paragraph_ids.size()
 
 
 func _start_system_tts(index: int) -> void:
@@ -488,6 +637,7 @@ func _start_system_tts(index: int) -> void:
 	if not paragraphs is Array or paragraphs.is_empty():
 		return
 	_tts_paragraph = clampi(index, 0, paragraphs.size() - 1)
+	session.update_listening_paragraph(_paragraph_id_for_index(_tts_paragraph))
 	var text := str(paragraphs[_tts_paragraph].get("text", "")).strip_edges()
 	if _tts_paragraph == 0:
 		text = str(story.get("title", "")) + "。" + text
@@ -498,7 +648,6 @@ func _start_system_tts(index: int) -> void:
 		return
 	_audio_active = true
 	_tts_wait = 0.0
-	_follow_audio = true
 	AudioFX.set_music_duck(true)
 	_update_highlight(true)
 	_save("系统朗读第 %s 段" % (_tts_paragraph + 1))
@@ -571,34 +720,42 @@ func _refresh_player() -> void:
 	if is_instance_valid(_time_label):
 		var count := maxi(1, _story_paragraph_count())
 		_time_label.text = "共 %s 段" % count if _tts_paragraph >= count else "第 %s / %s 段" % [mini(_tts_paragraph + 1, count), count]
+	if is_instance_valid(_follow_button):
+		_follow_button.visible = not _follow_audio
 	_set_audio_status(_audio_status())
 
 
 func _update_highlight(force: bool = false) -> void:
-	if _paragraphs.is_empty(): return
-	var count := _paragraphs.size()
+	if not is_instance_valid(_article_text) or _paragraph_ids.is_empty():
+		return
+	var count := _paragraph_ids.size()
 	var target := clampi(_tts_paragraph, 0, count - 1)
 	if not _audio_active and _tts_paragraph >= count:
 		target = count - 1
 	if target == _highlighted and not force: return
 	_highlighted = target
-	for index in _paragraphs.size():
-		_paragraphs[index].add_theme_stylebox_override("panel", PlaygroundUI.style(PlaygroundUI.mix(accent, Color.WHITE, 0.9) if index == target else PlaygroundUI.PAPER, 20, accent if index == target else PlaygroundUI.mix(accent, Color.WHITE, 0.85), 2 if index == target else 1))
-	if _follow_audio and target >= 0 and target < _paragraphs.size() and is_instance_valid(_reader_scroll):
+	var paragraph_id := _paragraph_id_for_index(target)
+	_article_text.set_highlighted_paragraph(paragraph_id)
+	if _follow_audio and is_instance_valid(_reader_scroll):
+		var visible := _visible_article_range()
+		if _article_text.is_paragraph_visible(paragraph_id, visible.x, visible.y):
+			return
 		_programmatic_scroll = true
-		_reader_scroll.ensure_control_visible(_paragraphs[target])
+		var target_y := _article_offset_in_scroll() + _article_text.scroll_y_for_paragraph(paragraph_id) - _reader_scroll.size.y * 0.24
+		_reader_scroll.scroll_vertical = maxi(0, int(target_y))
 		call_deferred("_end_programmatic_scroll")
 
 
 func _capture_reading() -> void:
-	if _restoring_reading or not is_instance_valid(_reader_scroll) or _paragraphs.is_empty(): return
-	var top := float(_reader_scroll.scroll_vertical)
-	var paragraph := 0
-	for index in _paragraphs.size():
-		if _paragraphs[index].position.y <= top + 20.0: paragraph = index
-	var panel := _paragraphs[paragraph]
-	var offset := clampf((top - panel.position.y) / maxf(1.0, panel.size.y), 0.0, 1.0)
-	session.handle_input({"type":"bookmark", "value":{"paragraph":paragraph, "offset":offset}})
+	if _restoring_reading or not is_instance_valid(_reader_scroll) or not is_instance_valid(_article_text):
+		return
+	var local_top := float(_reader_scroll.scroll_vertical) + _article_offset_in_scroll()
+	var anchor := _article_text.anchor_at_local_y(local_top)
+	session.update_reading_anchor(
+		str(anchor.get("paragraphId", "")),
+		int(anchor.get("characterIndex", 0)),
+		float(anchor.get("lineOffset", 0.0))
+	)
 
 
 func _restore_reading() -> void:
@@ -607,13 +764,19 @@ func _restore_reading() -> void:
 	await get_tree().process_frame
 	if generation != _reader_generation or not is_inside_tree():
 		return
-	if not is_instance_valid(_reader_scroll) or _paragraphs.is_empty():
+	if not is_instance_valid(_reader_scroll) or not is_instance_valid(_article_text):
 		_restoring_reading = false
 		return
-	var bookmark := session.bookmark()
-	var index := clampi(int(bookmark.get("paragraph", 0)), 0, _paragraphs.size() - 1)
+	var anchor := session.reading_anchor()
+	if str(anchor.get("paragraphId", "")).is_empty():
+		_reader_scroll.scroll_vertical = 0
+		_restoring_reading = false
+		return
 	_programmatic_scroll = true
-	_reader_scroll.scroll_vertical = maxi(0, int(_paragraphs[index].position.y + float(bookmark.get("offset", 0.0)) * _paragraphs[index].size.y))
+	_reader_scroll.scroll_vertical = maxi(
+		0,
+		int(_article_offset_in_scroll() + _article_text.scroll_y_for_anchor(anchor))
+	)
 	_restoring_reading = false
 	call_deferred("_end_programmatic_scroll")
 
@@ -647,6 +810,7 @@ func _restart_story() -> void:
 	_reader_scroll = null
 	_tts_paragraph = 0
 	_tts_wait = 0.0
+	_follow_audio = false
 	_save("本篇重新开始")
 	_render()
 	_tts_paragraph = 0
@@ -655,10 +819,10 @@ func _restart_story() -> void:
 
 func _save(note: String = "自动保存听读进度") -> void:
 	if session.state.is_empty(): return
-	if _tts_mode and _audio_active:
-		session.handle_input({"type":"bookmark", "value":{"paragraph":_tts_paragraph, "offset":0.0}})
-	else:
-		_capture_reading()
+	_capture_reading()
+	if _tts_mode and not _paragraph_ids.is_empty():
+		session.update_listening_paragraph(_paragraph_id_for_index(_tts_paragraph))
+	session.set_follow_reading(_follow_audio)
 	var learning_data := SaveStore.learning(str(players[0].id), game_id)
 	learning_data.storyShelf = session.learning_snapshot()
 	SaveStore.save_state(game_id, str(players[0].id), session.snapshot(), note)

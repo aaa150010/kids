@@ -293,7 +293,7 @@ func _lobby_heading() -> Control:
 		var resume := PlaygroundUI.button("继续上次", Color("#b57926"), _show_continue_dialog)
 		resume.custom_minimum_size = Vector2(154, 60)
 		row.add_child(resume)
-	row.add_child(PlaygroundUI.semantic_icon_button("shuffle", "随机游戏", Color("#c05b8f"), _show_random_game, "soft"))
+	row.add_child(PlaygroundUI.semantic_icon_button("shuffle", "随机游戏", Color("#99644f"), _show_random_game, "soft"))
 	if sorting:
 		row.add_child(PlaygroundUI.button("整理好了", Color("#99644f"), _toggle_lobby_sort, "primary"))
 	return row
@@ -825,7 +825,7 @@ func _show_profile_manager() -> void:
 		row.add_child(copy)
 		row.add_child(PlaygroundUI.button("成长", tint, _show_profile_report.bind(profile), "ghost"))
 		row.add_child(PlaygroundUI.button("编辑", tint, _show_profile_form.bind(profile), "soft"))
-		row.add_child(PlaygroundUI.button("删除", Color("#c35a48"), _confirm_delete_profile.bind(profile), "ghost"))
+		row.add_child(PlaygroundUI.button("删除", PlaygroundUI.DANGER, _confirm_delete_profile.bind(profile), "danger"))
 		content.add_child(row)
 	if SaveStore.profiles().is_empty():
 		content.add_child(PlaygroundUI.label("还没有儿童档案。先给孩子建一个名字和年龄吧。", 17, PlaygroundUI.INK_SOFT, 500, true))

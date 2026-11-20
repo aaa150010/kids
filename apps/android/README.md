@@ -49,6 +49,9 @@ pnpm native:audit
 - 600 篇正文和逐字拼音由 `pnpm native:stories` 从 `content-src/stories/` 生成。
 - 朗读使用安卓平板自带的中文系统 TTS，通过 Godot `DisplayServer.tts_*` 调用。
 - 不生成、下载或缓存 MP3；不调用云端语音服务，阅读进度按故事段落和段内偏移自动保存。
+- 每篇 2–3 张原创情节插画独立托管在 `https://lynote.xyz/play-app/story-images/`，打开故事时按需下载、校验并缓存；正文与拼音始终随 App 内置。
+- 故事图片不进入 APK 或内容包；本机缓存上限 64 MB，按最近使用时间清理。正文质量检查使用 `pnpm native:stories:audit`，图片部署使用 `pnpm native:stories:images:deploy`。
+- 正式 APK 只包含 OPPO Pad 3 Pro 使用的 `arm64-v8a` 运行库。构建脚本会拒绝带 ARM32 库、故事插画、音频文件或体积超过 100 MiB 的发布包。
 
 ## 品牌图标
 

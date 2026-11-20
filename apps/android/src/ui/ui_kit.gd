@@ -3,9 +3,16 @@ extends RefCounted
 
 const DEFAULT_SIZE := 20
 const INK := Color("#2e241f")
+const INK_DARK := Color("#171b20")
 const INK_SOFT := Color("#716052")
 const PAPER := Color("#fffdf7")
 const CREAM := Color("#fff9eb")
+const TOOL_BG := Color("#fff9ed")
+const TOOL_HOVER := Color("#fffdf7")
+const TOOL_PRESSED := Color("#f1eadb")
+const TOOL_LINE := Color("#d9d0be")
+const DANGER := Color("#b57926")
+const DANGER_INK := Color("#744515")
 const LINE := Color("#2e241f20")
 const BREAKPOINT_COMPACT := 1180.0
 const BREAKPOINT_WIDE := 1550.0
@@ -39,7 +46,7 @@ static func install_theme(root: Control) -> void:
 	theme.set_color("font_color", "Label", INK)
 	theme.set_color("font_color", "Button", INK)
 	theme.set_color("font_hover_color", "Button", INK)
-	theme.set_color("font_pressed_color", "Button", Color.WHITE)
+	theme.set_color("font_pressed_color", "Button", INK_DARK)
 	root.theme = theme
 
 
@@ -49,6 +56,11 @@ static func color(value: String, fallback: Color = INK) -> Color:
 
 static func mix(base: Color, other: Color, amount: float) -> Color:
 	return base.lerp(other, clampf(amount, 0.0, 1.0))
+
+
+static func on_accent(accent: Color) -> Color:
+	var luminance := accent.r * 0.2126 + accent.g * 0.7152 + accent.b * 0.0722
+	return INK_DARK if luminance >= 0.24 else Color.WHITE
 
 
 static func style(
@@ -203,6 +215,7 @@ static func button(
 	node.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
 	node.add_theme_font_override("font", _bold_font())
 	node.add_theme_font_size_override("font_size", 20)
+	var foreground := on_accent(accent)
 	var normal := style(
 		accent,
 		18,
@@ -221,35 +234,36 @@ static func button(
 	pressed.shadow_offset = Vector2.ZERO
 	var focus := normal.duplicate() as StyleBoxFlat
 	focus.bg_color = accent
-	focus.border_color = Color.WHITE
+	focus.border_color = foreground
 	focus.border_width_left = 4
 	focus.border_width_top = 4
 	focus.border_width_right = 4
 	focus.border_width_bottom = 4
-	node.add_theme_color_override("font_color", Color.WHITE)
-	node.add_theme_color_override("font_hover_color", Color.WHITE)
-	node.add_theme_color_override("font_pressed_color", Color.WHITE)
+	node.add_theme_color_override("font_color", foreground)
+	node.add_theme_color_override("font_hover_color", foreground)
+	node.add_theme_color_override("font_pressed_color", foreground)
 	if kind == "soft":
-		var soft_background := mix(accent, Color.WHITE, 0.82)
-		normal = style(soft_background, 18, mix(accent, Color.WHITE, 0.35), 2)
+		normal = style(TOOL_BG, 18, TOOL_LINE, 2, 3, Color(0, 0, 0, 0.10))
 		hover = normal.duplicate() as StyleBoxFlat
-		hover.bg_color = mix(soft_background, accent, 0.1)
+		hover.bg_color = TOOL_HOVER
 		pressed = normal.duplicate() as StyleBoxFlat
-		pressed.bg_color = mix(soft_background, accent, 0.2)
+		pressed.bg_color = TOOL_PRESSED
+		pressed.shadow_size = 1
 		focus = normal.duplicate() as StyleBoxFlat
 		focus.border_color = accent
 		focus.border_width_left = 4
 		focus.border_width_top = 4
 		focus.border_width_right = 4
 		focus.border_width_bottom = 4
-		node.add_theme_color_override("font_color", mix(accent, Color.BLACK, 0.35))
-		node.add_theme_color_override("font_hover_color", mix(accent, Color.BLACK, 0.45))
-		node.add_theme_color_override("font_pressed_color", mix(accent, Color.BLACK, 0.55))
+		node.add_theme_color_override("font_color", INK_DARK)
+		node.add_theme_color_override("font_hover_color", INK_DARK)
+		node.add_theme_color_override("font_pressed_color", INK)
 	elif kind == "ghost":
-		normal = style(Color(1, 1, 1, 0.68), 18, LINE, 1)
+		normal = style(Color(1, 1, 1, 0.56), 18, TOOL_LINE, 1)
 		hover = normal.duplicate() as StyleBoxFlat
-		hover.bg_color = Color.WHITE
+		hover.bg_color = TOOL_HOVER
 		pressed = normal.duplicate() as StyleBoxFlat
+		pressed.bg_color = TOOL_PRESSED
 		focus = normal.duplicate() as StyleBoxFlat
 		focus.border_color = accent
 		focus.border_width_left = 4
@@ -259,11 +273,28 @@ static func button(
 		node.add_theme_color_override("font_color", INK)
 		node.add_theme_color_override("font_hover_color", INK)
 		node.add_theme_color_override("font_pressed_color", INK_SOFT)
+	elif kind == "danger":
+		normal = style(TOOL_BG, 18, DANGER, 2, 2, Color(0, 0, 0, 0.08))
+		hover = normal.duplicate() as StyleBoxFlat
+		hover.bg_color = TOOL_HOVER
+		pressed = normal.duplicate() as StyleBoxFlat
+		pressed.bg_color = Color("#f5ead8")
+		focus = normal.duplicate() as StyleBoxFlat
+		focus.border_color = DANGER
+		focus.border_width_left = 4
+		focus.border_width_top = 4
+		focus.border_width_right = 4
+		focus.border_width_bottom = 4
+		node.add_theme_color_override("font_color", DANGER_INK)
+		node.add_theme_color_override("font_hover_color", DANGER_INK)
+		node.add_theme_color_override("font_pressed_color", DANGER_INK)
+	node.add_theme_color_override("font_focus_color", node.get_theme_color("font_color") if node.has_theme_color_override("font_color") else foreground)
+	node.add_theme_color_override("icon_focus_color", node.get_theme_color("font_color") if node.has_theme_color_override("font_color") else foreground)
 	node.add_theme_stylebox_override("normal", normal)
 	node.add_theme_stylebox_override("hover", hover)
 	node.add_theme_stylebox_override("pressed", pressed)
 	node.add_theme_stylebox_override("focus", focus)
-	node.add_theme_stylebox_override("disabled", style(mix(accent, Color.WHITE, 0.7), 18))
+	node.add_theme_stylebox_override("disabled", style(Color("#eee9de"), 18, TOOL_LINE, 1))
 	node.add_theme_color_override("font_disabled_color", Color(0.55, 0.5, 0.45, 0.75))
 	if on_pressed.is_valid():
 		node.pressed.connect(on_pressed)
@@ -373,8 +404,9 @@ static func choice_button(
 	active_hover.bg_color = mix(accent, Color.WHITE, 0.1)
 	node.add_theme_stylebox_override("pressed", active)
 	node.add_theme_stylebox_override("hover_pressed", active_hover)
-	node.add_theme_color_override("font_pressed_color", Color.WHITE)
-	node.add_theme_color_override("font_hover_pressed_color", Color.WHITE)
+	var active_foreground := on_accent(accent)
+	node.add_theme_color_override("font_pressed_color", active_foreground)
+	node.add_theme_color_override("font_hover_pressed_color", active_foreground)
 	return node
 
 

@@ -4,6 +4,8 @@ export KIDS_PLAYGROUND_AUDIT=1
 
 project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 godot_bin="${GODOT_BIN:-$HOME/Library/Caches/KidsPlayground/tools/Godot.app/Contents/MacOS/Godot}"
+audit_home="${KIDS_AUDIT_HOME:-$project_root/build/godot-audit-home}"
+mkdir -p "$audit_home"
 
 if [[ ! -x "$godot_bin" ]]; then
   echo "找不到 Godot 4.7.2 桌面运行器：$godot_bin" >&2
@@ -18,7 +20,7 @@ run_audit_stage() {
   local stage_name="$1"
   shift
   local stage_log="$audit_dir/$stage_name.log"
-  if ! "$godot_bin" "$@" 2>&1 | tee "$stage_log"; then
+  if ! HOME="$audit_home" "$godot_bin" "$@" 2>&1 | tee "$stage_log"; then
     return 1
   fi
   if rg -q 'SCRIPT ERROR:|Parse Error:|Compile Error:|Failed to load script|Failed to instantiate|Out of bounds' "$stage_log"; then

@@ -4,7 +4,7 @@
   "version": "1.3.0",
   "type": "module",
   "scripts": {
-    "native:content": "node scripts/native/author-stories.mjs && node scripts/native/author-poem-pinyin.mjs && node scripts/native/author-military.mjs && node scripts/native/export-content.mjs",
+    "native:content": "node scripts/native/audit-stories.mjs && node scripts/native/generate-story-layout.mjs && node scripts/native/author-stories.mjs && node scripts/native/author-poem-pinyin.mjs && node scripts/native/author-military.mjs && node scripts/native/export-content.mjs",
     "native:military": "node scripts/native/author-military.mjs",
     "native:poetry:pinyin": "node scripts/native/author-poem-pinyin.mjs",
     "native:levels": "node scripts/native/author-levels.mjs",
@@ -16,7 +16,10 @@
     "native:build:setup": "bash scripts/native/setup-android-build-tools.sh",
     "native:deploy": "bash scripts/native/deploy-android.sh",
     "native:release:docker": "bash scripts/native/build-android-docker.sh && SKIP_BUILD=1 bash scripts/native/deploy-android.sh",
-    "native:stories": "node scripts/native/author-stories.mjs"
+    "native:stories": "node scripts/native/audit-stories.mjs && node scripts/native/generate-story-layout.mjs && node scripts/native/author-stories.mjs",
+    "native:stories:audit": "node scripts/native/audit-stories.mjs",
+    "native:stories:illustrations": "python3 scripts/native/generate-story-illustrations.py",
+    "native:stories:images:deploy": "bash scripts/native/deploy-story-images.sh"
   },
   "devDependencies": {
     "pinyin-pro": "3.29.5"

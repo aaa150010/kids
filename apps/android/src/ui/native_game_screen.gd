@@ -407,17 +407,27 @@ func _open_pause_tools() -> void:
 	summary_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	summary_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var pause_status := "已保存，可以放心休息" if not _resume_on_start else "已接着上次进度，准备好再继续"
-	var actions := [
-		{"text": "继续游戏", "icon": "play", "kind": "primary", "callback": func(): _close_top_modal()},
+	var primary_action := {
+		"text": "接着读" if game_id == "stories" else "继续游戏",
+		"icon": "play",
+		"kind": "primary",
+		"callback": func(): _close_top_modal(),
+	}
+	var tool_actions := [
 		{"text": "怎么玩", "icon": "rules", "kind": "soft", "callback": func(): show_help()},
 		{"text": "声音与朗读", "icon": "sound", "kind": "soft", "callback": func(): _show_settings()},
-	]
-	actions.append_array(_extra_pause_actions())
-	actions.append_array([
-		{"text": "重开本局", "icon": "restart", "kind": "soft", "callback": func(): _confirm_restart()},
+		{"text": "重开本局", "icon": "restart", "kind": "danger", "callback": func(): _confirm_restart()},
 		{"text": "回游戏大厅", "icon": "home", "kind": "soft", "callback": func(): _confirm_exit()},
-	])
-	_pause_root_layer = open_modal("暂停一下", summary_text, actions, pause_status, false)
+	]
+	_pause_root_layer = open_modal("暂停一下", summary_text, [], pause_status, false, {
+		"layout": "pause",
+		"primary_action": primary_action,
+		"tool_actions": tool_actions,
+		"extra_actions": _extra_pause_actions(),
+		"width": 800.0,
+		"size": "L",
+		"fit_content": true,
+	})
 	_pause_root_layer.set_meta("pause_root", true)
 	_pause_root_layer.set_meta("pause_seat", _pause_origin_seat)
 	_layout_pause_rails()
@@ -516,7 +526,8 @@ func open_modal(
 	content: Control,
 	actions: Array,
 	eyebrow: String = "",
-	dismissible: bool = true
+	dismissible: bool = true,
+	options: Dictionary = {}
 ) -> Control:
 	# System tools stay upright even when the board is seated from its short edge.
 	var angle := 0.0
@@ -525,20 +536,21 @@ func open_modal(
 		if not manager.dialog_closed.is_connected(_on_dialog_closed):
 			manager.dialog_closed.connect(_on_dialog_closed)
 		# 本地栈按关闭信号同步，不能根据全局栈顶猜测身份
-		var layer: Control = manager.show_dialog({
-			"title": title,
-			"body": content,
-			"buttons": actions,
-			"eyebrow": eyebrow,
-			"dismissible": dismissible,
-			"accent": accent,
-			"size": "L",
-			"facing_angle": 0.0,
-		})
+		var opts := options.duplicate()
+		opts["title"] = title
+		opts["body"] = content
+		opts["buttons"] = actions
+		opts["eyebrow"] = eyebrow
+		opts["dismissible"] = dismissible
+		opts["accent"] = accent
+		if not opts.has("size"):
+			opts["size"] = "L"
+		opts["facing_angle"] = 0.0
+		var layer: Control = manager.show_dialog(opts)
 		_modal_stack.append(layer)
 		_layout_pause_rails()
 		return layer
-	return _open_modal_fallback(title, content, actions, eyebrow, dismissible, angle)
+	return _open_modal_fallback(title, content, actions, eyebrow, dismissible, angle, options)
 
 
 func _dialog_manager() -> DialogManager:
@@ -557,7 +569,8 @@ func _open_modal_fallback(
 	actions: Array,
 	eyebrow: String = "",
 	dismissible: bool = true,
-	angle: float = 0.0
+	angle: float = 0.0,
+	options: Dictionary = {}
 ) -> Control:
 	var layer := Control.new()
 	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -576,63 +589,49 @@ func _open_modal_fallback(
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	canvas.add_child(center)
-	var card := PlaygroundUI.panel(PlaygroundUI.PAPER, 30, PlaygroundUI.mix(accent, Color.WHITE, 0.55), 2)
-	card.custom_minimum_size = Vector2(minf(680, available.x - maxf(32.0, available.x * 0.08)), 0)
+	var card_width := clampf(
+		float(options.get("width", minf(800.0, available.x - maxf(32.0, available.x * 0.08)))),
+		360.0,
+		maxf(360.0, available.x - 32.0)
+	)
+	var panel_opts := options.duplicate()
+	panel_opts["title"] = title
+	panel_opts["body"] = content
+	panel_opts["buttons"] = actions
+	panel_opts["eyebrow"] = eyebrow
+	panel_opts["dismissible"] = dismissible
+	panel_opts["accent"] = accent
+	var panel := DialogPanel.build(
+		panel_opts,
+		available,
+		card_width,
+		func(): _close_top_modal()
+	)
+	var card: PanelContainer = panel.card
 	card.modulate.a = 0.0
 	card.scale = Vector2(0.97, 0.97)
 	card.pivot_offset = Vector2(card.size.x * 0.5, 0)
 	center.add_child(card)
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 14)
-	card.add_child(column)
-	if not eyebrow.is_empty():
-		column.add_child(PlaygroundUI.label(eyebrow, 14, accent, 700))
-	column.add_child(PlaygroundUI.label(title, 32, PlaygroundUI.INK, 700, true))
-	var content_scroll := ScrollContainer.new()
-	content_scroll.custom_minimum_size.y = minf(430.0, available.y * 0.50)
-	content_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	content_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	content_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	content_scroll.add_child(content)
-	var desired_content_height := clampf(content.get_combined_minimum_size().y + 8.0, 72.0, 360.0)
-	content_scroll.custom_minimum_size.y = desired_content_height
-	column.add_child(content_scroll)
-	var actions_row := HFlowContainer.new()
-	actions_row.alignment = FlowContainer.ALIGNMENT_END
-	actions_row.add_theme_constant_override("separation", 10)
-	for action in actions:
-		var kind := str(action.get("kind", "primary"))
-		var button: Button
-		if action.has("icon"):
-			button = PlaygroundUI.semantic_icon_button(
-				str(action["icon"]),
-				str(action.get("text", "好")),
-				accent,
-				action.get("callback", Callable()),
-				kind,
-				22
-			)
-		else:
-			button = PlaygroundUI.button(
-				str(action.get("text", "好")),
-				accent,
-				action.get("callback", Callable()),
-				kind
-			)
-		button.custom_minimum_size.x = 132
-		actions_row.add_child(button)
-	column.add_child(actions_row)
 	overlay_root.add_child(layer)
 	_modal_stack.append(layer)
+	_update_fallback_panel(panel, available, panel_opts)
 	var animation := MotionKit.tween(self)
 	animation.set_parallel(true)
 	animation.tween_property(card, "modulate:a", 1.0, MotionKit.MODAL_IN)
 	animation.tween_property(card, "scale", Vector2.ONE, MotionKit.MODAL_IN).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	var controls := card.find_children("*", "Button", true, false)
+	var controls := card.find_children("*", "Button", true, false).filter(
+		func(control):
+			var button := control as Button
+			return button != null and button.focus_mode != Control.FOCUS_NONE and button.is_visible_in_tree() and not button.disabled
+	)
 	if not controls.is_empty():
 		controls[0].call_deferred("grab_focus")
 	return layer
+
+
+func _update_fallback_panel(panel: Dictionary, available: Vector2, opts: Dictionary) -> void:
+	if panel.get("body_scroll") is ScrollContainer and panel.get("body") is Control:
+		DialogPanel.update_body_limit(panel.body_scroll, panel.body, available, opts)
 
 
 func _close_top_modal() -> void:

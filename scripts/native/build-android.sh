@@ -33,6 +33,7 @@ if [[ -z "$java_home" || ! -x "$java_home/bin/java" ]]; then
 fi
 
 android_sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-$user_home/Library/Caches/KidsPlayground/android-sdk}}"
+gradle_user_home="${KIDS_PLAYGROUND_GRADLE_USER_HOME:-$project_root/build/gradle-user-home}"
 
 if ! command -v "$godot_bin" >/dev/null 2>&1; then
   echo "找不到 Godot。请安装 Godot 4.7.2，并通过 GODOT_BIN 指向可执行文件。" >&2
@@ -68,6 +69,7 @@ fi
 export JAVA_HOME="$java_home"
 export ANDROID_HOME="$android_sdk"
 export ANDROID_SDK_ROOT="$android_sdk"
+export GRADLE_USER_HOME="$gradle_user_home"
 export PATH="$JAVA_HOME/bin:$android_sdk/platform-tools:$android_sdk/build-tools/34.0.0:$PATH"
 
 echo "工具链检查通过："
@@ -75,12 +77,15 @@ echo "  Godot=$godot_bin"
 echo "  Gradle=$gradle_bin"
 echo "  JAVA_HOME=$JAVA_HOME"
 echo "  ANDROID_HOME=$ANDROID_HOME"
+echo "  GRADLE_USER_HOME=$GRADLE_USER_HOME"
 echo "  ExportTemplates=$export_templates"
 if [[ "${CHECK_ONLY:-0}" == "1" ]]; then
   exit 0
 fi
 
 cd "$project_root"
+node scripts/native/audit-stories.mjs
+node scripts/native/generate-story-layout.mjs
 node scripts/native/author-stories.mjs
 node scripts/native/export-content.mjs
 node scripts/native/signing.mjs
@@ -117,8 +122,12 @@ NATIVE_PROJECT_DIR="$staging" node scripts/native/prepare-export.mjs
 if [[ "${SKIP_PLUGIN_BUILD:-0}" != "1" ]]; then
   (
     cd "$staging/android/plugins/updater"
+    plugin_gradle_args=(--no-daemon assembleRelease)
+    if [[ -d "$GRADLE_USER_HOME/caches/modules-2" ]]; then
+      plugin_gradle_args=(--offline "${plugin_gradle_args[@]}")
+    fi
     GODOT_LIB_AAR="$staging/android/build/libs/release/godot-lib.template_release.aar" \
-    "$gradle_bin" --no-daemon --offline assembleRelease
+      "$gradle_bin" "${plugin_gradle_args[@]}"
   )
   cp "$staging/android/plugins/updater/build/outputs/aar/updater-release.aar" \
     "$staging/android/plugins/UpdateInstaller.aar"
@@ -165,4 +174,28 @@ godot_run --headless --path "$staging" --script res://tools/pack_content.gd -- "
 
 APK_PATH="$staging/build/kids-playground.apk" PCK_PATH="$staging/build/content.pck" \
   node scripts/native/generate-release.mjs
+
+apk_path="$project_root/build/native-release/kids-playground-$(node -e "console.log(require('./apps/android/version.json').versionCode)").apk"
+apk_entries="$(unzip -Z1 "$apk_path")"
+if rg -q '^lib/armeabi-v7a/' <<<"$apk_entries"; then
+  echo "发布 APK 不应包含 ARM32 运行库。" >&2
+  exit 1
+fi
+if ! rg -q '^lib/arm64-v8a/libgodot_android\.so$' <<<"$apk_entries"; then
+  echo "发布 APK 缺少 ARM64 Godot 运行库。" >&2
+  exit 1
+fi
+if rg -q '^assets/(assets/)?stories/' <<<"$apk_entries"; then
+  echo "发布 APK 不得内置故事插画。" >&2
+  exit 1
+fi
+if rg -q '\.(mp3|m4a|aac|wav|ogg)$' <<<"$apk_entries"; then
+  echo "故事音频应由系统 TTS 生成，发布 APK 不得内置音频文件。" >&2
+  exit 1
+fi
+apk_bytes="$(wc -c < "$apk_path" | tr -d '[:space:]')"
+if (( apk_bytes > 100 * 1024 * 1024 )); then
+  echo "APK 体积 ${apk_bytes} 字节，超过 100 MiB 发布上限。" >&2
+  exit 1
+fi
 echo "原生安装包已生成：$project_root/build/native-release"
