@@ -16,11 +16,7 @@
     "native:build:setup": "bash scripts/native/setup-android-build-tools.sh",
     "native:deploy": "bash scripts/native/deploy-android.sh",
     "native:release:docker": "bash scripts/native/build-android-docker.sh && SKIP_BUILD=1 bash scripts/native/deploy-android.sh",
-    "native:stories": "node scripts/native/author-stories.mjs",
-    "native:stories:audio": "build/story-tools/venv/bin/python -u scripts/native/generate-story-audio.py",
-    "native:stories:prepare": "node scripts/native/prepare-story-audio-release.mjs",
-    "native:stories:deploy": "bash scripts/native/deploy-story-audio.sh",
-    "native:stories:setup": "bash scripts/native/setup-story-audio.sh"
+    "native:stories": "node scripts/native/author-stories.mjs"
   },
   "devDependencies": {
     "pinyin-pro": "3.29.5"

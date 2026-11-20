@@ -6,5 +6,5 @@
   "pronunciation": {"tool":"pinyin-pro","version":"3.29.5","license":"MIT","url":"https://github.com/zh-lx/pinyin-pro","use":"仅制作阶段生成拼音数据，词组校订保存在 pronunciation.json；不随 App 运行 JavaScript。"},
   "narration": {"provider":"Android System TTS","license":"平板系统自带","use":"App 运行时通过 Godot DisplayServer.tts_* 调用平板自带中文语音；不预生成、不下载 MP3、不调用云端合成。"},
   "classicReferences": ["https://zh.wikisource.org/wiki/韓非子","https://zh.wikisource.org/wiki/戰國策","https://zh.wikisource.org/wiki/列子","https://zh.wikisource.org/wiki/莊子","https://zh.wikisource.org/wiki/孟子","https://zh.wikisource.org/wiki/淮南子","https://zh.wikisource.org/wiki/山海經","https://zh.wikisource.org/wiki/史記","https://zh.wikisource.org/wiki/後漢書","https://zh.wikisource.org/wiki/世說新語","https://zh.wikisource.org/wiki/晉書","https://zh.wikisource.org/wiki/宋史","https://zh.wikisource.org/wiki/本草綱目","https://www.gutenberg.org/ebooks/21","https://www.gutenberg.org/ebooks/2591","https://www.gutenberg.org/ebooks/1597"],
-  "editorialStatus": "600 篇正文已扩写为完整多段故事并重新生成逐字拼音；朗读改为 Android 系统 TTS，音频索引为空，不随 App 分发 MP3。尚未逐篇人工审校、项目测试或真机播放验收。"
+  "editorialStatus": "600 篇正文已扩写为完整多段故事并重新生成逐字拼音；朗读仅使用 Android 系统 TTS，不随 App 分发或下载 MP3。尚未逐篇人工审校、项目测试或真机播放验收。"
 }

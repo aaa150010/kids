@@ -47,9 +47,8 @@ pnpm native:audit
 ## 中外故事馆
 
 - 600 篇正文和逐字拼音由 `pnpm native:stories` 从 `content-src/stories/` 生成。
-- 600 篇普通话 MP3 由 Qwen 在制作阶段生成，存放在 `content-src/story-audio/`，不进入 APK 或内容 PCK。
-- App 首次播放时按需下载，最多并行两项；逐篇校验 SHA-256 后写入 `user://story-audio/`，之后离线播放。
-- 服务端路径为 `https://lynote.xyz/play-app/stories/audio/`，只有用户明确发布后才运行上传脚本。
+- 朗读使用安卓平板自带的中文系统 TTS，通过 Godot `DisplayServer.tts_*` 调用。
+- 不生成、下载或缓存 MP3；不调用云端语音服务，阅读进度按故事段落和段内偏移自动保存。
 
 ## 品牌图标
 

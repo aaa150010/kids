@@ -83,7 +83,6 @@ func _sanitize() -> void:
 					"position": clampf(position, 0.0, 7200.0) if is_finite(position) else 0.0,
 					"paragraph": clampi(paragraph, 0, count - 1),
 					"offset": clampf(_number(bookmark.get("offset", 0.0)), 0.0, 1.0),
-					"audioHash": str(bookmark.get("audioHash", "")),
 				}
 	state.bookmarks = clean_bookmarks
 
@@ -130,13 +129,13 @@ func handle_input(action: Dictionary) -> bool:
 			if not (state.storyId in state.completed): state.completed.append(state.storyId)
 		"restart":
 			if str(state.storyId).is_empty(): return false
-			state.bookmarks[state.storyId] = {"position": 0.0, "paragraph": 0, "offset": 0.0, "audioHash": ""}
+			state.bookmarks[state.storyId] = {"position": 0.0, "paragraph": 0, "offset": 0.0}
 		_: return false
 	return true
 
 
 func bookmark() -> Dictionary:
-	return state.bookmarks.get(state.storyId, {"position": 0.0, "paragraph": 0, "offset": 0.0, "audioHash": ""}).duplicate(true)
+	return state.bookmarks.get(state.storyId, {"position": 0.0, "paragraph": 0, "offset": 0.0}).duplicate(true)
 
 
 func tick(_delta: float) -> void:

@@ -145,13 +145,13 @@
       "game_id":"stories", "title":"中外故事馆", "document_count":20,
       "entries":[
         {"source_id":"G01","shared":true,"interaction_conclusion":"正文与拼音自绘不吞滚动事件，程序滚动与手动滚动分别处理。","local_code":"apps/android/src/ui/story_text.gd:13","local_gap":"StoryText使用IGNORE；_programmatic_scroll避免主动定位被误判为用户拖动。","status":"已实现"},
-        {"source_id":"G02","shared":true,"interaction_conclusion":"播放/暂停按钮行为随真实播放和等待下载状态改变。","local_code":"apps/android/src/games/story_game.gd:358","local_gap":"有音频或_pending_play时统一取消/暂停；按钮文案分别显示暂停、取消播放、接着听。","status":"已实现"},
+        {"source_id":"G02","shared":true,"interaction_conclusion":"播放/暂停按钮行为随真实系统朗读状态改变。","local_code":"apps/android/src/games/story_game.gd","local_gap":"系统 TTS 播放中显示暂停；结束后可再读一遍或继续下一段。","status":"已实现"},
         {"source_id":"G03","shared":true,"interaction_conclusion":"恢复和跟随滚动不能和页面重排并发修改视图。","local_code":"apps/android/src/games/story_game.gd:523","local_gap":"恢复等待两帧并设置_restoring_reading/_programmatic_scroll；字体/拼音切换连点时布局稳定性待验证。","status":"待验证"},
         {"source_id":"G04","shared":true,"interaction_conclusion":"保存节奏独立于音频刷新，最多两秒补存。","local_code":"apps/android/src/ui/native_game_screen.gd:438","local_gap":"父类每2秒checkpoint，子类每0.15秒刷新播放位置；源码有补存路径，未跑时序验证。","status":"已实现"},
-        {"source_id":"G05","shared":true,"interaction_conclusion":"异步下载完成后检查当前篇目、页面与暂停状态再播放。","local_code":"apps/android/src/games/story_game.gd:374","local_gap":"核对_pending_play/storyId/is_inside_tree/paused，防旧故事下载完成后突然开口。","status":"已实现"},
+        {"source_id":"G05","shared":true,"interaction_conclusion":"切篇、暂停或退出后不得由旧异步任务突然开口。","local_code":"apps/android/src/games/story_game.gd","local_gap":"系统 TTS 无下载任务；切篇、暂停和退出均显式停止朗读。","status":"已实现"},
         {"source_id":"G06","shared":true,"interaction_conclusion":"正文进度与下载缓存分开，清理缓存不清除收藏和足迹。","local_code":"apps/android/src/games/story_session.gd:145","local_gap":"learning_snapshot单独保存收藏/最近/书签/读过；音频服务为共享缓存，隔离恢复需运行验证。","status":"已实现"},
-        {"source_id":"G07","shared":true,"interaction_conclusion":"暂停时保存位置，继续时用play(position)启动；不要仅对停止的流seek。","local_code":"apps/android/src/games/story_game.gd:374","local_gap":"_pause_audio取position后stream_paused；准备流后play(position)；_seek仅在_audio_active时操作流。","status":"已实现"},
-        {"source_id":"G08","shared":true,"interaction_conclusion":"故事音频与系统TTS互斥，后台不自动继续开口。","local_code":"apps/android/src/games/story_game.gd:391","local_gap":"播放MP3前Speech.stop，后台_pause_audio并保存；返回前台无自动播放逻辑。","status":"已实现"},
+        {"source_id":"G07","shared":true,"interaction_conclusion":"暂停时保存段落位置，继续时从当前段落重新开始。","local_code":"apps/android/src/games/story_game.gd","local_gap":"系统 TTS 不暴露 MP3 秒级位置，暂停保存段落与阅读偏移。","status":"已实现"},
+        {"source_id":"G08","shared":true,"interaction_conclusion":"故事系统朗读在后台停止，回来不自动开口。","local_code":"apps/android/src/games/story_game.gd","local_gap":"后台暂停系统 TTS 并保存；返回前台由用户显式继续。","status":"已实现"},
         {"source_id":"G09","shared":true,"interaction_conclusion":"触摸结束保存阅读位置，取消事件不应触发播放。","local_code":"apps/android/src/games/story_game.gd:300","local_gap":"正文松手_save；此处没有播放动作；系统取消与多指滚动后是否稳定捕获最后位置未测。","status":"待验证"},
         {"source_id":"G10","shared":true,"interaction_conclusion":"手动拖动正文后停止自动跟随，给用户明确的恢复跟随按钮。","local_code":"apps/android/src/games/story_game.gd:295","local_gap":"非程序滚动设_follow_audio=false；工具栏有跟随朗读恢复入口；手指拖动时跟随竞争待实机验证。","status":"已实现"},
         {"source_id":"K01","shared":true,"interaction_conclusion":"改变字号与拼音后按阅读锚点重排，偏好独立保存。","local_code":"apps/android/src/games/story_session.gd:110","local_gap":"字号28/34/40、拼音与bookmarks分别保存；字体变化后锚点附近是否无明显跳跃待验证。","status":"已实现"},
@@ -160,10 +160,10 @@
         {"source_id":"K06","shared":false,"interaction_conclusion":"屏幕坐标和内容坐标分开，段落高亮必须与可见正文对齐。","local_code":"apps/android/src/games/story_game.gd:492","local_gap":"按段落时间表选目标并ensure_control_visible；超长单段超过一屏时只定位整个Control，段内跟随效果需观察。","status":"待验证"},
         {"source_id":"S01","shared":false,"interaction_conclusion":"布局完成后再恢复滚动；手动浏览不被朗读强行拉回。","local_code":"apps/android/src/games/story_game.gd:523","local_gap":"等待两帧后恢复scroll_vertical，跟随时才ensure_control_visible；与官方同帧限制一致。","status":"已实现"},
         {"source_id":"S02","shared":false,"interaction_conclusion":"正文段落边界、换行与拼音应一一对应，不能用任意行高代替锚点。","local_code":"apps/android/src/ui/story_text.gd:32","local_gap":"自绘按字符及拼音宽度换行，支持显式换行；没有中文行首禁则处理，标点可能被挤到行首，尚未视觉复核。","status":"待验证"},
-        {"source_id":"S03","shared":false,"interaction_conclusion":"下载成功要同时校验请求结果、HTTP状态及媒体正文，不把request返回OK当完成。","local_code":"apps/android/src/core/story_audio_service.gd","local_gap":"已定位_on_download_finished与缓存校验入口；本轮只查函数与接口，未完整审核服务端范围响应、空间不足、取消重试路径，不能盖章网络可靠性。","status":"待验证"},
-        {"source_id":"S04","shared":false,"interaction_conclusion":"高亮时钟应考虑混音粒度和输出延迟，并缓存昂贵的延迟查询。","local_code":"apps/android/src/games/story_game.gd:438","local_gap":"已在每次准备音频流时缓存get_output_latency，并用playback_position+get_time_since_last_mix-latency计算倾听位置；实际驱动延迟和段落边界仍需真机验收。","status":"已实现"},
-        {"source_id":"S05","shared":false,"interaction_conclusion":"下载音频可运行时从本机路径加载；版本变更不复用旧音频秒数。","local_code":"apps/android/src/games/story_game.gd:381","local_gap":"AudioStreamMP3.load_from_file，加载失败提示重下；hash不同将_position置零。","status":"已实现"},
-        {"source_id":"S06","shared":false,"interaction_conclusion":"进度滑块以秒为单位，拖动结束一次提交，播放器刷新不反向触发seek。","local_code":"apps/android/src/games/story_game.gd:327","local_gap":"step=0.1，_dragging_slider与_updating_slider双守卫；暂停时拖动只更新_position，继续play(position)。","status":"已实现"}
+        {"source_id":"S03","shared":false,"interaction_conclusion":"朗读失败时要明确提示系统 TTS 不可用，不静默失败。","local_code":"apps/android/src/games/story_game.gd","local_gap":"未检测到中文系统语音或启动失败时提示家长检查系统 TTS。","status":"已实现"},
+        {"source_id":"S04","shared":false,"interaction_conclusion":"段落高亮应与当前系统 TTS 段落同步。","local_code":"apps/android/src/games/story_game.gd","local_gap":"逐段调用系统 TTS，结束后进入下一段并更新高亮；系统语速和停顿由平板决定。","status":"已实现"},
+        {"source_id":"S05","shared":false,"interaction_conclusion":"不依赖下载音频或媒体缓存。","local_code":"apps/android/src/games/story_game.gd","local_gap":"已移除 MP3 下载、缓存和索引链路，朗读固定使用系统 TTS。","status":"已实现"},
+        {"source_id":"S06","shared":false,"interaction_conclusion":"阅读位置按段落和段内偏移保存。","local_code":"apps/android/src/games/story_session.gd","local_gap":"书签保存 paragraph 与 offset；不再保存 MP3 秒数和音频哈希。","status":"已实现"}
       ]
     }
   ],
@@ -175,7 +175,7 @@
   ],
   "exclusions_and_limits": [
     "raw首次及部分重试502、超时不计数；GitHub contents API触发403 rate limit的请求也不计数；最终sources只含已取到有效正文的47份文件。",
-    "AudioStreamMP3在doc/classes和modules/minimp3/doc_classes的404路径不计数，最终有效位置为modules/mp3/doc_classes。",
+    "MP3 研究记录仅保留为历史参考；产品已移除 MP3 生成、下载、缓存和索引链路，当前只使用 Android 系统 TTS。",
     "MemoryMathAdd.qml已读但正文与MemoryEnumerate.qml一致，本研究不重复计数，改用实际读取的GridContainer.xml。",
     "本次GCompris目录检索未发现poetry专属活动，不声称读过不存在的poetry源码；唐诗的GCompris参考为readingh/readingv，另结合KOReader阅读设置与恢复源码。",
     "未找到并读取成熟Godot大富翁完整项目，不伪造该项；智慧岛采用GCompris回合源码与Godot视口/随机数/路径官方文档作对照，仍缺少成熟Godot棋盘骰子项目级基准。",

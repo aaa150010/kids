@@ -48,7 +48,6 @@ func _default_data() -> Dictionary:
 		"learning": {},
 		"recordedSessions": {},
 		"difficulty": {},
-		"storyDownloads": [],
 	}
 
 
@@ -98,8 +97,6 @@ func _normalize(source: Dictionary) -> Dictionary:
 		var value: Variant = result.settings[key]
 		var fallback := 0.72 if key == "speechVolume" else 1.0
 		result.settings[key] = clampf(float(value), 0.0, 1.0) if (value is float or value is int) and is_finite(float(value)) else fallback
-	if source.get("storyDownloads") is Array:
-		result.storyDownloads = source.storyDownloads.filter(func(id): return id is String).slice(0, 600)
 	if source.get("lobbyOrder") is Array:
 		result.lobbyOrder = source.lobbyOrder.filter(func(id): return id is String)
 	for item in source.get("profiles", []):
@@ -386,20 +383,6 @@ func set_setting(key: String, value: Variant) -> void:
 	data.settings[key] = value
 	flush()
 	changed.emit()
-
-
-func story_downloads() -> Array:
-	var saved: Variant = data.get("storyDownloads", [])
-	return saved.duplicate() if saved is Array else []
-
-
-func set_story_downloads(ids: Array) -> void:
-	var cleaned: Array = []
-	for story_id in ids:
-		if story_id is String and not (story_id in cleaned):
-			cleaned.append(story_id)
-	data.storyDownloads = cleaned.slice(0, 600)
-	flush()
 
 
 func difficulty(game_id: String, profile_id: String) -> String:

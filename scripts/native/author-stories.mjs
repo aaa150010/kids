@@ -63,16 +63,4 @@ for (const [category, expected] of Object.entries(counts)) {
 await mkdir(resolve(root, 'apps/android/content'), { recursive: true })
 await writeFile(resolve(root, 'content-src/data/stories.json'), JSON.stringify(stories) + '\n')
 await copyFile(resolve(root, 'content-src/data/stories.json'), resolve(root, 'apps/android/content/stories.json'))
-if (!textOnly) {
-  const audio = {
-    schema: 1,
-    model: 'android-system-tts',
-    speaker: 'system',
-    assets: {},
-    status: 'system-tts',
-    note: '故事朗读已改用安卓平板自带中文系统 TTS；不预生成、不下载 MP3。',
-  }
-  await writeFile(resolve(root, 'content-src/data/story-audio.json'), JSON.stringify(audio) + '\n')
-  await copyFile(resolve(root, 'content-src/data/story-audio.json'), resolve(root, 'apps/android/content/story-audio.json'))
-}
 console.log(`已制作 ${stories.length} 篇故事的原生文字与逐字拼音${draft ? '（制作中）' : ''}。`)

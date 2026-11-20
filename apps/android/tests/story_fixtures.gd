@@ -14,16 +14,6 @@ func run(content: Node, check: Callable) -> void:
 		check.call(story.paragraphs.size() >= 2, "story retains a complete segmented narrative: " + str(story.title))
 		for paragraph in story.paragraphs:
 			check.call(str(paragraph.text).length() == paragraph.pinyin.size(), "ruby aligns to every character: " + str(story.title))
-		var audio: Dictionary = content.story_audio_entry(str(story.id))
-		check.call(not audio.is_empty(), "matching narration index exists: " + str(story.title))
-		if not audio.is_empty():
-			check.call(str(audio.get("sha256", "")).length() == 64 and int(audio.get("size", 0)) > 0, "audio has integrity metadata")
-			check.call(audio.get("paragraphs", []).size() == story.paragraphs.size(), "audio timing covers each paragraph")
-			var end := 0.0
-			for segment in audio.get("paragraphs", []):
-				check.call(float(segment.start) >= end and float(segment.end) > float(segment.start), "audio segments are ordered")
-				end = float(segment.end)
-			check.call(end <= float(audio.get("duration", 0.0)) + 0.01, "audio timeline fits the duration")
 	check.call(totals == {"idiom":200,"myth":80,"folk":80,"fable":80,"history":60,"fairy":100}, "story category counts match the agreed library")
 	var order: Array = content.default_order()
 	check.call(order.find("workbook") == order.find("poetry") + 1 and order.find("stories") == order.find("workbook") + 1, "default learning shelf preserves poetry/workbook adjacency")
@@ -34,7 +24,7 @@ func run(content: Node, check: Callable) -> void:
 	check.call(bool(first.state.pinyin), "young children start with pinyin")
 	first.handle_input({"type":"open","id":"one"})
 	first.handle_input({"type":"favorite"})
-	first.handle_input({"type":"bookmark","value":{"position":12.4,"paragraph":1,"offset":0.3,"audioHash":"hash-a"}})
+	first.handle_input({"type":"bookmark","value":{"position":12.4,"paragraph":1,"offset":0.3}})
 	first.handle_input({"type":"complete"})
 	first.handle_input({"type":"font"})
 	var saved: Dictionary = first.snapshot()

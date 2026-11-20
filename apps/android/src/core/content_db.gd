@@ -15,7 +15,6 @@ var tuning: Dictionary = {}
 var military: Dictionary = {}
 var stories: Array = []
 var story_map: Dictionary = {}
-var story_audio: Dictionary = {}
 
 
 func _ready() -> void:
@@ -41,7 +40,6 @@ func _load_json_files() -> void:
 	for entry in stories:
 		if entry is Dictionary and not str(entry.get("id", "")).is_empty():
 			story_map[str(entry.id)] = entry
-	story_audio = _json_dictionary("story-audio.json")
 	var version_data := _json_dictionary("version.json")
 	content_version = int(version_data.get("version", 1))
 
@@ -79,16 +77,6 @@ func game(game_id: String) -> Dictionary:
 
 func story(story_id: String) -> Dictionary:
 	return story_map.get(story_id, {})
-
-
-func story_audio_entry(story_id: String) -> Dictionary:
-	var assets: Variant = story_audio.get("assets", {})
-	if not assets is Dictionary:
-		return {}
-	var entry: Variant = assets.get(story_id, {})
-	if not entry is Dictionary or str(entry.get("textSha256", "")) != str(story(story_id).get("narrationSha256", "")):
-		return {}
-	return entry
 
 
 func default_order() -> Array[String]:
