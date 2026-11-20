@@ -2,6 +2,7 @@ class_name LobbyGameCard
 extends PanelContainer
 
 signal launch_requested(game_id: String)
+signal resume_requested(game_id: String)
 signal help_requested(game_id: String)
 signal move_requested(game_id: String, direction: int)
 signal sort_drag_started(game_id: String, global_pos: Vector2)
@@ -98,49 +99,49 @@ func _build(animate: bool = true) -> void:
 	cover_wrap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	# 封面圆角与卡片内侧圆角保持一致
 	cover_wrap.add_theme_stylebox_override("panel", PlaygroundUI.style(PlaygroundUI.mix(accent, Color.WHITE, 0.86), 20, Color.TRANSPARENT))
+	var cover_canvas := Control.new()
+	cover_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cover_canvas.clip_contents = true
+	cover_wrap.add_child(cover_canvas)
 	_cover = TextureRect.new()
 	_cover.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	_cover.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 	_cover.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	_cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var cover_path := str(game.get("cover", ""))
-	var cached := LobbyCoverCache.texture(cover_path)
-	if cached != null:
-		_cover.texture = cached
-	elif not cover_path.is_empty():
-		# 缓存未命中：先显示 cover_wrap 占位色块，线程解码完成后回填
-		_cover.modulate.a = 0.0
-		LobbyCoverCache.request(cover_path, _on_cover_ready.bind(_cover, cover_path))
-	cover_wrap.add_child(_cover)
+	var original_cover := ArtLibrary.cover_texture(game_id)
+	if original_cover != null:
+		_cover.texture = original_cover
+	else:
+		var fallback_name := str(game.get("title", "小游戏"))
+		var glyph := ArtLibrary.semantic_picture(fallback_name, "cover", Vector2(240, 135))
+		glyph.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		cover_canvas.add_child(glyph)
+	cover_canvas.add_child(_cover)
 	var cover_tint := ColorRect.new()
 	cover_tint.color = Color(accent, 0.08)
 	cover_tint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	cover_tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	cover_wrap.add_child(cover_tint)
-	var deco_token := str(game.get("icon", "🎮"))
-	if ArtLibrary.texture(deco_token) != null:
-		var deco := ArtLibrary.picture(deco_token, Vector2(48, 48))
-		deco.position = Vector2(16, 12)
-		cover_wrap.add_child(deco)
-	else:
-		var deco := PlaygroundUI.label(deco_token, 48, accent, 700)
-		deco.position = Vector2(16, 12)
-		deco.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cover_wrap.add_child(deco)
+	cover_canvas.add_child(cover_tint)
+	var semantic_icon := "game"
+	if str(game.get("group", "games")) == "practice":
+		semantic_icon = "practice"
+	var deco := ArtLibrary.semantic_picture(semantic_icon, "ui", Vector2(44, 44))
+	deco.position = Vector2(16, 12)
+	cover_canvas.add_child(deco)
 	column.add_child(cover_wrap)
 	var tag_row := HBoxContainer.new()
 	tag_row.add_theme_constant_override("separation", 7)
 	tag_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tag_row.add_child(PlaygroundUI.chip(str(game.get("category", "小游戏")), accent))
 	if can_resume:
-		tag_row.add_child(PlaygroundUI.chip("▶ 可继续", Color("#d98b2b")))
+		tag_row.add_child(PlaygroundUI.chip("可继续", Color("#d98b2b")))
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tag_row.add_child(spacer)
-	var help := PlaygroundUI.icon_asset_button("📖", accent, func(): help_requested.emit(game_id), "查看玩法")
-	help.custom_minimum_size = Vector2(48, 48)
+	var help := PlaygroundUI.semantic_icon_button("rules", "玩法", accent, func(): help_requested.emit(game_id), "soft", 16)
+	help.custom_minimum_size = Vector2(88, 48)
 	help.tooltip_text = "查看玩法"
 	tag_row.add_child(help)
 	column.add_child(tag_row)
@@ -171,9 +172,18 @@ func _build(animate: bool = true) -> void:
 	players.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	players.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	footer.add_child(players)
+	if can_resume:
+		var fresh := PlaygroundUI.semantic_icon_button("restart", "新开", accent, func(): launch_requested.emit(game_id), "ghost", 16)
+		fresh.custom_minimum_size = Vector2(96, 48)
+		footer.add_child(fresh)
 	var start_text := "继续" if can_resume else "开始"
-	var start := PlaygroundUI.button(start_text, accent, func(): launch_requested.emit(game_id))
-	start.custom_minimum_size = Vector2(112, 48)
+	var start_action := func():
+		if can_resume:
+			resume_requested.emit(game_id)
+		else:
+			launch_requested.emit(game_id)
+	var start := PlaygroundUI.semantic_icon_button("continue" if can_resume else "play", start_text, accent, start_action, "primary", 20)
+	start.custom_minimum_size = Vector2(132, 48)
 	start.add_theme_font_size_override("font_size", 20)
 	start.disabled = sorting
 	footer.add_child(start)
@@ -184,7 +194,7 @@ func _build(animate: bool = true) -> void:
 		sort_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		sort_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(sort_overlay)
-		var grip := PlaygroundUI.label("⠿ 长按拖动", 15, accent, 700)
+		var grip := PlaygroundUI.label("长按拖动", 15, accent, 700)
 		grip.set_anchors_preset(Control.PRESET_TOP_RIGHT)
 		grip.position = Vector2(-118, 12)
 		grip.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -193,10 +203,10 @@ func _build(animate: bool = true) -> void:
 		controls.set_anchors_preset(Control.PRESET_TOP_LEFT)
 		controls.position = Vector2(10, 10)
 		controls.add_theme_constant_override("separation", 4)
-		var left := PlaygroundUI.button("←", accent, func(): move_requested.emit(game_id, -1), "soft")
-		var right := PlaygroundUI.button("→", accent, func(): move_requested.emit(game_id, 1), "soft")
-		left.custom_minimum_size = Vector2(48, 48)
-		right.custom_minimum_size = Vector2(48, 48)
+		var left := PlaygroundUI.semantic_icon_button("back", "前移", accent, func(): move_requested.emit(game_id, -1), "soft", 15)
+		var right := PlaygroundUI.semantic_icon_button("next", "后移", accent, func(): move_requested.emit(game_id, 1), "soft", 15)
+		left.custom_minimum_size = Vector2(82, 48)
+		right.custom_minimum_size = Vector2(82, 48)
 		controls.add_child(left)
 		controls.add_child(right)
 		add_child(controls)
@@ -300,7 +310,10 @@ func _press_visual(pressed: bool) -> void:
 func _on_tap(_position: Vector2, _index: int) -> void:
 	if sorting:
 		return
-	launch_requested.emit(game_id)
+	if can_resume:
+		resume_requested.emit(game_id)
+	else:
+		launch_requested.emit(game_id)
 
 
 func _on_long_press(_position: Vector2, _index: int) -> void:
@@ -340,12 +353,3 @@ func cancel_gesture() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_SCROLL_BEGIN or what == NOTIFICATION_APPLICATION_FOCUS_OUT:
 		cancel_gesture()
-
-
-# 封面线程解码完成后的回填
-func _on_cover_ready(loaded: Texture2D, target: TextureRect, path: String) -> void:
-	if loaded == null or not is_instance_valid(target) or target != _cover or is_queued_for_deletion() or path != str(game.get("cover", "")):
-		return
-	_cover.texture = loaded
-	var fade := MotionKit.tween(self)
-	fade.tween_property(_cover, "modulate:a", 1.0, 0.18)

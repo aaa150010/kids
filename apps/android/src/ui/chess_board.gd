@@ -8,11 +8,15 @@ var current_side := 0
 var selected := -1
 var targets: Array = []
 var interactive := true
-var accent := Color("#b23b32")
+var accent := Color("#167d74")
 var face_to_face := false
 var _touch_index := -1
 var _touch_guard_msec := -1000
 var _clock := 0.0
+var _pressed_cell := -1
+var _preview_cell := -1
+var _press_seat := 0
+var notice: Dictionary = {}
 
 
 func _ready() -> void:
@@ -28,13 +32,26 @@ func update_board(value: ChessRules, side: int, selected_position: int, legal: A
 	current_side = side
 	selected = selected_position
 	targets = legal.duplicate()
-	set_process(selected >= 0)
+	if not interactive:
+		_cancel_press()
+	notice = value.state.get("interactionNote", {}).duplicate(true) if value.state.get("interactionNote", {}) is Dictionary else {}
+	set_process(selected >= 0 or _pressed_cell >= 0)
 	queue_redraw()
 
 
 func _process(delta: float) -> void:
+	if not interactive or TabletopLayout.input_blocked(self):
+		_cancel_press()
+		return
 	_clock += delta
 	queue_redraw()
+	if selected < 0 and _pressed_cell < 0:
+		set_process(false)
+
+
+func _notification(what: int) -> void:
+	if what in [NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_WM_CLOSE_REQUEST]:
+		_cancel_press()
 
 
 func _pulse() -> float:
@@ -43,8 +60,8 @@ func _pulse() -> float:
 
 func metrics() -> Dictionary:
 	var steps := Vector2(9, 8) if face_to_face else Vector2(8, 9)
-	var gap_x := maxf(1.0, (size.x - 28.0) / (steps.x + 1.24))
-	var gap_y := maxf(1.0, (size.y - 28.0) / (steps.y + 1.24))
+	var gap_x := maxf(1.0, (size.x - 84.0) / (steps.x + 1.24))
+	var gap_y := maxf(1.0, (size.y - 76.0) / (steps.y + 1.24))
 	var extent := Vector2(steps.x * gap_x, steps.y * gap_y)
 	var origin := (size - extent) * 0.5
 	return {"gap": minf(gap_x, gap_y), "gap_x": gap_x, "gap_y": gap_y, "origin": origin}
@@ -99,8 +116,9 @@ func _draw() -> void:
 	var origin: Vector2 = layout.origin
 	if gap <= 0:
 		return
+	draw_style_box(PlaygroundUI.style(PlaygroundUI.mix(accent, Color.WHITE, 0.92), 30, PlaygroundUI.mix(accent, Color.WHITE, 0.55), 2), Rect2(Vector2.ZERO, size))
 	var board_rect := audit_bounds()
-	draw_style_box(PlaygroundUI.style(Color("#f8dda4"), 14, Color("#8e5737"), 3, 6, Color(0, 0, 0, 0.10)), board_rect)
+	draw_style_box(PlaygroundUI.style(Color("#fff0cf"), 24, Color("#bc8458"), 3, 6, Color(0, 0, 0, 0.10)), board_rect)
 	_draw_grid(origin, gap)
 	_draw_palaces(origin, gap)
 	_draw_river(origin, float(layout.gap_x), gap)
@@ -113,6 +131,9 @@ func _draw() -> void:
 		if piece is Dictionary and int(piece.get("position", -1)) >= 0:
 			_draw_piece(piece, gap)
 	_draw_move_hints(gap)
+	_draw_board_feedback(gap)
+	if rules != null:
+		TabletopLayout.draw_turn_marks(self, rules.state.get("players", []), current_side, face_to_face, [Color("#b23b32"), Color("#29313a")], str(rules.state.get("phase", "")) == "finished")
 	if rules != null and rules.state.get("phase", "") == "finished":
 		var panel := Rect2(size.x * 0.20, size.y * 0.44, size.x * 0.60, size.y * 0.12)
 		draw_style_box(PlaygroundUI.style(Color("#fff9e9"), 24, accent, 3, 8, Color(0, 0, 0, 0.18)), panel)
@@ -160,6 +181,9 @@ func _draw_piece(piece: Dictionary, gap: float) -> void:
 	var tint := Color("#b23b32") if side == 0 else Color("#29313a")
 	var radius := gap * 0.44
 	var text_angle := TabletopLayout.facing_angle(side, face_to_face)
+	if str(piece.kind) == "general" and rules.in_check(side) and str(rules.state.get("phase", "")) == "playing":
+		draw_circle(center, radius * 1.25, Color(0.88, 0.22, 0.18, 0.15))
+		draw_arc(center, radius * 1.25, 0.0, TAU, 44, Color("#c83c32"), 4.0, true)
 	if int(piece.position) == selected:
 		draw_circle(center, radius * 1.20, Color(0.95, 0.74, 0.25, 0.30))
 		draw_arc(center, radius * 1.18, 0, TAU, 40, Color("#e4ac28"), maxf(3.0, gap * 0.04), true)
@@ -169,7 +193,31 @@ func _draw_piece(piece: Dictionary, gap: float) -> void:
 	draw_arc(center, radius * 0.86, 0, TAU, 48, tint, maxf(1.0, gap * 0.012), true)
 	draw_set_transform(center, text_angle, Vector2.ONE)
 	_text(engine_name(piece), Vector2.ZERO, maxf(18.0, gap * 0.48), tint)
+	if str(piece.kind) == "general" and rules.in_check(side) and str(rules.state.get("phase", "")) == "playing":
+		_text("将军", Vector2(0.0, -radius * 1.42), maxf(14.0, gap * 0.19), Color("#b23b32"))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+func _draw_board_feedback(gap: float) -> void:
+	if rules == null:
+		return
+	for value in notice.get("cells", []):
+		var index := int(value)
+		if index >= 0 and index < ChessRules.CELLS:
+			draw_arc(position_for(index), gap * 0.52, 0, TAU, 40, Color("#c67c20"), 3.0, true)
+	var last: Dictionary = rules.state.get("lastMove", {})
+	if last.has("to"):
+		draw_arc(position_for(int(last.to)), gap * 0.29, 0, TAU, 32, Color("#d5a02e"), 3.0, true)
+	if _preview_cell >= 0:
+		var center := position_for(_preview_cell)
+		draw_arc(center, gap * 0.57, 0, TAU, 40, accent, 4.0, true)
+		var piece := rules.piece_at(_preview_cell)
+		var message := rules.piece_hint(piece) if not piece.is_empty() and int(piece.side) == current_side else str(rules.explain_move(selected, _preview_cell).message)
+		TabletopLayout.draw_note(self, center, message, TabletopLayout.facing_angle(_press_seat, face_to_face), accent)
+	elif not str(notice.get("message", "")).is_empty():
+		var cells: Array = notice.get("cells", [])
+		var anchor := position_for(int(cells[0])) if not cells.is_empty() and int(cells[0]) in range(ChessRules.CELLS) else size * 0.5
+		TabletopLayout.draw_note(self, anchor, str(notice.message), TabletopLayout.facing_angle(int(notice.get("side", current_side)), face_to_face), accent)
 
 
 func engine_name(piece: Dictionary) -> String:
@@ -265,29 +313,66 @@ func _text(value: String, center: Vector2, font_size: float, tint: Color) -> voi
 
 
 func _gui_input(event: InputEvent) -> void:
-	if not interactive:
+	if not interactive or TabletopLayout.input_blocked(self):
+		_cancel_press()
 		return
-	var point := Vector2.ZERO
-	var pressed := false
 	if event is InputEventScreenTouch:
 		_touch_guard_msec = Time.get_ticks_msec()
 		if event.pressed and _touch_index >= 0 and event.index != _touch_index:
 			return
 		if not event.pressed and event.index != _touch_index:
 			return
-		_touch_index = event.index if event.pressed else -1
-		point = event.position
-		pressed = event.pressed
+		if event.pressed:
+			_touch_index = event.index
+			_begin_press(event.position)
+		else:
+			_touch_index = -1
+			if event.canceled:
+				_cancel_press()
+			else:
+				_finish_press(event.position)
+	elif event is InputEventScreenDrag:
+		_touch_guard_msec = Time.get_ticks_msec()
+		if event.index == _touch_index:
+			_move_press(event.position)
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if Time.get_ticks_msec() - _touch_guard_msec < 500:
 			return
-		point = event.position
-		pressed = event.pressed
+		if event.pressed:
+			_begin_press(event.position)
+		else:
+			_finish_press(event.position)
+	elif event is InputEventMouseMotion and _pressed_cell >= 0:
+		_move_press(event.position)
 	else:
 		return
-	if not pressed:
-		return
-	var index := cell_at(point)
-	if index >= 0:
-		cell_pressed.emit(index)
-		accept_event()
+	accept_event()
+
+
+func _begin_press(point: Vector2) -> void:
+	_pressed_cell = cell_at(point)
+	_preview_cell = _pressed_cell
+	_press_seat = current_side
+	TabletopLayout.remember_seat(self, _press_seat)
+	set_process(true)
+	queue_redraw()
+
+
+func _move_press(point: Vector2) -> void:
+	_preview_cell = _pressed_cell if cell_at(point) == _pressed_cell else -1
+	queue_redraw()
+
+
+func _finish_press(point: Vector2) -> void:
+	var target := cell_at(point)
+	var commit := _pressed_cell >= 0 and target == _pressed_cell and not TabletopLayout.input_blocked(self)
+	_cancel_press()
+	if commit:
+		cell_pressed.emit(target)
+
+
+func _cancel_press() -> void:
+	_touch_index = -1
+	_pressed_cell = -1
+	_preview_cell = -1
+	queue_redraw()

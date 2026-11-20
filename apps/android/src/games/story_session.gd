@@ -22,7 +22,7 @@ func create_session(player: Dictionary, catalog: Dictionary, learning: Dictionar
 		"schemaVersion": 2, "gameId": "stories", "modeId": "classic",
 		"player": player.duplicate(true), "phase": "library", "seed": randi(),
 		"storyId": "", "category": "all", "filter": "age", "query": "", "page": 0,
-		"pinyin": true, "fontSize": 28,
+		"pinyin": true, "fontSize": 28, "shelfScroll": 0.0,
 		"favorites": [], "recent": [], "bookmarks": {}, "completed": [],
 	}
 	for key in ["fontSize", "favorites", "recent", "bookmarks", "completed"]:
@@ -61,6 +61,7 @@ func _sanitize() -> void:
 		state.phase = "library"
 	state.query = str(state.get("query", "")).left(80)
 	state.page = clampi(int(_number(state.get("page", 0))), 0, 100)
+	state.shelfScroll = clampf(_number(state.get("shelfScroll", 0.0)), 0.0, 1000000.0)
 	state.fontSize = int(_number(state.get("fontSize", 28), 28)) if int(_number(state.get("fontSize", 28), 28)) in [28, 34, 40] else 28
 	state.pinyin = bool(state.get("pinyin", false))
 	for key in ["favorites", "recent", "completed"]:

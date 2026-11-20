@@ -9,10 +9,12 @@ var state: Dictionary = {}
 var legal: Array = []
 var interactive := true
 var face_to_face := false
+var accent := Color("#d56c29")
 var show_numbers := false
 var focused := -1
 var pressed := false
 var motion := 1.0
+var notice: Dictionary = {}
 var _animation: Tween
 var _move_numbers: Dictionary = {}
 
@@ -64,6 +66,7 @@ func position_for(index: int) -> Vector2:
 func update_state(value: Dictionary, targets: Array = [], animate: bool = false) -> void:
 	state = value.duplicate(true)
 	legal = targets.duplicate()
+	notice = state.get("interactionNote", {}).duplicate(true) if state.get("interactionNote", {}) is Dictionary else {}
 	_move_numbers.clear()
 	if game_id == "gomoku":
 		# 相邻快照的差异才是这一手落点；旧实现取到的是最早的空盘。
@@ -157,6 +160,10 @@ func _draw() -> void:
 		_draw_move_hints(gap)
 	if _tooltip_index >= 0:
 		_draw_tooltip(gap)
+	elif not str(notice.get("message", "")).is_empty():
+		var cells: Array = notice.get("cells", [])
+		var anchor := position_for(int(cells[0])) if not cells.is_empty() and int(cells[0]) in range(int(layout.columns) * int(layout.rows)) else size * 0.5
+		TabletopLayout.draw_note(self, anchor, str(notice.message), TabletopLayout.facing_angle(int(notice.get("side", int(state.get("turn", 0)))), face_to_face), accent, "hint")
 	if focused >= 0 and pressed and interactive and _tooltip_index < 0:
 		var center := position_for(focused)
 		draw_arc(center,gap*0.44,0,TAU,40,Color("#e1a52a"),4,true)
@@ -300,12 +307,8 @@ func _draw_grid(gap: float) -> void:
 			draw_circle(shadow_center, gap * 0.32, Color(0, 0, 0, 0.16))
 			draw_circle(draw_center, gap * 0.43, Color(tint, 0.16))
 			draw_arc(draw_center, gap * 0.43, 0, TAU, 40, tint, 3.5, true)
-			var texture := ArtLibrary.jungle_piece(str(piece.kind))
-			if texture != null:
-				draw_set_transform(draw_center, piece_angle, Vector2.ONE)
-				draw_texture_rect(texture, Rect2(Vector2(-gap * 0.41, -gap * 0.44), Vector2(gap * 0.82, gap * 0.82)), false)
-				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			draw_set_transform(draw_center, piece_angle, Vector2.ONE)
+			_draw_jungle_animal(str(piece.kind), gap * 0.34, tint)
 			var badge_center := Vector2(gap * 0.30, gap * 0.28)
 			draw_circle(badge_center, gap * 0.15, tint)
 			_text(str(BoardRules.ANIMALS[piece.kind]), badge_center, gap * 0.13, Color.WHITE)
@@ -321,7 +324,11 @@ func _draw_grid(gap: float) -> void:
 		if game_id == "jungle" and index in BoardRules.TRAPS[1-int(piece.side)]:
 			var marker_angle := TabletopLayout.facing_angle(int(piece.side), face_to_face)
 			draw_set_transform(draw_center, marker_angle, Vector2.ONE)
-			_text("↓", Vector2(gap * 0.31, gap * 0.30), gap * 0.24, Color("#b43b2b"))
+			draw_colored_polygon(PackedVector2Array([
+				Vector2(gap * 0.18, gap * 0.18),
+				Vector2(gap * 0.42, gap * 0.18),
+				Vector2(gap * 0.30, gap * 0.36),
+			]), Color("#b43b2b"))
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var last_capture: Dictionary = state.get("lastMove",{}).get("captured",{})
 	if game_id != "gomoku" and not last_capture.is_empty() and motion < 1.0:
@@ -330,14 +337,69 @@ func _draw_grid(gap: float) -> void:
 			var center := position_for(last_to)
 			var alpha := 1.0-motion
 			if game_id == "jungle":
-				var texture := ArtLibrary.jungle_piece(str(last_capture.get("kind","")))
-				if texture != null:
-					var capture_angle := TabletopLayout.facing_angle(int(last_capture.get("side", 0)), face_to_face)
-					draw_set_transform(center, capture_angle, Vector2.ONE)
-					draw_texture_rect(texture, Rect2(Vector2(-gap * 0.30, -gap * 0.38), Vector2(gap * 0.60, gap * 0.56)), false, Color(1, 1, 1, alpha * 0.75))
-					draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+				_text(str(BoardRules.NAMES.get(str(last_capture.get("kind","")),"棋子")),center,gap*0.2,Color(0.55,0.28,0.24,alpha))
 			else:
 				_text(str(BoardRules.NAMES.get(str(last_capture.get("kind","")),"棋子")),center,gap*0.22,Color(0.55,0.28,0.24,alpha))
+	if rules_safe_participants().size() > 0:
+		TabletopLayout.draw_turn_marks(
+			self,
+			rules_safe_participants(),
+			int(state.get("turn", 0)),
+			face_to_face,
+			[Color("#d96947"), Color("#4e81b2")],
+			str(state.get("phase", "")) == "finished"
+		)
+
+
+func rules_safe_participants() -> Array:
+	var participants: Variant = state.get("players", [])
+	if participants is Array:
+		return (participants as Array).duplicate()
+	return []
+
+
+func _draw_jungle_animal(kind: String, radius: float, tint: Color) -> void:
+	var fur := Color("#f0ba67") if kind in ["lion","leopard"] else Color("#e8d3b0")
+	var dark := tint.darkened(0.35)
+	var center := Vector2(0, -radius * 0.1)
+	if kind == "elephant":
+		draw_circle(center + Vector2(-radius * 0.45, -radius * 0.1), radius * 0.55, Color("#a7b4c8"))
+		draw_circle(center + Vector2(radius * 0.45, -radius * 0.1), radius * 0.55, Color("#a7b4c8"))
+		draw_circle(center, radius * 0.62, Color("#8796ad"))
+		draw_line(center + Vector2(0, radius * 0.35), center + Vector2(radius * 0.08, radius * 1.15), Color("#8796ad"), radius * 0.22, true)
+	elif kind == "lion":
+		for index in 14:
+			var angle := float(index) * TAU / 14.0
+			draw_line(center + Vector2(cos(angle), sin(angle)) * radius * 0.58, center + Vector2(cos(angle), sin(angle)) * radius * 0.95, dark, radius * 0.18, true)
+		draw_circle(center, radius * 0.62, fur)
+	elif kind == "tiger":
+		draw_circle(center, radius * 0.64, Color("#e69b45"))
+		for x in [-0.36, -0.08, 0.20]:
+			draw_line(center + Vector2(radius * x, -radius * 0.58), center + Vector2(radius * (x + 0.10), -radius * 0.22), dark, radius * 0.10, true)
+	elif kind == "leopard":
+		draw_circle(center, radius * 0.62, Color("#e8ad55"))
+		for index in 7:
+			var angle := float(index) * TAU / 7.0
+			draw_circle(center + Vector2(cos(angle), sin(angle)) * radius * 0.38, radius * 0.07, dark)
+	else:
+		var ear_height := radius * (0.88 if kind in ["cat","rat","wolf"] else 0.58)
+		draw_colored_polygon(PackedVector2Array([
+			center + Vector2(-radius * 0.48, -radius * 0.28),
+			center + Vector2(-radius * 0.70, -radius * 0.28 - ear_height),
+			center + Vector2(-radius * 0.12, -radius * 0.60),
+		]), fur)
+		draw_colored_polygon(PackedVector2Array([
+			center + Vector2(radius * 0.48, -radius * 0.28),
+			center + Vector2(radius * 0.70, -radius * 0.28 - ear_height),
+			center + Vector2(radius * 0.12, -radius * 0.60),
+		]), fur)
+		draw_circle(center, radius * 0.62, fur)
+		if kind in ["rat","cat"]:
+			draw_line(center + Vector2(-radius * 0.2, radius * 0.2), center + Vector2(-radius * 0.95, radius * 0.02), dark, radius * 0.05, true)
+			draw_line(center + Vector2(radius * 0.2, radius * 0.2), center + Vector2(radius * 0.95, radius * 0.02), dark, radius * 0.05, true)
+	draw_circle(center + Vector2(-radius * 0.24, -radius * 0.06), radius * 0.08, Color("#342c27"))
+	draw_circle(center + Vector2(radius * 0.24, -radius * 0.06), radius * 0.08, Color("#342c27"))
+	draw_circle(center + Vector2(0, radius * 0.22), radius * 0.11, Color("#5d4135"))
 
 func _text(value: String, center: Vector2, font_size: float, tint: Color) -> void:
 	var pixels := maxi(12,int(font_size))

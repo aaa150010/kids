@@ -7,6 +7,7 @@ var feedback_panel: PanelContainer
 var feedback_title: Label
 var feedback_text: Label
 var next_button: Button
+var explain_button: Button
 var player_labels: Array[Label] = []
 var player_panels: Array[PanelContainer] = []
 var game_controls: Control
@@ -103,25 +104,16 @@ func _build_session() -> void:
 	controls.add_child(PlaygroundUI.button("重新开始",accent,_confirm_restart,"ghost"))
 	content_root.add_child(controls)
 	game_controls = controls
-	var row := HBoxContainer.new()
-	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	row.add_theme_constant_override("separation",14)
-	for side in 2:
-		var panel := _player_panel(side)
-		if side == 0:
-			row.add_child(panel)
-		else:
-			stage = QuizStage.new()
-			stage.game_id = game_id
-			stage.accent = accent
-			stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-			stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
-			stage.answered.connect(_answer)
-			stage.listen_requested.connect(_listen)
-			row.add_child(stage)
-			row.add_child(panel)
-	content_root.add_child(row)
+	stage = QuizStage.new()
+	stage.game_id = game_id
+	stage.accent = accent
+	stage.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	stage.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stage.answered.connect(_answer)
+	stage.listen_requested.connect(_listen)
+	content_root.add_child(stage)
 	feedback_panel = PlaygroundUI.panel(Color("#fff9e9"),22,PlaygroundUI.mix(accent,Color.WHITE,0.5),2)
+	feedback_panel.custom_minimum_size.y = 218
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation",8)
 	feedback_panel.add_child(column)
@@ -137,13 +129,13 @@ func _build_session() -> void:
 	column.add_child(scroll)
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation",12)
-	var explain_button := PlaygroundUI.button("听讲解",accent,func(): Speech.speak(feedback_text.text),"soft")
+	explain_button = PlaygroundUI.semantic_icon_button("speech","听讲解",accent,func(): Speech.speak(feedback_text.text),"soft")
 	explain_button.custom_minimum_size = Vector2(148,64)
 	actions.add_child(explain_button)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	actions.add_child(spacer)
-	next_button = PlaygroundUI.button("下一题 →",accent,_next)
+	next_button = PlaygroundUI.semantic_icon_button("next","下一题",accent,_next)
 	next_button.custom_minimum_size = Vector2(220,64)
 	actions.add_child(next_button)
 	column.add_child(actions)
@@ -158,7 +150,10 @@ func _player_panel(index: int) -> Control:
 	column.add_theme_constant_override("separation",16)
 	panel.add_child(column)
 	var player: Dictionary = players[index] if index < players.size() else {}
-	column.add_child(ArtLibrary.picture(str(player.get("avatar","💡")),Vector2(100,108)))
+	if player.is_empty():
+		column.add_child(ArtLibrary.semantic_picture("profile","ui",Vector2(100,108)))
+	else:
+		column.add_child(ArtLibrary.profile_picture(player,Vector2(100,108)))
 	column.add_child(PlaygroundUI.label(str(player.get("name","慢慢想")),22,PlaygroundUI.INK,700,true))
 	var label := PlaygroundUI.label("",18,PlaygroundUI.INK_SOFT,500,true)
 	column.add_child(label)
@@ -179,9 +174,18 @@ func _on_immersive_changed(value: bool) -> void:
 
 func _refresh() -> void:
 	if engine.state.get("phase","") == "empty":
-		feedback_panel.hide()
-		stage.hide()
-		player_labels[0].text = "这里还没有需要复习的题目。\n可以先玩自由练习。"
+		PlaygroundUI.clear(content_root)
+		var empty := VBoxContainer.new()
+		empty.alignment = BoxContainer.ALIGNMENT_CENTER
+		empty.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		empty.add_theme_constant_override("separation",20)
+		var picture := ArtLibrary.semantic_picture("practice","ui",Vector2(100,100))
+		picture.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		empty.add_child(picture)
+		empty.add_child(PlaygroundUI.label("还没有需要复习的题目",32,accent,700,true))
+		empty.add_child(PlaygroundUI.label("可以回大厅选择自由练习，学到的新本领都会留下来。",22,PlaygroundUI.INK_SOFT,500,true))
+		empty.add_child(PlaygroundUI.semantic_icon_button("home","回大厅",accent,func(): back_requested.emit()))
+		content_root.add_child(empty)
 		return
 	if engine.state.phase == "result":
 		_finish()
@@ -200,24 +204,29 @@ func _refresh() -> void:
 		progress.recentIds.append(str(question.id))
 	var totals: Array = engine.state.queues.map(func(queue): return queue.size())
 	stage.set_progress(int(engine.state.scores[current]),int(engine.state.positions[current]),int(totals[current]))
+	stage.player_name = str(players[current].get("name","")) if current < players.size() else ""
 	stage.update_question(question,int(engine.state.selected),engine.state.phase == "feedback",engine.state.scores,totals)
 	for index in 2:
 		if index < players.size():
-			player_labels[index].text = "%s\n第 %s / %s 题\n★ %s" % ["现在轮到你" if index == current else "等待下一轮",mini(int(engine.state.positions[index])+1,int(totals[index])),int(totals[index]),int(engine.state.scores[index])]
+			player_labels[index].text = "%s\n第 %s / %s 题\n得分 %s" % ["现在轮到你" if index == current else "等待下一轮",mini(int(engine.state.positions[index])+1,int(totals[index])),int(totals[index]),int(engine.state.scores[index])]
 			player_panels[index].add_theme_stylebox_override("panel",PlaygroundUI.style(PlaygroundUI.mix(accent,Color.WHITE,0.86 if index == current else 0.95),24,accent if index == current else PlaygroundUI.LINE,3 if index == current else 1))
 		else:
 			player_labels[index].text = "没有倒计时\n可以反复听题\n答后还有小讲解"
-	feedback_panel.visible = engine.state.phase == "feedback"
-	if feedback_panel.visible:
-		feedback_panel.modulate.a = 0.0
-		MotionKit.tween(self).tween_property(feedback_panel, "modulate:a", 1.0, 0.16)
+	var showing_answer: bool = engine.state.phase == "feedback"
+	# 留出固定讲解位置，答题后题干与选项不因新增面板而跳动。
+	feedback_panel.show()
+	explain_button.visible = showing_answer
+	next_button.visible = showing_answer
+	if showing_answer:
 		var correct := int(engine.state.selected) == int(question.answer)
 		feedback_title.text = "答对啦！" if correct else "一起看一看，学会就好"
 		feedback_text.text = "正确答案：%s\n%s" % [question.options[int(question.answer)],question.get("explanation","")]
-		next_button.text = "查看成绩" if engine.final_question() else "下一题 →"
-	elif _last_question != str(question.id):
-		_last_question = str(question.id)
-		Speech.speak(str(question.get("narration",question.get("prompt",""))))
+		next_button.text = "查看成绩" if engine.final_question() else "下一题"
+	else:
+		feedback_title.text = "点一张答案卡"
+		feedback_text.text = "慢慢想，也可以点“听题”再听一遍。答完后，一起看看为什么。"
+		if _last_question != str(question.id):
+			_last_question = str(question.id)
 	_save("正在看讲解" if engine.state.phase == "feedback" else "正在答题")
 
 func _listen() -> void:
@@ -245,7 +254,6 @@ func _answer(index: int) -> void:
 	lesson_action("answer")
 	_save("答案与讲解已保存")
 	_refresh()
-	Speech.speak("正确答案是%s。%s" % [question.options[int(question.answer)],question.get("explanation","")])
 
 func _next() -> void:
 	if paused:
@@ -277,13 +285,22 @@ func _finish() -> void:
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	column.add_theme_constant_override("separation",20)
 	panel.add_child(column)
-	column.add_child(ArtLibrary.picture("🏆",Vector2(120,120)))
+	var trophy := ArtLibrary.semantic_picture("trophy","ui",Vector2(120,120))
+	trophy.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	column.add_child(trophy)
 	column.add_child(PlaygroundUI.label("又学会了新本领！",36,accent,700))
 	for index in players.size():
 		column.add_child(PlaygroundUI.label("%s · 答对 %s / %s 题" % [players[index].name,int(engine.state.scores[index]),engine.state.queues[index].size()],26,PlaygroundUI.INK,700,true))
 	if mode_id == "adventure":
 		var stars := GameTuning.stars(game_id,difficulty,int(engine.state.scores[0]),engine.state.queues[0].size())
-		column.add_child(PlaygroundUI.label("★".repeat(stars)+"☆".repeat(3-stars),42,Color("#c99520"),700))
+		var star_row := HBoxContainer.new()
+		star_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		star_row.add_theme_constant_override("separation",8)
+		for index in 3:
+			var star := ArtLibrary.semantic_picture("star","ui",Vector2(42,42))
+			star.modulate = Color.WHITE if index < stars else Color(1,1,1,0.24)
+			star_row.add_child(star)
+		column.add_child(star_row)
 		column.add_child(PlaygroundUI.label("获得一颗星就可以去下一关，也可以再练一遍。",19,PlaygroundUI.INK_SOFT,500,true))
 	var actions := HFlowContainer.new()
 	actions.add_theme_constant_override("h_separation",14)
@@ -319,8 +336,39 @@ func _change_family(target: String) -> void:
 		{"text":"换一页","kind":"primary","callback":func(): _close_top_modal(); family = target; _new_session(); _build_session(); _refresh()},
 	])
 
-func _confirm_restart() -> void:
+
+func _extra_pause_actions() -> Array:
+	if mode_id == "adventure":
+		return [{"text":"关卡地图", "icon":"back", "kind":"soft", "callback":func(): _close_pause_tools(); _show_map()}]
+	if game_id == "workbook" and mode_id != "review":
+		return [{"text":"练习分类", "icon":"practice", "kind":"soft", "callback":_show_family_from_pause}]
+	return []
+
+
+func _show_family_from_pause() -> void:
+	var choices := VBoxContainer.new()
+	choices.add_theme_constant_override("separation", 10)
+	for entry in [["mixed","综合","practice"],["foundation","基础","game"],["calculation","计算","practice"],["application","应用","game"]]:
+		var target := str(entry[0])
+		choices.add_child(PlaygroundUI.semantic_icon_button(
+			str(entry[2]),
+			str(entry[1]),
+			accent,
+			_apply_family_from_pause.bind(target),
+			"soft"
+		))
+	open_modal("选择练习分类", choices, [{"text":"回到暂停","icon":"back","kind":"soft","callback":func(): _close_top_modal()}], "换分类会开始这一组的新一页")
+
+
+func _apply_family_from_pause(target: String) -> void:
 	_close_top_modal()
+	_close_pause_tools()
+	family = target
+	_new_session()
+	_build_session()
+	_refresh()
+
+func _confirm_restart() -> void:
 	open_modal("重新开始这一页？",PlaygroundUI.label("已完成的关卡和自己的错题会保留。",20,PlaygroundUI.INK_SOFT,500,true),[
 		{"text":"继续这页","kind":"soft","callback":func(): _close_top_modal()},
 		{"text":"重新开始","kind":"primary","callback":func(): _close_top_modal(); toggle_pause(false); _new_session(); _build_session(); _refresh()},

@@ -137,8 +137,6 @@ func _build_table() -> void:
 		for entry in ContentDB.memory_themes():
 			var identifier := str(entry.id)
 			tools.add_child(PlaygroundUI.button(str(entry.name),accent,_choose_theme.bind(identifier),"primary" if identifier == card_theme else "soft"))
-	if players.size() == 1:
-		tools.add_child(PlaygroundUI.button("看一对提示",accent,_hint,"soft"))
 	tools.add_child(PlaygroundUI.button("重新开始",accent,_confirm_restart,"ghost"))
 	content_root.add_child(tools)
 	game_tools = tools
@@ -155,13 +153,13 @@ func _build_table() -> void:
 	var table := PlaygroundUI.panel(Color("#f7e6ee"),28,Color("#c992ad"),3)
 	table.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	table.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	var grid_scroll := ScrollContainer.new()
-	grid_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	grid_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	# 卡槽在本局固定，整盘适应可用宽高，不通过滚动改变记忆位置。
+	var grid_scroll := Control.new()
 	grid_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	table.add_child(grid_scroll)
 	var grid := GridContainer.new()
+	grid.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	grid.add_theme_constant_override("h_separation",12)
 	grid.add_theme_constant_override("v_separation",12)
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -179,9 +177,14 @@ func _build_table() -> void:
 		card.pressed.connect(_flip.bind(index))
 		cards.append(card)
 	content_root.add_child(table)
+	var footer := HBoxContainer.new()
+	footer.add_theme_constant_override("separation",16)
 	status = PlaygroundUI.label("",22,accent,700,true)
-	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	content_root.add_child(status)
+	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	footer.add_child(status)
+	if players.size() == 1:
+		footer.add_child(PlaygroundUI.semantic_icon_button("hint","看一对",accent,_hint,"soft"))
+	content_root.add_child(footer)
 	_on_immersive_changed(immersive)
 
 
@@ -189,26 +192,63 @@ func _on_immersive_changed(value: bool) -> void:
 	if game_header != null and is_instance_valid(game_header):
 		game_header.visible = not value
 	if status != null and is_instance_valid(status):
-		status.visible = not value
+		status.show()
 	if game_tools != null and is_instance_valid(game_tools):
 		game_tools.visible = not value
 	if value:
 		_last_immersive_player = int(engine.state.get("currentPlayer", 0)) if not engine.state.is_empty() else -1
 
-func _layout_memory_grid(scroll: ScrollContainer, grid: GridContainer, card_count: int) -> void:
+
+func _extra_pause_actions() -> Array:
+	if mode_id == "adventure":
+		return [{"text":"关卡地图", "icon":"back", "kind":"soft", "callback":func(): _close_pause_tools(); _show_map()}]
+	return [{"text":"更换主题", "icon":"shuffle", "kind":"soft", "callback":_show_theme_from_pause}]
+
+
+func _show_theme_from_pause() -> void:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+	for entry in ContentDB.memory_themes():
+		var identifier := str(entry.id)
+		box.add_child(PlaygroundUI.semantic_icon_button(
+			"game",
+			str(entry.name),
+			accent,
+			_apply_theme_from_pause.bind(identifier),
+			"primary" if identifier == card_theme else "soft"
+		))
+	open_modal("选择卡牌主题", box, [
+		{"text":"继续这局", "icon":"back", "kind":"soft", "callback":func(): _close_top_modal()},
+	], "换主题会重新发牌")
+
+
+func _apply_theme_from_pause(identifier: String) -> void:
+	_close_top_modal()
+	_close_pause_tools()
+	card_theme = identifier
+	_new_session()
+	_build_table()
+	_refresh(false)
+
+func _layout_memory_grid(scroll: Control, grid: GridContainer, card_count: int) -> void:
 	if not is_instance_valid(scroll) or not is_instance_valid(grid) or card_count <= 0:
 		return
 	var viewport_size := scroll.size
 	if viewport_size.x < 1.0 or viewport_size.y < 1.0:
 		return
-	const MIN_CARD_WIDTH := 90.0
-	const MIN_CARD_HEIGHT := 116.0
 	const GAP := 12.0
-	var max_columns := maxi(1, int(floor((viewport_size.x + GAP) / (MIN_CARD_WIDTH + GAP))))
-	var visible_rows := maxi(1, int(floor((viewport_size.y + GAP) / (MIN_CARD_HEIGHT + GAP))))
-	var columns_for_height := int(ceil(float(card_count) / float(visible_rows)))
-	var balanced_columns := int(round(sqrt(float(card_count) * viewport_size.x / viewport_size.y)))
-	grid.columns = clampi(maxi(columns_for_height, balanced_columns), 1, max_columns)
+	var best_columns := 2
+	var best_side := 0.0
+	for columns in range(2, mini(card_count,12)+1):
+		var rows := ceili(float(card_count)/float(columns))
+		var width := (viewport_size.x-GAP*float(columns-1))/float(columns)
+		var height := (viewport_size.y-GAP*float(rows-1))/float(rows)
+		var side := minf(width/0.78,height)
+		if side > best_side:
+			best_side = side
+			best_columns = columns
+	grid.columns = best_columns
+	grid.size = viewport_size
 
 
 func _player_chip(index: int) -> Control:
@@ -218,7 +258,10 @@ func _player_chip(index: int) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation",10)
 	panel.add_child(row)
-	row.add_child(ArtLibrary.picture(str(players[index].get("avatar","🦊")) if index < players.size() else "💡",Vector2(46,48)))
+	if index < players.size():
+		row.add_child(ArtLibrary.profile_picture(players[index],Vector2(46,48)))
+	else:
+		row.add_child(ArtLibrary.semantic_picture("hint","ui",Vector2(46,48)))
 	var copy := VBoxContainer.new()
 	copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	copy.add_theme_constant_override("separation",1)
@@ -263,7 +306,9 @@ func _refresh(animate: bool = true, hold: Array = []) -> void:
 		if not who.is_empty():
 			hint = "%s · 轮到你" % who
 		show_toast(hint, 1.1)
-	status.text = "全部配对完成啦！" if engine.state.phase == "result" else "看看这两张图案，记住位置" if bool(engine.state.pending) else "配对成功可以继续翻；翻错就换人" if engine.state.flipped.is_empty() else "再翻一张，找一找它的朋友"
+	var who := str(players[int(engine.state.currentPlayer)].get("name",""))
+	var action := "全部配对完成啦！" if engine.state.phase == "result" else "记住这两个位置" if bool(engine.state.pending) else "翻开一张，找朋友" if engine.state.flipped.is_empty() else "再翻一张，找相同的图案"
+	status.text = "%s · %s" % [who,action]
 
 func _flip(index: int) -> void:
 	if paused:
@@ -278,10 +323,6 @@ func _flip(index: int) -> void:
 	FeedbackKit.haptic(7)
 	_save("已翻开 %s 张卡" % engine.state.flipped.size())
 	_refresh()
-	for entry in ContentDB.memory_cards():
-		if str(entry.id) == str(engine.state.deck[index]):
-			Speech.speak(str(entry.name))
-			break
 
 func _hint() -> void:
 	if paused:
@@ -334,12 +375,20 @@ func _finish() -> void:
 		engine.state.reported = true
 		_save("翻牌完成",false)
 	var content := VBoxContainer.new()
-	content.add_child(ArtLibrary.picture("🏆",Vector2(100,100)))
+	var trophy := ArtLibrary.semantic_picture("trophy","ui",Vector2(100,100))
+	trophy.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	content.add_child(trophy)
 	for index in players.size():
 		content.add_child(PlaygroundUI.label("%s 找到 %s 对" % [players[index].name,int(engine.state.scores[index])],25,accent,700,true))
 	if mode_id == "adventure":
-		content.add_child(PlaygroundUI.label("★".repeat(engine.stars())+"☆".repeat(3-engine.stars()),36,Color("#cc9a28"),700))
-	var actions := [{"text":"再翻一局","kind":"soft","callback":func(): _close_top_modal(); _new_session(); _build_table(); _refresh(false)}]
+		var star_row := HBoxContainer.new()
+		star_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		for index in 3:
+			var star := ArtLibrary.semantic_picture("star","ui",Vector2(36,36))
+			star.modulate = Color.WHITE if index < engine.stars() else Color(1,1,1,0.24)
+			star_row.add_child(star)
+		content.add_child(star_row)
+	var actions := [{"text":"再翻一局","icon":"repeat","kind":"soft","callback":func(): _close_top_modal(); _new_session(); _build_table(); _refresh(false)}]
 	if mode_id == "adventure":
 		actions.append({"text":"关卡地图","kind":"primary","callback":func(): _close_top_modal(); _show_map()})
 	else:
@@ -365,7 +414,6 @@ func _choose_theme(target: String) -> void:
 	])
 
 func _confirm_restart() -> void:
-	_close_top_modal()
 	open_modal("重新翻这一局？",PlaygroundUI.label("已经通过的关卡和其他游戏会保留。",20,PlaygroundUI.INK_SOFT,500,true),[
 		{"text":"继续这局","kind":"soft","callback":func(): _close_top_modal()},
 		{"text":"重新开始","kind":"primary","callback":func(): _close_top_modal(); toggle_pause(false); _new_session(); _build_table(); _refresh(false)},

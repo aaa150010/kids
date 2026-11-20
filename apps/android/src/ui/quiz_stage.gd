@@ -4,6 +4,48 @@ extends Control
 signal answered(index: int)
 signal listen_requested
 
+
+class PatternMark:
+	extends Control
+	var token := ""
+	var accent := Color("#b69014")
+
+	func _ready() -> void:
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+		resized.connect(queue_redraw)
+
+	func _draw() -> void:
+		var center := Vector2(size.x * 0.5, size.y * 0.62)
+		var extent := minf(size.x, size.y) * 0.62
+		var tint := Color("#6fb95c")
+		if token.contains("⭐"):
+			tint = Color("#d9a31d")
+			var points := PackedVector2Array()
+			for index in 10:
+				var angle := -PI * 0.5 + float(index) * PI / 5.0
+				var radius := extent * 0.48 if index % 2 == 0 else extent * 0.21
+				points.append(center + Vector2(cos(angle), sin(angle)) * radius)
+			draw_colored_polygon(points, tint)
+		elif token.contains("🔺"):
+			draw_colored_polygon(PackedVector2Array([
+				center + Vector2(0, -extent * 0.45),
+				center + Vector2(extent * 0.43, extent * 0.36),
+				center + Vector2(-extent * 0.43, extent * 0.36),
+			]), Color("#d95f55"))
+		elif token.contains("🔶"):
+			draw_colored_polygon(PackedVector2Array([
+				center + Vector2(0, -extent * 0.45),
+				center + Vector2(extent * 0.45, 0),
+				center + Vector2(0, extent * 0.45),
+				center + Vector2(-extent * 0.45, 0),
+			]), Color("#d79b31"))
+		elif token.contains("🟦"):
+			draw_rect(Rect2(center - Vector2.ONE * extent * 0.35, Vector2.ONE * extent * 0.7), Color("#4d86c5"))
+		elif token.contains("□"):
+			draw_rect(Rect2(center - Vector2.ONE * extent * 0.35, Vector2.ONE * extent * 0.7), Color("#6b5b4c"), false, maxf(3.0, extent * 0.06), true)
+		else:
+			draw_circle(center, extent * 0.35, tint)
+
 const OUT_TIME := 0.12 # 旧题滑出时长
 const IN_TIME := 0.22 # 新题弹入时长
 const STAR_LIFE := 0.62 # 答对星星粒子生命周期
@@ -31,6 +73,7 @@ var _sparks: Array = [] # 自绘答对星星粒子
 var _position := 0
 var _total := 0
 var _correct := 0
+var player_name := ""
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(420,390)
@@ -38,7 +81,7 @@ func _ready() -> void:
 	prompt = PlaygroundUI.label("",30,PlaygroundUI.INK,700,true)
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(prompt)
-	listen = PlaygroundUI.button("听题",accent,_request_listen,"soft")
+	listen = PlaygroundUI.semantic_icon_button("listen","听题",accent,_request_listen,"soft")
 	listen.custom_minimum_size = Vector2(84,52)
 	PressFeedback.attach(listen,&"select")
 	add_child(listen)
@@ -124,7 +167,13 @@ func _apply(data: Dictionary) -> void:
 		button.modulate.a = 1.0
 		button.scale = Vector2.ONE
 		button.rotation = 0.0
-		button.text = str(question.get("options",["","",""])[index])
+		var option_text := str(question.get("options",["","",""])[index])
+		var option_symbols := ArtLibrary.symbols(option_text)
+		var plain_option := option_text
+		for symbol in option_symbols:
+			plain_option = plain_option.replace(str(symbol), "")
+		plain_option = plain_option.strip_edges()
+		button.text = plain_option
 		button.disabled = feedback
 		var tint := accent
 		if feedback:
@@ -137,16 +186,44 @@ func _apply(data: Dictionary) -> void:
 		for child in button.get_children():
 			button.remove_child(child)
 			child.queue_free()
-		var symbols := ArtLibrary.symbols(button.text)
-		if not symbols.is_empty() and button.text.length() <= symbols.size()*3:
+		var symbols := option_symbols
+		if game_id == "patterns":
 			button.text = ""
+			if feedback and (index == int(question.get("answer",-1)) or index == selected):
+				var tag := PlaygroundUI.label("正确答案" if index == int(question.get("answer",-1)) else "你选的", 15, accent, 700)
+				tag.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+				tag.set_anchors_preset(Control.PRESET_TOP_WIDE)
+				tag.offset_top = 6
+				tag.offset_bottom = 28
+				tag.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				button.add_child(tag)
+			var mark := PatternMark.new()
+			mark.token = option_text.strip_edges()
+			mark.accent = accent
+			mark.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			button.add_child(mark)
+		elif not symbols.is_empty() and option_text.length() <= symbols.size()*3:
+			var feedback_label := "正确答案" if feedback and index == int(question.get("answer",-1)) else "你选的" if feedback and index == selected else ""
+			button.text = feedback_label + ("\n" + plain_option if not plain_option.is_empty() else "")
 			var row := HBoxContainer.new()
 			row.alignment = BoxContainer.ALIGNMENT_CENTER
 			row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 			row.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 			for symbol in symbols:
-				row.add_child(ArtLibrary.picture(str(symbol),Vector2(42,52)))
+				row.add_child(ArtLibrary.semantic_picture(str(symbol),"quiz",Vector2(42,52)))
+			row.offset_top = 24 if feedback else 0
 			button.add_child(row)
+		elif feedback:
+			if index == int(question.get("answer",-1)):
+				button.text = "正确答案\n" + plain_option
+			elif index == selected:
+				button.text = "你选的\n" + plain_option
+		if feedback and (index == int(question.get("answer",-1)) or index == selected):
+			var mark := ArtLibrary.semantic_picture("check" if index == int(question.get("answer",-1)) else "close", "ui", Vector2(24,24))
+			mark.position = Vector2(10,8)
+			mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			button.add_child(mark)
 	_layout()
 	if feedback:
 		_play_feedback()
@@ -288,15 +365,15 @@ func _layout() -> void:
 	listen.size = Vector2(clampf(size.x*0.13,84.0,120.0),clampf(size.y*0.06,48.0,64.0))
 	listen.position = Vector2(size.x-listen.size.x-16,12)
 	var prompt_top := maxf(size.y*0.115,listen.size.y+18)
-	var options_top := size.y*0.77
-	var prompt_height := clampf(size.y*0.23,56.0,maxf(56.0,options_top-prompt_top-8.0))
+	var options_top := size.y*0.73
+	var prompt_height := clampf(size.y*0.19,56.0,maxf(56.0,options_top-prompt_top-8.0))
 	prompt.position = Vector2(pad,prompt_top)
 	prompt.size = Vector2(size.x-pad*2,prompt_height)
 	prompt.pivot_offset = prompt.size*0.5
 	var gap := clampf(size.x*0.012,6.0,14.0)
 	var width := (size.x-pad*2-gap*2)/3.0
-	var height := clampf(size.y*0.17,88.0,164.0)
-	var answer_font := clampi(int(size.y*0.026),20,30)
+	var height := clampf(size.y*0.22,88.0,164.0)
+	var answer_font := clampi(int(size.y*0.036),22,34)
 	for index in buttons.size():
 		buttons[index].position = Vector2(pad+index*(width+gap),options_top)
 		buttons[index].size = Vector2(width,height)
@@ -377,7 +454,7 @@ func _draw_progress() -> void:
 		return
 	var font := PlaygroundUI.font()
 	var font_size := 17 if size.x >= 520 else 15
-	var text := "第 %s / %s 题" % [mini(_position+1,_total),_total]
+	var text := "%s · 第 %s / %s 题" % [player_name,mini(_position+1,_total),_total]
 	var width := font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x+26
 	draw_style_box(PlaygroundUI.style(PlaygroundUI.mix(accent,Color.WHITE,0.78),17,PlaygroundUI.mix(accent,Color.WHITE,0.4),2),Rect2(16,12,width,34))
 	draw_string(font,Vector2(16+13,12+17+font_size*0.36),text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size,PlaygroundUI.mix(accent,PlaygroundUI.INK,0.4))
@@ -385,9 +462,12 @@ func _draw_progress() -> void:
 	var slots := clampi(floori(float(_total)/float(STAR_GOAL)),1,3)
 	var lit := mini(floori(float(_correct)/float(STAR_GOAL)),slots)
 	for index in slots:
-		var glyph := "★" if index < lit else "☆"
 		var tint := Color("#d9a52c") if index < lit else Color("#c9bda9")
-		draw_string(font,Vector2(16+width+10+index*26,12+17+10),glyph,HORIZONTAL_ALIGNMENT_LEFT,-1,24,tint)
+		var center := Vector2(16+width+22+index*26,29)
+		if index < lit:
+			_draw_star(center,10.0,tint,0.0)
+		else:
+			draw_arc(center,9.0,0,TAU,20,tint,2.0,true)
 
 
 func _draw_sparks() -> void:
@@ -410,25 +490,17 @@ func _draw_star(center: Vector2, radius: float, tint: Color, angle: float) -> vo
 
 func _draw_water() -> void:
 	var unit := clampf(size.y/500.0,0.7,1.5)
-	for row in 2:
-		var top := size.y*0.55+row*size.y*0.12
-		var bar := 48.0*unit
-		draw_style_box(PlaygroundUI.style(Color("#74bfdc") if row == 0 else Color("#94d6e5"),24),Rect2(24,top,size.x-48,bar))
-		for index in 10:
-			var point := Vector2(46+index*(size.x-80)/10.0,top+bar*0.5+sin(clock*1.6+index)*3)
-			draw_arc(point,7*unit,0,PI,10,Color(1,1,1,0.35),2,true)
-		var progress := float(scores[row])/maxf(1,float(totals[row])) if row < scores.size() and row < totals.size() else 0.0
-		_icon("⛵",Vector2(65+(size.x-160)*progress,top+bar*0.45+sin(clock*2.2+row)*3),Vector2(60,56)*unit)
-		_icon("🚩",Vector2(size.x-56,top+bar*0.38),Vector2(30,38)*unit)
-	_draw_visual(Vector2(size.x*0.5,size.y*0.42),46*unit)
+	var top := size.y*0.62
+	draw_style_box(PlaygroundUI.style(Color("#94d6e5"),18),Rect2(32,top,size.x-64,26*unit))
+	var progress := float(_position)/maxf(1,float(_total))
+	_icon("⛵",Vector2(70+(size.x-160)*progress,top+8),Vector2(46,44)*unit)
+	_draw_visual(Vector2(size.x*0.5,size.y*0.47),68*unit)
 
 func _draw_letters() -> void:
 	var top := size.y*0.40
 	var height := clampf(size.y*0.22,64.0,140.0)
 	draw_style_box(PlaygroundUI.style(Color("#fffcf5"),24,Color("#e6b0a0"),2),Rect2(size.x*0.21,top,size.x*0.58,height))
-	for index in 4:
-		var origin := Vector2(size.x*0.21+index*size.x*0.145,top)
-		draw_line(origin,origin+Vector2(0,height),Color("#efd8ce"),1.5,true)
+	draw_line(Vector2(size.x*0.21,top+height*0.5),Vector2(size.x*0.79,top+height*0.5),Color("#efd8ce"),1.5,true)
 	_draw_visual(Vector2(size.x*0.5,top+height*0.5),clampf(height*0.62,40.0,80.0))
 	if feedback and not question.is_empty():
 		draw_line(Vector2(size.x*0.5,top+height),buttons[int(question.answer)].position+Vector2(buttons[0].size.x*0.5,-5),Color("#77a476"),4,true)
@@ -479,9 +551,102 @@ func _draw_visual(center: Vector2, extent: float) -> void:
 		return
 	var side := minf(extent,(size.x-180)/maxf(1,_tokens.size()))
 	for index in _tokens.size():
-		_icon(str(_tokens[index]),center+Vector2((index-(_tokens.size()-1)*0.5)*side,0),Vector2.ONE*side*0.9)
+		var spot := center+Vector2((index-(_tokens.size()-1)*0.5)*side,0)
+		if game_id == "patterns":
+			draw_style_box(PlaygroundUI.style(Color("#fffaf0"),14,accent if feedback else PlaygroundUI.mix(accent,Color.WHITE,0.6),2),Rect2(spot-Vector2.ONE*side*0.47,Vector2.ONE*side*0.94))
+			_draw_pattern_token(str(_tokens[index]),spot,side*0.72)
+		elif not _draw_simple_token(str(_tokens[index]),spot,side*0.72):
+			_icon(str(_tokens[index]),spot,Vector2.ONE*side*0.78)
+
+
+func _draw_simple_token(token: String, center: Vector2, extent: float) -> bool:
+	var color_map := {
+		"🔴":Color("#d9534f"), "🔵":Color("#4d86c5"), "🟢":Color("#6fb95c"),
+		"🟡":Color("#e0ba35"), "🟣":Color("#8a56a8"), "🟠":Color("#df8938"),
+		"🟤":Color("#9a6449"), "⚪":Color("#f7f4ec"),
+	}
+	for token_key in color_map:
+		if token.contains(str(token_key)):
+			draw_circle(center,extent*0.34,color_map[token_key])
+			return true
+	if token.contains("⭐"):
+		_draw_pattern_token(token,center,extent)
+		return true
+	if token.contains("🔺") or token.contains("🔶") or token.contains("🟦"):
+		_draw_pattern_token(token,center,extent)
+		return true
+	if token.contains("⬆") or token.contains("⬇") or token.contains("⬅") or token.contains("➡"):
+		var direction := Vector2.UP if token.contains("⬆") else Vector2.DOWN if token.contains("⬇") else Vector2.LEFT if token.contains("⬅") else Vector2.RIGHT
+		var side := Vector2(-direction.y,direction.x)
+		draw_colored_polygon(PackedVector2Array([
+			center+direction*extent*0.46,
+			center-direction*extent*0.22+side*extent*0.38,
+			center-direction*extent*0.22-side*extent*0.38,
+		]),accent)
+		return true
+	if token.contains("🌙"):
+		draw_circle(center,extent*0.38,Color("#f2c94c"))
+		draw_circle(center+Vector2(extent*0.14,-extent*0.04),extent*0.33,PlaygroundUI.mix(accent,Color.WHITE,0.9))
+		return true
+	if token.contains("☀") or token.contains("🌞"):
+		draw_circle(center,extent*0.24,Color("#f0b72f"))
+		for index in 8:
+			var direction := Vector2.RIGHT.rotated(float(index)*TAU/8.0)
+			draw_line(center+direction*extent*0.30,center+direction*extent*0.46,Color("#e4a622"),maxf(2.0,extent*0.06),true)
+		return true
+	if token.contains("☁"):
+		draw_circle(center+Vector2(-extent*0.18,extent*0.06),extent*0.22,Color("#dceaf2"))
+		draw_circle(center+Vector2(extent*0.05,-extent*0.02),extent*0.30,Color("#edf6fb"))
+		draw_circle(center+Vector2(extent*0.28,extent*0.08),extent*0.20,Color("#dceaf2"))
+		return true
+	return false
+
+
+func _draw_pattern_token(token: String, center: Vector2, extent: float) -> void:
+	var tint := Color("#6fb95c")
+	var shape := "circle"
+	if token.contains("⭐"):
+		tint = Color("#d9a31d")
+		shape = "star"
+	elif token.contains("🔺"):
+		tint = Color("#d95f55")
+		shape = "triangle"
+	elif token.contains("🔶"):
+		tint = Color("#d79b31")
+		shape = "diamond"
+	elif token.contains("🟦"):
+		tint = Color("#4d86c5")
+		shape = "square"
+	elif token.contains("□"):
+		draw_rect(Rect2(center-Vector2.ONE*extent*0.34,Vector2.ONE*extent*0.68),Color("#6b5b4c"),false,maxf(3.0,extent*0.055),true)
+		return
+	match shape:
+		"square":
+			draw_rect(Rect2(center-Vector2.ONE*extent*0.33,Vector2.ONE*extent*0.66),tint,true)
+		"triangle":
+			draw_colored_polygon(PackedVector2Array([
+				center+Vector2(0,-extent*0.42),
+				center+Vector2(extent*0.4,extent*0.34),
+				center+Vector2(-extent*0.4,extent*0.34),
+			]),tint)
+		"diamond":
+			draw_colored_polygon(PackedVector2Array([
+				center+Vector2(0,-extent*0.42),
+				center+Vector2(extent*0.42,0),
+				center+Vector2(0,extent*0.42),
+				center+Vector2(-extent*0.42,0),
+			]),tint)
+		"star":
+			var points := PackedVector2Array()
+			for index in 10:
+				var angle := -PI*0.5+float(index)*PI/5.0
+				var radius := extent*0.44 if index%2==0 else extent*0.20
+				points.append(center+Vector2(cos(angle),sin(angle))*radius)
+			draw_colored_polygon(points,tint)
+		_:
+			draw_circle(center,extent*0.34,tint)
 
 func _icon(token: String, center: Vector2, dimensions: Vector2) -> void:
-	var image := ArtLibrary.texture(token)
+	var image := ArtLibrary.semantic_texture(token,"quiz")
 	if image != null:
 		draw_texture_rect(image,Rect2(center-dimensions*0.5,dimensions),false)

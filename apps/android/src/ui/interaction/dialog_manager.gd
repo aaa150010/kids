@@ -30,6 +30,8 @@ const DEFAULT_ACCENT := Color("#167d74")
 var _stack: Array[Control] = []
 var _dialog_layer: CanvasLayer
 var _toast_layer: CanvasLayer
+var _active_toast: Control
+var _toast_tween: Tween
 
 
 func _ready() -> void:
@@ -112,8 +114,10 @@ func show_dialog(opts: Dictionary) -> Control:
 			heading.add_child(PlaygroundUI.label(title, 30, PlaygroundUI.INK, 700, true))
 		header.add_child(heading)
 		if dismissible:
-			var close := PlaygroundUI.icon_button("×", accent, func(): close_layer(layer, true), "关闭")
+			var close := PlaygroundUI.semantic_icon_button("close", "", accent, func(): close_layer(layer, true), "soft", 18)
 			close.focus_mode = Control.FOCUS_NONE
+			close.custom_minimum_size = Vector2(52, 52)
+			close.tooltip_text = "关闭"
 			header.add_child(close)
 		column.add_child(header)
 		column.add_child(PlaygroundUI.separator(PlaygroundUI.mix(accent, Color.WHITE, 0.78)))
@@ -202,10 +206,15 @@ func show_confirm(
 
 
 func show_toast(text: String, duration := 2.4) -> void:
+	if _toast_tween != null and is_instance_valid(_toast_tween):
+		_toast_tween.kill()
+	if is_instance_valid(_active_toast):
+		_active_toast.queue_free()
 	var holder := Control.new()
 	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_toast_layer.add_child(holder)
+	_active_toast = holder
 	var toast := PanelContainer.new()
 	toast.add_theme_stylebox_override("panel", PlaygroundUI.style(
 		Color(0.15, 0.18, 0.16, 0.92), 16, Color.TRANSPARENT, 0, 8, Color(0, 0, 0, 0.25)
@@ -217,13 +226,13 @@ func show_toast(text: String, duration := 2.4) -> void:
 	holder.add_child(toast)
 	toast.position = Vector2(0, 56)
 	toast.modulate.a = 0.0
-	var tween := MotionKit.tween(self)
-	tween.set_parallel(true)
-	tween.tween_property(toast, "modulate:a", 1.0, 0.14)
-	tween.tween_property(toast, "position:y", 72.0, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT) # 淡入上浮
-	tween.chain().tween_interval(duration)
-	tween.tween_property(toast, "modulate:a", 0.0, 0.25)
-	tween.tween_callback(holder.queue_free)
+	_toast_tween = MotionKit.tween(self)
+	_toast_tween.set_parallel(true)
+	_toast_tween.tween_property(toast, "modulate:a", 1.0, 0.14)
+	_toast_tween.tween_property(toast, "position:y", 72.0, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_toast_tween.chain().tween_interval(duration)
+	_toast_tween.tween_property(toast, "modulate:a", 0.0, 0.25)
+	_toast_tween.tween_callback(holder.queue_free)
 
 
 func close_top(respect_dismissible: bool = false) -> bool:
@@ -341,12 +350,24 @@ func _button_row(actions: Array, accent: Color, card_width: float) -> Control:
 	# 宽屏不再把两个操作拉满整行，保持紧凑的玩具按钮比例。
 	var pair_width := clampf((card_width - 72.0) * 0.5, BUTTON_PAIR_MIN, 240.0)
 	for action in actions:
-		var button := PlaygroundUI.button(
-			str(action.get("text", "好")),
-			accent,
-			action.get("callback", Callable()),
-			str(action.get("kind", "primary"))
-		)
+		var kind := str(action.get("kind", "primary"))
+		var button: Button
+		if action.has("icon"):
+			button = PlaygroundUI.semantic_icon_button(
+				str(action["icon"]),
+				str(action.get("text", "好")),
+				accent,
+				action.get("callback", Callable()),
+				kind,
+				BUTTON_FONT
+			)
+		else:
+			button = PlaygroundUI.button(
+				str(action.get("text", "好")),
+				accent,
+				action.get("callback", Callable()),
+				kind
+			)
 		button.custom_minimum_size.y = BUTTON_HEIGHT
 		button.add_theme_font_size_override("font_size", BUTTON_FONT)
 		button.custom_minimum_size.x = pair_width if pair else maxf(button.custom_minimum_size.x, 160.0)

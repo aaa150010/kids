@@ -1,0 +1,15 @@
+{
+  "createdAt": "2026-11-20",
+  "project": "童心游乐场",
+  "description": "本轮界面图标、游戏封面、卡背、棋子外观和内容图形由项目自绘或由原生矢量绘制生成，不复制第三方游戏素材。",
+  "runtimeSources": [
+    "assets/original/ui/icons.svg",
+    "assets/original/covers/covers.svg",
+    "apps/android/src/ui/original_glyph.gd"
+  ],
+  "notes": [
+    "内容文字、拼音、数字与数学符号由原生字体绘制。",
+    "旧第三方资源的历史许可记录继续保留，供仓库审计使用。",
+    "原创素材可按项目自身许可策略维护，不需要携带第三方署名。"
+  ]
+}

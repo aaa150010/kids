@@ -12,6 +12,10 @@ var game_tools: Control
 var view := "board"
 var _puzzle_picker: Control
 var _last_immersive_turn := -1
+var _result_visible := false
+var _replay_board: MilitaryBoard
+var _replay_label: Label
+var _replay_index := 0
 
 
 func _ready() -> void:
@@ -73,6 +77,7 @@ func _build_board() -> void:
 	content_root.add_child(header)
 	game_header = header
 	board = MilitaryBoard.new()
+	board.accent = accent
 	board.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	board.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	board.cell_pressed.connect(_cell)
@@ -103,7 +108,10 @@ func _player_chip(side: int) -> Control:
 	row.add_theme_constant_override("separation", 10)
 	panel.add_child(row)
 	var player: Dictionary = players[side] if side < players.size() else {}
-	row.add_child(ArtLibrary.picture(str(player.get("avatar", "🎖️")), Vector2(46, 48)))
+	if player.is_empty():
+		row.add_child(ArtLibrary.semantic_picture("trophy", "ui", Vector2(46, 48)))
+	else:
+		row.add_child(ArtLibrary.profile_picture(player, Vector2(46, 48)))
 	var copy := VBoxContainer.new()
 	copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	copy.add_theme_constant_override("separation", 1)
@@ -140,10 +148,17 @@ func _on_immersive_changed(value: bool) -> void:
 		_last_immersive_turn = int(engine.state.get("turn", 0)) if not engine.state.is_empty() else -1
 
 
+func _extra_pause_actions() -> Array:
+	var actions: Array = [{"text":"悔棋", "icon":"undo", "kind":"soft", "callback":func(): _close_pause_tools(); _undo()}]
+	if mode_id == "puzzle":
+		actions.append({"text":"残局列表", "icon":"back", "kind":"soft", "callback":func(): _close_pause_tools(); _show_puzzle_map()})
+	return actions
+
+
 func _refresh() -> void:
 	if board == null or not is_instance_valid(board) or engine.state.is_empty():
 		return
-	if engine.state.phase == "finished" and not bool(engine.state.get("reported", false)):
+	if engine.state.phase == "finished" and not _result_visible:
 		_show_result()
 	content_root.rotation = 0.0
 	board.visible = true
@@ -189,8 +204,8 @@ func _refresh() -> void:
 		status.text = "残局练习：点自己的棋子，再点亮起的位置" if mode_id == "puzzle" else "%s走棋：点自己的棋子，再点亮起的位置" % engine.side_name(turn)
 		var selected_piece := engine.piece_at(selected)
 		if not selected_piece.is_empty():
-			var captures := targets.filter(func(target): return not engine.piece_at(int(target)).is_empty()).size()
-			detail.text = "%s：可走 %s 格 · 可吃 %s 枚" % [str(MilitaryRules.NAMES.get(str(selected_piece.kind), "棋子")), targets.size() - captures, captures]
+			var attacks := targets.filter(func(target): return not engine.piece_at(int(target)).is_empty()).size()
+			detail.text = "%s：可走 %s 格 · 可攻击 %s 处" % [str(MilitaryRules.NAMES.get(str(selected_piece.kind), "棋子")), targets.size() - attacks, attacks]
 		else:
 			detail.text = "所有棋子都亮着；工兵可排雷，炸弹同归于尽，夺取军旗获胜。"
 		var battle: Dictionary = engine.state.get("lastBattle", {})
@@ -206,14 +221,38 @@ func _cell(position: int) -> void:
 	var action: Dictionary
 	if selected >= 0 and position in engine.legal_targets(selected):
 		action = {"type": "move", "to": position}
-	elif position != selected and not piece.is_empty() and int(piece.side) == int(engine.state.turn):
-		if engine.legal_targets(position).is_empty():
+	elif selected >= 0:
+		var explanation := engine.explain_move(selected, position)
+		engine.state.interactionNote = {
+			"message": str(explanation.get("message", engine.piece_hint(engine.piece_at(selected)))),
+			"cells": explanation.get("cells", [position]),
+			"side": int(engine.state.turn),
+		}
+		if position != selected and not piece.is_empty() and int(piece.side) == int(engine.state.turn) and not engine.legal_targets(position).is_empty():
+			action = {"type": "select", "position": position}
+		else:
 			SfxMap.play(&"error")
-			show_toast("%s不能移动" % str(MilitaryRules.NAMES.get(str(piece.kind), "这枚棋子")))
+			FeedbackKit.haptic(12)
+			_save("正在查看军棋走法")
+			_refresh()
+			return
+	elif not piece.is_empty() and int(piece.side) == int(engine.state.turn):
+		if engine.legal_targets(position).is_empty():
+			engine.state.interactionNote = {
+				"message": engine.piece_hint(piece),
+				"cells": [position],
+				"side": int(engine.state.turn),
+			}
+			SfxMap.play(&"error")
+			_refresh()
 			return
 		action = {"type": "select", "position": position}
 	else:
-		action = {"type": "deselect"}
+		var hint := "先选自己这一方的棋子" if piece.is_empty() else "这是对方的棋子，先选自己的"
+		engine.state.interactionNote = {"message": hint, "cells": [position] if position >= 0 else [], "side": int(engine.state.turn)}
+		SfxMap.play(&"error")
+		_refresh()
+		return
 	var result := engine.handle_input(action)
 	if not bool(result.get("ok", false)):
 		SfxMap.play(&"error")
@@ -223,6 +262,7 @@ func _cell(position: int) -> void:
 		SfxMap.play(&"select")
 	else:
 		SfxMap.play(&"move")
+	engine.state.interactionNote = {}
 	_save("军棋进行中")
 	_refresh()
 	if engine.state.phase == "finished":
@@ -244,7 +284,22 @@ func _battle_text(battle: Dictionary) -> String:
 
 
 func _undo() -> void:
-	if paused or not engine.undo_last_move():
+	if paused or engine.state.phase != "playing" or engine.state.history.is_empty():
+		show_toast("现在没有可以撤回的走法")
+		return
+	if mode_id == "classic" and players.size() == 2:
+		open_modal("悔棋确认", PlaygroundUI.label("请另一方确认，是否撤回最近一步？", 21, PlaygroundUI.INK, 500, true), [
+			{"text": "继续下棋", "kind": "soft", "callback": func(): _close_top_modal()},
+			{"text": "同意撤回", "kind": "primary", "callback": _perform_undo},
+		], "双方棋局")
+		return
+	_perform_undo()
+
+
+func _perform_undo() -> void:
+	if not _modal_stack.is_empty():
+		_close_top_modal()
+	if not engine.undo_last_move():
 		show_toast("现在没有可以撤回的走法")
 		return
 	_save("撤回了一步")
@@ -260,6 +315,9 @@ func _confirm_restart() -> void:
 
 func _restart_game() -> void:
 	_close_top_modal()
+	if paused:
+		toggle_pause(false)
+	_result_visible = false
 	_create(level_id)
 	_build_board()
 	_refresh()
@@ -280,7 +338,7 @@ func _show_puzzle_map() -> void:
 		var button := PlaygroundUI.button(
 			"%s\n一步夺旗" % str(puzzle.get("title", "残局")),
 			accent,
-			func(): _open_puzzle(index),
+			_open_puzzle.bind(index),
 			"primary" if index + 1 == level_id else "soft"
 		)
 		button.custom_minimum_size = Vector2(0, 88)
@@ -292,6 +350,7 @@ func _show_puzzle_map() -> void:
 
 func _open_puzzle(index: int) -> void:
 	_close_top_modal()
+	_result_visible = false
 	_create(index + 1)
 	_build_board()
 	_refresh()
@@ -325,26 +384,77 @@ func _show_rules() -> void:
 
 func _show_result() -> void:
 	var state := engine.state
-	if bool(state.get("reported", false)):
+	if not bool(state.get("reported", false)):
+		state.reported = true
+		if mode_id == "puzzle" and int(state.winner) == 0:
+			SaveStore.complete_level(str(players[0].id), game_id, level_id, 1, mode_id)
+			SaveStore.record_outcome(str(players[0].id), game_id, "win", 1, 0, 0, {"strategy": {"correct": 1, "answered": 1}}, str(state.get("sessionId", "military")))
+		elif mode_id == "classic":
+			var winner := int(state.winner)
+			for side in players.size():
+				var outcome := "draw" if winner < 0 else "win" if side == winner else "loss"
+				SaveStore.record_outcome(str(players[side].id), game_id, outcome, 1 if outcome == "win" else 0, 0, 0, {"strategy": {"correct": 1 if outcome == "win" else 0, "answered": 1}}, str(state.get("sessionId", "military")))
+		_save("军棋完成", false)
+	if _result_visible:
 		return
-	state.reported = true
-	if mode_id == "puzzle" and int(state.winner) == 0:
-		SaveStore.complete_level(str(players[0].id), game_id, level_id, 1, mode_id)
-		SaveStore.record_outcome(str(players[0].id), game_id, "win", 1, 0, 0, {"strategy": {"correct": 1, "answered": 1}}, str(state.get("sessionId", "military")))
-	elif mode_id == "classic":
-		var winner := int(state.winner)
-		for side in players.size():
-			var outcome := "draw" if winner < 0 else "win" if side == winner else "loss"
-			SaveStore.record_outcome(str(players[side].id), game_id, outcome, 1 if outcome == "win" else 0, 0, 0, {"strategy": {"correct": 1 if outcome == "win" else 0, "answered": 1}}, str(state.get("sessionId", "military")))
-	_save("军棋完成", false)
+	_result_visible = true
 	var body := VBoxContainer.new()
 	body.add_theme_constant_override("separation", 8)
-	body.add_child(ArtLibrary.picture("🏆" if int(state.winner) == 0 else "🎖️", Vector2(88, 88)))
+	var trophy := ArtLibrary.semantic_picture("trophy", "ui", Vector2(88, 88))
+	trophy.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	body.add_child(trophy)
 	body.add_child(PlaygroundUI.label(str(state.get("reason", "本局结束")), 24, accent, 700, true))
-	var actions := [{"text": "再来一局", "kind": "primary", "callback": func(): _restart_game()}]
+	var actions := [
+		{"text": "棋谱回放", "icon": "repeat", "kind": "soft", "callback": func(): _result_visible = false; _close_top_modal(); _show_replay()},
+		{"text": "再看棋盘", "kind": "soft", "callback": func(): _result_visible = false; _close_top_modal()},
+		{"text": "再来一局", "kind": "primary", "callback": func(): _result_visible = false; _restart_game()},
+	]
 	if mode_id == "puzzle":
 		actions.insert(0, {"text": "选择残局", "kind": "soft", "callback": func(): _close_top_modal(); _show_puzzle_map()})
 	open_modal("军棋结束", body, actions, "本局已自动保存")
+
+
+func _show_replay() -> void:
+	if engine.state.is_empty() or engine.state.get("history", []).is_empty():
+		show_toast("这一局还没有可以回放的步骤")
+		return
+	_replay_index = 0
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 8)
+	_replay_board = MilitaryBoard.new()
+	_replay_board.accent = accent
+	_replay_board.interactive = false
+	_replay_board.custom_minimum_size = Vector2(900, 460)
+	body.add_child(_replay_board)
+	_replay_label = PlaygroundUI.label("", 18, accent, 700)
+	_replay_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.add_child(_replay_label)
+	open_modal("棋谱回放", body, [
+		{"text": "上一步", "icon": "back", "kind": "soft", "callback": _replay_step.bind(-1)},
+		{"text": "下一步", "icon": "next", "kind": "soft", "callback": _replay_step.bind(1)},
+		{"text": "关闭回放", "icon": "close", "kind": "primary", "callback": func(): _close_top_modal()},
+	], "回放不会改变当前棋局")
+	_refresh_replay()
+
+
+func _replay_step(direction: int) -> void:
+	var count := int(engine.state.get("history", []).size())
+	_replay_index = clampi(_replay_index + direction, 0, count)
+	_refresh_replay()
+
+
+func _refresh_replay() -> void:
+	if not is_instance_valid(_replay_board):
+		return
+	var history: Array = engine.state.get("history", [])
+	var replay_state := engine.state.duplicate(true)
+	if _replay_index < history.size() and history[_replay_index] is Dictionary:
+		replay_state.merge(history[_replay_index].duplicate(true), true)
+	var replay_rules := MilitaryRules.new()
+	replay_rules.state = replay_state
+	var side := int(replay_state.get("turn", 0))
+	_replay_board.update_board(replay_rules, side, -1, [], true)
+	_replay_label.text = "第 %s / %s 步 · 只查看，不改变当前局面" % [_replay_index, history.size()]
 
 
 func _save(note: String, resume: bool = true) -> void:

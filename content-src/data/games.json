@@ -436,8 +436,8 @@
     "subtitle": "楚河汉界，红先黑后",
     "icon": "♟️",
     "category": "双人棋局",
-    "accent": "#b23b32",
-    "soft": "#f7ded8",
+    "accent": "#167d74",
+    "soft": "#d9eee8",
     "cover": "res://assets/covers/chess.svg",
     "group": "games",
     "players": "1–2 人",
@@ -482,8 +482,8 @@
     "subtitle": "一格一格，把数字排整齐",
     "icon": "🔢",
     "category": "数学思维",
-    "accent": "#276f9e",
-    "soft": "#dceef7",
+    "accent": "#6b2764",
+    "soft": "#ead9e9",
     "cover": "res://assets/covers/sudoku.svg",
     "group": "games",
     "players": "1 人",
@@ -497,7 +497,7 @@
       "💡 提示与检查"
     ],
     "guide": [
-      "先选一格，再点下面的数字。",
+      "先选一格，再点右边的数字。",
       "每行、每列和每个小宫里，数字都不能重复。",
       "填错了会轻轻提示；所有进度都会自动保存。"
     ],

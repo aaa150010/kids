@@ -333,6 +333,13 @@
       "url": "https://en.wikipedia.org/wiki/Xiangqi",
       "license": "CC BY-SA 4.0",
       "note": "核对走法、九宫、楚河汉界与吃将规则；本项目棋子与棋盘为原生矢量自绘。"
+    },
+    {
+      "id": "kids-playground-original-art-2026-11",
+      "title": "童心游乐场原创界面与内容图形",
+      "license": "项目原创",
+      "accessedAt": "2026-11-20",
+      "note": "操作图标、游戏封面图集、档案头像和内容图形由项目自绘或由原生矢量绘制生成；旧第三方资源仅保留历史许可记录。"
     }
   ]
 }

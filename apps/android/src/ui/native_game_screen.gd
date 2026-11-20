@@ -15,17 +15,19 @@ var content_root: VBoxContainer
 var overlay_root: Control
 var topbar: Control
 var layout_root: VBoxContainer
-var _immersive_bar: HBoxContainer
-var _immersive_canvas: Control
 var _toast_canvas: Control
 var _interaction_seat := -1
+var _last_actor_seat := -1
 var _last_touch_msec := -1000
-var _immersive_controls_generation := 0
-var _immersive_tap_times: Array = []
-var _immersive_tap_position := Vector2.ZERO
 var toast_label: Label
+var _toast_tween: Tween
 var settings_button: Button
 var _modal_stack: Array[Control] = []
+var _pause_root_layer: Control
+var _pause_origin_seat := -1
+var _left_pause_rail: PanelContainer
+var _right_pause_rail: PanelContainer
+var _rail_press: Dictionary = {}
 var mode_id := "classic"
 var level_id := 1
 var session_id := ""
@@ -38,6 +40,13 @@ var lesson_actions: Array = []
 var lesson_texts: Array = []
 var lesson_visible := false
 var _save_interval := 0.0
+var _resume_on_start := false
+var _suppress_resume_on_close := false
+const RAIL_WIDTH := 60.0
+const SYSTEM_GESTURE_GUARD := 24.0
+const RAIL_MIN_HEIGHT_RATIO := 0.18
+const RAIL_MAX_HEIGHT_RATIO := 0.82
+const RAIL_TAP_SLOP := 16.0
 
 
 func setup(meta: Dictionary, selected_players: Array) -> void:
@@ -51,6 +60,13 @@ func setup(meta: Dictionary, selected_players: Array) -> void:
 	if not GameTuning.supports(game_id):
 		difficulty_pref = "auto"
 	SaveStore.set_context(game_id, mode_id, players.map(func(player): return str(player.id)))
+	if bool(meta.get("resume", false)):
+		_resume_on_start = true
+	elif bool(meta.get("freshStart", false)):
+		_resume_on_start = false
+	else:
+		var stored := SaveStore.load_state(game_id, players.map(func(player): return str(player.id)))
+		_resume_on_start = not stored.is_empty() and bool(stored.get("resume", true))
 
 
 func build_shell() -> void:
@@ -62,8 +78,10 @@ func build_shell() -> void:
 	var metrics := PlaygroundUI.layout_metrics(get_viewport_rect().size)
 	var safe := PlaygroundUI.safe_insets(get_viewport_rect().size)
 	var vertical_safe := minf(float(safe.top), float(safe.bottom))
-	margin.add_theme_constant_override("margin_left", int(maxf(metrics.margin,float(safe.left)+10.0)))
-	margin.add_theme_constant_override("margin_right", int(maxf(metrics.margin,float(safe.right)+10.0)))
+	var side_margin := maxf(metrics.margin, float(safe.left) + SYSTEM_GESTURE_GUARD + RAIL_WIDTH + 8.0)
+	var opposite_margin := maxf(metrics.margin, float(safe.right) + SYSTEM_GESTURE_GUARD + RAIL_WIDTH + 8.0)
+	margin.add_theme_constant_override("margin_left", int(side_margin))
+	margin.add_theme_constant_override("margin_right", int(opposite_margin))
 	margin.add_theme_constant_override("margin_top", int(maxf(10.0,vertical_safe+6.0)))
 	margin.add_theme_constant_override("margin_bottom", int(maxf(10.0,vertical_safe+6.0)))
 	add_child(margin)
@@ -93,7 +111,7 @@ func build_shell() -> void:
 	overlay_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(overlay_root)
-	_build_immersive_bar()
+	_build_pause_rails()
 	_toast_canvas = Control.new()
 	_toast_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_toast_canvas)
@@ -107,40 +125,125 @@ func build_shell() -> void:
 	toast_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	toast_label.position = Vector2(0, 24)
 	_toast_canvas.add_child(toast_label)
-	resized.connect(_layout_immersive_controls)
+	resized.connect(_layout_pause_rails)
+	if _resume_on_start:
+		call_deferred("_show_initial_resume_pause")
 
 
-func _build_immersive_bar() -> void:
-	_immersive_canvas = Control.new()
-	_immersive_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_immersive_canvas)
-	TabletopLayout.layout_canvas(_immersive_canvas, get_viewport_rect().size, 0.0)
-	_immersive_bar = HBoxContainer.new()
-	_immersive_bar.anchor_left = 1.0
-	_immersive_bar.anchor_right = 1.0
-	_immersive_bar.anchor_top = 0.0
-	_immersive_bar.anchor_bottom = 0.0
-	_immersive_bar.offset_left = -360.0
-	_immersive_bar.offset_right = -16.0
-	_immersive_bar.offset_top = 12.0
-	_immersive_bar.offset_bottom = 60.0
-	_immersive_bar.alignment = BoxContainer.ALIGNMENT_END
-	_immersive_bar.add_theme_constant_override("separation", 8)
-	_immersive_bar.z_index = 60
-	var rules := PlaygroundUI.button("规则", accent, show_game_rules, "soft")
-	rules.custom_minimum_size = Vector2(70, 48)
-	rules.add_theme_font_size_override("font_size", 17)
-	_immersive_bar.add_child(rules)
-	var pause := PlaygroundUI.button("Ⅱ 暂停", accent, toggle_pause, "soft")
-	pause.custom_minimum_size = Vector2(96, 48)
-	pause.add_theme_font_size_override("font_size", 17)
-	_immersive_bar.add_child(pause)
-	var exit := PlaygroundUI.button("退出全屏", accent, func(): set_immersive(false), "primary")
-	exit.custom_minimum_size = Vector2(112, 48)
-	exit.add_theme_font_size_override("font_size", 17)
-	_immersive_bar.add_child(exit)
-	_immersive_bar.visible = false
-	_immersive_canvas.add_child(_immersive_bar)
+func _build_pause_rails() -> void:
+	_left_pause_rail = _make_pause_rail(-1)
+	_right_pause_rail = _make_pause_rail(1)
+	overlay_root.add_child(_left_pause_rail)
+	overlay_root.add_child(_right_pause_rail)
+	call_deferred("_layout_pause_rails")
+
+
+func _make_pause_rail(side: int) -> PanelContainer:
+	var rail := PanelContainer.new()
+	rail.name = "LeftPauseRail" if side < 0 else "RightPauseRail"
+	rail.mouse_filter = Control.MOUSE_FILTER_STOP
+	rail.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	rail.focus_mode = Control.FOCUS_NONE
+	rail.set_meta("pause_side", side)
+	var paper := PlaygroundUI.style(Color(1, 1, 1, 0.24), 24, Color(accent, 0.22), 1)
+	paper.content_margin_left = 0
+	paper.content_margin_right = 0
+	paper.content_margin_top = 0
+	paper.content_margin_bottom = 0
+	rail.add_theme_stylebox_override("panel", paper)
+	var fold := VBoxContainer.new()
+	fold.alignment = BoxContainer.ALIGNMENT_CENTER
+	fold.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	fold.add_theme_constant_override("separation", 7)
+	for index in 3:
+		var dot := ColorRect.new()
+		dot.color = Color(accent, 0.42)
+		dot.custom_minimum_size = Vector2(5, 5)
+		dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		fold.add_child(dot)
+	rail.add_child(fold)
+	rail.gui_input.connect(_on_pause_rail_input.bind(side))
+	rail.mouse_entered.connect(func():
+		rail.modulate = Color(1.05, 1.05, 1.05, 1.0)
+	)
+	rail.mouse_exited.connect(func():
+		rail.modulate = Color.WHITE
+		_rail_press.erase(side)
+	)
+	return rail
+
+
+func _layout_pause_rails() -> void:
+	if not is_instance_valid(_left_pause_rail) or not is_instance_valid(_right_pause_rail):
+		return
+	var viewport := get_viewport_rect().size
+	var safe := PlaygroundUI.safe_insets(viewport)
+	var left_offset := float(safe.get("left", 0.0)) + SYSTEM_GESTURE_GUARD
+	var right_offset := float(safe.get("right", 0.0)) + SYSTEM_GESTURE_GUARD
+	var top := viewport.y * RAIL_MIN_HEIGHT_RATIO
+	var bottom := viewport.y * RAIL_MAX_HEIGHT_RATIO
+	_left_pause_rail.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_left_pause_rail.position = Vector2(left_offset, top)
+	_left_pause_rail.size = Vector2(RAIL_WIDTH, bottom - top)
+	_right_pause_rail.set_anchors_preset(Control.PRESET_TOP_LEFT)
+	_right_pause_rail.position = Vector2(viewport.x - right_offset - RAIL_WIDTH, top)
+	_right_pause_rail.size = Vector2(RAIL_WIDTH, bottom - top)
+	var rails_visible := immersive and not paused and _modal_stack.is_empty()
+	_left_pause_rail.visible = rails_visible
+	_right_pause_rail.visible = rails_visible
+
+
+func _on_pause_rail_input(event: InputEvent, side: int) -> void:
+	if paused or not _modal_stack.is_empty():
+		_rail_press.erase(side)
+		return
+	get_viewport().set_input_as_handled()
+	if event is InputEventScreenTouch:
+		if event.device == InputEvent.DEVICE_ID_EMULATION:
+			return
+		_last_touch_msec = Time.get_ticks_msec()
+		if event.pressed:
+			_rail_press[side] = {"start": event.position, "last": event.position}
+		else:
+			_finish_rail_tap(side, event.position)
+	elif event is InputEventScreenDrag:
+		_last_touch_msec = Time.get_ticks_msec()
+		if _rail_press.has(side):
+			var press: Dictionary = _rail_press[side]
+			press["last"] = event.position
+			var start: Vector2 = press.get("start", event.position)
+			if start.distance_to(event.position) > RAIL_TAP_SLOP:
+				_rail_press.erase(side)
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if Time.get_ticks_msec() - _last_touch_msec < 500:
+			return
+		if event.pressed:
+			_rail_press[side] = {"start": event.position, "last": event.position}
+		else:
+			_finish_rail_tap(side, event.position)
+	elif event is InputEventMouseMotion and _rail_press.has(side):
+		var press: Dictionary = _rail_press[side]
+		press["last"] = event.position
+		var start: Vector2 = press.get("start", event.position)
+		if start.distance_to(event.position) > RAIL_TAP_SLOP:
+			_rail_press.erase(side)
+
+
+func _finish_rail_tap(side: int, position: Vector2) -> void:
+	if not _rail_press.has(side):
+		return
+	var press: Dictionary = _rail_press[side]
+	_rail_press.erase(side)
+	var start: Vector2 = press.get("start", position)
+	if start.distance_to(position) > RAIL_TAP_SLOP:
+		return
+	_interaction_seat = 0 if side < 0 else 1
+	toggle_pause(true)
+
+
+func _show_initial_resume_pause() -> void:
+	if not paused and _modal_stack.is_empty():
+		toggle_pause(true)
 
 
 func face_to_face() -> bool:
@@ -158,18 +261,6 @@ func _overlay_angle() -> float:
 	return TabletopLayout.facing_angle(_interaction_seat if _interaction_seat >= 0 else _current_seat(), face_to_face())
 
 
-func _layout_immersive_controls() -> void:
-	if is_instance_valid(_immersive_canvas):
-		TabletopLayout.layout_canvas(_immersive_canvas, get_viewport_rect().size, _overlay_angle())
-		if face_to_face():
-			var bar_width := maxf(344.0, _immersive_bar.get_combined_minimum_size().x)
-			_immersive_bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-			_immersive_bar.offset_left = -bar_width * 0.5
-			_immersive_bar.offset_right = bar_width * 0.5
-			_immersive_bar.offset_top = -64.0
-			_immersive_bar.offset_bottom = -16.0
-
-
 func _build_topbar() -> Control:
 	var bar := PlaygroundUI.panel(Color(1, 1, 1, 0.76), 24, PlaygroundUI.mix(accent, Color.WHITE, 0.6), 1)
 	var metrics := PlaygroundUI.layout_metrics(get_viewport_rect().size)
@@ -178,9 +269,8 @@ func _build_topbar() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	bar.add_child(row)
-	var back := PlaygroundUI.icon_button("←", accent, _handle_back, "返回")
-	back.custom_minimum_size = Vector2(52, 48)
-	back.add_theme_font_size_override("font_size", 24)
+	var back := PlaygroundUI.semantic_icon_button("back", "返回", accent, _handle_back, "soft", 18)
+	back.custom_minimum_size = Vector2(92, 48)
 	row.add_child(back)
 	var title_box := VBoxContainer.new()
 	title_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -195,12 +285,8 @@ func _build_topbar() -> Control:
 	if compact and GameTuning.supports(game_id):
 		row.add_child(PlaygroundUI.chip(GameTuning.label(difficulty), accent))
 	_extra_topbar_actions(row)
-	var fullscreen := PlaygroundUI.button("全屏", accent, func(): set_immersive(true), "soft")
-	fullscreen.custom_minimum_size = Vector2(64, 48)
-	fullscreen.add_theme_font_size_override("font_size", 16)
-	row.add_child(fullscreen)
-	var pause := PlaygroundUI.button("Ⅱ  暂停", accent, toggle_pause, "soft")
-	pause.custom_minimum_size = Vector2(108, 48)
+	var pause := PlaygroundUI.semantic_icon_button("pause", "暂停", accent, toggle_pause, "soft", 18)
+	pause.custom_minimum_size = Vector2(92, 48)
 	row.add_child(pause)
 	return bar
 
@@ -213,91 +299,13 @@ func show_game_rules() -> void:
 	show_help()
 
 
-func set_immersive(value: bool) -> void:
-	if immersive == value:
-		return
-	immersive = value
-	if topbar != null and is_instance_valid(topbar):
-		topbar.visible = not value
-	if lesson_banner != null and is_instance_valid(lesson_banner):
-		lesson_banner.visible = lesson_visible and not value
-	if _immersive_bar != null and is_instance_valid(_immersive_bar):
-		_immersive_bar.visible = false
-	_immersive_controls_generation += 1
-	_immersive_tap_times.clear()
-	if layout_root != null:
-		layout_root.add_theme_constant_override("separation", 6 if value else 12)
-	_on_immersive_changed(value)
-	checkpoint("进入沉浸模式" if value else "退出沉浸模式")
-	AudioFX.play("tap")
-
-
 func _on_immersive_changed(_value: bool) -> void:
 	pass
 
 
-func _show_immersive_controls() -> void:
-	if not immersive or _immersive_bar == null or not is_instance_valid(_immersive_bar):
-		return
-	_immersive_controls_generation += 1
-	var generation := _immersive_controls_generation
-	_layout_immersive_controls()
-	_immersive_bar.visible = true
-	_immersive_bar.modulate.a = 1.0
-	await get_tree().create_timer(4.0).timeout
-	if generation == _immersive_controls_generation and immersive and is_instance_valid(_immersive_bar):
-		_immersive_bar.visible = false
-		_clear_overlay_seat_if_idle()
-
-
 func _clear_overlay_seat_if_idle() -> void:
-	if _modal_stack.is_empty() and (not is_instance_valid(_immersive_bar) or not _immersive_bar.visible):
+	if _modal_stack.is_empty():
 		_interaction_seat = -1
-
-
-func _notice_immersive_tap(position: Vector2) -> void:
-	if not immersive:
-		return
-	if not _blank_at(position):
-		_immersive_tap_times.clear()
-		return
-	var now := Time.get_ticks_msec()
-	if _immersive_tap_times.is_empty() or position.distance_to(_immersive_tap_position) > 56.0:
-		_immersive_tap_times.clear()
-		_immersive_tap_position = position
-	_immersive_tap_times = _immersive_tap_times.filter(func(stamp: int) -> bool: return now - stamp <= 720)
-	_immersive_tap_times.append(now)
-	if _immersive_tap_times.size() >= 3:
-		_immersive_tap_times.clear()
-		_interaction_seat = 0 if position.x < get_viewport_rect().size.x * 0.5 else 1
-		_show_immersive_controls()
-
-
-func _blank_at(position: Vector2) -> bool:
-	if not _modal_stack.is_empty():
-		return false
-	for control in find_children("*", "Control", true, false):
-		if not control.is_visible_in_tree():
-			continue
-		var local: Vector2 = control.get_global_transform_with_canvas().affine_inverse() * position
-		if not Rect2(Vector2.ZERO, control.size).has_point(local):
-			continue
-		if control is BaseButton:
-			return false
-		if control.has_method("is_blank_at") and not bool(control.call("is_blank_at", local)):
-			return false
-	return true
-
-
-func _input(event: InputEvent) -> void:
-	if not immersive:
-		return
-	if event is InputEventScreenTouch and not event.pressed:
-		_last_touch_msec = Time.get_ticks_msec()
-		_notice_immersive_tap(event.position)
-	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
-		if Time.get_ticks_msec() - _last_touch_msec > 500:
-			_notice_immersive_tap(event.position)
 
 
 func _player_pill(player: Dictionary, first: bool) -> Control:
@@ -307,7 +315,7 @@ func _player_pill(player: Dictionary, first: bool) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
 	pill.add_child(row)
-	var avatar := PlaygroundUI.label(str(player.get("avatar", "🦊")), 28, tint, 700)
+	var avatar := ArtLibrary.profile_picture(player, Vector2(34, 34))
 	row.add_child(avatar)
 	var text := VBoxContainer.new()
 	text.add_theme_constant_override("separation", 0)
@@ -324,59 +332,146 @@ func set_content(node: Control) -> void:
 
 
 func show_help() -> void:
-	if face_to_face() and has_method("_show_rules"):
-		call("_show_rules")
-		return
+	if not paused:
+		_open_pause_tools()
 	var content := VBoxContainer.new()
-	content.add_theme_constant_override("separation", 12)
-	for index in ContentDB.guide(game_id).size():
+	content.add_theme_constant_override("separation", 14)
+	var guide := ContentDB.guide(game_id)
+	var icons := ["play", "next", "check", "hint"]
+	for index in guide.size():
 		var line := HBoxContainer.new()
-		line.add_theme_constant_override("separation", 10)
-		var number := PlaygroundUI.chip(str(index + 1), accent)
-		number.custom_minimum_size = Vector2(42, 38)
-		line.add_child(number)
-		var text := PlaygroundUI.label(str(ContentDB.guide(game_id)[index]), 18, PlaygroundUI.INK_SOFT, 500, true)
+		line.add_theme_constant_override("separation", 14)
+		var image := ArtLibrary.semantic_picture(str(icons[mini(index, icons.size() - 1)]), "ui", Vector2(44, 44))
+		line.add_child(image)
+		var text := PlaygroundUI.label(str(guide[index]), 20, PlaygroundUI.INK if index < 3 else PlaygroundUI.INK_SOFT, 600 if index < 3 else 500, true)
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		line.add_child(text)
 		content.add_child(line)
+	var spoken_guide := PackedStringArray()
+	for line in guide:
+		spoken_guide.append(str(line))
 	Speech.speak("%s玩法。%s" % [
 		str(game_meta.get("title", "小游戏")),
-		" ".join(ContentDB.guide(game_id)),
+		" ".join(spoken_guide),
 	])
 	var actions := [
-		{"text": "再读一遍", "kind": "soft", "callback": func(): Speech.repeat()},
-		{"text": "知道啦", "kind": "primary", "callback": func(): _close_top_modal()},
+		{"text": "再读一遍", "icon": "repeat", "kind": "soft", "callback": func(): Speech.repeat()},
+		{"text": "知道了", "icon": "check", "kind": "primary", "callback": func(): _close_top_modal()},
 	]
-	actions.insert(0, {"text": "重玩小课堂", "kind": "soft", "callback": func(): _close_top_modal(); begin_lesson(true)})
+	actions.insert(0, {"text": "三步小课堂", "icon": "play", "kind": "soft", "callback": func(): _close_top_modal(); begin_lesson(true)})
+	if has_method("_show_rules"):
+		actions.insert(1, {"text": "更多规则", "icon": "rules", "kind": "soft", "callback": func(): call("_show_rules")})
 	open_modal("怎么玩", content, actions, "小玩家指南")
 
 
 func toggle_pause(force: Variant = null) -> void:
-	if _modal_stack.size() > 0 and force == null:
-		_close_top_modal()
-		return
-	paused = not paused if force == null else bool(force)
-	checkpoint("暂停游戏" if paused else "继续游戏")
+	var target := not paused if force == null else bool(force)
+	if target:
+		if paused:
+			return
+		_open_pause_tools()
+	else:
+		if not paused:
+			return
+		_close_pause_tools()
+
+
+func _open_pause_tools() -> void:
 	if paused:
-		lesson_action("pause")
-	AudioFX.play("pause" if paused else "tap")
+		return
+	_pause_origin_seat = _interaction_seat
+	if _pause_origin_seat < 0 and _last_actor_seat >= 0:
+		_pause_origin_seat = _last_actor_seat
+	if _pause_origin_seat < 0:
+		_pause_origin_seat = _current_seat()
+	_interaction_seat = _pause_origin_seat
+	checkpoint("暂停游戏")
+	lesson_action("pause")
+	paused = true
 	Speech.stop()
-	pause_changed.emit(paused)
-	MotionKit.set_paused_tree(self, paused)
+	AudioFX.stop_all()
+	_rail_press.clear()
+	MotionKit.set_paused_tree(self, true)
+	pause_changed.emit(true)
+	AudioFX.play("pause")
+	var panel := VBoxContainer.new()
+	panel.add_theme_constant_override("separation", 12)
+	var saved := HBoxContainer.new()
+	saved.add_theme_constant_override("separation", 9)
+	saved.add_child(ArtLibrary.semantic_picture("check", "ui", Vector2(26, 26)))
+	saved.add_child(PlaygroundUI.label(
+		"已保存，可以放心休息" if not _resume_on_start else "已接着上次进度，准备好再继续",
+		16,
+		PlaygroundUI.INK_SOFT,
+		600,
+		true
+	))
+	panel.add_child(saved)
+	var summary := PlaygroundUI.panel(PlaygroundUI.mix(accent, Color.WHITE, 0.88), 18, PlaygroundUI.mix(accent, Color.WHITE, 0.5), 1)
+	var summary_row := HBoxContainer.new()
+	summary_row.add_theme_constant_override("separation", 10)
+	summary_row.add_child(ArtLibrary.semantic_picture("pause", "ui", Vector2(34, 34)))
+	var summary_text := PlaygroundUI.label(
+		"%s · %s" % [
+			str(game_meta.get("title", "小游戏")),
+			str(ContentDB.mode(game_id, mode_id).get("name", "正在玩")),
+		],
+		18,
+		PlaygroundUI.INK,
+		700,
+		true
+	)
+	summary_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	summary_row.add_child(summary_text)
+	summary.add_child(summary_row)
+	panel.add_child(summary)
+	var actions := [
+		{"text": "继续游戏", "icon": "play", "kind": "primary", "callback": func(): _close_top_modal()},
+		{"text": "怎么玩", "icon": "rules", "kind": "soft", "callback": func(): show_help()},
+		{"text": "声音与朗读", "icon": "sound", "kind": "soft", "callback": func(): _show_settings()},
+	]
+	actions.append_array(_extra_pause_actions())
+	actions.append_array([
+		{"text": "重开本局", "icon": "restart", "kind": "soft", "callback": func(): _confirm_restart()},
+		{"text": "回游戏大厅", "icon": "home", "kind": "soft", "callback": func(): _confirm_exit()},
+	])
+	_pause_root_layer = open_modal("暂停一下", panel, actions, "轻点两侧纸边也可以打开这里", false)
+	_pause_root_layer.set_meta("pause_root", true)
+	_pause_root_layer.set_meta("pause_seat", _pause_origin_seat)
+	_layout_pause_rails()
+
+
+func _extra_pause_actions() -> Array:
+	return []
+
+
+func _close_pause_tools() -> void:
+	if not is_instance_valid(_pause_root_layer):
+		_resume_after_pause()
+		return
+	var manager := _dialog_manager()
+	if manager != null and manager.owns_layer(_pause_root_layer):
+		while manager.has_open_dialog() and manager.top_layer() != _pause_root_layer:
+			manager.close_top()
+		manager.close_layer(_pause_root_layer)
+		return
+	_close_top_modal()
+
+
+func _resume_after_pause() -> void:
 	if not paused:
 		return
-	var panel := VBoxContainer.new()
-	panel.add_theme_constant_override("separation", 10)
-	panel.add_child(PlaygroundUI.label("进度已经自动保存", 15, PlaygroundUI.INK_SOFT, 500, true))
-	var actions := [
-		{"text": "继续游戏", "kind": "primary", "callback": func(): _close_top_modal(); toggle_pause(false)},
-		{"text": "看玩法", "kind": "soft", "callback": func(): _close_top_modal(); show_help()},
-		{"text": "声音与朗读", "kind": "soft", "callback": func(): _close_top_modal(); _show_settings()},
-		{"text": "重开本局", "kind": "soft", "callback": func(): _confirm_restart()},
-		{"text": "回游戏大厅", "kind": "soft", "callback": func(): _confirm_exit()},
-	]
-	var pause_layer := open_modal("暂停一下", panel, actions, "随时可以回来", false)
-	pause_layer.set_meta("resume_on_back", true)
+	paused = false
+	_suppress_resume_on_close = false
+	_pause_root_layer = null
+	_pause_origin_seat = -1
+	_interaction_seat = -1
+	_resume_on_start = false
+	checkpoint("继续游戏")
+	MotionKit.set_paused_tree(self, false)
+	pause_changed.emit(false)
+	AudioFX.play("tap")
+	_layout_pause_rails()
 
 
 func _show_settings() -> void:
@@ -384,19 +479,19 @@ func _show_settings() -> void:
 	box.add_theme_constant_override("separation", 10)
 	var settings := SaveStore.settings()
 	var buttons := [
-		{"icon": "🔊", "label": "音效", "key": "soundOn"},
-		{"icon": "🎹", "label": "音乐", "key": "musicOn"},
-		{"icon": "🎤", "label": "中文朗读", "key": "speechOn"},
-		{"icon": "✋", "label": "触感", "key": "hapticsOn"},
+		{"icon": "sound", "label": "音效", "key": "soundOn"},
+		{"icon": "music", "label": "音乐", "key": "musicOn"},
+		{"icon": "speech", "label": "中文朗读", "key": "speechOn"},
+		{"icon": "haptics", "label": "触感", "key": "hapticsOn"},
 	]
 	for entry in buttons:
 		var key := str(entry["key"])
 		var state := "开" if bool(settings.get(key, true)) else "关"
-		box.add_child(PlaygroundUI.icon_text_button(str(entry["icon"]), "%s：%s" % [str(entry["label"]), state], accent, _toggle_setting.bind(key), "soft"))
+		box.add_child(PlaygroundUI.semantic_icon_button(str(entry["icon"]), "%s：%s" % [str(entry["label"]), state], accent, _toggle_setting.bind(key), "soft"))
 	box.add_child(volume_controls(accent))
 	open_modal("声音与朗读", box, [
-		{"text": "关掉窗口", "kind": "primary", "callback": func(): _close_top_modal()},
-	], "三项都可以随时切换")
+		{"text": "回到暂停", "icon": "back", "kind": "primary", "callback": func(): _close_top_modal()},
+	], "开关会立即生效")
 
 
 static func volume_controls(tint: Color) -> Control:
@@ -442,12 +537,6 @@ func open_modal(
 	dismissible: bool = true
 ) -> Control:
 	var angle := _overlay_angle()
-	var contains_board := content.has_method("position_for")
-	for child in content.find_children("*", "Control", true, false):
-		if child.has_method("position_for"):
-			contains_board = true
-	if contains_board:
-		angle = 0.0
 	var manager := _dialog_manager()
 	if manager != null:
 		if not manager.dialog_closed.is_connected(_on_dialog_closed):
@@ -464,6 +553,7 @@ func open_modal(
 			"facing_angle": angle,
 		})
 		_modal_stack.append(layer)
+		_layout_pause_rails()
 		return layer
 	return _open_modal_fallback(title, content, actions, eyebrow, dismissible, angle)
 
@@ -529,12 +619,24 @@ func _open_modal_fallback(
 	actions_row.alignment = FlowContainer.ALIGNMENT_END
 	actions_row.add_theme_constant_override("separation", 10)
 	for action in actions:
-		var button := PlaygroundUI.button(
-			str(action.get("text", "好")),
-			accent,
-			action.get("callback", Callable()),
-			str(action.get("kind", "primary"))
-		)
+		var kind := str(action.get("kind", "primary"))
+		var button: Button
+		if action.has("icon"):
+			button = PlaygroundUI.semantic_icon_button(
+				str(action["icon"]),
+				str(action.get("text", "好")),
+				accent,
+				action.get("callback", Callable()),
+				kind,
+				22
+			)
+		else:
+			button = PlaygroundUI.button(
+				str(action.get("text", "好")),
+				accent,
+				action.get("callback", Callable()),
+				kind
+			)
 		button.custom_minimum_size.x = 132
 		actions_row.add_child(button)
 	column.add_child(actions_row)
@@ -568,7 +670,12 @@ func _close_top_modal() -> void:
 
 func _on_dialog_closed(layer: Control) -> void:
 	_modal_stack.erase(layer)
+	if layer == _pause_root_layer:
+		_pause_root_layer = null
+		if paused and not _suppress_resume_on_close:
+			_resume_after_pause()
 	call_deferred("_clear_overlay_seat_if_idle")
+	call_deferred("_layout_pause_rails")
 
 
 func _exit_tree() -> void:
@@ -581,59 +688,64 @@ func _exit_tree() -> void:
 
 
 func _confirm_restart() -> void:
-	_close_top_modal()
 	var text := PlaygroundUI.label("这局当前进度会被清空，重新开始。儿童档案和已获得成绩会保留。", 18, PlaygroundUI.INK_SOFT, 500, true)
 	var restart_action := func():
-		_close_top_modal()
+		_suppress_resume_on_close = true
+		_close_all_game_dialogs()
 		paused = false
+		_pause_root_layer = null
+		MotionKit.set_paused_tree(self, false)
 		pause_changed.emit(false)
 		restart_requested.emit()
 	open_modal("重开本局？", text, [
-		{"text": "继续这局", "kind": "soft", "callback": func(): _close_top_modal()},
-		{"text": "重新开始", "kind": "primary", "callback": restart_action},
+		{"text": "继续这局", "icon": "back", "kind": "soft", "callback": func(): _close_top_modal()},
+		{"text": "重新开始", "icon": "restart", "kind": "primary", "callback": restart_action},
 	], "当前游戏")
 
 
 func _confirm_exit() -> void:
 	checkpoint("返回大厅前保存")
-	_close_top_modal()
 	var text := PlaygroundUI.label("当前进度已经保存。回大厅后可以从游戏卡片继续。", 18, PlaygroundUI.INK_SOFT, 500, true)
 	var back_action := func():
 		SaveStore.flush()
 		Speech.stop()
 		AudioFX.stop_music()
+		_suppress_resume_on_close = true
+		_close_all_game_dialogs()
 		back_requested.emit()
 	open_modal("回游戏大厅？", text, [
-		{"text": "留在这里", "kind": "soft", "callback": func(): _close_top_modal()},
-		{"text": "回大厅", "kind": "primary", "callback": back_action},
+		{"text": "留在这里", "icon": "back", "kind": "soft", "callback": func(): _close_top_modal()},
+		{"text": "回大厅", "icon": "home", "kind": "primary", "callback": back_action},
 	], "进度已保存")
 
 
+func _close_all_game_dialogs() -> void:
+	var manager := _dialog_manager()
+	if manager != null:
+		for layer in _modal_stack.duplicate():
+			if manager.owns_layer(layer):
+				manager.close_layer(layer)
+	_modal_stack.clear()
+	_pause_root_layer = null
+
+
 func _handle_back() -> void:
-	if _modal_stack.is_empty():
-		_interaction_seat = -1
 	var manager := _dialog_manager()
 	if manager != null and manager.has_open_dialog():
 		var top := manager.top_layer()
-		if top in _modal_stack and bool(top.get_meta("resume_on_back", false)):
-			manager.close_layer(top)
-			toggle_pause(false)
-		else:
-			manager.close_layer(top, true)
+		if top in _modal_stack:
+			if bool(top.get_meta("pause_root", false)):
+				_close_pause_tools()
+			else:
+				manager.close_layer(top, true)
 		return
 	if not _modal_stack.is_empty():
 		var top: Control = _modal_stack.back()
-		if bool(top.get_meta("resume_on_back", false)):
+		if bool(top.get_meta("dismissible", true)):
 			_close_top_modal()
-			toggle_pause(false)
-		elif bool(top.get_meta("dismissible", true)):
-			_close_top_modal()
-		return
-	if immersive:
-		set_immersive(false)
 		return
 	if paused:
-		toggle_pause(false)
+		_close_pause_tools()
 		return
 	toggle_pause(true)
 
@@ -648,15 +760,17 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func show_toast(message: String, seconds: float = 2.4) -> void:
+	if _toast_tween != null and is_instance_valid(_toast_tween):
+		_toast_tween.kill()
 	TabletopLayout.layout_canvas(_toast_canvas, get_viewport_rect().size, TabletopLayout.facing_angle(_current_seat(), face_to_face()))
 	toast_label.text = message
 	toast_label.size = toast_label.get_minimum_size()
 	var toast_y := _toast_canvas.size.y - toast_label.size.y - 24.0 if face_to_face() else 24.0
 	toast_label.position = Vector2((_toast_canvas.size.x - toast_label.size.x) * 0.5, toast_y)
 	toast_label.modulate.a = 1.0
-	var tween := MotionKit.tween(self)
-	tween.tween_interval(seconds)
-	tween.tween_property(toast_label, "modulate:a", 0.0, 0.25)
+	_toast_tween = MotionKit.tween(self)
+	_toast_tween.tween_interval(seconds)
+	_toast_tween.tween_property(toast_label, "modulate:a", 0.0, 0.25)
 
 
 func add_saved_meta(note: String, resume: bool = true) -> void:
@@ -686,6 +800,8 @@ func _notification(what: int) -> void:
 		checkpoint("切后台保存")
 		Speech.stop()
 		AudioFX.stop_all()
+		if not paused:
+			call_deferred("toggle_pause", true)
 
 
 func level_map(on_chosen: Callable) -> Control:
@@ -702,7 +818,8 @@ func level_map(on_chosen: Callable) -> Control:
 		var number := int(entry.id)
 		var unlocked := SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id)
 		var stars := clampi(int(SaveStore.learning(str(players[0].id),game_id,mode_id).stars.get(str(number),0)),0,3)
-		var button := PlaygroundUI.button("%s\n%s\n%s" % [str(number) if unlocked else "锁", str(entry.title), "★".repeat(stars) + "☆".repeat(3-stars)], accent, on_chosen.bind(number), "soft")
+		var state_text := "尚未解锁" if not unlocked else "已获 %s / 3 星" % stars
+		var button := PlaygroundUI.button("%s\n%s\n%s" % [str(number) if unlocked else "锁", str(entry.title), state_text], accent, on_chosen.bind(number), "soft")
 		button.custom_minimum_size = Vector2(0, 136)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.disabled = not unlocked
@@ -716,40 +833,66 @@ func begin_lesson(force: bool = false) -> void:
 		return
 	if not force:
 		return
-	if immersive:
-		set_immersive(false)
-	if not force and bool(SaveStore.learning(str(players[0].id),game_id,mode_id).tutorialSeen):
-		return
+	if not paused:
+		_open_pause_tools()
 	lesson_step = 0
+	var icon_names: Array[String] = []
 	if game_id in ["math","pinyin","patterns","animals","workbook"]:
 		lesson_actions = ["listen","answer","next"]
 		lesson_texts = ["点听题，听听这一题在问什么。","点一个答案，看看正确答案与讲解。","读完讲解，再点下面的下一题。"]
+		icon_names = ["listen","next","check"]
 	elif game_id == "military":
 		lesson_actions = ["select","move","pause"]
-		lesson_texts = ["双方棋子全部明示，红方先走。","点自己的棋子，再点亮起的位置移动。","点暂停，军棋会自动保存，回来继续。"]
+		lesson_texts = ["双方棋子全部明示，红方先走。","点自己的棋子，再点亮起的位置移动。","两边都会显示可攻击结果，战斗后仍会留在棋盘上。"]
+		icon_names = ["game","next","hint"]
 	elif game_id == "sudoku":
 		lesson_actions = ["select","move","pause"]
-		lesson_texts = ["先点一个空格。","再点下面的数字。","每行每列和小宫都不能重复，进度会自动保存。"]
+		lesson_texts = ["先点一个空格。","再点右边的数字。","每行每列和小宫都不能重复，重复处会一起圈出。"]
+		icon_names = ["next","erase","hint"]
 	elif game_id == "chess":
 		lesson_actions = ["select","move","pause"]
-		lesson_texts = ["红方先走，点自己的棋子。","点发光的交叉点走棋；炮要隔一颗棋子才能吃子。","吃掉对方将帅就获胜，进度会自动保存。"]
+		lesson_texts = ["红方先走，点自己的棋子。","按住目标先预览，松手确认，滑开取消。","马腿、象眼、炮架等阻挡原因会留在棋盘上。"]
+		icon_names = ["game","next","hint"]
 	elif game_id in ["jungle","gomoku"]:
 		lesson_actions = ["select","move","pause"]
-		lesson_texts = ["点一枚自己的棋子；五子棋请按住空交叉点。","点亮起的位置，走出第一步。","试试上方暂停按钮，进度会自动保存。"]
+		lesson_texts = ["点一枚自己的棋子；五子棋请按住空交叉点。","按住目标先预览，松手确认，滑开取消。","轻点两侧纸边，打开暂停和规则。"]
+		icon_names = ["game","next","pause"]
 	elif game_id == "memory":
 		lesson_actions = ["flip","pair","pause"]
 		lesson_texts = ["点一张卡，把它翻过来。","再翻一张，记住两张图案的位置。","点暂停，回来还会停在这一局。"]
+		icon_names = ["game","search","pause"]
 	elif game_id == "poetry":
 		lesson_actions = ["draw","evaluate","next"]
 		lesson_texts = ["请家长拿好平板，点抽一首。","让孩子背对屏幕，背完后选择背对了或再复习。","原诗会留下，点下一首才继续。"]
+		icon_names = ["poem","speech","next"]
 	elif game_id == "stories":
 		lesson_actions = ["open_story","listen","pause"]
-		lesson_texts = ["选一个故事，翻开故事书。","点听故事；第一次需要联网下载，下载后就能离线听。","试试暂停，回来可以接着上次的位置听。"]
+		lesson_texts = ["选一个故事，翻开故事书。","点系统朗读开始听；没有点播放时不会自动开口。","轻点两侧纸边暂停，回来会从当前段落接着读。"]
+		icon_names = ["story","speech","pause"]
 	else:
 		lesson_actions = ["roll","answer","pause"]
 		lesson_texts = ["点掷骰子，看看角色走到哪里。","遇到题目慢慢答，讲解会留下。","试试暂停，回来继续本次冒险。"]
-	lesson_visible = true
-	_show_lesson_step()
+		icon_names = ["game","next","pause"]
+	var body := VBoxContainer.new()
+	body.add_theme_constant_override("separation", 12)
+	for index in lesson_texts.size():
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 12)
+		row.add_child(ArtLibrary.semantic_picture(icon_names[index], "ui", Vector2(38, 38)))
+		var copy := VBoxContainer.new()
+		copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		copy.add_child(PlaygroundUI.label("第 %s 步" % (index + 1), 15, accent, 700))
+		copy.add_child(PlaygroundUI.label(str(lesson_texts[index]), 20, PlaygroundUI.INK, 600, true))
+		row.add_child(copy)
+		body.add_child(row)
+	var spoken_steps := PackedStringArray()
+	for step in lesson_texts:
+		spoken_steps.append(str(step))
+	Speech.speak("小课堂。 %s" % " ".join(spoken_steps))
+	open_modal("怎么玩", body, [
+		{"text": "再读一遍", "icon": "repeat", "kind": "soft", "callback": func(): Speech.repeat()},
+		{"text": "开始试玩", "icon": "play", "kind": "primary", "callback": func(): _finish_lesson(); _close_top_modal()},
+	], "三步就能开始")
 
 
 func lesson_action(action: String) -> void:

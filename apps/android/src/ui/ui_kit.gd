@@ -285,7 +285,7 @@ static func icon_asset_button(icon_token: String, tint: Color, on_pressed: Calla
 	var node := button("", tint, on_pressed, "soft")
 	node.custom_minimum_size = Vector2(52, 52)
 	node.tooltip_text = tooltip
-	var icon := ArtLibrary.picture(icon_token, Vector2(28, 28))
+	var icon := ArtLibrary.semantic_picture(icon_token, "ui", Vector2(28, 28))
 	icon.name = "ButtonIcon"
 	icon.size = Vector2(28, 28)
 	icon.position = Vector2(12, 12)
@@ -300,7 +300,8 @@ static func icon_asset_button(icon_token: String, tint: Color, on_pressed: Calla
 static func icon_text_button(icon_token: String, text: String, tint: Color, on_pressed: Callable, kind: String = "soft", font_size: int = 19) -> Button:
 	var node := button(text, tint, on_pressed, kind)
 	node.add_theme_font_size_override("font_size", font_size)
-	var icon := ArtLibrary.picture(icon_token, Vector2(28, 28))
+	node.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	var icon := ArtLibrary.semantic_picture(icon_token, "ui", Vector2(28, 28))
 	icon.name = "ButtonIcon"
 	icon.size = Vector2(28, 28)
 	icon.position = Vector2(18, 14)
@@ -309,11 +310,42 @@ static func icon_text_button(icon_token: String, text: String, tint: Color, on_p
 		var box := node.get_theme_stylebox(state)
 		if box is StyleBoxFlat:
 			var copy := box.duplicate() as StyleBoxFlat
-			copy.content_margin_left += 36
+			copy.content_margin_left += 42
+			copy.content_margin_right = maxf(12.0, copy.content_margin_right - 8.0)
 			node.add_theme_stylebox_override(state, copy)
 	node.resized.connect(func():
 		if is_instance_valid(icon):
 			icon.position = Vector2(18, (node.size.y - 28) * 0.5)
+	)
+	return node
+
+
+static func semantic_icon_button(
+	semantic: String,
+	label: String,
+	tint: Color,
+	on_pressed: Callable,
+	kind: String = "soft",
+	font_size: int = 20
+) -> Button:
+	var node := button(label, tint, on_pressed, kind)
+	node.add_theme_font_size_override("font_size", font_size)
+	node.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	var image := ArtLibrary.semantic_picture(semantic, "ui", Vector2(28, 28))
+	image.name = "SemanticIcon"
+	image.size = Vector2(28, 28)
+	image.position = Vector2(16, 14)
+	node.add_child(image)
+	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+		var box := node.get_theme_stylebox(state)
+		if box is StyleBoxFlat:
+			var copy := box.duplicate() as StyleBoxFlat
+			copy.content_margin_left += 42
+			copy.content_margin_right = maxf(12.0, copy.content_margin_right - 8.0)
+			node.add_theme_stylebox_override(state, copy)
+	node.resized.connect(func():
+		if is_instance_valid(image):
+			image.position = Vector2(16, (node.size.y - 28) * 0.5)
 	)
 	return node
 
@@ -388,10 +420,6 @@ static func chip(text: String, accent: Color) -> PanelContainer:
 			icon_token = str(symbol)
 			label_text = text.substr(icon_token.length()).strip_edges()
 			break
-	if not icon_token.is_empty():
-		var icon_node := ArtLibrary.picture(icon_token, Vector2(20, 20))
-		icon_node.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		row.add_child(icon_node)
 	var content := label(label_text, 14, mix(accent, Color.BLACK, 0.25), 700)
 	content.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_theme_constant_override("outline_size", 0)

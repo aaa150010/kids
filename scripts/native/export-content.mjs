@@ -1,5 +1,5 @@
 import { cp, mkdir, readdir, readFile, rm } from 'node:fs/promises'
-import { resolve } from 'node:path'
+import { relative, resolve, sep } from 'node:path'
 
 const root = resolve(import.meta.dirname, '../..')
 const source = resolve(root, 'content-src')
@@ -16,10 +16,16 @@ try {
 } catch (error) {
   if (error.code !== 'ENOENT') throw error
 }
+const legacyRuntimeAssetRoots = new Set(['covers', 'icons', 'kenney', 'jungle'])
+const sourceAssets = resolve(source, 'assets')
 await rm(resolve(target, 'assets'), { recursive: true, force: true })
-await cp(resolve(source, 'assets'), resolve(target, 'assets'), {
+await cp(sourceAssets, resolve(target, 'assets'), {
   recursive: true,
-  filter: path => !excluded.has(path) && !excluded.has(path.replace(/\.import$/, '')),
+  filter: path => {
+    const assetPath = relative(sourceAssets, path)
+    if (assetPath && legacyRuntimeAssetRoots.has(assetPath.split(sep)[0])) return false
+    return !excluded.has(path) && !excluded.has(path.replace(/\.import$/, ''))
+  },
 })
 await cp(resolve(source, 'licenses'), resolve(target, 'assets/licenses'), { recursive: true })
-console.log('已从独立内容源生成安卓题库与资源。')
+console.log('已从独立内容源生成安卓题库与原创运行时资源；旧第三方展示资源不进入 APK。')

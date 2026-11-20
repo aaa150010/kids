@@ -506,7 +506,69 @@ func _position_snapshot() -> Dictionary:
 
 
 func can_select(piece: Dictionary) -> bool:
-	return _own_side(piece, int(state.turn)) and not legal_targets(int(piece.position)).is_empty()
+	return _own_side(piece, int(state.turn))
+
+
+func piece_hint(piece: Dictionary) -> String:
+	match str(piece.get("kind", "")):
+		"chariot": return "车走直线，不能越过棋子"
+		"horse": return "马走日字，先看看马腿有没有被挡住"
+		"cannon": return "炮走直线，吃子时中间恰好隔一枚棋子"
+		"elephant": return "象走田字，不能过河，也不能塞象眼"
+		"advisor": return "士在九宫里斜走一格"
+		"general": return "将帅在九宫里直走一格，不能被将军"
+		"soldier": return "兵卒向前走一格，过河以后也能横着走"
+	return "先点自己的棋子，再点红点或红圈"
+
+
+func in_check(side: int) -> bool:
+	return _in_check(side, state.get("pieces", []))
+
+
+# Explanations reuse the real move generators. They never make a move legal.
+func explain_move(origin: int, destination: int) -> Dictionary:
+	var piece := piece_at(origin)
+	if piece.is_empty():
+		return {"message": "先点自己的棋子，再点亮起的位置", "cells": []}
+	if destination < 0 or destination >= CELLS:
+		return {"message": piece_hint(piece), "cells": [origin]}
+	if destination in legal_targets(origin):
+		return {"message": "松手后走到这里", "cells": [destination]}
+	var occupant := piece_at(destination)
+	if not occupant.is_empty() and int(occupant.side) == int(piece.side):
+		return {"message": "这里是自己的棋子，可以改选它", "cells": [destination]}
+	if destination in _pseudo_targets(origin, state.pieces):
+		return {"message": "这样会让自己的将帅被将军，先保护将帅", "cells": [int(_find_general_in(int(piece.side), state.pieces).get("position", origin))]}
+	var row_delta := _row(destination) - _row(origin)
+	var col_delta := _col(destination) - _col(origin)
+	var kind := str(piece.kind)
+	if kind == "horse" and ((absi(row_delta) == 2 and absi(col_delta) == 1) or (absi(row_delta) == 1 and absi(col_delta) == 2)):
+		var leg := _index(_row(origin) + (signi(row_delta) if absi(row_delta) == 2 else 0), _col(origin) + (signi(col_delta) if absi(col_delta) == 2 else 0))
+		return {"message": "马腿被这枚棋子挡住了", "cells": [leg]}
+	if kind == "elephant" and absi(row_delta) == 2 and absi(col_delta) == 2:
+		var crossed := _row(destination) <= 4 if int(piece.side) == 0 else _row(destination) >= 5
+		if crossed:
+			return {"message": "象不能过河，试试自己这一边", "cells": [destination]}
+		var eye := _index(_row(origin) + int(row_delta / 2), _col(origin) + int(col_delta / 2))
+		return {"message": "象眼被这枚棋子挡住了", "cells": [eye]}
+	if kind in ["chariot", "cannon"] and (row_delta == 0 or col_delta == 0):
+		var between: Array = []
+		var step_row := signi(row_delta)
+		var step_col := signi(col_delta)
+		var row := _row(origin) + step_row
+		var col := _col(origin) + step_col
+		while row != _row(destination) or col != _col(destination):
+			var position := _index(row, col)
+			if not piece_at(position).is_empty():
+				between.append(position)
+			row += step_row
+			col += step_col
+		if kind == "chariot":
+			return {"message": "车的直路被挡住了，不能越过棋子", "cells": between}
+		return {"message": "炮吃子时中间要恰好隔一枚棋子" if not occupant.is_empty() else "炮移动到空位时不能越过棋子", "cells": between if not between.is_empty() else [destination]}
+	if kind in ["advisor", "general"] and not _palace(int(piece.side), _row(destination), _col(destination)):
+		return {"message": "这枚棋子只能在九宫里走", "cells": [destination]}
+	return {"message": piece_hint(piece), "cells": [destination]}
 
 
 func handle_input(action: Dictionary) -> Dictionary:
@@ -516,10 +578,8 @@ func handle_input(action: Dictionary) -> Dictionary:
 		var piece := piece_at(int(action.get("position", -1)))
 		if not _own_side(piece, int(state.turn)):
 			return {"ok": false, "message": "请先选自己的棋子"}
-		if legal_targets(int(piece.position)).is_empty():
-			return {"ok": false, "message": "这枚棋子暂时不能走"}
 		state.selected = int(piece.position)
-		return {"ok": true}
+		return {"ok": true, "message": piece_hint(piece)}
 	if str(action.get("type", "")) == "deselect":
 		state.selected = -1
 		return {"ok": true}
@@ -528,7 +588,8 @@ func handle_input(action: Dictionary) -> Dictionary:
 	var from := int(state.get("selected", -1))
 	var to := int(action.get("to", -1))
 	if from < 0 or not (to in legal_targets(from)):
-		return {"ok": false, "message": "请点亮起的位置"}
+		var explanation := explain_move(from, to)
+		return {"ok": false, "message": explanation.message, "cells": explanation.cells}
 	var moving := piece_at(from)
 	var captured := piece_at(to)
 	var captured_kind := str(captured.get("kind", "")) if not captured.is_empty() else ""
@@ -537,7 +598,7 @@ func handle_input(action: Dictionary) -> Dictionary:
 		"movingId": str(moving.id), "captured": captured.duplicate(true), "before": _position_snapshot(),
 	})
 	state.pieces = _moved_board(from, to, state.pieces)
-	state.lastMove = {"from": from, "to": to}
+	state.lastMove = {"from": from, "to": to, "side": int(state.turn), "kind": str(moving.kind), "captured": captured_kind}
 	state.selected = -1
 	state.moveCount = int(state.moveCount) + 1
 	if captured_kind == "general":

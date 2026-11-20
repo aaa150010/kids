@@ -120,7 +120,11 @@ func _ready() -> void:
 	face.offset_right = -10
 	face.offset_top = 8
 	face.offset_bottom = -8
-	picture = ArtLibrary.picture("",Vector2(60,70))
+	picture = TextureRect.new()
+	picture.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	picture.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	picture.custom_minimum_size = Vector2(60,70)
+	picture.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	picture.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	face.add_child(picture)
 	title = PlaygroundUI.label("",19,PlaygroundUI.INK,700,true)
@@ -146,8 +150,8 @@ func _ready() -> void:
 	var back_copy := VBoxContainer.new()
 	back_copy.alignment = BoxContainer.ALIGNMENT_CENTER
 	back_copy.add_theme_constant_override("separation",4)
-	var mark := PlaygroundUI.label("✦",42,Color("#fff4ce"),700)
-	mark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var mark := ArtLibrary.semantic_picture("game","ui",Vector2(42,42))
+	mark.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	back_copy.add_child(mark)
 	var hint := PlaygroundUI.label("翻一翻",16,Color("#fff5f8"),700)
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -185,7 +189,7 @@ func configure(card: Dictionary) -> void:
 
 func _apply_card() -> void:
 	title.text = str(pending_card.get("name",""))
-	picture.texture = ArtLibrary.texture(str(pending_card.get("emoji","")))
+	picture.texture = ArtLibrary.semantic_texture(str(pending_card.get("name",pending_card.get("id",""))),"memory")
 
 func show_face(value: bool, is_paired: bool, locked: bool, animate: bool = true) -> void:
 	disabled = locked or value or is_paired

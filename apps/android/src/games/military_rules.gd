@@ -383,6 +383,50 @@ func legal_targets(position: int) -> Array:
 	return _movement_targets(position)
 
 
+func piece_hint(piece: Dictionary) -> String:
+	match str(piece.get("kind", "")):
+		"flag": return "军旗守在这里，不能移动；保护好它"
+		"mine": return "地雷不能移动，只有工兵能排雷"
+		"engineer": return "工兵可以排雷，还能沿铁路转弯"
+		"bomb": return "炸弹和碰到的对方棋子会一起退场"
+	return "公路走一格，铁路可直走；行营里的棋子不能被攻击"
+
+
+func explain_move(origin: int, destination: int) -> Dictionary:
+	var piece := piece_at(origin)
+	if piece.is_empty():
+		return {"message": "先点自己的棋子，再点红点或红圈", "cells": []}
+	if str(piece.kind) in ["flag", "mine"]:
+		return {"message": piece_hint(piece), "cells": [origin]}
+	if destination < 0 or destination >= CELLS:
+		return {"message": piece_hint(piece), "cells": [origin]}
+	var target := piece_at(destination)
+	if not target.is_empty() and int(target.side) == int(piece.side):
+		return {"message": "这里是自己的棋子，可以改选它", "cells": [destination]}
+	if not target.is_empty() and destination in CAMPS:
+		return {"message": "行营像保护伞，里面的棋子不能被攻击", "cells": [destination]}
+	if destination in _movement_targets(origin):
+		return engagement_preview(origin, destination)
+	return {"message": "沿连着的公路走一格，或沿没有棋子阻挡的铁路走", "cells": [destination]}
+
+
+func engagement_preview(origin: int, destination: int) -> Dictionary:
+	var attacker := piece_at(origin)
+	var defender := piece_at(destination)
+	if attacker.is_empty() or destination not in _movement_targets(origin):
+		return {"result": "blocked", "message": "这里暂时走不到", "cells": [destination], "icon": "hint"}
+	if defender.is_empty():
+		return {"result": "move", "message": "松手后走到这里", "cells": [destination], "icon": "next"}
+	var result := _resolve_combat(attacker, defender)
+	var message := ""
+	match result:
+		"capture": message = "可以夺取对方军旗"
+		"attacker": message = "%s可以吃掉%s" % [str(NAMES[attacker.kind]), str(NAMES[defender.kind])]
+		"defender": message = "%s会被%s挡住，自己的棋子会退场" % [str(NAMES[attacker.kind]), str(NAMES[defender.kind])]
+		_: message = "%s和%s会一起退场" % [str(NAMES[attacker.kind]), str(NAMES[defender.kind])]
+	return {"result": result, "message": message, "cells": [destination], "icon": "hint" if result in ["defender", "both"] else "check"}
+
+
 func _snapshot_before() -> Dictionary:
 	return {
 		"pieces": state.pieces.duplicate(true),
@@ -459,7 +503,8 @@ func _execute_move(target: int) -> Dictionary:
 	var position := int(state.selected)
 	var piece := piece_at(position)
 	if piece.is_empty() or not (target in _movement_targets(position)):
-		return {"ok": false, "message": "这一步走不了，看看亮起的位置。"}
+		var explanation := explain_move(position, target)
+		return {"ok": false, "message": explanation.message, "cells": explanation.cells}
 	var before := _snapshot_before()
 	var defender := piece_at(target)
 	state.selected = -1
@@ -473,7 +518,7 @@ func _execute_move(target: int) -> Dictionary:
 		state.lastBattle = {
 			"from": position, "to": target,
 			"attacker": str(piece.kind), "defender": str(defender.kind),
-			"result": result,
+			"result": result, "side": int(piece.side),
 		}
 		captured = true
 		match result:
@@ -493,6 +538,7 @@ func _execute_move(target: int) -> Dictionary:
 				_remove_piece(str(defender.id))
 				state.lastMove = {"from": position, "to": target, "captured": defender.duplicate(true)}
 	state.history.append(before)
+	state.lastMove.side = int(piece.side)
 	state.history = state.history.slice(maxi(0, state.history.size() - 30))
 	state.moveCount = int(state.moveCount) + 1
 	state.noCapturePlies = 0 if captured else int(state.noCapturePlies) + 1

@@ -93,6 +93,7 @@ func _build_board() -> void:
 	game_header = header
 	surface = BoardSurface.new()
 	surface.game_id = game_id
+	surface.accent = accent
 	surface.face_to_face = TabletopLayout.enabled(game_id, players, mode_id)
 	surface.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	surface.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -127,8 +128,10 @@ func _player_chip(side: int) -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation",10)
 	panel.add_child(row)
-	var token := str(players[side].get("avatar","🦊")) if side < players.size() else "🎯"
-	row.add_child(ArtLibrary.picture(token,Vector2(46,48)))
+	if side < players.size():
+		row.add_child(ArtLibrary.profile_picture(players[side], Vector2(46, 48)))
+	else:
+		row.add_child(ArtLibrary.semantic_picture("trophy", "ui", Vector2(46, 48)))
 	var copy := VBoxContainer.new()
 	copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	copy.add_theme_constant_override("separation",1)
@@ -164,6 +167,24 @@ func _on_immersive_changed(value: bool) -> void:
 		game_tools.visible = not value
 	if value:
 		_last_immersive_turn = int(engine.state.get("turn", 0)) if not engine.state.is_empty() else -1
+
+
+func _extra_pause_actions() -> Array:
+	var actions: Array = []
+	if mode_id == "puzzle":
+		actions.append({"text":"关卡地图", "icon":"back", "kind":"soft", "callback":func(): _close_pause_tools(); _show_map()})
+		actions.append({"text":"看提示", "icon":"hint", "kind":"soft", "callback":func(): _close_pause_tools(); _hint()})
+	elif game_id == "gomoku":
+		actions.append({"text":"显示手数", "icon":"game", "kind":"soft", "callback":_toggle_numbers_from_pause})
+	actions.append({"text":"悔棋", "icon":"undo", "kind":"soft", "callback":func(): _close_pause_tools(); _request_undo()})
+	return actions
+
+
+func _toggle_numbers_from_pause() -> void:
+	_close_pause_tools()
+	if is_instance_valid(surface):
+		surface.show_numbers = not surface.show_numbers
+		surface.queue_redraw()
 
 
 func _refresh(animate: bool = false) -> void:
@@ -209,12 +230,18 @@ func _cell(position: int) -> void:
 		action.type = "select"
 	var result := engine.handle_input(action)
 	if not bool(result.ok):
+		engine.state.interactionNote = {
+			"message": str(result.get("message", "试试亮起的位置")),
+			"cells": [position] if position >= 0 else [],
+			"side": int(engine.state.get("turn", 0)),
+		}
 		_shake_for_failed(position)
 		SfxMap.play(&"error")
 		FeedbackKit.haptic(15)
-		show_toast(str(result.get("message","试试亮起的位置")))
-		_save("正在思考")
+		_save("正在查看落点原因")
+		_refresh()
 		return
+	engine.state.interactionNote = {}
 	var event := str(result.event)
 	if event == "select":
 		SfxMap.play(&"select")
@@ -222,7 +249,6 @@ func _cell(position: int) -> void:
 		SfxMap.play(&"flip")
 		if bool(result.get("factionAssigned", false)):
 			show_toast("阵营确定：你执%s方！" % ("红" if int(result.get("factionSide", 0)) == 0 else "蓝"), 4)
-			Speech.speak("你的阵营确定了，执%s方。" % ("红" if int(result.get("factionSide", 0)) == 0 else "蓝"))
 	elif not engine.state.get("lastMove",{}).get("captured",{}).is_empty():
 		# 吃子：SfxMap 里没有 whoosh 语义事件，直接用合成音名
 		AudioFX.play("whoosh")
@@ -273,9 +299,13 @@ func _hint() -> void:
 	engine.state.hints = int(engine.state.hints)+1
 	FeedbackKit.haptic(7)
 	var text := str(engine.state.puzzle.get("hint","先看看可走的位置。"))
-	show_toast(text,5)
+	var line: Array = engine.state.puzzle.get("line", [])
+	var cursor := int(engine.state.get("lineIndex", 0))
+	var target := int(line[cursor].get("to", -1)) if cursor >= 0 and cursor < line.size() and line[cursor] is Dictionary else -1
+	engine.state.interactionNote = {"message":text, "cells":[target] if target >= 0 else [], "side":int(engine.state.get("turn",0))}
 	Speech.speak(text)
 	_save("看过提示")
+	_refresh()
 
 
 func _show_rules() -> void:
@@ -360,7 +390,9 @@ func _show_result() -> void:
 			SaveStore.record_outcome(str(players[side].id),game_id,outcome,stars if mode_id == "puzzle" else 1 if outcome == "win" else 0,0,0,{"strategy":{"correct":1 if outcome == "win" else 0,"answered":1}},str(state.get("sessionId","legacy-"+game_id+str(state.moveCount))))
 		_save("本局完成",false)
 	var content := VBoxContainer.new()
-	content.add_child(ArtLibrary.picture("🏆",Vector2(100,100)))
+	var trophy := ArtLibrary.semantic_picture("trophy", "ui", Vector2(100, 100))
+	trophy.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	content.add_child(trophy)
 	content.add_child(PlaygroundUI.label(str(state.reason),25,accent,700,true))
 	content.add_child(PlaygroundUI.label("共走 %s 手，可以回放刚才的棋局。" % state.moveCount,18,PlaygroundUI.INK_SOFT,500,true))
 	var actions: Array = [{"text":"棋谱回放","kind":"soft","callback":func(): _close_top_modal(); _show_replay()}]
@@ -374,7 +406,6 @@ func _show_result() -> void:
 	else:
 		SfxMap.play(&"win")
 	FeedbackKit.haptic(14)
-	Speech.speak(str(state.reason))
 
 func _show_replay() -> void:
 	if engine.state.is_empty():
@@ -408,7 +439,6 @@ func _save(note: String, resume: bool = true) -> void:
 	SaveStore.save_state(game_id,str(players[0].id),engine.snapshot(),note,resume and (engine.state.phase == "playing" or view == "map"))
 
 func _confirm_restart() -> void:
-	_close_top_modal()
 	open_modal("重新开始？",PlaygroundUI.label("当前棋局重新开始，已经完成的关卡和其他游戏会保留。",20,PlaygroundUI.INK_SOFT,500,true),[
 		{"text":"继续这局","kind":"soft","callback":func(): _close_top_modal()},
 		{"text":"重新开始","kind":"primary","callback":func(): _close_top_modal(); toggle_pause(false); _create(level_id); _refresh()},
@@ -424,11 +454,3 @@ func _process(delta: float) -> void:
 		if is_instance_valid(surface) and surface.motion >= 0.999:
 			_fixed_reply()
 		return
-	_idle_seconds += delta
-	var hint_seconds := int(GameTuning.value(game_id,difficulty,"hintSeconds",18))
-	if hint_seconds > 0 and not bool(engine.state.get("autoHintShown",false)) and mode_id == "puzzle" and _idle_seconds >= hint_seconds:
-		engine.state.autoHintShown = true
-		var text := str(engine.state.get("puzzle",{}).get("hint","再看看目标，试试另一处。"))
-		show_toast(text,4)
-		Speech.speak(text)
-		_save("自动提示")

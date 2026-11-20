@@ -14,13 +14,18 @@ var face_to_face := false
 var _touch_index := -1
 var _touch_guard_msec := -1000
 var _clock := 0.0
+var _touch_pressed := false
+var _pressed_cell := -1
+var _preview_cell := -1
+var _press_seat := 0
+var notice: Dictionary = {}
 
-const BOARD_BG := Color("#0d1a13")
-const BOARD_SURFACE := Color("#182a20")
-const BOARD_CELL := Color("#20362a")
-const BOARD_CELL_BORDER := Color(0.55, 0.58, 0.46, 0.32)
-const BOARD_BRASS := Color("#c2a767")
-const BOARD_BRASS_SOFT := Color(0.76, 0.66, 0.42, 0.42)
+const BOARD_BG := Color("#5b63b2")
+const BOARD_SURFACE := Color("#fbf3df")
+const BOARD_CELL := Color("#fffaf0")
+const BOARD_CELL_BORDER := Color("#c8bca7")
+const BOARD_BRASS := Color("#8a6d42")
+const BOARD_BRASS_SOFT := Color(0.52, 0.43, 0.28, 0.38)
 const TOKEN_PAPER := Color("#f3ead6")
 const TOKEN_INK := Color("#24271f")
 const TOKEN_RED := Color("#b43a33")
@@ -41,12 +46,18 @@ func update_board(value: MilitaryRules, side: int, selected_position: int, legal
 	selected = selected_position
 	targets = legal.duplicate()
 	reveal_all = reveal
-	set_process(selected >= 0)
+	notice = value.state.get("interactionNote", {}).duplicate(true) if value.state.get("interactionNote", {}) is Dictionary else {}
+	if not interactive:
+		_cancel_press()
+	set_process(selected >= 0 or _touch_pressed)
 	queue_redraw()
 
 
 func _process(delta: float) -> void:
 	_clock += delta
+	if not interactive or TabletopLayout.input_blocked(self):
+		_cancel_press()
+		return
 	queue_redraw()
 
 
@@ -133,6 +144,7 @@ func _draw() -> void:
 	for piece in pieces:
 		_draw_piece(piece, gap_x, gap_y)
 	_draw_move_hints(gap_x, gap_y)
+	_draw_board_feedback(unit)
 	if rules != null and rules.state.get("phase", "") == "finished":
 		var panel := Rect2(size.x * 0.26, size.y * 0.43, size.x * 0.48, size.y * 0.14)
 		draw_style_box(PlaygroundUI.style(Color("#f3ead6"), 22, BOARD_BRASS, 2, 6, Color(0, 0, 0, 0.35)), panel)
@@ -140,17 +152,14 @@ func _draw() -> void:
 
 
 func _draw_board_frame() -> void:
-	draw_style_box(PlaygroundUI.style(BOARD_BG, 30, Color("#314536"), 2, 8, Color(0, 0, 0, 0.24)), Rect2(Vector2.ZERO, size))
+	draw_style_box(PlaygroundUI.style(BOARD_BG, 30, Color("#414a93"), 2, 8, Color(0, 0, 0, 0.20)), Rect2(Vector2.ZERO, size))
 	var inner := Rect2(Vector2(8, 8), size - Vector2(16, 16))
 	draw_style_box(PlaygroundUI.style(BOARD_SURFACE, 24, BOARD_BRASS_SOFT, 1), inner)
 	var field := Rect2(Vector2(14, 14), size - Vector2(28, 28))
-	draw_style_box(PlaygroundUI.style(Color("#15261d"), 20, Color(0.72, 0.61, 0.37, 0.22), 1), field)
-	var center := size * 0.5
-	for index in 3:
-		draw_arc(center, float(index + 1) * minf(size.x, size.y) * 0.115, 0, TAU, 80, Color(0.75, 0.64, 0.40, 0.055), 1.0, true)
+	draw_style_box(PlaygroundUI.style(Color("#f6ead2"), 20, Color(0.52, 0.43, 0.28, 0.22), 1), field)
 	var midline_x := position_for(MilitaryRules.MIDLINE * MilitaryRules.COLS).x
-	draw_rect(Rect2(midline_x - 3.0, 16.0, 6.0, size.y - 32.0), Color(0.08, 0.15, 0.11, 0.38))
-	draw_line(Vector2(midline_x, 18.0), Vector2(midline_x, size.y - 18.0), Color(0.76, 0.66, 0.42, 0.16), 1.0)
+	draw_rect(Rect2(midline_x - 4.0, 16.0, 8.0, size.y - 32.0), Color(0.35, 0.38, 0.69, 0.16))
+	draw_line(Vector2(midline_x, 18.0), Vector2(midline_x, size.y - 18.0), BOARD_BRASS_SOFT, 1.0)
 
 
 func _draw_place_name(value: String, index: int, center: Vector2, font_size: float, tint: Color) -> void:
@@ -172,9 +181,9 @@ func _draw_roads(gap: float) -> void:
 				if drawn.has(key):
 					continue
 				drawn[key] = true
-				draw_line(position_for(first), position_for(second), Color("#0b1510"), maxf(5.0, gap * 0.080), true)
-				draw_line(position_for(first), position_for(second), Color("#b49a5b"), maxf(2.0, gap * 0.030), true)
-				draw_line(position_for(first), position_for(second), Color(1, 0.95, 0.77, 0.30), maxf(0.8, gap * 0.011), true)
+				draw_line(position_for(first), position_for(second), Color("#fdfaf2"), maxf(6.0, gap * 0.085), true)
+				draw_line(position_for(first), position_for(second), Color("#5b63b2"), maxf(2.5, gap * 0.034), true)
+				draw_line(position_for(first), position_for(second), Color(1, 1, 1, 0.55), maxf(0.8, gap * 0.011), true)
 	for row in MilitaryRules.ROWS:
 		for col in MilitaryRules.COLS:
 			if row == MilitaryRules.MIDLINE:
@@ -190,7 +199,7 @@ func _draw_roads(gap: float) -> void:
 				if drawn.has(key):
 					continue
 				drawn[key] = true
-				draw_line(position_for(index), position_for(target), Color(0.58, 0.58, 0.45, 0.44), maxf(1.2, gap * 0.020), true)
+				draw_line(position_for(index), position_for(target), Color(0.55, 0.48, 0.35, 0.40), maxf(1.2, gap * 0.020), true)
 
 
 func _draw_piece(piece: Dictionary, gap_x: float, gap_y: float) -> void:
@@ -376,10 +385,41 @@ func _draw_move_hints(gap_x: float, gap_y: float) -> void:
 			draw_circle(finish, radius, Color(0.88, 0.28, 0.22, 0.10))
 			draw_arc(finish, radius, 0, TAU, 36, Color("#e04b3f"), maxf(3.0, unit * 0.045), true)
 			draw_circle(finish + Vector2(0, -radius), unit * 0.07, Color("#e04b3f"))
+			_draw_engagement_badge(finish + Vector2(radius * 0.72, radius * 0.72), unit * 0.16, str(rules.engagement_preview(selected, target).get("result", "blocked")))
 		else:
 			draw_circle(finish, unit * (0.24 + 0.025 * pulse), Color(0.88, 0.28, 0.22, 0.16))
 			draw_circle(finish, unit * (0.115 + 0.01 * pulse), Color("#e04b3f"))
 			draw_circle(finish, unit * 0.04, Color("#fff7df"))
+
+
+func _draw_engagement_badge(center: Vector2, radius: float, result: String) -> void:
+	var tint := Color("#3f8b5c")
+	if result == "defender":
+		tint = Color("#bf6d29")
+	elif result == "both":
+		tint = Color("#d94a3d")
+	elif result == "capture":
+		tint = Color("#d4a21f")
+	draw_circle(center, radius * 1.45, Color("#fffaf0"))
+	draw_arc(center, radius * 1.45, 0, TAU, 28, tint, maxf(2.0, radius * 0.18), true)
+	match result:
+		"capture":
+			draw_line(center + Vector2(-radius * 0.55, radius * 0.72), center + Vector2(-radius * 0.55, -radius * 0.72), tint, maxf(2.0, radius * 0.20), true)
+			draw_colored_polygon(PackedVector2Array([
+				center + Vector2(-radius * 0.55, -radius * 0.65),
+				center + Vector2(radius * 0.72, -radius * 0.35),
+				center + Vector2(-radius * 0.55, radius * 0.02),
+			]), tint)
+		"defender":
+			draw_line(center + Vector2(-radius * 0.55, -radius * 0.55), center + Vector2(radius * 0.55, radius * 0.55), tint, maxf(2.0, radius * 0.22), true)
+			draw_line(center + Vector2(radius * 0.55, -radius * 0.55), center + Vector2(-radius * 0.55, radius * 0.55), tint, maxf(2.0, radius * 0.22), true)
+		"both":
+			for index in 8:
+				var direction := Vector2.RIGHT.rotated(float(index) * TAU / 8.0)
+				draw_line(center + direction * radius * 0.22, center + direction * radius * 0.9, tint, maxf(1.5, radius * 0.16), true)
+		_:
+			draw_line(center + Vector2(-radius * 0.58, 0), center + Vector2(-radius * 0.18, radius * 0.48), tint, maxf(2.0, radius * 0.22), true)
+			draw_line(center + Vector2(-radius * 0.18, radius * 0.48), center + Vector2(radius * 0.62, -radius * 0.48), tint, maxf(2.0, radius * 0.22), true)
 
 
 func _draw_diamond(center: Vector2, radius: float, color: Color) -> void:
@@ -449,10 +489,9 @@ func _text_left(value: String, anchor: Vector2, font_size: float, tint: Color) -
 
 
 func _gui_input(event: InputEvent) -> void:
-	if not interactive:
+	if not interactive or TabletopLayout.input_blocked(self):
+		_cancel_press()
 		return
-	var position := Vector2.ZERO
-	var pressed := false
 	if event is InputEventScreenTouch:
 		_touch_guard_msec = Time.get_ticks_msec()
 		if event.pressed and _touch_index >= 0 and event.index != _touch_index:
@@ -461,20 +500,110 @@ func _gui_input(event: InputEvent) -> void:
 			return
 		if event.pressed:
 			_touch_index = event.index
+			_begin_press(event.position)
 		else:
 			_touch_index = -1
-		position = event.position
-		pressed = event.pressed
+			if event.canceled:
+				_cancel_press()
+			else:
+				_finish_press(event.position)
+	elif event is InputEventScreenDrag:
+		_touch_guard_msec = Time.get_ticks_msec()
+		if event.index == _touch_index:
+			_move_press(event.position)
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if Time.get_ticks_msec() - _touch_guard_msec < 500:
 			return
-		position = event.position
-		pressed = event.pressed
+		if event.pressed:
+			_begin_press(event.position)
+		else:
+			_finish_press(event.position)
+	elif event is InputEventMouseMotion and _touch_pressed:
+		_move_press(event.position)
 	else:
 		return
-	if not pressed:
+	accept_event()
+
+
+func _begin_press(point: Vector2) -> void:
+	_pressed_cell = cell_at(point)
+	_preview_cell = _pressed_cell
+	_press_seat = current_side
+	_touch_pressed = true
+	TabletopLayout.remember_seat(self, _press_seat)
+	set_process(true)
+	queue_redraw()
+
+
+func _move_press(point: Vector2) -> void:
+	_preview_cell = _pressed_cell if cell_at(point) == _pressed_cell else -1
+	queue_redraw()
+
+
+func _finish_press(point: Vector2) -> void:
+	var target := cell_at(point)
+	var commit := _pressed_cell >= 0 and target == _pressed_cell and not TabletopLayout.input_blocked(self)
+	_cancel_press()
+	if commit:
+		cell_pressed.emit(target)
+
+
+func _cancel_press() -> void:
+	_touch_pressed = false
+	_touch_index = -1
+	_pressed_cell = -1
+	_preview_cell = -1
+	queue_redraw()
+
+
+func _draw_board_feedback(unit: float) -> void:
+	if rules == null:
 		return
-	var index := cell_at(position)
-	if index >= 0:
-		cell_pressed.emit(index)
-		accept_event()
+	for value in notice.get("cells", []):
+		var index := int(value)
+		if index >= 0 and index < MilitaryRules.CELLS:
+			draw_arc(position_for(index), unit * 0.52, 0, TAU, 36, Color("#c67c20"), 3.0, true)
+	if _preview_cell >= 0:
+		var center := position_for(_preview_cell)
+		draw_arc(center, minf(float(metrics().gap_x), float(metrics().gap_y)) * 0.57, 0, TAU, 40, accent, 4.0, true)
+		var message := ""
+		if selected >= 0:
+			var preview := rules.explain_move(selected, _preview_cell)
+			message = str(preview.get("message", ""))
+		else:
+			var piece := rules.piece_at(_preview_cell)
+			message = rules.piece_hint(piece) if not piece.is_empty() else "先选自己的棋子"
+		TabletopLayout.draw_note(self, center, message, TabletopLayout.facing_angle(_press_seat, face_to_face), accent, "hint")
+	elif not str(notice.get("message", "")).is_empty():
+		var cells: Array = notice.get("cells", [])
+		var anchor := position_for(int(cells[0])) if not cells.is_empty() and int(cells[0]) in range(MilitaryRules.CELLS) else size * 0.5
+		TabletopLayout.draw_note(self, anchor, str(notice.message), TabletopLayout.facing_angle(int(notice.get("side", current_side)), face_to_face), accent, "hint")
+	var battle: Dictionary = rules.state.get("lastBattle", {})
+	if selected < 0 and not battle.is_empty():
+		var anchor_index := int(battle.get("to", -1))
+		var anchor := position_for(anchor_index) if anchor_index in range(MilitaryRules.CELLS) else size * 0.5
+		var angle := TabletopLayout.facing_angle(int(battle.get("side", current_side)), face_to_face)
+		TabletopLayout.draw_note(self, anchor, _battle_message(battle), angle, accent, "check")
+	if rules.state.get("players") is Array and not rules.state.players.is_empty():
+		TabletopLayout.draw_turn_marks(
+			self,
+			rules.state.players,
+			current_side,
+			face_to_face,
+			[TOKEN_RED, TOKEN_BLUE],
+			str(rules.state.get("phase", "")) == "finished"
+		)
+
+
+func _battle_message(battle: Dictionary) -> String:
+	var attacker := str(MilitaryRules.NAMES.get(str(battle.get("attacker", "")), "棋子"))
+	var defender := str(MilitaryRules.NAMES.get(str(battle.get("defender", "")), "棋子"))
+	match str(battle.get("result", "")):
+		"capture":
+			return "%s夺下军旗" % attacker
+		"attacker":
+			return "%s吃掉%s" % [attacker, defender]
+		"defender":
+			return "%s挡住了%s" % [defender, attacker]
+		_:
+			return "%s与%s一起退场" % [attacker, defender]

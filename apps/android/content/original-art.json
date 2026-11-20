@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "renderer": "res://src/ui/original_glyph.gd",
+  "contentLookup": "stable content name or content ID",
+  "groups": {
+    "ui": "assets/original/ui/icons.svg",
+    "covers": "assets/original/covers/covers.svg",
+    "cardBacks": "res://src/ui/memory_card.gd",
+    "junglePieces": "res://src/ui/board_surface.gd",
+    "contentArt": "ArtLibrary.semantic_texture"
+  },
+  "legacyEmojiPolicy": "Emoji tokens remain only inside content data as stable authoring tokens; runtime converts them to original category graphics.",
+  "missingAssetPolicy": "Use a neutral OriginalGlyph placeholder and preserve game state."
+}

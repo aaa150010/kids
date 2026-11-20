@@ -47,8 +47,10 @@ var _game_order: Array[String] = []
 var _screen_game := ""
 var _pending_update: Dictionary = {}
 var _manual_check := false
-var _random_token := 0
 var _launch_modes: Dictionary = {}
+var _preparation: Dictionary = {}
+var _lobby_scroll_offset := 0
+var _pending_preparation_game := ""
 var intro_sequence = null
 # W3 大厅丝滑化：增量刷新与排序拖拽编排
 var _heading_row: HBoxContainer = null
@@ -87,8 +89,6 @@ func _ready() -> void:
 	_sort_drag = DragController.new()
 	_sort_drag.name = "LobbySortDrag"
 	add_child(_sort_drag)
-	# 后台线程预载全部封面，避免大厅首帧同步解码
-	LobbyCoverCache.warmup(_cover_paths())
 	get_viewport().size_changed.connect(_on_resize)
 	UpdateService.update_available.connect(_on_update_available)
 	UpdateService.check_finished.connect(_on_check_finished)
@@ -127,20 +127,9 @@ func _notification(what: int) -> void:
 
 
 func _process(delta: float) -> void:
-	# 封面线程加载状态轮询（完成后回填卡片）
-	LobbyCoverCache.poll()
 	# 排序拖拽贴近滚动区上下边缘时自动滚动
 	if _sort_drag != null and _sort_drag.active:
 		_sort_auto_scroll(delta)
-
-
-func _cover_paths() -> Array:
-	var paths: Array = []
-	for id in ContentDB.default_order():
-		var cover := str(ContentDB.game(id).get("cover", ""))
-		if not cover.is_empty():
-			paths.append(cover)
-	return paths
 
 
 func _on_resize() -> void:
@@ -154,12 +143,14 @@ func _columns() -> int:
 
 func _rebuild_lobby() -> void:
 	_cancel_sort_drag()
+	if is_instance_valid(scroll):
+		_lobby_scroll_offset = scroll.scroll_vertical
 	if is_instance_valid(lobby_root):
 		lobby_root.queue_free()
 	lobby_root = Control.new()
 	lobby_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	screen_root.add_child(lobby_root)
-	lobby_root.add_child(PlaygroundUI.background(Color("#dcefd8")))
+	lobby_root.add_child(PlaygroundUI.background(Color("#ead7b8")))
 	var metrics := PlaygroundUI.layout_metrics(get_viewport_rect().size)
 	var safe := PlaygroundUI.safe_insets(get_viewport_rect().size)
 	var margin := MarginContainer.new()
@@ -206,6 +197,7 @@ func _rebuild_lobby() -> void:
 		var card := LobbyGameCard.new()
 		card.configure(meta, can_resume, sorting, get_viewport_rect().size)
 		card.launch_requested.connect(_open_game_picker)
+		card.resume_requested.connect(_continue_saved_game)
 		card.help_requested.connect(_show_game_help)
 		card.move_requested.connect(_move_game)
 		card.sort_drag_started.connect(_on_card_sort_started)
@@ -214,17 +206,17 @@ func _rebuild_lobby() -> void:
 		card_grid.add_child(card)
 	var footer := HBoxContainer.new()
 	footer.add_theme_constant_override("separation", 12)
-	footer.add_child(PlaygroundUI.label("🌱 每个游戏都会实时自动保存，切后台也会补存。", 12, PlaygroundUI.INK_SOFT, 500))
+	footer.add_child(PlaygroundUI.label("玩到哪里，就记到哪里。", 16, PlaygroundUI.INK_SOFT, 500))
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(spacer)
-	footer.add_child(PlaygroundUI.button("👨‍👩‍👧 管理儿童档案", Color("#167d74"), _show_profile_manager, "ghost"))
 	page.add_child(footer)
 	var bottom_spacer := Control.new()
 	bottom_spacer.custom_minimum_size.y = 8
 	page.add_child(bottom_spacer)
 	AudioFX.start_music("lobby")
 	PlaygroundUI.fade_in(lobby_root, 0.18, 0.0)
+	page_scroll.set_deferred("scroll_vertical", _lobby_scroll_offset)
 	if sorting:
 		show_toast("按住任意游戏卡拖到新位置")
 
@@ -232,45 +224,38 @@ func _rebuild_lobby() -> void:
 func _lobby_header() -> Control:
 	var metrics := PlaygroundUI.layout_metrics(get_viewport_rect().size)
 	var compact := bool(metrics.compact_cards)
-	var panel := PlaygroundUI.panel(Color(1, 1, 1, 0.72), 24, Color(0, 0, 0, 0.06), 1)
-	panel.custom_minimum_size.y = 68 if compact else 74
+	var panel := PlaygroundUI.panel(Color("#fff7e7"), 28, Color("#dbc29b"), 2)
+	panel.custom_minimum_size.y = 80 if compact else 88
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	panel.add_child(row)
 	var mark := PlaygroundUI.panel(Color("#ffd56d"), 20, Color("#dca42c"), 2)
 	mark.custom_minimum_size = Vector2(58, 58)
-	var logo := ArtLibrary.picture("🎲", Vector2(38, 38))
+	var logo := TextureRect.new()
+	logo.texture = load("res://assets/branding/app-icon.svg")
+	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	logo.custom_minimum_size = Vector2(46, 46)
+	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	mark.add_child(logo)
 	row.add_child(mark)
 	var brand := VBoxContainer.new()
 	brand.add_theme_constant_override("separation", 0)
 	brand.add_child(PlaygroundUI.label("童心游乐场", 24 if compact else 27, PlaygroundUI.INK, 700))
 	if not compact:
-		brand.add_child(PlaygroundUI.label("一家人一起玩的本地益智游戏", 12, PlaygroundUI.INK_SOFT, 500))
+		brand.add_child(PlaygroundUI.label("打开玩具柜，开始今天的发现", 16, PlaygroundUI.INK_SOFT, 500))
 	row.add_child(brand)
-	var greeting := PlaygroundUI.button(_greeting(), Color("#dca42c"), _show_continue_dialog, "soft")
-	greeting.custom_minimum_size = Vector2(142 if compact else 300, 48)
-	if compact:
-		greeting.text = "▶ 继续游戏" if not SaveStore.resumable_sessions().is_empty() else "今天玩什么"
-	row.add_child(greeting)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(spacer)
-	var profile_row := HBoxContainer.new()
-	profile_row.add_theme_constant_override("separation", 7)
-	for profile in SaveStore.profiles().slice(0, 2 if compact else 4):
-		profile_row.add_child(_profile_chip(profile))
-	row.add_child(profile_row)
-	row.add_child(PlaygroundUI.button("＋", Color("#167d74"), _show_profile_manager, "soft"))
-	if not _pending_update.is_empty():
-		row.add_child(PlaygroundUI.button("⬆ 更新", Color("#c05b8f"), _show_update_dialog, "primary"))
-	row.add_child(PlaygroundUI.icon_asset_button("🔊", Color("#167d74"), _show_settings, "声音设置"))
+	row.add_child(PlaygroundUI.semantic_icon_button("sound", "声音", Color("#99644f"), _show_settings, "soft"))
+	row.add_child(PlaygroundUI.semantic_icon_button("settings", "家长工具" + (" · 有更新" if not _pending_update.is_empty() else ""), Color("#99644f"), _show_parent_tools, "ghost"))
 	return panel
 
 
 func _greeting() -> String:
 	if not SaveStore.resumable_sessions().is_empty():
-		return "▶ 点这里继续上次游戏"
+		return "点这里继续上次游戏"
 	return "今天想玩哪一关？"
 
 
@@ -280,7 +265,7 @@ func _profile_chip(profile: Dictionary) -> Control:
 	chip.custom_minimum_size = Vector2(122, 52)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 7)
-	row.add_child(PlaygroundUI.label(str(profile.get("avatar", "🦊")), 26, tint, 700))
+	row.add_child(ArtLibrary.profile_picture(profile, Vector2(34, 34)))
 	var copy := VBoxContainer.new()
 	copy.add_theme_constant_override("separation", 0)
 	copy.add_child(PlaygroundUI.label(str(profile.get("name", "小朋友")), 15, PlaygroundUI.INK, 700))
@@ -296,21 +281,61 @@ func _lobby_heading() -> Control:
 	var title := VBoxContainer.new()
 	var title_heading := HBoxContainer.new()
 	title_heading.add_theme_constant_override("separation", 8)
-	title_heading.add_child(ArtLibrary.picture("🎲", Vector2(30, 30)))
-	title_heading.add_child(PlaygroundUI.label("今天玩什么？", 31, PlaygroundUI.INK, 700))
+	title_heading.add_child(PlaygroundUI.label("我的玩具柜", 32, PlaygroundUI.INK, 700))
 	title.add_child(title_heading)
-	title.add_child(PlaygroundUI.label("游戏和练习各自有独立风格，卡片顺序可以拖动调整", 13, PlaygroundUI.INK_SOFT, 500))
+	var entries := SaveStore.resumable_sessions()
+	title.add_child(PlaygroundUI.label("挑一件喜欢的，坐下来玩吧" if entries.is_empty() else _latest_session_caption(entries[0]), 17, PlaygroundUI.INK_SOFT, 500, true))
 	row.add_child(title)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(spacer)
-	row.add_child(PlaygroundUI.icon_text_button("🎲", "随机游戏", Color("#c05b8f"), _show_random_game, "soft"))
-	row.add_child(PlaygroundUI.icon_text_button("✅" if sorting else "✋", "完成排序" if sorting else "拖动排序", Color("#167d74"), func():
-		sorting = not sorting
-		AudioFX.play("select")
-		_rebuild_lobby()
-	, "primary" if sorting else "ghost"))
+	if not entries.is_empty() and not sorting:
+		var resume := PlaygroundUI.button("继续上次", Color("#b57926"), _show_continue_dialog)
+		resume.custom_minimum_size = Vector2(154, 60)
+		row.add_child(resume)
+	row.add_child(PlaygroundUI.semantic_icon_button("shuffle", "随机游戏", Color("#c05b8f"), _show_random_game, "soft"))
+	if sorting:
+		row.add_child(PlaygroundUI.button("整理好了", Color("#99644f"), _toggle_lobby_sort, "primary"))
 	return row
+
+
+func _latest_session_caption(entry: Dictionary) -> String:
+	var meta := ContentDB.game(str(entry.get("gameId", "")))
+	return "%s还在等你" % str(meta.get("title", "上次的游戏"))
+
+
+func _show_parent_tools() -> void:
+	var tint := Color("#99644f")
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 14)
+	content.add_child(PlaygroundUI.semantic_icon_button("profile", "儿童档案与成长记录", tint, func(): _close_top_modal(); _show_profile_manager(), "soft"))
+	content.add_child(PlaygroundUI.semantic_icon_button("sort", "整理玩具柜", tint, func(): _close_top_modal(); _toggle_lobby_sort(), "soft"))
+	content.add_child(PlaygroundUI.semantic_icon_button("undo", "恢复默认摆放", tint, _confirm_default_order, "ghost"))
+	content.add_child(PlaygroundUI.semantic_icon_button("settings", "声音与应用更新", tint, func(): _close_top_modal(); _show_settings(), "ghost"))
+	if not _pending_update.is_empty():
+		content.add_child(PlaygroundUI.semantic_icon_button("restart", "查看新版本", tint, func(): _close_top_modal(); _show_update_dialog(), "soft"))
+	_open_modal("家长工具", content, [{"text":"返回玩具柜","kind":"primary","callback":func(): _close_top_modal()}], "陪伴与整理", true, {"accent":tint})
+
+
+func _toggle_lobby_sort() -> void:
+	sorting = not sorting
+	AudioFX.play("select")
+	_rebuild_lobby()
+
+
+func _confirm_default_order() -> void:
+	var content := PlaygroundUI.label("游戏和练习会回到默认位置。每位孩子的进度都会保留。", 20, PlaygroundUI.INK_SOFT, 500, true)
+	_open_modal("重新摆好玩具柜？", content, [
+		{"text":"先不调整","kind":"ghost","callback":func(): _close_top_modal()},
+		{"text":"恢复摆放","kind":"primary","callback":_reset_lobby_order},
+	], "只调整卡片顺序", true, {"accent":Color("#99644f")})
+
+
+func _reset_lobby_order() -> void:
+	SaveStore.set_lobby_order(ContentDB.default_order())
+	_close_top_modal()
+	_close_top_modal()
+	_rebuild_lobby()
 
 
 func _sort_note() -> Control:
@@ -332,140 +357,252 @@ func _open_game_picker(game_id: String, chosen_mode: String = "") -> void:
 	if meta.is_empty():
 		return
 	if SaveStore.profiles().is_empty():
+		_pending_preparation_game = game_id
 		_show_profile_manager()
 		return
 	var tint := PlaygroundUI.color(str(meta.accent))
-	if chosen_mode.is_empty():
-		var menu := VBoxContainer.new()
-		menu.add_theme_constant_override("separation", 14)
-		for entry in SaveStore.resumable_sessions():
-			if str(entry.gameId) == game_id:
-				menu.add_child(PlaygroundUI.button("继续 · " + str(entry.get("note", "上次游戏")), tint, func(): _close_top_modal(); _resume_entry(entry), "soft"))
-		for entry in ContentDB.modes(game_id):
-			var button := PlaygroundUI.button(str(entry.name) + "  →\n" + str(entry.get("description","")), tint, func(): _close_top_modal(); _open_game_picker(game_id, str(entry.id)), "soft")
-			button.custom_minimum_size.y = 82
-			button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-			menu.add_child(button)
-		_open_modal(str(meta.title), menu, [{"text":"关闭","kind":"ghost","callback":func(): _close_top_modal()}], "今天想怎么玩？")
+	var modes := ContentDB.modes(game_id)
+	if modes.is_empty():
+		show_toast("这个游戏暂时没有可用模式")
 		return
-	_launch_modes[game_id] = chosen_mode
-	var definition := ContentDB.mode(game_id,chosen_mode)
+	var mode_id := chosen_mode if not chosen_mode.is_empty() else str(_launch_modes.get(game_id, modes[0].id))
+	var definition := ContentDB.mode(game_id, mode_id)
+	if definition.is_empty() and not modes.is_empty():
+		definition = modes[0]
+	mode_id = str(definition.id)
 	var minimum := int(definition.player_range[0])
 	var maximum := int(definition.player_range[1])
 	var selected := SaveStore.selected_profiles(game_id, minimum, maximum)
+	var chosen_ids: Array = selected.map(func(player): return str(player.id)).slice(0, maximum)
+	_preparation = {
+		"gameId":game_id, "modeId":mode_id, "ids":chosen_ids,
+		"preference":SaveStore.difficulty(game_id, str(chosen_ids[0]) if not chosen_ids.is_empty() else ""),
+		"difficultyTouched":false, "modeButtons":[], "profileButtons":[], "difficultyButtons":[],
+	}
 	var content := VBoxContainer.new()
-	content.add_theme_constant_override("separation", 12)
-	content.add_child(PlaygroundUI.label("选 %s 位小朋友" % minimum if minimum == maximum else "选 %s–%s 位小朋友" % [minimum, maximum], 20, PlaygroundUI.INK_SOFT, 700))
-	var choice_row := HFlowContainer.new()
-	choice_row.add_theme_constant_override("h_separation", 12)
-	choice_row.add_theme_constant_override("v_separation", 12)
-	var chosen_ids: Array = selected.map(func(player): return str(player.id)).slice(0,maximum)
-	var difficulty_select := OptionButton.new()
-	difficulty_select.custom_minimum_size = Vector2(230, 50)
-	difficulty_select.add_theme_font_override("font", PlaygroundUI.font())
-	difficulty_select.add_theme_font_size_override("font_size", 17)
-	var soft_difficulty := PlaygroundUI.mix(tint, Color.WHITE, 0.86)
-	difficulty_select.add_theme_stylebox_override("normal", PlaygroundUI.style(soft_difficulty, 16, tint, 2))
-	difficulty_select.add_theme_stylebox_override("hover", PlaygroundUI.style(PlaygroundUI.mix(tint, Color.WHITE, 0.76), 16, tint, 2))
-	difficulty_select.add_theme_stylebox_override("pressed", PlaygroundUI.style(tint, 16, tint, 2))
-	difficulty_select.add_theme_stylebox_override("focus", PlaygroundUI.style(soft_difficulty, 16, tint, 2))
-	difficulty_select.add_theme_stylebox_override("disabled", PlaygroundUI.style(PlaygroundUI.mix(tint, Color.WHITE, 0.94), 16, PlaygroundUI.LINE, 1))
-	difficulty_select.add_theme_color_override("font_color", tint)
-	difficulty_select.add_theme_color_override("font_hover_color", tint)
-	difficulty_select.add_theme_color_override("font_pressed_color", Color.WHITE)
-	difficulty_select.add_theme_color_override("font_disabled_color", PlaygroundUI.INK_SOFT)
-	var difficulty_popup := difficulty_select.get_popup()
-	difficulty_popup.add_theme_stylebox_override("panel", PlaygroundUI.style(PlaygroundUI.PAPER, 16, tint, 2, 5, Color(0, 0, 0, 0.16)))
-	difficulty_popup.add_theme_stylebox_override("hover", PlaygroundUI.style(tint, 10, tint, 0))
-	difficulty_popup.add_theme_font_size_override("font_size", 17)
-	difficulty_popup.add_theme_color_override("font_color", PlaygroundUI.INK)
-	difficulty_popup.add_theme_color_override("font_hover_color", Color.WHITE)
-	difficulty_popup.add_theme_constant_override("v_separation", 10)
-	difficulty_popup.add_theme_constant_override("item_start_padding", 14)
-	difficulty_popup.add_theme_constant_override("item_end_padding", 14)
-	var difficulty_values := ["auto", "easy", "normal", "challenge"]
-	for value in difficulty_values:
-		difficulty_select.add_item(GameTuning.label(str(value)))
-		difficulty_select.set_item_metadata(difficulty_select.item_count - 1, value)
-	var preference_profile := str(chosen_ids[0]) if not chosen_ids.is_empty() else (str(SaveStore.profiles()[0].id) if not SaveStore.profiles().is_empty() else "")
-	var current_preference := SaveStore.difficulty(game_id, preference_profile)
-	difficulty_select.select(maxi(0, difficulty_values.find(current_preference)))
-	if not GameTuning.supports(game_id):
-		difficulty_select.disabled = true
-		difficulty_select.select(0)
-	content.add_child(PlaygroundUI.label("难度", 15, PlaygroundUI.INK_SOFT, 700))
-	content.add_child(difficulty_select)
-	var start_button := PlaygroundUI.button("开始 " + str(definition.name) + " →", tint, _start_from_picker.bind(game_id, chosen_ids, minimum, maximum, difficulty_select))
-	start_button.disabled = chosen_ids.size() < minimum
+	content.add_theme_constant_override("separation", 18)
+	var columns := HBoxContainer.new()
+	columns.add_theme_constant_override("separation", 24)
+	content.add_child(columns)
+	var mode_column := VBoxContainer.new()
+	mode_column.custom_minimum_size.x = 280
+	mode_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mode_column.add_theme_constant_override("separation", 12)
+	mode_column.add_child(PlaygroundUI.label("怎么玩", 24, PlaygroundUI.INK, 700))
+	columns.add_child(mode_column)
+	var mode_group := ButtonGroup.new()
+	for entry in modes:
+		var button := PlaygroundUI.choice_button(str(entry.name), tint, mode_group, str(entry.id), str(entry.id) == mode_id, Vector2(0, 64), 21)
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.pressed.connect(_select_preparation_mode.bind(str(entry.id)))
+		mode_column.add_child(button)
+		_preparation.modeButtons.append(button)
+	var mode_description := PlaygroundUI.label("", 17, PlaygroundUI.INK_SOFT, 500, true)
+	mode_column.add_child(mode_description)
+	_preparation.description = mode_description
+	var player_column := VBoxContainer.new()
+	player_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	player_column.size_flags_stretch_ratio = 1.65
+	player_column.add_theme_constant_override("separation", 12)
+	columns.add_child(player_column)
+	var player_heading := PlaygroundUI.label("", 24, PlaygroundUI.INK, 700)
+	player_column.add_child(player_heading)
+	_preparation.playerHeading = player_heading
+	var choices := HFlowContainer.new()
+	choices.add_theme_constant_override("h_separation", 10)
+	choices.add_theme_constant_override("v_separation", 10)
+	player_column.add_child(choices)
 	for profile in SaveStore.profiles():
-		var button := PlaygroundUI.button("%s  %s · %s 岁" % [profile.avatar,profile.name,profile.age], PlaygroundUI.color(str(profile.color)), _toggle_picker_profile.bind(str(profile.id),chosen_ids,maximum,choice_row,minimum,start_button), "soft")
-		button.custom_minimum_size = Vector2(210,64)
-		button.set_meta("profile_id",str(profile.id))
-		choice_row.add_child(button)
-	content.add_child(choice_row)
-	update_select_buttons(choice_row,chosen_ids,tint)
-	_open_modal(str(meta.title) + " · " + str(definition.name), content, [
-		{"text":"取消","kind":"ghost","callback":func(): _close_top_modal()},
-			{"text":"开始游戏 →","kind":"primary","callback":_start_from_picker.bind(game_id,chosen_ids,minimum,maximum,difficulty_select)},
-	], "每个孩子都有自己的进度")
+		var button := PlaygroundUI.choice_button("%s · %s 岁" % [profile.name, profile.age], PlaygroundUI.color(str(profile.color)), null, str(profile.id), str(profile.id) in chosen_ids, Vector2(200, 60), 20)
+		var avatar_picture := ArtLibrary.profile_picture(profile, Vector2(38, 38))
+		avatar_picture.position = Vector2(10, 11)
+		button.add_child(avatar_picture)
+		for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+			var box := button.get_theme_stylebox(state)
+			if box is StyleBoxFlat:
+				var copy := box.duplicate() as StyleBoxFlat
+				copy.content_margin_left += 40
+				button.add_theme_stylebox_override(state, copy)
+		button.pressed.connect(_toggle_preparation_profile.bind(str(profile.id)))
+		choices.add_child(button)
+		_preparation.profileButtons.append(button)
+	var difficulty_box := VBoxContainer.new()
+	difficulty_box.add_theme_constant_override("separation", 10)
+	difficulty_box.add_child(PlaygroundUI.label("练习难度", 22, PlaygroundUI.INK, 700))
+	var difficulty_row := HFlowContainer.new()
+	difficulty_row.add_theme_constant_override("h_separation", 8)
+	difficulty_row.add_theme_constant_override("v_separation", 8)
+	difficulty_box.add_child(difficulty_row)
+	var difficulty_group := ButtonGroup.new()
+	for value in ["auto", "easy", "normal", "challenge"]:
+		var choice := PlaygroundUI.choice_button(GameTuning.label(value), tint, difficulty_group, value, value == str(_preparation.preference), Vector2(96, 52), 19)
+		choice.pressed.connect(_select_preparation_difficulty.bind(value))
+		difficulty_row.add_child(choice)
+		_preparation.difficultyButtons.append(choice)
+	difficulty_box.visible = GameTuning.supports(game_id)
+	player_column.add_child(difficulty_box)
+	var summary_panel := PlaygroundUI.panel(PlaygroundUI.color(str(meta.get("soft", "#fff2db"))), 22, PlaygroundUI.mix(tint, Color.WHITE, 0.55), 2)
+	var summary := PlaygroundUI.label("", 20, PlaygroundUI.INK, 700, true)
+	summary_panel.add_child(summary)
+	content.add_child(summary_panel)
+	_preparation.summary = summary
+	var pause_hint := HBoxContainer.new()
+	pause_hint.add_theme_constant_override("separation", 9)
+	pause_hint.add_child(ArtLibrary.semantic_picture("pause", "ui", Vector2(28, 28)))
+	var pause_copy := PlaygroundUI.label("游戏中轻点左右纸边，可以打开暂停、规则和声音。", 17, PlaygroundUI.INK_SOFT, 500, true)
+	pause_copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_hint.add_child(pause_copy)
+	content.add_child(pause_hint)
+	var layer := _open_modal(str(meta.title) + " · 开始前", content, [
+		{"text":"返回玩具柜","kind":"ghost","callback":func(): _close_top_modal()},
+		{"text":"开始游戏","kind":"primary","callback":_start_from_preparation},
+	], "选玩法、选伙伴，准备好再出发", true, {"accent":tint,"width":1100.0,"size":"L","max_content_height":570.0})
+	# 保存真正位于固定操作区的按钮，人数变化直接更新这一颗按钮。
+	for control in layer.find_children("*", "Button", true, false):
+		if control is Button and control.text == "开始游戏":
+			_preparation.startButton = control
+			break
+	_refresh_preparation()
 
 
-func _start_from_picker(game_id: String, chosen_ids: Array, minimum: int, maximum: int, difficulty_select: OptionButton) -> void:
-	if chosen_ids.size() < minimum:
-		show_toast("请先选好本局的小朋友")
-		return
-	var preference := "auto"
-	if not difficulty_select.disabled and difficulty_select.selected >= 0:
-		preference = str(difficulty_select.get_item_metadata(difficulty_select.selected))
-	_confirm_game_start(game_id, chosen_ids, minimum, maximum, preference)
+func _select_preparation_mode(mode_id: String) -> void:
+	_preparation.modeId = mode_id
+	var definition := ContentDB.mode(str(_preparation.gameId), mode_id)
+	var ids: Array = _preparation.ids
+	while ids.size() > int(definition.player_range[1]):
+		ids.pop_back()
+	_refresh_preparation()
 
 
-func _toggle_picker_profile(
-	profile_id: String,
-	chosen_ids: Array,
-	maximum: int,
-	choice_row: Control,
-	minimum: int,
-	start_button: Button
-) -> void:
-	if profile_id in chosen_ids:
-		chosen_ids.erase(profile_id)
-	elif chosen_ids.size() < maximum:
-		chosen_ids.append(profile_id)
+func _toggle_preparation_profile(profile_id: String) -> void:
+	var ids: Array = _preparation.ids
+	var definition := ContentDB.mode(str(_preparation.gameId), str(_preparation.modeId))
+	var maximum := int(definition.player_range[1])
+	if profile_id in ids:
+		ids.erase(profile_id)
+	else:
+		if ids.size() < maximum:
+			ids.append(profile_id)
+		else:
+			show_toast("这一局最多选 %s 位小朋友，先取消一位再选" % maximum)
+	if not bool(_preparation.difficultyTouched):
+		_preparation.preference = SaveStore.difficulty(str(_preparation.gameId), str(ids[0]) if not ids.is_empty() else "")
 	AudioFX.play("select")
-	update_select_buttons(choice_row, chosen_ids, Color.WHITE)
-	start_button.disabled = chosen_ids.size() < minimum
+	_refresh_preparation()
 
 
-func _confirm_game_start(game_id: String, chosen_ids: Array, minimum: int, maximum: int, difficulty_pref: String = "auto") -> void:
-	if chosen_ids.size() < minimum:
+func _select_preparation_difficulty(preference: String) -> void:
+	_preparation.preference = preference
+	_preparation.difficultyTouched = true
+	_refresh_preparation()
+
+
+func _refresh_preparation() -> void:
+	var game_id := str(_preparation.gameId)
+	var definition := ContentDB.mode(game_id, str(_preparation.modeId))
+	var ids: Array = _preparation.ids
+	var minimum := int(definition.player_range[0])
+	var maximum := int(definition.player_range[1])
+	var selected: Array = []
+	for profile_id in ids:
+		selected.append(SaveStore.profile(str(profile_id)))
+	_preparation.playerHeading.text = "谁来玩 · 选 %s 位" % minimum if minimum == maximum else "谁来玩 · 选 %s–%s 位" % [minimum, maximum]
+	_preparation.description.text = str(definition.get("description", ""))
+	for button in _preparation.modeButtons:
+		button.set_pressed_no_signal(str(button.get_meta("choice_value")) == str(_preparation.modeId))
+	for button in _preparation.profileButtons:
+		button.set_pressed_no_signal(str(button.get_meta("choice_value")) in ids)
+	for button in _preparation.difficultyButtons:
+		var value := str(button.get_meta("choice_value"))
+		button.set_pressed_no_signal(value == str(_preparation.preference))
+		button.text = "自动 · " + GameTuning.label(GameTuning.resolve("auto", selected)) if value == "auto" else GameTuning.label(value)
+	var summary := "再选 %s 位小朋友，就可以出发" % maxi(0, minimum - ids.size())
+	if ids.size() >= minimum:
+		if TabletopLayout.enabled(game_id, selected, str(_preparation.modeId)):
+			summary = "左边：%s　　右边：%s\n两位小朋友坐在平板的左右短边" % [selected[0].name, selected[1].name]
+		elif selected.size() == 2:
+			summary = "%s 和 %s\n坐在平板下方，一人一次轮流玩" % [selected[0].name, selected[1].name]
+		elif game_id == "poetry":
+			summary = "%s 来背诗，家长拿好平板" % selected[0].name
+		else:
+			summary = "%s · %s" % [selected[0].name, definition.name]
+		if GameTuning.supports(game_id):
+			summary += "　·　" + GameTuning.label(GameTuning.resolve(str(_preparation.preference), selected))
+	_preparation.summary.text = summary
+	var start_button: Button = _preparation.get("startButton")
+	if is_instance_valid(start_button):
+		start_button.disabled = ids.size() < minimum or ids.size() > maximum
+
+
+func _start_from_preparation() -> void:
+	var game_id := str(_preparation.gameId)
+	var mode_id := str(_preparation.modeId)
+	var definition := ContentDB.mode(game_id, mode_id)
+	var ids: Array = _preparation.ids.duplicate()
+	if ids.size() < int(definition.player_range[0]) or ids.size() > int(definition.player_range[1]):
+		_refresh_preparation()
 		return
-	_close_top_modal()
-	SaveStore.select_profiles(game_id, chosen_ids)
-	_start_game(game_id, SaveStore.selected_profiles(game_id, minimum, maximum), "", difficulty_pref)
+	var preference := str(_preparation.preference) if GameTuning.supports(game_id) else "auto"
+	var entry := _matching_session(game_id, mode_id, ids)
+	if not entry.is_empty():
+		var explanation := PlaygroundUI.label("这几位小朋友还有一局正在进行。继续原来的发现，或重新开始？", 21, PlaygroundUI.INK_SOFT, 500, true)
+		_open_modal("这局还在等你", explanation, [
+			{"text":"返回准备","kind":"ghost","callback":func(): _close_top_modal()},
+			{"text":"另开一局","kind":"soft","callback":_commit_prepared_start.bind(game_id, mode_id, ids, preference)},
+			{"text":"继续这局","kind":"primary","callback":func(): _close_lobby_modals(); _resume_entry(entry)},
+		], "另开一局只替换这局进度，成长记录会保留", true, {"accent":PlaygroundUI.color(str(ContentDB.game(game_id).accent))})
+		return
+	_commit_prepared_start(game_id, mode_id, ids, preference)
 
 
-func update_select_buttons(container: Control, chosen_ids: Array, accent: Color) -> void:
-	for button in container.get_children():
-		var choice := button as Button
-		if choice == null:
-			continue
-		var id := str(choice.get_meta("profile_id", ""))
-		var selected := id in chosen_ids
-		choice.modulate = Color.WHITE if selected else Color(1, 1, 1, 0.72)
-		choice.text = ("✓ " if selected else "") + choice.text.trim_prefix("✓ ")
+func _matching_session(game_id: String, mode_id: String, ids: Array) -> Dictionary:
+	var ordered := ids.duplicate()
+	ordered.sort()
+	for entry in SaveStore.resumable_sessions():
+		var participants: Array = entry.get("participantIds", []).duplicate()
+		participants.sort()
+		if str(entry.get("gameId", "")) == game_id and str(entry.get("modeId", "classic")) == mode_id and participants == ordered:
+			return entry
+	return {}
 
 
-func _start_game(game_id: String, selected: Array, chosen_mode: String = "", difficulty_pref: String = "auto") -> void:
+func _commit_prepared_start(game_id: String, mode_id: String, ids: Array, preference: String) -> void:
+	_close_lobby_modals()
+	SaveStore.select_profiles(game_id, ids)
+	SaveStore.set_context(game_id, mode_id, ids)
+	SaveStore.clear_state(game_id, str(ids[0]))
+	var selected: Array = []
+	for profile_id in ids:
+		selected.append(SaveStore.profile(str(profile_id)))
+	_start_game(game_id, selected, mode_id, preference)
+
+
+func _close_lobby_modals() -> void:
+	while not modal_stack.is_empty():
+		_close_top_modal()
+
+
+func _start_game(
+	game_id: String,
+	selected: Array,
+	chosen_mode: String = "",
+	difficulty_pref: String = "auto",
+	resume_existing: bool = false
+) -> void:
 	if selected.is_empty() or not GAME_SCRIPTS.has(game_id):
 		return
 	var target_mode := chosen_mode if not chosen_mode.is_empty() else str(_launch_modes.get(game_id,"classic"))
 	var definition := ContentDB.mode(game_id,target_mode)
+	if definition.is_empty():
+		_open_game_picker(game_id)
+		return
 	if selected.size() < int(definition.player_range[0]) or selected.size() > int(definition.player_range[1]):
 		_open_game_picker(game_id,target_mode)
 		return
 	var meta := ContentDB.game(game_id).duplicate(true)
 	meta.modeId = target_mode
+	meta.resume = resume_existing
+	meta.freshStart = not resume_existing
 	if not GameTuning.supports(game_id):
 		difficulty_pref = "auto"
 	meta.difficultyPreference = difficulty_pref
@@ -477,7 +614,7 @@ func _start_game(game_id: String, selected: Array, chosen_mode: String = "", dif
 	screen.back_requested.connect(_return_to_lobby)
 	screen.restart_requested.connect(func():
 		SaveStore.clear_state(game_id,str(selected[0].id))
-		_start_game(game_id,selected,target_mode,difficulty_pref)
+		_start_game(game_id,selected,target_mode,difficulty_pref,false)
 	)
 	screen.pause_changed.connect(func(is_paused: bool):
 		if is_paused:
@@ -569,12 +706,21 @@ func _resume_entry(entry: Dictionary) -> void:
 	if selected.is_empty():
 		_open_game_picker(str(entry.gameId),str(entry.get("modeId","classic")))
 	else:
-		_start_game(str(entry.gameId),selected,str(entry.get("modeId","classic")))
+		var game_id := str(entry.gameId)
+		var preference := SaveStore.difficulty(game_id, str(selected[0].id))
+		_start_game(game_id, selected, str(entry.get("modeId","classic")), preference, true)
 
 
 func _continue_saved_game(game_id: String) -> void:
-	_close_top_modal()
-	_open_game_picker(game_id)
+	var matching: Array = SaveStore.resumable_sessions().filter(
+		func(entry): return str(entry.get("gameId", "")) == game_id
+	)
+	if matching.is_empty():
+		_open_game_picker(game_id)
+	elif matching.size() == 1:
+		_resume_entry(matching[0])
+	else:
+		_show_continue_dialog()
 
 
 func _show_random_game() -> void:
@@ -582,12 +728,10 @@ func _show_random_game() -> void:
 	if games.is_empty():
 		return
 	var result: Dictionary = games.pick_random()
-	_random_token += 1
-	var token := _random_token
 	var content := VBoxContainer.new()
 	content.alignment = BoxContainer.ALIGNMENT_CENTER
 	content.add_theme_constant_override("separation", 12)
-	var icon := ArtLibrary.picture("🎲", Vector2(74, 74))
+	var icon := ArtLibrary.semantic_picture("shuffle", "ui", Vector2(74, 74))
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	content.add_child(icon)
 	var title := PlaygroundUI.label("转盘转动中…", 32, PlaygroundUI.INK, 700)
@@ -598,9 +742,16 @@ func _show_random_game() -> void:
 	content.add_child(subtitle)
 	AudioFX.play("select")
 	var random_layer := _open_modal("随机游戏", content, [
-		{"text": "再转一次", "kind": "soft", "callback": func(): _close_top_modal(); _show_random_game()},
-		{"text": "就玩这个", "kind": "primary", "callback": _play_random_result.bind(str(result.id))},
+		{"text": "再转一次", "icon": "repeat", "kind": "soft", "callback": func(): _close_top_modal(); _show_random_game()},
+		{"text": "就玩这个", "icon": "play", "kind": "primary", "callback": _play_random_result.bind(str(result.id))},
 	], "今天玩什么？", false)
+	var accept_button: Button
+	for control in random_layer.find_children("*", "Button", true, false):
+		if control is Button and control.text == "就玩这个":
+			accept_button = control
+			break
+	if is_instance_valid(accept_button):
+		accept_button.disabled = true
 	for tick in 14:
 		if not is_instance_valid(title):
 			return
@@ -610,13 +761,17 @@ func _show_random_game() -> void:
 		await get_tree().create_timer(0.07 + tick * 0.006).timeout
 	if is_instance_valid(title):
 		title.text = str(result.title)
-		icon.text = str(result.icon)
-		subtitle.text = "转盘停在这里，马上出发！"
+		var old_icon := icon
+		icon = ArtLibrary.semantic_picture("continue", "ui", Vector2(74, 74))
+		icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		content.add_child(icon)
+		content.move_child(icon,0)
+		if is_instance_valid(old_icon):
+			old_icon.queue_free()
+		subtitle.text = "转盘停在这里，由你决定是否出发"
+		if is_instance_valid(accept_button):
+			accept_button.disabled = false
 		AudioFX.play("win")
-	await get_tree().create_timer(0.75).timeout
-	if token == _random_token and is_instance_valid(random_layer) and random_layer in modal_stack:
-		_close_top_modal()
-		_play_random_result(str(result.id))
 
 
 func _play_random_result(game_id: String) -> void:
@@ -628,14 +783,7 @@ func _play_random_result(game_id: String) -> void:
 	if modes.is_empty():
 		return
 	var definition: Dictionary = modes[0]
-	var minimum := int(definition.player_range[0])
-	var maximum := int(definition.player_range[1])
-	var selected := SaveStore.selected_profiles(game_id,minimum,maximum)
-	SaveStore.select_profiles(game_id,selected.map(func(player): return str(player.id)))
-	if selected.size() >= minimum:
-		_start_game(game_id,selected,str(definition.id))
-	else:
-		_open_game_picker(game_id,str(definition.id))
+	_open_game_picker(game_id,str(definition.id))
 
 
 func _reorder_game(from_id: String, to_id: String) -> void:
@@ -669,7 +817,7 @@ func _show_profile_manager() -> void:
 		var tint := PlaygroundUI.color(str(profile.color))
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 9)
-		row.add_child(PlaygroundUI.label(str(profile.avatar), 32, tint, 700))
+		row.add_child(ArtLibrary.profile_picture(profile, Vector2(44, 44)))
 		var copy := VBoxContainer.new()
 		copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		copy.add_child(PlaygroundUI.label(str(profile.name), 18, PlaygroundUI.INK, 700))
@@ -683,8 +831,8 @@ func _show_profile_manager() -> void:
 		content.add_child(PlaygroundUI.label("还没有儿童档案。先给孩子建一个名字和年龄吧。", 17, PlaygroundUI.INK_SOFT, 500, true))
 	var actions := []
 	if SaveStore.profiles().size() < SaveStore.MAX_PROFILES:
-		actions.append({"text": "＋ 新建档案", "kind": "primary", "callback": func(): _close_top_modal(); _show_profile_form({})})
-	actions.append({"text": "关闭", "kind": "soft", "callback": func(): _close_top_modal()})
+		actions.append({"text": "新建档案", "icon": "profile", "kind": "primary", "callback": func(): _close_top_modal(); _show_profile_form({})})
+	actions.append({"text": "关闭", "kind": "soft", "callback": func(): _pending_preparation_game = ""; _close_top_modal()})
 	_open_modal("儿童档案", content, actions, "最多 8 位，数据只保存在本机", false)
 
 
@@ -697,7 +845,7 @@ func _show_profile_report(profile: Dictionary) -> void:
 	content.add_theme_constant_override("separation", 10)
 	var head := HBoxContainer.new()
 	head.add_theme_constant_override("separation", 10)
-	head.add_child(PlaygroundUI.label(str(profile.avatar), 36, tint, 700))
+	head.add_child(ArtLibrary.profile_picture(profile, Vector2(54, 54)))
 	var copy := VBoxContainer.new()
 	copy.add_child(PlaygroundUI.label(str(profile.name), 24, PlaygroundUI.INK, 700))
 	copy.add_child(PlaygroundUI.label("%s 岁 · 最近 40 场保存在本机" % profile.age, 13, PlaygroundUI.INK_SOFT, 500))
@@ -746,7 +894,7 @@ func _show_profile_report(profile: Dictionary) -> void:
 		var favorites: Array = story_learning.get("favorites", []) if story_learning.get("favorites") is Array else []
 		var story_note := HBoxContainer.new()
 		story_note.add_theme_constant_override("separation", 8)
-		var story_icon := ArtLibrary.picture("📚", Vector2(28, 28))
+		var story_icon := ArtLibrary.semantic_picture("story", "ui", Vector2(28, 28))
 		story_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		story_note.add_child(story_icon)
 		var story_text := PlaygroundUI.label("故事听读足迹：读过 %s 篇 · 收藏 %s 篇\n这些是听读记录，不作为语言能力评分；可以请孩子讲讲最喜欢的片段。" % [heard.size(), favorites.size()], 16, PlaygroundUI.INK_SOFT, 500, true)
@@ -768,7 +916,7 @@ func _show_profile_form(existing: Dictionary) -> void:
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var intro := HBoxContainer.new()
 	intro.add_theme_constant_override("separation", 10)
-	intro.add_child(ArtLibrary.picture("✨", Vector2(26, 26)))
+	intro.add_child(ArtLibrary.semantic_picture("profile", "ui", Vector2(26, 26)))
 	var intro_copy := PlaygroundUI.label("给孩子起个名字，再挑一个喜欢的头像和代表色。", 17, PlaygroundUI.INK_SOFT, 500, true)
 	intro_copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	intro.add_child(intro_copy)
@@ -809,15 +957,26 @@ func _show_profile_form(existing: Dictionary) -> void:
 	avatar_row.add_theme_constant_override("h_separation", 8)
 	avatar_row.add_theme_constant_override("v_separation", 8)
 	for avatar in AVATARS:
-		avatar_row.add_child(PlaygroundUI.choice_button(
-			avatar,
+		var avatar_button := PlaygroundUI.choice_button(
+			"",
 			brand,
 			avatar_group,
 			avatar,
 			avatar == starting_avatar,
 			Vector2(58, 54),
 			27
-		))
+		)
+		var avatar_index := maxi(0, AVATARS.find(avatar))
+		var avatar_picture := ArtLibrary.profile_picture(
+			{"avatar": avatar, "color": PROFILE_COLORS[avatar_index % PROFILE_COLORS.size()]},
+			Vector2(40, 40)
+		)
+		var avatar_center := CenterContainer.new()
+		avatar_center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		avatar_center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		avatar_center.add_child(avatar_picture)
+		avatar_button.add_child(avatar_center)
+		avatar_row.add_child(avatar_button)
 	form_right.add_child(_profile_form_section("头像", "每个孩子都可以选自己的小动物", avatar_row))
 	var color_names := {
 		"#d56c29": "橙色",
@@ -861,15 +1020,19 @@ func _show_profile_form(existing: Dictionary) -> void:
 			SaveStore.add_profile(name, age, avatar, tint)
 		else:
 			SaveStore.update_profile(str(existing.id), name, age, avatar, tint)
+		var reopen_game := _pending_preparation_game
+		_pending_preparation_game = ""
 		_close_top_modal()
 		_rebuild_lobby()
 		AudioFX.play("confirm")
+		if not reopen_game.is_empty():
+			call_deferred("_open_game_picker", reopen_game)
 	name_edit.text_submitted.connect(func(_text: String): save_profile.call())
 	_open_modal(
 		"编辑儿童档案" if not existing.is_empty() else "新建儿童档案",
 		content,
 		[
-			{"text": "取消", "kind": "ghost", "callback": func(): _close_top_modal()},
+			{"text": "取消", "kind": "ghost", "callback": func(): _pending_preparation_game = ""; _close_top_modal()},
 			{"text": "保存修改" if not existing.is_empty() else "保存档案", "kind": "primary", "callback": save_profile},
 		],
 		"名字和年龄会用于开局",
@@ -917,15 +1080,15 @@ func _show_settings() -> void:
 	content.add_theme_constant_override("separation", 10)
 	var settings := SaveStore.settings()
 	var labels := {
-		"soundOn": {"icon": "🔊", "text": "音效"},
-		"musicOn": {"icon": "🎹", "text": "背景音乐"},
-		"speechOn": {"icon": "🎤", "text": "中文朗读"},
-		"hapticsOn": {"icon": "✋", "text": "触感反馈"},
+		"soundOn": {"icon": "sound", "text": "音效"},
+		"musicOn": {"icon": "music", "text": "背景音乐"},
+		"speechOn": {"icon": "speech", "text": "中文朗读"},
+		"hapticsOn": {"icon": "haptics", "text": "触感反馈"},
 	}
 	for key in ["soundOn", "musicOn", "speechOn", "hapticsOn"]:
 		var state := "开" if bool(settings.get(key, true)) else "关"
 		var entry: Dictionary = labels[key]
-		content.add_child(PlaygroundUI.icon_text_button(str(entry["icon"]), "%s：%s" % [str(entry["text"]), state], Color("#167d74"), _toggle_setting.bind(key), "soft"))
+		content.add_child(PlaygroundUI.semantic_icon_button(str(entry["icon"]), "%s：%s" % [str(entry["text"]), state], Color("#167d74"), _toggle_setting.bind(key), "soft"))
 	content.add_child(NativeGameScreen.volume_controls(Color("#167d74")))
 	content.add_child(PlaygroundUI.separator())
 	content.add_child(PlaygroundUI.label("应用更新", 15, PlaygroundUI.INK_SOFT, 700))
@@ -950,7 +1113,7 @@ func _toggle_setting(key: String) -> void:
 func _on_update_available(info: Dictionary) -> void:
 	_pending_update = info
 	if is_instance_valid(lobby_root) and current_screen == null:
-		show_toast("发现新版本，可在顶部点击“更新”")
+		show_toast("发现新版本，可在“家长工具”中查看")
 		_rebuild_lobby()
 
 
@@ -1008,7 +1171,8 @@ func _open_modal(
 		opts["buttons"] = actions
 		opts["eyebrow"] = eyebrow
 		opts["dismissible"] = dismissible
-		opts["accent"] = Color("#167d74")
+		if not opts.has("accent"):
+			opts["accent"] = Color("#167d74")
 		if not opts.has("width"):
 			opts["width"] = 840.0
 		var managed: Control = dialogs.show_dialog(opts)
