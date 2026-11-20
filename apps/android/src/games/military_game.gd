@@ -187,9 +187,14 @@ func _refresh() -> void:
 		detail.text = "本局共走 %s 手，进度已经自动保存。" % int(engine.state.get("moveCount", 0))
 	else:
 		status.text = "残局练习：点自己的棋子，再点亮起的位置" if mode_id == "puzzle" else "%s走棋：点自己的棋子，再点亮起的位置" % engine.side_name(turn)
-		detail.text = "所有棋子都亮着；工兵可排雷，炸弹同归于尽，夺取军旗获胜。"
+		var selected_piece := engine.piece_at(selected)
+		if not selected_piece.is_empty():
+			var captures := targets.filter(func(target): return not engine.piece_at(int(target)).is_empty()).size()
+			detail.text = "%s：可走 %s 格 · 可吃 %s 枚" % [str(MilitaryRules.NAMES.get(str(selected_piece.kind), "棋子")), targets.size() - captures, captures]
+		else:
+			detail.text = "所有棋子都亮着；工兵可排雷，炸弹同归于尽，夺取军旗获胜。"
 		var battle: Dictionary = engine.state.get("lastBattle", {})
-		if not battle.is_empty():
+		if not battle.is_empty() and selected < 0:
 			detail.text = _battle_text(battle)
 
 
@@ -201,7 +206,11 @@ func _cell(position: int) -> void:
 	var action: Dictionary
 	if selected >= 0 and position in engine.legal_targets(selected):
 		action = {"type": "move", "to": position}
-	elif not piece.is_empty() and engine.can_select(piece):
+	elif position != selected and not piece.is_empty() and int(piece.side) == int(engine.state.turn):
+		if engine.legal_targets(position).is_empty():
+			SfxMap.play(&"error")
+			show_toast("%s不能移动" % str(MilitaryRules.NAMES.get(str(piece.kind), "这枚棋子")))
+			return
 		action = {"type": "select", "position": position}
 	else:
 		action = {"type": "deselect"}
@@ -291,7 +300,7 @@ func _open_puzzle(index: int) -> void:
 func _show_rules() -> void:
 	var lines := [
 		"棋盘横向摆放，双方各 25 枚棋子；军旗放在大本营，地雷放在后方。",
-		"棋子用数字和条纹数表示军衔：数字越大、条纹越多，军衔越高；炸弹、地雷、军旗和工兵用专属图形。",
+		"棋子用两位数字和九格刻度表示军衔：数字越大、亮起的刻度越多，军衔越高；炸弹、地雷、军旗用“特”字印章和专属图形。",
 		"右上角白圆点代表红方，白菱形代表蓝方。",
 		"这是明棋对弈：双方棋子全部亮着，红方先走，轮流走棋。",
 		"司令 > 军长 > 师长 > 旅长 > 团长 > 营长 > 连长 > 排长 > 工兵，大吃小，同级同归于尽。",

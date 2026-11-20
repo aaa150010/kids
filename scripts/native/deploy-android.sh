@@ -15,7 +15,11 @@ if [[ ! -f "$release_dir/latest.json" || ! -f "$release_dir/latest.sig" || ! -f 
 fi
 
 # Upload immutable narration files before making a matching APK/content index available.
-bash scripts/native/deploy-story-audio.sh
+if node -e "const a=require('./content-src/data/story-audio.json'); process.exit(Object.keys(a.assets||{}).length ? 0 : 1)"; then
+  bash scripts/native/deploy-story-audio.sh
+else
+  echo "故事音频索引为空，本版本跳过音频上传；随后发布只含文字与拼音的 APK/内容包。"
+fi
 
 version="$(node -e "console.log(require('./apps/android/version.json').versionName)")"
 code="$(node -e "console.log(require('./apps/android/version.json').versionCode)")"

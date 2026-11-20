@@ -17,10 +17,6 @@ const SILENT_DB := -48.0
 const SFX_COOLDOWN := {
 	"tap": 0.035,
 	"select": 0.045,
-	"shoot": 0.055,
-	"hit": 0.045,
-	"food": 0.12,
-	"sun": 0.08,
 	"flip": 0.04,
 }
 
@@ -117,7 +113,7 @@ func _configure_buses() -> void:
 
 
 func _prewarm_sfx() -> void:
-	for name in ["correct","wrong","turn","tap","select","back","pause","win","flip","pair","plant","sun","shoot","hit","food","mower","flag","boss","studio","title","whoosh","coin"]:
+	for name in ["correct","wrong","turn","tap","select","back","pause","win","flip","pair","studio","title","whoosh"]:
 		_sfx_stream(name)
 
 
@@ -215,30 +211,12 @@ func _recipe(name: String) -> Dictionary:
 			return _notes([660.0, 880.0], 0.04, [0.06, 0.08])
 		"pair":
 			return _notes([783.99, 987.77, 1174.66], 0.07, [0.1, 0.1, 0.24])
-		"plant":
-			return _notes([196.0, 293.66, 392.0], 0.06, [0.09, 0.09, 0.16])
-		"sun":
-			return _notes([1046.5, 1318.51], 0.05, [0.07, 0.13])
-		"shoot":
-			return _notes([880.0], 0.025, [0.045])
-		"hit":
-			return _notes([150.0, 110.0], 0.04, [0.05, 0.08])
-		"food":
-			return _notes([110.0, 92.0], 0.08, [0.09, 0.1])
-		"mower":
-			return _notes([220.0, 330.0, 440.0], 0.055, [0.08, 0.08, 0.18])
-		"flag":
-			return _notes([392.0, 523.25, 659.25], 0.1, [0.15, 0.15, 0.28])
-		"boss":
-			return _notes([130.81, 146.83, 130.81, 98.0], 0.18, [0.25, 0.25, 0.25, 0.45])
 		"studio":
 			return _notes([261.63, 329.63, 392.0], 0.11, [0.16, 0.16, 0.34])
 		"title":
 			return _notes([523.25, 659.25, 783.99, 1046.5], 0.1, [0.16, 0.16, 0.16, 0.36])
 		"whoosh":
 			return _notes([196.0, 246.94, 329.63, 440.0], 0.06, [0.08, 0.08, 0.08, 0.18])
-		"coin":
-			return _notes([987.77, 1318.51], 0.045, [0.07, 0.16])
 		_:
 			return _notes([523.25], 0.05, [0.1])
 

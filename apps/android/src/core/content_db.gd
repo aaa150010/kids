@@ -197,3 +197,12 @@ func military_formations() -> Array:
 
 func military_puzzles() -> Array:
 	return military.get("puzzles", [])
+
+
+func chess_puzzles() -> Array:
+	return puzzles.get("chess", [])
+
+
+func sudoku_puzzles() -> Array:
+	var value: Variant = _json_dictionary("sudoku.json").get("puzzles", [])
+	return value if value is Array else []

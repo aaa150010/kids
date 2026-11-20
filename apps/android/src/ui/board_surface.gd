@@ -8,6 +8,7 @@ var game_id := "gomoku"
 var state: Dictionary = {}
 var legal: Array = []
 var interactive := true
+var face_to_face := false
 var show_numbers := false
 var focused := -1
 var pressed := false
@@ -45,7 +46,9 @@ func metrics() -> Dictionary:
 	var columns := 15 if game_id == "gomoku" else 9 if game_id == "jungle" else 12
 	var rows := 15 if game_id == "gomoku" else 7 if game_id == "jungle" else 5
 	var padding := 24.0
-	var spacing := minf((size.x-padding)/float(columns if game_id != "gomoku" else 14),(size.y-padding)/float(rows if game_id != "gomoku" else 14))
+	var horizontal_units := float(columns) + 0.2 if game_id != "gomoku" else 15.2
+	var vertical_units := float(rows) + 0.2 if game_id != "gomoku" else 15.2
+	var spacing := minf((size.x - padding) / horizontal_units, (size.y - padding) / vertical_units)
 	var extent := Vector2(columns if game_id != "gomoku" else 14,rows if game_id != "gomoku" else 14)*spacing
 	var origin := (size-extent)*0.5
 	if game_id != "gomoku":
@@ -150,6 +153,8 @@ func _draw() -> void:
 		_draw_gomoku(gap)
 	else:
 		_draw_grid(gap)
+	if game_id == "jungle":
+		_draw_move_hints(gap)
 	if _tooltip_index >= 0:
 		_draw_tooltip(gap)
 	if focused >= 0 and pressed and interactive and _tooltip_index < 0:
@@ -190,7 +195,7 @@ func _draw_gomoku(gap: float) -> void:
 		if show_numbers:
 			var number := int(_move_numbers.get(index,0))
 			if number > 0:
-				_text(str(number),center,gap*0.28,Color.WHITE if int(board[index]) == 0 else Color("#37322a"))
+				_facing_text(str(number), center, gap * 0.28, Color.WHITE if int(board[index]) == 0 else Color("#37322a"), int(board[index]))
 	var line: Array = state.get("winningLine",[])
 	for order in line.size():
 		var index := int(line[order])
@@ -241,8 +246,9 @@ func _draw_grid(gap: float) -> void:
 		else:
 			marker = "行营" if index in BoardRules.CAMPS else "大本营" if index in BoardRules.HEADQUARTERS else ""
 		if not marker.is_empty():
-			_text(marker,center,gap*0.2,Color("#827759"))
-		if index in legal:
+			var marker_side := 0 if index % 9 < 4 else 1
+			_facing_text(marker, center, gap * 0.2, Color("#827759"), marker_side)
+		if game_id == "gomoku" and index in legal:
 			# 合法落点：半透明主色圆片 + 中心实心点，轻微呼吸缩放
 			draw_circle(center,gap*(0.30+0.035*breath),Color(0.88,0.67,0.20,0.35))
 			draw_circle(center,gap*(0.10+0.012*breath),Color("#e1ac35"))
@@ -289,22 +295,22 @@ func _draw_grid(gap: float) -> void:
 				_text("?",draw_center,gap*0.4*flip_width,Color("#fff6d6"))
 			continue
 		if game_id == "jungle":
+			var piece_angle := TabletopLayout.facing_angle(int(piece.side), face_to_face)
 			var shadow_center := draw_center + Vector2(0, gap * 0.37)
 			draw_circle(shadow_center, gap * 0.32, Color(0, 0, 0, 0.16))
 			draw_circle(draw_center, gap * 0.43, Color(tint, 0.16))
 			draw_arc(draw_center, gap * 0.43, 0, TAU, 40, tint, 3.5, true)
 			var texture := ArtLibrary.jungle_piece(str(piece.kind))
 			if texture != null:
-				draw_texture_rect(texture, Rect2(draw_center - Vector2(gap * 0.41, gap * 0.44), Vector2(gap * 0.82, gap * 0.82)), false)
-			var badge_center := draw_center + Vector2(gap * 0.30, gap * 0.28)
+				draw_set_transform(draw_center, piece_angle, Vector2.ONE)
+				draw_texture_rect(texture, Rect2(Vector2(-gap * 0.41, -gap * 0.44), Vector2(gap * 0.82, gap * 0.82)), false)
+				draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			draw_set_transform(draw_center, piece_angle, Vector2.ONE)
+			var badge_center := Vector2(gap * 0.30, gap * 0.28)
 			draw_circle(badge_center, gap * 0.15, tint)
 			_text(str(BoardRules.ANIMALS[piece.kind]), badge_center, gap * 0.13, Color.WHITE)
-			var opposite_badge := draw_center + Vector2(-gap * 0.30, -gap * 0.28)
-			draw_set_transform(opposite_badge, PI, Vector2.ONE)
-			draw_circle(Vector2.ZERO, gap * 0.15, tint)
-			_text(str(BoardRules.ANIMALS[piece.kind]), Vector2.ZERO, gap * 0.13, Color.WHITE)
+			_text(str(BoardRules.NAMES[piece.kind]), Vector2(0, gap * 0.40), gap * 0.16, tint)
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-			_text(str(BoardRules.NAMES[piece.kind]), draw_center + Vector2(0, gap * 0.40), gap * 0.16, tint)
 		else:
 			var rect := Rect2(draw_center-Vector2(gap*0.38*flip_width,gap*0.4),Vector2(gap*0.76*flip_width,gap*0.8))
 			draw_style_box(PlaygroundUI.style(Color("#fff9ec"),12,tint,3,4,Color(0,0,0,0.15)),rect)
@@ -313,7 +319,10 @@ func _draw_grid(gap: float) -> void:
 		if selected:
 			draw_arc(draw_center,gap*0.47,0,TAU,40,Color("#e6ae2e"),4,true)
 		if game_id == "jungle" and index in BoardRules.TRAPS[1-int(piece.side)]:
-			_text("↓",draw_center+Vector2(gap*0.31,gap*0.30),gap*0.24,Color("#b43b2b"))
+			var marker_angle := TabletopLayout.facing_angle(int(piece.side), face_to_face)
+			draw_set_transform(draw_center, marker_angle, Vector2.ONE)
+			_text("↓", Vector2(gap * 0.31, gap * 0.30), gap * 0.24, Color("#b43b2b"))
+			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var last_capture: Dictionary = state.get("lastMove",{}).get("captured",{})
 	if game_id != "gomoku" and not last_capture.is_empty() and motion < 1.0:
 		var last_to := int(state.get("lastMove",{}).get("to",-1))
@@ -323,7 +332,10 @@ func _draw_grid(gap: float) -> void:
 			if game_id == "jungle":
 				var texture := ArtLibrary.jungle_piece(str(last_capture.get("kind","")))
 				if texture != null:
-					draw_texture_rect(texture,Rect2(center-Vector2(gap*0.30,gap*0.38),Vector2(gap*0.60,gap*0.56)),false,Color(1,1,1,alpha*0.75))
+					var capture_angle := TabletopLayout.facing_angle(int(last_capture.get("side", 0)), face_to_face)
+					draw_set_transform(center, capture_angle, Vector2.ONE)
+					draw_texture_rect(texture, Rect2(Vector2(-gap * 0.30, -gap * 0.38), Vector2(gap * 0.60, gap * 0.56)), false, Color(1, 1, 1, alpha * 0.75))
+					draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 			else:
 				_text(str(BoardRules.NAMES.get(str(last_capture.get("kind","")),"棋子")),center,gap*0.22,Color(0.55,0.28,0.24,alpha))
 
@@ -332,6 +344,11 @@ func _text(value: String, center: Vector2, font_size: float, tint: Color) -> voi
 	var font := PlaygroundUI.font()
 	var width := font.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels).x
 	draw_string(font,center+Vector2(-width*0.5,pixels*0.35),value,HORIZONTAL_ALIGNMENT_LEFT,-1,pixels,tint)
+
+func _facing_text(value: String, center: Vector2, font_size: float, tint: Color, side: int) -> void:
+	draw_set_transform(center, TabletopLayout.facing_angle(side, face_to_face), Vector2.ONE)
+	_text(value, Vector2.ZERO, font_size, tint)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 func _gui_input(event: InputEvent) -> void:
 	if _blocked_by_dialog():
@@ -461,9 +478,13 @@ func _index_at(point: Vector2) -> int:
 	var limit := float(layout.spacing)*0.7
 	if game_id == "gomoku":
 		limit = maxf(float(layout.spacing)*0.85,22.0)
-	if point.distance_to(Vector2(layout.origin)+Vector2(col,row)*float(layout.spacing)) > limit:
+	var visual_point := Vector2(layout.origin) + Vector2(col, row) * float(layout.spacing)
+	if point.distance_to(visual_point) > limit:
 		return -1
 	return row*15+col if game_id == "gomoku" else row*9+col if game_id == "jungle" else col*5+row
+
+func is_blank_at(point: Vector2) -> bool:
+	return _index_at(point) < 0
 
 # --- 自绘动画辅助 ---
 
@@ -486,6 +507,57 @@ func _draw_error_mark(center: Vector2, gap: float) -> void:
 	draw_line(center-Vector2(arm,arm),center+Vector2(arm,arm),Color(0.86,0.31,0.24,alpha),3,true)
 	draw_line(center-Vector2(arm,-arm),center+Vector2(arm,-arm),Color(0.86,0.31,0.24,alpha),3,true)
 
+
+func _draw_move_hints(gap: float) -> void:
+	if legal.is_empty():
+		return
+	var selected_id := str(state.get("selected", ""))
+	if selected_id.is_empty():
+		return
+	var selected_piece: Dictionary = {}
+	for piece in state.get("pieces", []):
+		if str(piece.get("id", "")) == selected_id:
+			selected_piece = piece
+			break
+	if selected_piece.is_empty():
+		return
+	var start := position_for(int(selected_piece.position))
+	var kind := str(selected_piece.get("kind", ""))
+	var pulse := _breath()
+	var route := Color("#d56c29")
+	route.a = 0.32
+	var selected_row := int(int(selected_piece.position) / 9)
+	for value in legal:
+		var target := int(value)
+		var finish := position_for(target)
+		if kind in ["lion", "tiger"] and absi(int(target / 9) - selected_row) > 1:
+			_draw_dashed(start, finish, route, maxf(2.0, gap * 0.045), gap * 0.20)
+		else:
+			draw_line(start, finish, route, maxf(2.0, gap * 0.045), true)
+		var captured := not _piece_at(target).is_empty()
+		if captured:
+			var radius := gap * (0.51 + 0.025 * pulse)
+			draw_circle(finish, radius, Color(0.88, 0.28, 0.22, 0.10))
+			draw_arc(finish, radius, 0, TAU, 38, Color("#e04b3f"), maxf(3.0, gap * 0.045), true)
+			draw_circle(finish + Vector2(0, -radius), gap * 0.07, Color("#e04b3f"))
+		else:
+			draw_circle(finish, gap * (0.24 + 0.025 * pulse), Color(0.88, 0.28, 0.22, 0.16))
+			draw_circle(finish, gap * (0.115 + 0.01 * pulse), Color("#e04b3f"))
+			draw_circle(finish, gap * 0.04, Color("#fff7df"))
+
+
+func _draw_dashed(start: Vector2, finish: Vector2, tint: Color, width: float, dash: float) -> void:
+	var delta := finish - start
+	var length := delta.length()
+	if length < 1.0:
+		return
+	var direction := delta / length
+	var cursor := 0.0
+	while cursor < length:
+		var end := minf(cursor + dash * 0.62, length)
+		draw_line(start + direction * cursor, start + direction * end, tint, width, true)
+		cursor += dash
+
 func _piece_at(index: int) -> Dictionary:
 	for piece in state.get("pieces",[]):
 		if int(piece.get("position",-1)) == index:
@@ -506,13 +578,17 @@ func _draw_tooltip(gap: float) -> void:
 	var width := maxf(gap*4.2,180.0)
 	var height := maxf(gap*1.3,46.0)
 	var center := position_for(_tooltip_index)
-	var box_center := center+Vector2(0,-gap*1.55)
-	box_center.x = clampf(box_center.x,width*0.5+6.0,size.x-width*0.5-6.0)
-	box_center.y = clampf(box_center.y,height*0.5+6.0,size.y-height*0.5-6.0)
-	var rect := Rect2(box_center-Vector2(width*0.5,height*0.5),Vector2(width,height))
+	var angle := TabletopLayout.facing_angle(int(state.get("turn", 0)), face_to_face)
+	var box_center := center + Vector2(0, -gap * 1.55).rotated(angle)
+	var visual_extent := Vector2(height, width) if face_to_face else Vector2(width, height)
+	box_center.x = clampf(box_center.x, visual_extent.x * 0.5 + 6.0, size.x - visual_extent.x * 0.5 - 6.0)
+	box_center.y = clampf(box_center.y, visual_extent.y * 0.5 + 6.0, size.y - visual_extent.y * 0.5 - 6.0)
+	draw_set_transform(box_center, angle, Vector2.ONE)
+	var rect := Rect2(Vector2(-width * 0.5, -height * 0.5), Vector2(width, height))
 	draw_style_box(PlaygroundUI.style(Color("#fffdf4"),16,Color("#b98a3e"),2,6,Color(0,0,0,0.2)),rect)
-	_text(title,box_center+Vector2(0,-height*0.16),gap*0.22,Color("#4a3a22"))
-	_text(caption,box_center+Vector2(0,height*0.2),gap*0.18,Color("#7a6644"))
+	_text(title, Vector2(0, -height * 0.16), gap * 0.22, Color("#4a3a22"))
+	_text(caption, Vector2(0, height * 0.2), gap * 0.18, Color("#7a6644"))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 func _jungle_caption(kind: String) -> String:
 	if kind == "rat":

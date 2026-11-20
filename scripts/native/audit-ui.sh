@@ -11,8 +11,24 @@ if [[ ! -x "$godot_bin" ]]; then
   exit 1
 fi
 
-"$godot_bin" --headless --editor --quit --path "$project_root/apps/android"
-"$godot_bin" \
+audit_dir="$project_root/build/ui-audit"
+mkdir -p "$audit_dir"
+
+run_audit_stage() {
+  local stage_name="$1"
+  shift
+  local stage_log="$audit_dir/$stage_name.log"
+  if ! "$godot_bin" "$@" 2>&1 | tee "$stage_log"; then
+    return 1
+  fi
+  if rg -q 'SCRIPT ERROR:|Parse Error:|Compile Error:|Failed to load script|Failed to instantiate|Out of bounds' "$stage_log"; then
+    echo "原生截图审计失败，请查看：$stage_log" >&2
+    return 1
+  fi
+}
+
+run_audit_stage import --headless --editor --quit --path "$project_root/apps/android"
+run_audit_stage capture \
   --path "$project_root/apps/android" \
   --script res://tests/ui_snapshot.gd \
   --rendering-method gl_compatibility

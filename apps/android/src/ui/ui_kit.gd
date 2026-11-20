@@ -281,6 +281,43 @@ static func icon_button(symbol: String, tint: Color, on_pressed: Callable, toolt
 	return node
 
 
+static func icon_asset_button(icon_token: String, tint: Color, on_pressed: Callable, tooltip: String = "") -> Button:
+	var node := button("", tint, on_pressed, "soft")
+	node.custom_minimum_size = Vector2(52, 52)
+	node.tooltip_text = tooltip
+	var icon := ArtLibrary.picture(icon_token, Vector2(28, 28))
+	icon.name = "ButtonIcon"
+	icon.size = Vector2(28, 28)
+	icon.position = Vector2(12, 12)
+	node.add_child(icon)
+	node.resized.connect(func():
+		if is_instance_valid(icon):
+			icon.position = (node.size - Vector2(28, 28)) * 0.5
+	)
+	return node
+
+
+static func icon_text_button(icon_token: String, text: String, tint: Color, on_pressed: Callable, kind: String = "soft", font_size: int = 19) -> Button:
+	var node := button(text, tint, on_pressed, kind)
+	node.add_theme_font_size_override("font_size", font_size)
+	var icon := ArtLibrary.picture(icon_token, Vector2(28, 28))
+	icon.name = "ButtonIcon"
+	icon.size = Vector2(28, 28)
+	icon.position = Vector2(18, 14)
+	node.add_child(icon)
+	for state in ["normal", "hover", "pressed", "focus", "disabled"]:
+		var box := node.get_theme_stylebox(state)
+		if box is StyleBoxFlat:
+			var copy := box.duplicate() as StyleBoxFlat
+			copy.content_margin_left += 36
+			node.add_theme_stylebox_override(state, copy)
+	node.resized.connect(func():
+		if is_instance_valid(icon):
+			icon.position = Vector2(18, (node.size.y - 28) * 0.5)
+	)
+	return node
+
+
 static func choice_button(
 	text: String,
 	accent: Color,
@@ -341,10 +378,25 @@ static func text_field(placeholder: String, value: String, accent: Color) -> Lin
 static func chip(text: String, accent: Color) -> PanelContainer:
 	var node := panel(mix(accent, Color.WHITE, 0.82), 999, mix(accent, Color.WHITE, 0.3), 1)
 	node.custom_minimum_size = Vector2(0, 34)
-	var content := label(text, 14, mix(accent, Color.BLACK, 0.25), 700)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 5)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var label_text := text
+	var icon_token := ""
+	for symbol in ArtLibrary.symbols(text):
+		if text.begins_with(str(symbol)):
+			icon_token = str(symbol)
+			label_text = text.substr(icon_token.length()).strip_edges()
+			break
+	if not icon_token.is_empty():
+		var icon_node := ArtLibrary.picture(icon_token, Vector2(20, 20))
+		icon_node.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(icon_node)
+	var content := label(label_text, 14, mix(accent, Color.BLACK, 0.25), 700)
 	content.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_theme_constant_override("outline_size", 0)
-	node.add_child(content)
+	row.add_child(content)
+	node.add_child(row)
 	return node
 
 

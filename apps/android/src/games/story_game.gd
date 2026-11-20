@@ -3,7 +3,8 @@ extends NativeGameScreen
 
 const PAGE_SIZE := 18
 const CATEGORY_NAMES := {"all":"全部", "idiom":"成语故事", "myth":"神话故事", "folk":"民间故事", "fable":"寓言故事", "history":"历史典故", "fairy":"中外童话"}
-const CATEGORY_ICONS := {"all":"📚", "idiom":"📜", "myth":"🐉", "folk":"🏮", "fable":"🦊", "history":"🏯", "fairy":"🏰"}
+const CATEGORY_ICONS := {"all":"📚", "idiom":"📜", "myth":"🐉", "folk":"🏮", "fable":"🦊", "history":"🏯", "fairy":"✨"}
+const FILTER_NAMES := ["全库故事", "适龄推荐", "我的收藏", "最近读过"]
 var session := StorySession.new()
 var narrator: AudioStreamPlayer
 var _position := 0.0
@@ -16,6 +17,7 @@ var _reader_scroll: ScrollContainer
 var reader_tools: Control
 var _paragraphs: Array[PanelContainer] = []
 var _audio_label: Label
+var _audio_icon: TextureRect
 var _play_button: Button
 var _timeline: HSlider
 var _time_label: Label
@@ -35,6 +37,9 @@ var _reader_generation := 0
 var _reading_dirty := false
 var _reading_save_clock := 0.0
 var _output_latency := -1.0
+var _tts_mode := false
+var _tts_paragraph := 0
+var _tts_wait := 0.0
 
 
 func _ready() -> void:
@@ -79,10 +84,14 @@ func _render() -> void:
 	_cards_root = null
 	_timeline = null
 	_audio_label = null
+	_audio_icon = null
 	_play_button = null
 	_time_label = null
 	_paragraphs.clear()
 	_highlighted = -1
+	_tts_mode = false
+	_tts_paragraph = 0
+	_tts_wait = 0.0
 	PlaygroundUI.clear(content_root)
 	if session.state.phase == "reading" and not _story().is_empty():
 		_render_reader()
@@ -116,42 +125,76 @@ func _resume_position(story_id: String) -> float:
 
 func _render_library() -> void:
 	var heading := HBoxContainer.new()
-	var greeting := PlaygroundUI.label("📚 %s的故事书架" % players[0].name, 26, accent, 700)
+	heading.add_theme_constant_override("separation", 10)
+	var title_row := HBoxContainer.new()
+	title_row.add_theme_constant_override("separation", 8)
+	title_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	title_row.add_child(ArtLibrary.picture("📚", Vector2(34, 34)))
+	var greeting := PlaygroundUI.label("%s的故事书架" % players[0].name, 26, accent, 700)
 	greeting.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	heading.add_child(greeting)
-	heading.add_child(PlaygroundUI.button("↓ 下载管理", accent, _show_downloads, "soft"))
+	title_row.add_child(greeting)
+	heading.add_child(title_row)
+	heading.add_child(PlaygroundUI.icon_text_button("🔊", "系统朗读", accent, _show_system_tts_info))
 	content_root.add_child(heading)
 	var categories := HFlowContainer.new()
 	categories.add_theme_constant_override("h_separation", 8)
 	categories.add_theme_constant_override("v_separation", 8)
 	for key in StorySession.CATEGORIES:
-		var button := PlaygroundUI.button(str(CATEGORY_ICONS[key]) + " " + str(CATEGORY_NAMES[key]), accent, _set_category.bind(str(key)), "primary" if session.state.category == key else "soft")
+		var button := PlaygroundUI.icon_text_button(
+			str(CATEGORY_ICONS[key]),
+			str(CATEGORY_NAMES[key]),
+			accent,
+			_set_category.bind(str(key)),
+			"primary" if session.state.category == key else "soft",
+			18
+		)
 		button.custom_minimum_size.y = 48
-		button.add_theme_font_size_override("font_size", 18)
 		categories.add_child(button)
 	content_root.add_child(categories)
 	var search_row := HBoxContainer.new()
 	search_row.add_theme_constant_override("separation", 8)
-	var search := LineEdit.new()
-	search.placeholder_text = "找故事：输入故事名、人物或成语"
-	search.text = str(session.state.query)
-	search.custom_minimum_size.y = 48
+	var search := PlaygroundUI.text_field("找故事：输入故事名、人物或成语", str(session.state.query), accent)
+	search.custom_minimum_size.y = 50
 	search.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	search.add_theme_font_size_override("font_size", 20)
-	search.add_theme_stylebox_override("normal", PlaygroundUI.style(Color.WHITE, 16, accent, 1))
 	search.text_changed.connect(func(value: String):
 		session.handle_input({"type":"query", "value":value})
 		_search_timer.start()
 	)
 	search.text_submitted.connect(func(_value: String): _search_timer.stop(); _on_search_settled())
 	search_row.add_child(search)
-	var filters := OptionButton.new()
-	filters.custom_minimum_size = Vector2(175, 48)
-	filters.add_theme_font_size_override("font_size", 20)
-	for name in ["全库故事", "适龄推荐", "我的收藏", "最近读过", "已下载音频"]: filters.add_item(name)
-	filters.select(StorySession.FILTERS.find(str(session.state.filter)))
-	filters.item_selected.connect(func(index: int):
-		session.handle_input({"type":"filter", "value":StorySession.FILTERS[index]})
+	var filters := MenuButton.new()
+	filters.custom_minimum_size = Vector2(184, 48)
+	filters.text = _story_filter_label(str(session.state.filter)) + "  ▾"
+	filters.alignment = HORIZONTAL_ALIGNMENT_CENTER
+	filters.flat = false
+	filters.add_theme_font_size_override("font_size", 19)
+	var soft_filter := PlaygroundUI.mix(accent, Color.WHITE, 0.86)
+	filters.add_theme_stylebox_override("normal", PlaygroundUI.style(soft_filter, 16, accent, 2))
+	filters.add_theme_stylebox_override("hover", PlaygroundUI.style(PlaygroundUI.mix(accent, Color.WHITE, 0.76), 16, accent, 2))
+	filters.add_theme_stylebox_override("pressed", PlaygroundUI.style(accent, 16, accent, 2))
+	filters.add_theme_stylebox_override("focus", PlaygroundUI.style(soft_filter, 16, accent, 2))
+	filters.add_theme_color_override("font_color", accent)
+	filters.add_theme_color_override("font_hover_color", accent)
+	filters.add_theme_color_override("font_pressed_color", Color.WHITE)
+	var blank_image := Image.create(2, 2, false, Image.FORMAT_RGBA8)
+	blank_image.fill(Color(0, 0, 0, 0))
+	filters.add_theme_icon_override("arrow", ImageTexture.create_from_image(blank_image))
+	var popup := filters.get_popup()
+	popup.add_theme_stylebox_override("panel", PlaygroundUI.style(PlaygroundUI.PAPER, 16, accent, 2, 5, Color(0, 0, 0, 0.16)))
+	popup.add_theme_stylebox_override("hover", PlaygroundUI.style(accent, 10, accent, 0))
+	popup.add_theme_font_size_override("font_size", 18)
+	popup.add_theme_color_override("font_color", PlaygroundUI.INK)
+	popup.add_theme_color_override("font_hover_color", Color.WHITE)
+	popup.add_theme_constant_override("v_separation", 10)
+	popup.add_theme_constant_override("item_start_padding", 14)
+	popup.add_theme_constant_override("item_end_padding", 14)
+	for index in StorySession.FILTERS.size():
+		popup.add_item(FILTER_NAMES[index], index)
+		popup.set_item_checked(index, str(session.state.filter) == str(StorySession.FILTERS[index]))
+	popup.index_pressed.connect(func(index: int):
+		var key := str(StorySession.FILTERS[index])
+		filters.text = str(FILTER_NAMES[index]) + "  ▾"
+		session.handle_input({"type":"filter", "value":key})
 		_save("切换故事筛选")
 		_render_cards()
 	)
@@ -174,6 +217,11 @@ func _on_search_settled() -> void:
 	_render_cards()
 
 
+func _story_filter_label(filter_key: String) -> String:
+	var index := StorySession.FILTERS.find(filter_key)
+	return FILTER_NAMES[index] if index >= 0 and index < FILTER_NAMES.size() else FILTER_NAMES[0]
+
+
 func _select_stories() -> Array:
 	var results: Array = []
 	var query := str(session.state.query).strip_edges().to_lower()
@@ -187,8 +235,6 @@ func _select_stories() -> Array:
 				if not (story_id in session.state.favorites): continue
 			"recent":
 				if not (story_id in session.state.recent): continue
-			"downloaded":
-				if not StoryAudio.is_cached(story_id): continue
 		if not query.is_empty() and not (query in str(story.get("searchText", story.title)).to_lower()): continue
 		results.append(story)
 	if session.state.filter == "recent":
@@ -224,7 +270,15 @@ func _render_cards() -> void:
 			var pinyin_label := PlaygroundUI.label(title_pinyin, 14, PlaygroundUI.INK_SOFT, 500, true)
 			pinyin_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 			title_box.add_child(pinyin_label)
-		title_box.add_child(PlaygroundUI.label(str(CATEGORY_ICONS.get(str(story.category), "📖")) + " " + str(story.title), 24, accent, 700, true))
+		var title_row := HBoxContainer.new()
+		title_row.add_theme_constant_override("separation", 6)
+		var category_icon := ArtLibrary.picture(str(CATEGORY_ICONS.get(str(story.category), "📖")), Vector2(26, 26))
+		category_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		title_row.add_child(category_icon)
+		var title_label := PlaygroundUI.label(str(story.title), 24, accent, 700, true)
+		title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		title_row.add_child(title_label)
+		title_box.add_child(title_row)
 		column.add_child(title_box)
 		var opening := str(story.paragraphs[0].text) if not story.paragraphs.is_empty() else "翻开故事，一起听读。"
 		column.add_child(PlaygroundUI.label(opening.left(48) + ("……" if opening.length() > 48 else ""), 18, PlaygroundUI.INK_SOFT, 500, true))
@@ -235,18 +289,20 @@ func _render_cards() -> void:
 		label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tools.add_child(label)
 		tools.add_child(PlaygroundUI.button("看故事", accent, _open_story.bind(str(story.id), false), "soft"))
-		var audio_available := StoryAudio.available(str(story.id))
-		var listen := PlaygroundUI.button(
-			"听故事" if StoryAudio.is_cached(str(story.id)) else "下载听" if audio_available else "音频准备中",
-			accent,
-			_open_story.bind(str(story.id), true)
-		)
-		listen.disabled = not audio_available
+		var listen := PlaygroundUI.icon_text_button("🔊", "系统朗读", accent, _open_story.bind(str(story.id), true), "primary", 18)
 		tools.add_child(listen)
 		column.add_child(tools)
 		grid.add_child(card)
 	if _filtered.is_empty():
-		grid.add_child(PlaygroundUI.label("📖 这里还没有故事\n试试其他分类，或选择“全库故事”。", 25, PlaygroundUI.INK_SOFT, 500, true))
+		var empty := VBoxContainer.new()
+		empty.add_theme_constant_override("separation", 8)
+		var empty_icon := ArtLibrary.picture("📖", Vector2(64, 64))
+		empty_icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		empty.add_child(empty_icon)
+		var empty_label := PlaygroundUI.label("这里还没有故事\n试试其他分类，或选择“全库故事”。", 25, PlaygroundUI.INK_SOFT, 500, true)
+		empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		empty.add_child(empty_label)
+		grid.add_child(empty)
 	scroll.add_child(grid)
 	_cards_root.add_child(scroll)
 	var pagination := HBoxContainer.new()
@@ -274,6 +330,10 @@ func _open_story(story_id: String, listen: bool = false) -> void:
 	_save("切换故事前保存")
 	if not session.handle_input({"type":"open", "id":story_id}): return
 	_reader_scroll = null
+	_tts_mode = ContentDB.story_audio_entry(story_id).is_empty()
+	var story_paragraphs: Array = _story().get("paragraphs", [])
+	_tts_paragraph = clampi(int(session.bookmark().get("paragraph", 0)), 0, maxi(0, story_paragraphs.size() - 1))
+	_tts_wait = 0.0
 	_position = _resume_position(story_id)
 	_duration = float(ContentDB.story_audio_entry(story_id).get("duration", 0.0))
 	_follow_audio = true
@@ -289,6 +349,10 @@ func _open_story(story_id: String, listen: bool = false) -> void:
 func _render_reader() -> void:
 	_restoring_reading = true
 	var story := _story()
+	_tts_mode = ContentDB.story_audio_entry(str(story.id)).is_empty()
+	var story_paragraphs: Array = story.get("paragraphs", [])
+	_tts_paragraph = clampi(int(session.bookmark().get("paragraph", 0)), 0, maxi(0, story_paragraphs.size() - 1))
+	_tts_wait = 0.0
 	var tools := HFlowContainer.new()
 	tools.add_theme_constant_override("h_separation", 8)
 	tools.add_theme_constant_override("v_separation", 8)
@@ -317,17 +381,13 @@ func _render_reader() -> void:
 		panel.add_child(body)
 		paper.add_child(panel)
 		_paragraphs.append(panel)
-	var finish := HBoxContainer.new()
-	finish.add_theme_constant_override("separation", 12)
-	finish.add_child(PlaygroundUI.button("✓ 读完啦", accent, func(): _mark_complete(); show_toast("这篇读过啦，故事还会留在这里。"), "soft"))
-	finish.add_child(PlaygroundUI.button("下一篇 →", accent, _next_story))
-	paper.add_child(finish)
 	paper.add_child(PlaygroundUI.label("故事出处：%s\n%s" % [str(story.get("sourceLabel", "经典故事")), str(story.get("editorialNote", "传统故事的儿童中文改写。"))], 14, PlaygroundUI.INK_SOFT, 500, true))
 	_reader_scroll.add_child(paper)
 	_reader_scroll.get_v_scroll_bar().value_changed.connect(func(_value: float):
 		if not _programmatic_scroll and not _restoring_reading:
 			_follow_audio = false
-			_capture_reading()
+			if not (_tts_mode and _audio_active):
+				_capture_reading()
 			_reading_dirty = true
 			_reading_save_clock = 0.0
 	)
@@ -353,49 +413,93 @@ func _build_player() -> Control:
 	panel.add_child(column)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
-	_play_button = PlaygroundUI.button("Ⅱ 暂停" if _audio_active else "▶ 接着听" if _position > 0.0 else "▶ 听故事", accent, _toggle_audio)
+	var tts := _tts_mode
+	_play_button = PlaygroundUI.button("Ⅱ 暂停朗读" if _audio_active else "▶ 系统朗读" if tts else "Ⅱ 暂停" if _audio_active else "▶ 接着听" if _position > 0.0 else "▶ 听故事", accent, _toggle_audio)
 	row.add_child(_play_button)
-	row.add_child(PlaygroundUI.button("↶ 10秒", accent, _jump.bind(-10.0), "soft"))
-	row.add_child(PlaygroundUI.button("10秒 ↷", accent, _jump.bind(10.0), "soft"))
+	if not tts:
+		row.add_child(PlaygroundUI.button("↶ 10秒", accent, _jump.bind(-10.0), "soft"))
+		row.add_child(PlaygroundUI.button("10秒 ↷", accent, _jump.bind(10.0), "soft"))
 	row.add_child(PlaygroundUI.button("↺ 重听", accent, _restart_story, "soft"))
+	var finish := PlaygroundUI.button("✓ 读完啦", accent, func(): _mark_complete(); show_toast("这篇读过啦，故事还会留在这里。"), "soft")
+	finish.custom_minimum_size = Vector2(108, 48)
+	finish.add_theme_font_size_override("font_size", 17)
+	row.add_child(finish)
+	var next_story := PlaygroundUI.button("下一篇 →", accent, _next_story, "primary")
+	next_story.custom_minimum_size = Vector2(104, 48)
+	next_story.add_theme_font_size_override("font_size", 17)
+	row.add_child(next_story)
 	_time_label = PlaygroundUI.label("", 17, PlaygroundUI.INK_SOFT)
 	_time_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(_time_label)
-	row.add_child(PlaygroundUI.button("↓ 下载", accent, _show_downloads, "soft"))
+	if not tts:
+		row.add_child(PlaygroundUI.button("↓ 下载", accent, _show_downloads, "soft"))
 	column.add_child(row)
-	_timeline = HSlider.new()
-	_timeline.custom_minimum_size.y = 48
-	_timeline.min_value = 0.0
-	_duration = float(ContentDB.story_audio_entry(str(session.state.storyId)).get("duration", _duration))
-	_timeline.max_value = maxf(1.0, _duration)
-	_timeline.step = 0.1
-	_timeline.editable = _duration > 0.0
-	_timeline.drag_started.connect(func(): _dragging_slider = true)
-	_timeline.drag_ended.connect(func(changed_value: bool):
-		_dragging_slider = false
-		if changed_value: _seek(_timeline.value)
-	)
-	_timeline.value_changed.connect(func(value: float):
-		if not _updating_slider and not _dragging_slider: _seek(value)
-	)
-	column.add_child(_timeline)
+	if not tts:
+		_timeline = HSlider.new()
+		_timeline.custom_minimum_size.y = 48
+		_timeline.min_value = 0.0
+		_duration = float(ContentDB.story_audio_entry(str(session.state.storyId)).get("duration", _duration))
+		_timeline.max_value = maxf(1.0, _duration)
+		_timeline.step = 0.1
+		_timeline.editable = _duration > 0.0
+		_timeline.drag_started.connect(func(): _dragging_slider = true)
+		_timeline.drag_ended.connect(func(changed_value: bool):
+			_dragging_slider = false
+			if changed_value: _seek(_timeline.value)
+		)
+		_timeline.value_changed.connect(func(value: float):
+			if not _updating_slider and not _dragging_slider: _seek(value)
+		)
+		column.add_child(_timeline)
+	var status_row := HBoxContainer.new()
+	status_row.add_theme_constant_override("separation", 6)
+	_audio_icon = ArtLibrary.picture("🔊", Vector2(20, 20))
+	_audio_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	status_row.add_child(_audio_icon)
 	_audio_label = PlaygroundUI.label(_audio_status(), 15, PlaygroundUI.INK_SOFT, 500, true)
-	column.add_child(_audio_label)
+	_audio_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status_row.add_child(_audio_label)
+	column.add_child(status_row)
 	_refresh_player()
 	return panel
 
 
+func _audio_icon_token() -> String:
+	if not bool(SaveStore.settings().get("speechOn", true)): return "🚫"
+	if _tts_mode and not Speech.has_chinese_voice(): return "🚫"
+	if not _tts_mode and ContentDB.story_audio_entry(str(session.state.storyId)).is_empty(): return "📖"
+	if _tts_mode and _tts_paragraph >= _story_paragraph_count(): return "✅"
+	if not _tts_mode and not _audio_active and _duration > 0.0 and _position >= _duration - 0.1: return "✅"
+	return "🔊"
+
+
+func _set_audio_status(text: String) -> void:
+	if is_instance_valid(_audio_label): _audio_label.text = text
+	if is_instance_valid(_audio_icon): _audio_icon.texture = ArtLibrary.texture(_audio_icon_token())
+
+
 func _audio_status() -> String:
 	var story_id := str(session.state.storyId)
-	if not _pending_play.is_empty(): return "↓ 正在准备音频，文字可以先看。"
-	if not bool(SaveStore.settings().get("speechOn", true)): return "🗣 中文朗读已关闭，可在暂停面板的声音设置中开启。"
-	if StoryAudio.is_cached(story_id): return "✓ 音频已下载，可以离线听 · 切后台会暂停并自动保存"
-	if StoryAudio.available(story_id): return "↓ 首次听这篇需要联网下载，以后可以离线听。"
-	return "📖 文字已就绪，这篇音频暂未准备好。"
+	if _tts_mode:
+		if not bool(SaveStore.settings().get("speechOn", true)): return "中文朗读已关闭，可在暂停面板的声音设置中开启。"
+		if not Speech.has_chinese_voice(): return "平板没有检测到中文系统语音，请先在系统设置中安装中文 TTS。"
+		if _audio_active: return "正在使用平板自带中文语音朗读 · 音色由系统决定 · 切后台会暂停并自动保存"
+		return "使用平板自带中文语音，无需下载音频 · 音色由系统设置决定"
+	if not _pending_play.is_empty(): return "正在准备音频，文字可以先看。"
+	if not bool(SaveStore.settings().get("speechOn", true)): return "中文朗读已关闭，可在暂停面板的声音设置中开启。"
+	if StoryAudio.is_cached(story_id): return "音频已下载，可以离线听 · 切后台会暂停并自动保存"
+	if StoryAudio.available(story_id): return "首次听这篇需要联网下载，以后可以离线听。"
+	return "文字已就绪，这篇音频暂未准备好。"
 
 
 func _toggle_audio() -> void:
+	if _tts_mode:
+		if _audio_active:
+			_pause_audio()
+		else:
+			_request_play()
+		return
 	if _audio_active or not _pending_play.is_empty(): _pause_audio(); _save("暂停听故事")
 	else: _request_play()
 
@@ -405,10 +509,87 @@ func _request_play() -> void:
 	if not bool(SaveStore.settings().get("speechOn", true)):
 		show_toast("先在声音设置中打开中文朗读，再来听故事。")
 		return
+	if _tts_mode:
+		if not Speech.has_chinese_voice():
+			show_toast("平板没有检测到中文系统语音，请先在系统设置中安装中文 TTS。")
+			return
+		var count := _story_paragraph_count()
+		if count <= 0: return
+		if _tts_paragraph >= count:
+			_tts_paragraph = 0
+		_pending_play = ""
+		lesson_action("listen")
+		_start_system_tts(_tts_paragraph)
+		return
 	_pending_play = str(session.state.storyId)
 	_refresh_player()
 	lesson_action("listen")
 	StoryAudio.enqueue([_pending_play], true)
+
+
+func _story_paragraph_count() -> int:
+	var paragraphs: Variant = _story().get("paragraphs", [])
+	return paragraphs.size() if paragraphs is Array else 0
+
+
+func _start_system_tts(index: int) -> void:
+	var story := _story()
+	var paragraphs: Variant = story.get("paragraphs", [])
+	if not paragraphs is Array or paragraphs.is_empty():
+		return
+	_tts_paragraph = clampi(index, 0, paragraphs.size() - 1)
+	var text := str(paragraphs[_tts_paragraph].get("text", "")).strip_edges()
+	if _tts_paragraph == 0:
+		text = str(story.get("title", "")) + "。" + text
+	if not Speech.begin(text, 0.9):
+		_audio_active = false
+		_refresh_player()
+		show_toast("系统中文语音暂时不可用，请检查平板的中文 TTS 设置。")
+		return
+	_audio_active = true
+	_tts_wait = 0.0
+	_follow_audio = true
+	_update_highlight(true)
+	_save("系统朗读第 %s 段" % (_tts_paragraph + 1))
+	_refresh_player()
+
+
+func _advance_system_tts(delta: float) -> void:
+	if not _tts_mode or not _audio_active:
+		return
+	if Speech.is_speaking():
+		_tts_wait = 0.0
+		return
+	_tts_wait += delta
+	if _tts_wait < 0.35:
+		return
+	_tts_wait = 0.0
+	_tts_paragraph += 1
+	if _tts_paragraph >= _story_paragraph_count():
+		_finish_system_tts()
+	else:
+		_start_system_tts(_tts_paragraph)
+
+
+func _finish_system_tts() -> void:
+	_audio_active = false
+	_tts_wait = 0.0
+	Speech.stop()
+	AudioFX.set_music_duck(false)
+	_mark_complete()
+	AudioFX.play("win")
+	_refresh_player()
+	_set_audio_status("故事讲完啦，可以再看一遍，准备好再点下一篇。")
+
+
+func _show_system_tts_info() -> void:
+	_pause_audio()
+	var voice_hint := "已检测到中文系统语音。" if Speech.has_chinese_voice() else "当前未检测到中文系统语音，请在平板系统设置里安装中文 TTS。"
+	var text := "故事使用安卓平板自带的中文语音朗读，不下载音频，也不需要联网。\n\n音色、语速和停顿由平板系统决定；暂停后从当前段落继续。%s" % voice_hint
+	open_modal("系统朗读", PlaygroundUI.label(text, 20, PlaygroundUI.INK, 500, true), [
+		{"text": "试听系统语音", "kind": "soft", "callback": func(): Speech.speak("你好，我是平板自带的中文语音。")},
+		{"text": "知道啦", "kind": "primary", "callback": func(): _close_top_modal()},
+	], "无需下载")
 
 
 func _on_audio_ready(story_id: String, path: String) -> void:
@@ -440,6 +621,15 @@ func _on_audio_ready(story_id: String, path: String) -> void:
 
 func _pause_audio() -> void:
 	_pending_play = ""
+	if _tts_mode:
+		if _audio_active:
+			_save("暂停系统朗读")
+			Speech.stop()
+			_audio_active = false
+		_tts_wait = 0.0
+		AudioFX.set_music_duck(false)
+		_refresh_player()
+		return
 	var seeking := _dragging_slider and is_instance_valid(_timeline)
 	if _audio_active:
 		_position = _current_position()
@@ -453,7 +643,7 @@ func _pause_audio() -> void:
 
 
 func _seek(value: float) -> void:
-	if paused or _duration <= 0.0: return
+	if _tts_mode or paused or _duration <= 0.0: return
 	_position = clampf(value, 0.0, maxf(0.0, _duration - 0.05))
 	if _audio_active: narrator.seek(_position)
 	_follow_audio = true
@@ -474,13 +664,14 @@ func _current_position() -> float:
 
 
 func _on_audio_finished() -> void:
+	if _tts_mode: return
 	_audio_active = false
 	_position = _duration
 	AudioFX.set_music_duck(false)
 	_mark_complete()
 	AudioFX.play("win")
 	_refresh_player()
-	if is_instance_valid(_audio_label): _audio_label.text = "✓ 故事讲完啦，可以再看一遍，准备好再点下一篇。"
+	_set_audio_status("故事讲完啦，可以再看一遍，准备好再点下一篇。")
 
 
 func _mark_complete() -> void:
@@ -494,6 +685,17 @@ func _mark_complete() -> void:
 
 
 func _refresh_player() -> void:
+	if _tts_mode:
+		var count := maxi(1, _story_paragraph_count())
+		if is_instance_valid(_play_button):
+			_play_button.text = "Ⅱ 暂停朗读" if _audio_active else "▶ 再读一遍" if _tts_paragraph >= count else "▶ 继续朗读" if _tts_paragraph > 0 else "▶ 系统朗读"
+		if is_instance_valid(_time_label):
+			if _tts_paragraph >= count:
+				_time_label.text = "共 %s 段" % count
+			else:
+				_time_label.text = "第 %s / %s 段" % [mini(_tts_paragraph + 1, count), count]
+		_set_audio_status(_audio_status())
+		return
 	if is_instance_valid(_play_button):
 		_play_button.text = "Ⅱ 暂停" if _audio_active else "取消播放" if not _pending_play.is_empty() else "▶ 接着听" if _position > 0.0 else "▶ 听故事"
 	if is_instance_valid(_time_label): _time_label.text = _format_time(_current_position()) + " / " + _format_time(_duration)
@@ -503,7 +705,7 @@ func _refresh_player() -> void:
 		_timeline.value = _current_position()
 		_timeline.editable = _duration > 0.0
 		_updating_slider = false
-	if is_instance_valid(_audio_label): _audio_label.text = _audio_status()
+	_set_audio_status(_audio_status())
 
 
 func _format_time(seconds: float) -> String:
@@ -515,7 +717,7 @@ func _on_download_progress(story_id: String, received: int, total: int) -> void:
 	_transfers[story_id] = "%s %s%%" % [str(ContentDB.story(story_id).get("title", "音频")), int(100.0 * received / maxi(1, total))]
 	if is_instance_valid(_downloads_transfer): _downloads_transfer.text = "↓ " + "  ·  ".join(_transfers.values())
 	if story_id == _pending_play and is_instance_valid(_audio_label):
-		_audio_label.text = "↓ 正在下载 %s%% · 文字可以先看" % int(100.0 * received / maxi(1, total))
+		_set_audio_status("正在下载 %s%% · 文字可以先看" % int(100.0 * received / maxi(1, total)))
 
 
 func _on_download_failed(story_id: String, message: String) -> void:
@@ -523,7 +725,7 @@ func _on_download_failed(story_id: String, message: String) -> void:
 	if story_id == _pending_play:
 		_pending_play = ""
 		_refresh_player()
-		if is_instance_valid(_audio_label): _audio_label.text = message
+		_set_audio_status(message)
 		show_toast(message)
 		AudioFX.play("wrong")
 		Speech.speak("音频暂时没准备好，可以先看文字。")
@@ -540,14 +742,20 @@ func _refresh_downloads() -> void:
 
 func _update_highlight(force: bool = false) -> void:
 	if _paragraphs.is_empty(): return
-	var entry := ContentDB.story_audio_entry(str(session.state.storyId))
-	var position := _current_position()
 	var target := -1
-	for index in entry.get("paragraphs", []).size():
-		var segment: Dictionary = entry.paragraphs[index]
-		if position >= float(segment.get("start", 0.0)) and position < float(segment.get("end", 0.0)):
-			target = index
-			break
+	if _tts_mode:
+		var count := _paragraphs.size()
+		target = clampi(_tts_paragraph, 0, count - 1)
+		if not _audio_active and _tts_paragraph >= count:
+			target = count - 1
+	else:
+		var entry := ContentDB.story_audio_entry(str(session.state.storyId))
+		var position := _current_position()
+		for index in entry.get("paragraphs", []).size():
+			var segment: Dictionary = entry.paragraphs[index]
+			if position >= float(segment.get("start", 0.0)) and position < float(segment.get("end", 0.0)):
+				target = index
+				break
 	if target == _highlighted and not force: return
 	_highlighted = target
 	for index in _paragraphs.size():
@@ -614,8 +822,12 @@ func _restart_story() -> void:
 	session.handle_input({"type":"restart"})
 	_reader_scroll = null
 	_position = 0.0
+	_tts_paragraph = 0
+	_tts_wait = 0.0
 	_save("本篇重新开始")
 	_render()
+	_tts_paragraph = 0
+	_tts_wait = 0.0
 	_request_play()
 
 
@@ -689,11 +901,14 @@ func _confirm_clear_audio(ids: Array) -> void:
 
 func _save(note: String = "自动保存听读进度") -> void:
 	if session.state.is_empty(): return
-	_capture_reading()
-	if not _story().is_empty():
-		_position = _current_position()
-		var entry := ContentDB.story_audio_entry(str(session.state.storyId))
-		session.handle_input({"type":"bookmark", "value":{"position":_position, "audioHash":str(entry.get("sha256", ""))}})
+	if _tts_mode and _audio_active:
+		session.handle_input({"type":"bookmark", "value":{"paragraph":_tts_paragraph, "offset":0.0}})
+	else:
+		_capture_reading()
+		if not _tts_mode and not _story().is_empty():
+			_position = _current_position()
+			var entry := ContentDB.story_audio_entry(str(session.state.storyId))
+			session.handle_input({"type":"bookmark", "value":{"position":_position, "audioHash":str(entry.get("sha256", ""))}})
 	var learning_data := SaveStore.learning(str(players[0].id), game_id)
 	learning_data.storyShelf = session.learning_snapshot()
 	SaveStore.save_state(game_id, str(players[0].id), session.snapshot(), note)
@@ -729,6 +944,8 @@ func _confirm_restart() -> void:
 
 func _process(delta: float) -> void:
 	super._process(delta)
+	if _tts_mode:
+		_advance_system_tts(delta)
 	if _reading_dirty and not _restoring_reading:
 		_reading_save_clock += delta
 		if _reading_save_clock >= 0.35:
@@ -737,7 +954,8 @@ func _process(delta: float) -> void:
 	if _update_clock < 0.15: return
 	_update_clock = 0.0
 	if _audio_active:
-		_position = _current_position()
+		if not _tts_mode:
+			_position = _current_position()
 		_refresh_player()
 		_update_highlight()
 
@@ -752,4 +970,5 @@ func _notification(what: int) -> void:
 func _exit_tree() -> void:
 	_pending_play = ""
 	if narrator != null: narrator.stop()
+	if _audio_active: Speech.stop()
 	AudioFX.set_music_duck(false)

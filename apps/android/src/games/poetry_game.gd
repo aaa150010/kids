@@ -85,7 +85,7 @@ var _draw_sequence := 0
 var poem_scrolls: Dictionary = {}
 var poem_scroll: ScrollContainer = null
 var profile_panel: Control
-var poem_line_labels: Array[Label] = []
+var poem_line_labels: Array[Control] = []
 # 当前诗卡与待播放的入场动画（"flip" 抽诗翻面 / "pop" 换一首弹入 / "" 直接显示）
 var _card: Control = null
 var _pending_transition := ""
@@ -360,29 +360,14 @@ func _draw_view() -> Control:
 		var line: Variant = raw_lines[index]
 		var line_block := VBoxContainer.new()
 		line_block.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		line_block.add_theme_constant_override("separation", 1)
-		if not hide_text and index < pinyin_lines.size():
-			var pinyin_text := str(pinyin_lines[index]).strip_edges()
-			if not pinyin_text.is_empty():
-				var pinyin_size := clampi(int(round(float(poem_font_size) * 0.52)), 14, 24)
-				var pinyin_label := PlaygroundUI.label(pinyin_text, pinyin_size, PlaygroundUI.INK_SOFT, 500, true)
-				pinyin_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				pinyin_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-				line_block.add_child(pinyin_label)
-		var line_label := PlaygroundUI.label(
-			"••••••" if hide_text else str(line),
-			poem_font_size if not hide_text else poem_font_size + 4,
-			PlaygroundUI.INK if not hide_text else PlaygroundUI.INK_SOFT,
-			700,
-			true
-		)
-		line_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		line_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		line_block.add_child(line_label)
+		var pinyin_text := str(pinyin_lines[index]) if index < pinyin_lines.size() else ""
+		var ruby := PoemRubyText.new()
+		ruby.configure(str(line), pinyin_text, poem_font_size, not hide_text, hide_text)
+		line_block.add_child(ruby)
 		if transition == "flip":
 			line_block.modulate.a = 0.0
 		reveal_blocks.append(line_block)
-		poem_line_labels.append(line_label)
+		poem_line_labels.append(ruby)
 		text.add_child(line_block)
 	column.add_child(text)
 	# 卡背：藤紫 + 📜 印章，翻面前先给孩子一个"抽签"的期待
@@ -475,7 +460,7 @@ func _restore_poem_scroll() -> void:
 	if anchor.is_empty():
 		return
 	var index := clampi(int(anchor.get("line", 0)), 0, poem_line_labels.size() - 1)
-	var label: Label = poem_line_labels[index]
+	var label: Control = poem_line_labels[index]
 	if not is_instance_valid(label):
 		return
 	var top := label.get_global_rect().position.y - poem_scroll.get_global_rect().position.y + float(poem_scroll.scroll_vertical)
@@ -489,7 +474,7 @@ func _capture_poem_scroll() -> void:
 	var line_index := 0
 	var ratio := 0.0
 	for index in poem_line_labels.size():
-		var label: Label = poem_line_labels[index]
+		var label: Control = poem_line_labels[index]
 		if not is_instance_valid(label):
 			continue
 		var rect := label.get_global_rect()
@@ -504,13 +489,8 @@ func _library_view() -> Control:
 	var column := VBoxContainer.new()
 	column.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_theme_constant_override("separation", 10)
-	var search := LineEdit.new()
-	search.placeholder_text = "搜索题目、诗人或诗句"
-	search.text = query
+	var search := PlaygroundUI.text_field("搜索题目、诗人或诗句", query, accent)
 	search.custom_minimum_size.y = 50
-	search.add_theme_font_override("font", PlaygroundUI.font())
-	search.add_theme_font_size_override("font_size", 18)
-	search.add_theme_stylebox_override("normal", PlaygroundUI.style(Color.WHITE, 16, PlaygroundUI.mix(accent, Color.WHITE, 0.5), 2))
 	search.text_submitted.connect(func(value):
 		query = value
 		library_page = 0

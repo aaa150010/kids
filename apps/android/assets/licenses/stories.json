@@ -1,11 +1,10 @@
 {
   "name": "中外故事馆",
-  "edition": "2026-11-16",
-  "text": "本项目重新编写的儿童中文叙述与原创童话、寓言、成语情境。经典改写依据古籍、传统口述情节和作者已逝多年的经典作品，不复制现代中文译文；出处随各篇保存。标为传说的内容不作为确证史实。",
+  "edition": "2026-11-19",
+  "text": "本项目重新编写的儿童中文叙述与原创童话、寓言、成语情境。经典改写依据古籍、传统口述情节和公有领域经典作品，不复制现代中文译文；出处随各篇保存。标为传说的内容不作为确证史实。",
   "artwork": "content-src/assets/covers/stories.svg 为本项目原创矢量绘本封面。",
   "pronunciation": {"tool":"pinyin-pro","version":"3.29.5","license":"MIT","url":"https://github.com/zh-lx/pinyin-pro","use":"仅制作阶段生成拼音数据，词组校订保存在 pronunciation.json；不随 App 运行 JavaScript。"},
-  "narration": {"model":"Qwen3-TTS-12Hz-0.6B-CustomVoice","speaker":"Serena","license":"Apache-2.0","url":"https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice","conversion":"mlx-community/Qwen3-TTS-12Hz-0.6B-CustomVoice-bf16","revision":"6415d95f88be018ff9e46813119dc3bc12261328","use":"制作阶段本机合成普通话音频；不克隆用户或其他真人声音，不在 App 中运行模型。"},
-  "authoringRuntime": {"tool":"mlx-audio","version":"0.6.5","license":"MIT","url":"https://github.com/Blaizzy/mlx-audio","use":"本机 Apple 芯片批量制作 MP3 与段落时间点，运行库及模型不随 APK 分发。"},
-  "classicReferences": ["https://zh.wikisource.org/wiki/史記","https://zh.wikisource.org/wiki/山海經","https://zh.wikisource.org/wiki/世說新語","https://www.gutenberg.org/ebooks/21","https://www.gutenberg.org/ebooks/2591","https://www.gutenberg.org/ebooks/1597"],
-  "editorialStatus": "600 篇正文、逐字拼音和普通话 MP3 已制作，并通过生成脚本的文本哈希、文件大小、SHA-256 与段落时间轴结构校验；尚未逐篇人工试听、项目测试或真机播放验收。"
+  "narration": {"provider":"Android System TTS","license":"平板系统自带","use":"App 运行时通过 Godot DisplayServer.tts_* 调用平板自带中文语音；不预生成、不下载 MP3、不调用云端合成。"},
+  "classicReferences": ["https://zh.wikisource.org/wiki/韓非子","https://zh.wikisource.org/wiki/戰國策","https://zh.wikisource.org/wiki/列子","https://zh.wikisource.org/wiki/莊子","https://zh.wikisource.org/wiki/孟子","https://zh.wikisource.org/wiki/淮南子","https://zh.wikisource.org/wiki/山海經","https://zh.wikisource.org/wiki/史記","https://zh.wikisource.org/wiki/後漢書","https://zh.wikisource.org/wiki/世說新語","https://zh.wikisource.org/wiki/晉書","https://zh.wikisource.org/wiki/宋史","https://zh.wikisource.org/wiki/本草綱目","https://www.gutenberg.org/ebooks/21","https://www.gutenberg.org/ebooks/2591","https://www.gutenberg.org/ebooks/1597"],
+  "editorialStatus": "600 篇正文已扩写为完整多段故事并重新生成逐字拼音；朗读改为 Android 系统 TTS，音频索引为空，不随 App 分发 MP3。尚未逐篇人工审校、项目测试或真机播放验收。"
 }

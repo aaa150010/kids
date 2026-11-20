@@ -14,8 +14,6 @@ const MAP := {
 	&"cancel": "back",
 	&"error": "wrong",
 	&"success": "correct",
-	&"plant": "plant",
-	&"sun_collect": "sun",
 	&"flip": "flip",
 	&"match": "pair",
 	&"mismatch": "wrong",

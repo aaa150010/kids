@@ -8,7 +8,6 @@ const source = resolve(root, 'content-src/stories')
 const counts = { idiom: 200, myth: 80, folk: 80, fable: 80, history: 60, fairy: 100 }
 const draft = process.argv.includes('--draft')
 const textOnly = process.argv.includes('--text-only')
-const narrationRevision = '6415d95f88be018ff9e46813119dc3bc12261328'
 const sha = text => createHash('sha256').update(text).digest('hex')
 const bookNames = { '史记':'史記', '左传':'春秋左氏傳', '汉书':'漢書', '后汉书':'後漢書', '晋书':'晉書', '宋史':'宋史', '列子':'列子', '庄子':'莊子', '韩非子':'韓非子', '战国策':'戰國策', '淮南子':'淮南子', '山海经':'山海經', '世说新语':'世說新語', '说苑':'說苑', '吕氏春秋':'呂氏春秋', '论语':'論語', '孟子':'孟子', '荀子':'荀子', '礼记':'禮記', '尚书':'尚書', '周易':'周易', '资治通鉴':'資治通鑑', '西游记':'西遊記', '封神演义':'封神演義', '梦溪笔谈':'夢溪筆談', '天工开物':'天工開物', '徐霞客游记':'徐霞客遊記', '本草纲目':'本草綱目', '竹取物语':'竹取物語' }
 const overrides = JSON.parse(await readFile(resolve(source, 'pronunciation.json'), 'utf8'))
@@ -65,13 +64,13 @@ await mkdir(resolve(root, 'apps/android/content'), { recursive: true })
 await writeFile(resolve(root, 'content-src/data/stories.json'), JSON.stringify(stories) + '\n')
 await copyFile(resolve(root, 'content-src/data/stories.json'), resolve(root, 'apps/android/content/stories.json'))
 if (!textOnly) {
-  let audio = { schema: 1, model: 'Qwen3-TTS-12Hz-0.6B-CustomVoice', speaker: 'Serena', assets: {} }
-  try { audio = JSON.parse(await readFile(resolve(root, 'content-src/data/story-audio.json'), 'utf8')) } catch (error) { if (error.code !== 'ENOENT') throw error }
-  const current = new Map(stories.map(story => [story.id, story.narrationSha256]))
-  audio.assets = Object.fromEntries(Object.entries(audio.assets).filter(([id, entry]) => current.get(id) === entry.textSha256))
-  for (const entry of Object.values(audio.assets)) {
-    entry.generator = entry.generator ?? {}
-    entry.generator.revision = narrationRevision
+  const audio = {
+    schema: 1,
+    model: 'android-system-tts',
+    speaker: 'system',
+    assets: {},
+    status: 'system-tts',
+    note: '故事朗读已改用安卓平板自带中文系统 TTS；不预生成、不下载 MP3。',
   }
   await writeFile(resolve(root, 'content-src/data/story-audio.json'), JSON.stringify(audio) + '\n')
   await copyFile(resolve(root, 'content-src/data/story-audio.json'), resolve(root, 'apps/android/content/story-audio.json'))

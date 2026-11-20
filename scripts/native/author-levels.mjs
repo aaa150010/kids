@@ -9,7 +9,10 @@ const mode = (id, name, minimum, maximum, description) => ({ id, name, player_ra
 const chapters = {}
 for (const game of games) {
   const modes = []
+  if (game.id === 'sudoku') { chapters[game.id] = Array.from({ length:32 }, (_, index) => ({ id:index+1, title:(index < 8 ? '四宫格' : '九宫格')+' '+(index%8+1), theme:index < 8 ? 'mini' : 'classic', family:index < 8 ? 'easy' : index < 16 ? 'normal' : 'challenge', seed:1301 + index * 7907 })); continue }
+  if (game.id === 'chess') { chapters[game.id] = Array.from({ length:24 }, (_, index) => ({ id:index+1, title:`残局 ${index+1}`, theme:'capture', family:'strategy', seed:1109 + index * 7919 })); continue }
   if (game.id === 'poetry') modes.push(mode('classic', '亲子抽背', 1, 1, '随机抽背、背诵路线、待复习与全库浏览'))
+  else if (game.id === 'chess') modes.push(mode('classic', '双人对弈', 2, 2, '完整中国象棋规则，面对面轮流走棋'), mode('puzzle', '一步杀练习', 1, 1, '固定局面，找出将军或吃将的一步'))
   else if (game.id === 'military') modes.push(mode('classic', '经典双人', 2, 2, '双方各 25 子，预置阵法、铁路、行营与军旗'), mode('puzzle', '残局练习', 1, 1, '一步夺旗与兵种练习，不调用 AI'))
   else if (['jungle', 'gomoku'].includes(game.id)) modes.push(mode('classic', '双人对弈', 2, 2, '面对面轮流下棋，支持回放'), mode('puzzle', '单人闯关', 1, 1, '预设局面、目标步数与清楚的讲解'))
   else if (game.id === 'workbook') modes.push(mode('classic', '自由练习', 1, 2, '一人练习或两人轮流，保留错题'), mode('adventure', '单元闯关', 1, 1, '基础、计算、应用三个单元'), mode('review', '错题复习', 1, 1, '复习自己的错题，不重复计入原局'))
@@ -29,7 +32,21 @@ for (const game of games) {
   }))
 }
 const pieces = (entries) => entries.map(([kind, side, position], index) => ({ id: `piece-${index}`, kind, side, position, revealed:true }))
-const puzzles = { gomoku:[], jungle:[] }
+const puzzles = { chess:[], gomoku:[], jungle:[] }
+const chessPieces = (entries) => entries.map(([kind, side, position], index) => ({ id:`chess-${index}`, kind, side, position }))
+const chessEndings = [
+  { title:'车马一步杀', pieces:[['general',1,4],['advisor',1,13],['general',0,76],['chariot',0,7],['horse',0,25]], line:{from:7,to:4} },
+  { title:'炮镇中路', pieces:[['general',1,4],['advisor',1,13],['general',0,76],['cannon',0,67],['chariot',0,6]], line:{from:67,to:4} },
+  { title:'骏马窥宫', pieces:[['general',1,4],['advisor',1,13],['general',0,76],['horse',0,22],['chariot',0,8]], line:{from:22,to:4} },
+]
+for (let index = 0; index < 12; index++) {
+  const ending = chessEndings[index % chessEndings.length]
+  puzzles.chess.push({
+    id:index+1, title:ending.title, hint:'找出能直接吃掉黑将的一步。',
+    pieces:chessPieces(ending.pieces), goal:'capture', targetSteps:1,
+    line:[{from:ending.line.from,to:ending.line.to}],
+  })
+}
 for (let index = 0; index < 30; index++) {
   const direction = [[1,0],[0,1],[1,1],[1,-1]][index % 4]
   const origin = [3 + Math.floor(index / 4) % 5, direction[1] < 0 ? 10 : 3 + Math.floor(index / 8)]

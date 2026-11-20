@@ -1,4 +1,546 @@
 {
+  "chess": [
+    {
+      "id": 1,
+      "title": "车马一步杀",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "chariot",
+          "side": 0,
+          "position": 7
+        },
+        {
+          "id": "chess-4",
+          "kind": "horse",
+          "side": 0,
+          "position": 25
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 7,
+          "to": 4
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "炮镇中路",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "cannon",
+          "side": 0,
+          "position": 67
+        },
+        {
+          "id": "chess-4",
+          "kind": "chariot",
+          "side": 0,
+          "position": 6
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 67,
+          "to": 4
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "骏马窥宫",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "horse",
+          "side": 0,
+          "position": 22
+        },
+        {
+          "id": "chess-4",
+          "kind": "chariot",
+          "side": 0,
+          "position": 8
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 22,
+          "to": 4
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "车马一步杀",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "chariot",
+          "side": 0,
+          "position": 7
+        },
+        {
+          "id": "chess-4",
+          "kind": "horse",
+          "side": 0,
+          "position": 25
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 7,
+          "to": 4
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "炮镇中路",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "cannon",
+          "side": 0,
+          "position": 67
+        },
+        {
+          "id": "chess-4",
+          "kind": "chariot",
+          "side": 0,
+          "position": 6
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 67,
+          "to": 4
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "骏马窥宫",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "horse",
+          "side": 0,
+          "position": 22
+        },
+        {
+          "id": "chess-4",
+          "kind": "chariot",
+          "side": 0,
+          "position": 8
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 22,
+          "to": 4
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "车马一步杀",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "chariot",
+          "side": 0,
+          "position": 7
+        },
+        {
+          "id": "chess-4",
+          "kind": "horse",
+          "side": 0,
+          "position": 25
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 7,
+          "to": 4
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "炮镇中路",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "cannon",
+          "side": 0,
+          "position": 67
+        },
+        {
+          "id": "chess-4",
+          "kind": "chariot",
+          "side": 0,
+          "position": 6
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 67,
+          "to": 4
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "骏马窥宫",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "horse",
+          "side": 0,
+          "position": 22
+        },
+        {
+          "id": "chess-4",
+          "kind": "chariot",
+          "side": 0,
+          "position": 8
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 22,
+          "to": 4
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "车马一步杀",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "chariot",
+          "side": 0,
+          "position": 7
+        },
+        {
+          "id": "chess-4",
+          "kind": "horse",
+          "side": 0,
+          "position": 25
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 7,
+          "to": 4
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "炮镇中路",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "cannon",
+          "side": 0,
+          "position": 67
+        },
+        {
+          "id": "chess-4",
+          "kind": "chariot",
+          "side": 0,
+          "position": 6
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 67,
+          "to": 4
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "title": "骏马窥宫",
+      "hint": "找出能直接吃掉黑将的一步。",
+      "pieces": [
+        {
+          "id": "chess-0",
+          "kind": "general",
+          "side": 1,
+          "position": 4
+        },
+        {
+          "id": "chess-1",
+          "kind": "advisor",
+          "side": 1,
+          "position": 13
+        },
+        {
+          "id": "chess-2",
+          "kind": "general",
+          "side": 0,
+          "position": 76
+        },
+        {
+          "id": "chess-3",
+          "kind": "horse",
+          "side": 0,
+          "position": 22
+        },
+        {
+          "id": "chess-4",
+          "kind": "chariot",
+          "side": 0,
+          "position": 8
+        }
+      ],
+      "goal": "capture",
+      "targetSteps": 1,
+      "line": [
+        {
+          "from": 22,
+          "to": 4
+        }
+      ]
+    }
+  ],
   "gomoku": [
     {
       "id": 1,

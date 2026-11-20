@@ -9,6 +9,8 @@ const GAME_SCRIPTS := {
 	"patterns": "res://src/games/quiz_game.gd",
 	"animals": "res://src/games/quiz_game.gd",
 	"gomoku": "res://src/games/board_game.gd",
+	"chess": "res://src/games/chess_game.gd",
+	"sudoku": "res://src/games/sudoku_game.gd",
 	"military": "res://src/games/military_game.gd",
 	"workbook": "res://src/games/quiz_game.gd",
 	"stories": "res://src/games/story_game.gd",
@@ -22,6 +24,8 @@ const MUSIC_THEMES := {
 	"patterns": "rainbow",
 	"animals": "forest",
 	"gomoku": "lobby",
+	"chess": "poetry",
+	"sudoku": "math",
 	"military": "night",
 	"workbook": "math",
 	"stories": "poetry",
@@ -235,9 +239,8 @@ func _lobby_header() -> Control:
 	panel.add_child(row)
 	var mark := PlaygroundUI.panel(Color("#ffd56d"), 20, Color("#dca42c"), 2)
 	mark.custom_minimum_size = Vector2(58, 58)
-	var emoji := PlaygroundUI.label("🎡", 32, Color("#7c5411"), 700)
-	emoji.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	mark.add_child(emoji)
+	var logo := ArtLibrary.picture("🎲", Vector2(38, 38))
+	mark.add_child(logo)
 	row.add_child(mark)
 	var brand := VBoxContainer.new()
 	brand.add_theme_constant_override("separation", 0)
@@ -261,14 +264,14 @@ func _lobby_header() -> Control:
 	row.add_child(PlaygroundUI.button("＋", Color("#167d74"), _show_profile_manager, "soft"))
 	if not _pending_update.is_empty():
 		row.add_child(PlaygroundUI.button("⬆ 更新", Color("#c05b8f"), _show_update_dialog, "primary"))
-	row.add_child(PlaygroundUI.icon_button("🔊", Color("#167d74"), _show_settings, "声音设置"))
+	row.add_child(PlaygroundUI.icon_asset_button("🔊", Color("#167d74"), _show_settings, "声音设置"))
 	return panel
 
 
 func _greeting() -> String:
 	if not SaveStore.resumable_sessions().is_empty():
 		return "▶ 点这里继续上次游戏"
-	return "🌤️ 今天想玩哪一关？"
+	return "今天想玩哪一关？"
 
 
 func _profile_chip(profile: Dictionary) -> Control:
@@ -291,14 +294,18 @@ func _lobby_heading() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	var title := VBoxContainer.new()
-	title.add_child(PlaygroundUI.label("🎪 今天玩什么？", 31, PlaygroundUI.INK, 700))
+	var title_heading := HBoxContainer.new()
+	title_heading.add_theme_constant_override("separation", 8)
+	title_heading.add_child(ArtLibrary.picture("🎲", Vector2(30, 30)))
+	title_heading.add_child(PlaygroundUI.label("今天玩什么？", 31, PlaygroundUI.INK, 700))
+	title.add_child(title_heading)
 	title.add_child(PlaygroundUI.label("游戏和练习各自有独立风格，卡片顺序可以拖动调整", 13, PlaygroundUI.INK_SOFT, 500))
 	row.add_child(title)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(spacer)
-	row.add_child(PlaygroundUI.button("🎡 随机游戏", Color("#c05b8f"), _show_random_game, "soft"))
-	row.add_child(PlaygroundUI.button("✓ 完成排序" if sorting else "✋ 拖动排序", Color("#167d74"), func():
+	row.add_child(PlaygroundUI.icon_text_button("🎲", "随机游戏", Color("#c05b8f"), _show_random_game, "soft"))
+	row.add_child(PlaygroundUI.icon_text_button("✅" if sorting else "✋", "完成排序" if sorting else "拖动排序", Color("#167d74"), func():
 		sorting = not sorting
 		AudioFX.play("select")
 		_rebuild_lobby()
@@ -357,6 +364,25 @@ func _open_game_picker(game_id: String, chosen_mode: String = "") -> void:
 	difficulty_select.custom_minimum_size = Vector2(230, 50)
 	difficulty_select.add_theme_font_override("font", PlaygroundUI.font())
 	difficulty_select.add_theme_font_size_override("font_size", 17)
+	var soft_difficulty := PlaygroundUI.mix(tint, Color.WHITE, 0.86)
+	difficulty_select.add_theme_stylebox_override("normal", PlaygroundUI.style(soft_difficulty, 16, tint, 2))
+	difficulty_select.add_theme_stylebox_override("hover", PlaygroundUI.style(PlaygroundUI.mix(tint, Color.WHITE, 0.76), 16, tint, 2))
+	difficulty_select.add_theme_stylebox_override("pressed", PlaygroundUI.style(tint, 16, tint, 2))
+	difficulty_select.add_theme_stylebox_override("focus", PlaygroundUI.style(soft_difficulty, 16, tint, 2))
+	difficulty_select.add_theme_stylebox_override("disabled", PlaygroundUI.style(PlaygroundUI.mix(tint, Color.WHITE, 0.94), 16, PlaygroundUI.LINE, 1))
+	difficulty_select.add_theme_color_override("font_color", tint)
+	difficulty_select.add_theme_color_override("font_hover_color", tint)
+	difficulty_select.add_theme_color_override("font_pressed_color", Color.WHITE)
+	difficulty_select.add_theme_color_override("font_disabled_color", PlaygroundUI.INK_SOFT)
+	var difficulty_popup := difficulty_select.get_popup()
+	difficulty_popup.add_theme_stylebox_override("panel", PlaygroundUI.style(PlaygroundUI.PAPER, 16, tint, 2, 5, Color(0, 0, 0, 0.16)))
+	difficulty_popup.add_theme_stylebox_override("hover", PlaygroundUI.style(tint, 10, tint, 0))
+	difficulty_popup.add_theme_font_size_override("font_size", 17)
+	difficulty_popup.add_theme_color_override("font_color", PlaygroundUI.INK)
+	difficulty_popup.add_theme_color_override("font_hover_color", Color.WHITE)
+	difficulty_popup.add_theme_constant_override("v_separation", 10)
+	difficulty_popup.add_theme_constant_override("item_start_padding", 14)
+	difficulty_popup.add_theme_constant_override("item_end_padding", 14)
 	var difficulty_values := ["auto", "easy", "normal", "challenge"]
 	for value in difficulty_values:
 		difficulty_select.add_item(GameTuning.label(str(value)))
@@ -561,8 +587,8 @@ func _show_random_game() -> void:
 	var content := VBoxContainer.new()
 	content.alignment = BoxContainer.ALIGNMENT_CENTER
 	content.add_theme_constant_override("separation", 12)
-	var icon := PlaygroundUI.label("🎡", 74, PlaygroundUI.color(str(result.accent)), 700)
-	icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var icon := ArtLibrary.picture("🎲", Vector2(74, 74))
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	content.add_child(icon)
 	var title := PlaygroundUI.label("转盘转动中…", 32, PlaygroundUI.INK, 700)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -571,7 +597,7 @@ func _show_random_game() -> void:
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(subtitle)
 	AudioFX.play("select")
-	var random_layer := _open_modal("🎡 随机游戏", content, [
+	var random_layer := _open_modal("随机游戏", content, [
 		{"text": "再转一次", "kind": "soft", "callback": func(): _close_top_modal(); _show_random_game()},
 		{"text": "就玩这个", "kind": "primary", "callback": _play_random_result.bind(str(result.id))},
 	], "今天玩什么？", false)
@@ -580,7 +606,6 @@ func _show_random_game() -> void:
 			return
 		var preview: Dictionary = games.pick_random()
 		title.text = str(preview.title)
-		icon.text = str(preview.icon)
 		AudioFX.play("tap")
 		await get_tree().create_timer(0.07 + tick * 0.006).timeout
 	if is_instance_valid(title):
@@ -719,7 +744,15 @@ func _show_profile_report(profile: Dictionary) -> void:
 	if not story_learning.is_empty():
 		var heard: Array = story_learning.get("completed", []) if story_learning.get("completed") is Array else []
 		var favorites: Array = story_learning.get("favorites", []) if story_learning.get("favorites") is Array else []
-		content.add_child(PlaygroundUI.label("📚 故事听读足迹：读过 %s 篇 · 收藏 %s 篇\n这些是听读记录，不作为语言能力评分；可以请孩子讲讲最喜欢的片段。" % [heard.size(), favorites.size()], 16, PlaygroundUI.INK_SOFT, 500, true))
+		var story_note := HBoxContainer.new()
+		story_note.add_theme_constant_override("separation", 8)
+		var story_icon := ArtLibrary.picture("📚", Vector2(28, 28))
+		story_icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		story_note.add_child(story_icon)
+		var story_text := PlaygroundUI.label("故事听读足迹：读过 %s 篇 · 收藏 %s 篇\n这些是听读记录，不作为语言能力评分；可以请孩子讲讲最喜欢的片段。" % [heard.size(), favorites.size()], 16, PlaygroundUI.INK_SOFT, 500, true)
+		story_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		story_note.add_child(story_text)
+		content.add_child(story_note)
 	_open_modal("%s 的成长报告" % profile.name, content, [
 		{"text": "关闭", "kind": "primary", "callback": func(): _close_top_modal()},
 	], "只用于本机辅导，不显示排行")
@@ -735,7 +768,7 @@ func _show_profile_form(existing: Dictionary) -> void:
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var intro := HBoxContainer.new()
 	intro.add_theme_constant_override("separation", 10)
-	intro.add_child(PlaygroundUI.label("🌟", 26, Color("#b69014"), 700))
+	intro.add_child(ArtLibrary.picture("✨", Vector2(26, 26)))
 	var intro_copy := PlaygroundUI.label("给孩子起个名字，再挑一个喜欢的头像和代表色。", 17, PlaygroundUI.INK_SOFT, 500, true)
 	intro_copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	intro.add_child(intro_copy)
@@ -883,10 +916,16 @@ func _show_settings() -> void:
 	var content := VBoxContainer.new()
 	content.add_theme_constant_override("separation", 10)
 	var settings := SaveStore.settings()
-	var labels := {"soundOn": "🔊 音效", "musicOn": "🎵 背景音乐", "speechOn": "🗣️ 中文朗读", "hapticsOn": "📳 触感反馈"}
+	var labels := {
+		"soundOn": {"icon": "🔊", "text": "音效"},
+		"musicOn": {"icon": "🎹", "text": "背景音乐"},
+		"speechOn": {"icon": "🎤", "text": "中文朗读"},
+		"hapticsOn": {"icon": "✋", "text": "触感反馈"},
+	}
 	for key in ["soundOn", "musicOn", "speechOn", "hapticsOn"]:
 		var state := "开" if bool(settings.get(key, true)) else "关"
-		content.add_child(PlaygroundUI.button("%s：%s" % [labels[key], state], Color("#167d74"), _toggle_setting.bind(key), "soft"))
+		var entry: Dictionary = labels[key]
+		content.add_child(PlaygroundUI.icon_text_button(str(entry["icon"]), "%s：%s" % [str(entry["text"]), state], Color("#167d74"), _toggle_setting.bind(key), "soft"))
 	content.add_child(NativeGameScreen.volume_controls(Color("#167d74")))
 	content.add_child(PlaygroundUI.separator())
 	content.add_child(PlaygroundUI.label("应用更新", 15, PlaygroundUI.INK_SOFT, 700))

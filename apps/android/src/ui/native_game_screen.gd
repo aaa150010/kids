@@ -16,6 +16,10 @@ var overlay_root: Control
 var topbar: Control
 var layout_root: VBoxContainer
 var _immersive_bar: HBoxContainer
+var _immersive_canvas: Control
+var _toast_canvas: Control
+var _interaction_seat := -1
+var _last_touch_msec := -1000
 var _immersive_controls_generation := 0
 var _immersive_tap_times: Array = []
 var _immersive_tap_position := Vector2.ZERO
@@ -57,10 +61,11 @@ func build_shell() -> void:
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var metrics := PlaygroundUI.layout_metrics(get_viewport_rect().size)
 	var safe := PlaygroundUI.safe_insets(get_viewport_rect().size)
+	var vertical_safe := minf(float(safe.top), float(safe.bottom))
 	margin.add_theme_constant_override("margin_left", int(maxf(metrics.margin,float(safe.left)+10.0)))
 	margin.add_theme_constant_override("margin_right", int(maxf(metrics.margin,float(safe.right)+10.0)))
-	margin.add_theme_constant_override("margin_top", int(maxf(10.0,float(safe.top)+6.0)))
-	margin.add_theme_constant_override("margin_bottom", int(maxf(14.0,float(safe.bottom)+8.0)))
+	margin.add_theme_constant_override("margin_top", int(maxf(10.0,vertical_safe+6.0)))
+	margin.add_theme_constant_override("margin_bottom", int(maxf(10.0,vertical_safe+6.0)))
 	add_child(margin)
 	layout_root = VBoxContainer.new()
 	layout_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -89,17 +94,27 @@ func build_shell() -> void:
 	overlay_root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(overlay_root)
 	_build_immersive_bar()
+	_toast_canvas = Control.new()
+	_toast_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_toast_canvas)
+	TabletopLayout.layout_canvas(_toast_canvas, get_viewport_rect().size, 0.0)
 	toast_label = PlaygroundUI.label("", 18, Color.WHITE, 700)
 	toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	toast_label.z_index = 80
+	toast_label.add_theme_stylebox_override("normal", PlaygroundUI.style(Color(0.15, 0.18, 0.16, 0.94), 12, Color.TRANSPARENT, 0))
 	toast_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	toast_label.modulate.a = 0.0
 	toast_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	toast_label.position = Vector2(0, 24)
-	add_child(toast_label)
+	_toast_canvas.add_child(toast_label)
+	resized.connect(_layout_immersive_controls)
 
 
 func _build_immersive_bar() -> void:
+	_immersive_canvas = Control.new()
+	_immersive_canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_immersive_canvas)
+	TabletopLayout.layout_canvas(_immersive_canvas, get_viewport_rect().size, 0.0)
 	_immersive_bar = HBoxContainer.new()
 	_immersive_bar.anchor_left = 1.0
 	_immersive_bar.anchor_right = 1.0
@@ -125,7 +140,34 @@ func _build_immersive_bar() -> void:
 	exit.add_theme_font_size_override("font_size", 17)
 	_immersive_bar.add_child(exit)
 	_immersive_bar.visible = false
-	add_child(_immersive_bar)
+	_immersive_canvas.add_child(_immersive_bar)
+
+
+func face_to_face() -> bool:
+	return TabletopLayout.enabled(game_id, players, mode_id)
+
+
+func _current_seat() -> int:
+	if not face_to_face():
+		return 0
+	var rules: Variant = get("engine")
+	return clampi(int(rules.state.get("turn", 0)), 0, 1) if rules != null else 0
+
+
+func _overlay_angle() -> float:
+	return TabletopLayout.facing_angle(_interaction_seat if _interaction_seat >= 0 else _current_seat(), face_to_face())
+
+
+func _layout_immersive_controls() -> void:
+	if is_instance_valid(_immersive_canvas):
+		TabletopLayout.layout_canvas(_immersive_canvas, get_viewport_rect().size, _overlay_angle())
+		if face_to_face():
+			var bar_width := maxf(344.0, _immersive_bar.get_combined_minimum_size().x)
+			_immersive_bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+			_immersive_bar.offset_left = -bar_width * 0.5
+			_immersive_bar.offset_right = bar_width * 0.5
+			_immersive_bar.offset_top = -64.0
+			_immersive_bar.offset_bottom = -16.0
 
 
 func _build_topbar() -> Control:
@@ -199,15 +241,25 @@ func _show_immersive_controls() -> void:
 		return
 	_immersive_controls_generation += 1
 	var generation := _immersive_controls_generation
+	_layout_immersive_controls()
 	_immersive_bar.visible = true
 	_immersive_bar.modulate.a = 1.0
 	await get_tree().create_timer(4.0).timeout
 	if generation == _immersive_controls_generation and immersive and is_instance_valid(_immersive_bar):
 		_immersive_bar.visible = false
+		_clear_overlay_seat_if_idle()
+
+
+func _clear_overlay_seat_if_idle() -> void:
+	if _modal_stack.is_empty() and (not is_instance_valid(_immersive_bar) or not _immersive_bar.visible):
+		_interaction_seat = -1
 
 
 func _notice_immersive_tap(position: Vector2) -> void:
 	if not immersive:
+		return
+	if not _blank_at(position):
+		_immersive_tap_times.clear()
 		return
 	var now := Time.get_ticks_msec()
 	if _immersive_tap_times.is_empty() or position.distance_to(_immersive_tap_position) > 56.0:
@@ -217,16 +269,35 @@ func _notice_immersive_tap(position: Vector2) -> void:
 	_immersive_tap_times.append(now)
 	if _immersive_tap_times.size() >= 3:
 		_immersive_tap_times.clear()
+		_interaction_seat = 0 if position.x < get_viewport_rect().size.x * 0.5 else 1
 		_show_immersive_controls()
+
+
+func _blank_at(position: Vector2) -> bool:
+	if not _modal_stack.is_empty():
+		return false
+	for control in find_children("*", "Control", true, false):
+		if not control.is_visible_in_tree():
+			continue
+		var local: Vector2 = control.get_global_transform_with_canvas().affine_inverse() * position
+		if not Rect2(Vector2.ZERO, control.size).has_point(local):
+			continue
+		if control is BaseButton:
+			return false
+		if control.has_method("is_blank_at") and not bool(control.call("is_blank_at", local)):
+			return false
+	return true
 
 
 func _input(event: InputEvent) -> void:
 	if not immersive:
 		return
 	if event is InputEventScreenTouch and not event.pressed:
+		_last_touch_msec = Time.get_ticks_msec()
 		_notice_immersive_tap(event.position)
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and not event.pressed:
-		_notice_immersive_tap(event.position)
+		if Time.get_ticks_msec() - _last_touch_msec > 500:
+			_notice_immersive_tap(event.position)
 
 
 func _player_pill(player: Dictionary, first: bool) -> Control:
@@ -253,6 +324,9 @@ func set_content(node: Control) -> void:
 
 
 func show_help() -> void:
+	if face_to_face() and has_method("_show_rules"):
+		call("_show_rules")
+		return
 	var content := VBoxContainer.new()
 	content.add_theme_constant_override("separation", 12)
 	for index in ContentDB.guide(game_id).size():
@@ -310,15 +384,15 @@ func _show_settings() -> void:
 	box.add_theme_constant_override("separation", 10)
 	var settings := SaveStore.settings()
 	var buttons := [
-		["🔊 音效", "soundOn", "soundOn"],
-		["🎵 音乐", "musicOn", "musicOn"],
-		["🗣️ 中文朗读", "speechOn", "speechOn"],
-		["📳 触感", "hapticsOn", "hapticsOn"],
+		{"icon": "🔊", "label": "音效", "key": "soundOn"},
+		{"icon": "🎹", "label": "音乐", "key": "musicOn"},
+		{"icon": "🎤", "label": "中文朗读", "key": "speechOn"},
+		{"icon": "✋", "label": "触感", "key": "hapticsOn"},
 	]
 	for entry in buttons:
-		var key := str(entry[1])
+		var key := str(entry["key"])
 		var state := "开" if bool(settings.get(key, true)) else "关"
-		box.add_child(PlaygroundUI.button("%s：%s" % [entry[0], state], accent, _toggle_setting.bind(key), "soft"))
+		box.add_child(PlaygroundUI.icon_text_button(str(entry["icon"]), "%s：%s" % [str(entry["label"]), state], accent, _toggle_setting.bind(key), "soft"))
 	box.add_child(volume_controls(accent))
 	open_modal("声音与朗读", box, [
 		{"text": "关掉窗口", "kind": "primary", "callback": func(): _close_top_modal()},
@@ -367,6 +441,13 @@ func open_modal(
 	eyebrow: String = "",
 	dismissible: bool = true
 ) -> Control:
+	var angle := _overlay_angle()
+	var contains_board := content.has_method("position_for")
+	for child in content.find_children("*", "Control", true, false):
+		if child.has_method("position_for"):
+			contains_board = true
+	if contains_board:
+		angle = 0.0
 	var manager := _dialog_manager()
 	if manager != null:
 		if not manager.dialog_closed.is_connected(_on_dialog_closed):
@@ -380,10 +461,11 @@ func open_modal(
 			"dismissible": dismissible,
 			"accent": accent,
 			"size": "M",
+			"facing_angle": angle,
 		})
 		_modal_stack.append(layer)
 		return layer
-	return _open_modal_fallback(title, content, actions, eyebrow, dismissible)
+	return _open_modal_fallback(title, content, actions, eyebrow, dismissible, angle)
 
 
 func _dialog_manager() -> DialogManager:
@@ -401,7 +483,8 @@ func _open_modal_fallback(
 	content: Control,
 	actions: Array,
 	eyebrow: String = "",
-	dismissible: bool = true
+	dismissible: bool = true,
+	angle: float = 0.0
 ) -> Control:
 	var layer := Control.new()
 	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -412,11 +495,16 @@ func _open_modal_fallback(
 	dim.color = Color(0.12, 0.16, 0.13, 0.45)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	layer.add_child(dim)
+	var canvas := Control.new()
+	canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(canvas)
+	var available := TabletopLayout.canvas_size(get_viewport_rect().size, angle)
+	TabletopLayout.layout_canvas(canvas, get_viewport_rect().size, angle)
 	var center := CenterContainer.new()
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	layer.add_child(center)
+	canvas.add_child(center)
 	var card := PlaygroundUI.panel(PlaygroundUI.PAPER, 30, PlaygroundUI.mix(accent, Color.WHITE, 0.55), 2)
-	card.custom_minimum_size = Vector2(minf(680, size.x - maxf(32.0, size.x * 0.08)), 0)
+	card.custom_minimum_size = Vector2(minf(680, available.x - maxf(32.0, available.x * 0.08)), 0)
 	card.modulate.a = 0.0
 	card.scale = Vector2(0.97, 0.97)
 	card.pivot_offset = Vector2(card.size.x * 0.5, 0)
@@ -428,7 +516,7 @@ func _open_modal_fallback(
 		column.add_child(PlaygroundUI.label(eyebrow, 14, accent, 700))
 	column.add_child(PlaygroundUI.label(title, 32, PlaygroundUI.INK, 700, true))
 	var content_scroll := ScrollContainer.new()
-	content_scroll.custom_minimum_size.y = minf(430.0, size.y * 0.50)
+	content_scroll.custom_minimum_size.y = minf(430.0, available.y * 0.50)
 	content_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	content_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	content_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -475,10 +563,12 @@ func _close_top_modal() -> void:
 		return
 	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	MotionKit.fade_out_and_free(layer, self, MotionKit.MODAL_OUT)
+	call_deferred("_clear_overlay_seat_if_idle")
 
 
 func _on_dialog_closed(layer: Control) -> void:
 	_modal_stack.erase(layer)
+	call_deferred("_clear_overlay_seat_if_idle")
 
 
 func _exit_tree() -> void:
@@ -520,6 +610,8 @@ func _confirm_exit() -> void:
 
 
 func _handle_back() -> void:
+	if _modal_stack.is_empty():
+		_interaction_seat = -1
 	var manager := _dialog_manager()
 	if manager != null and manager.has_open_dialog():
 		var top := manager.top_layer()
@@ -556,7 +648,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func show_toast(message: String, seconds: float = 2.4) -> void:
+	TabletopLayout.layout_canvas(_toast_canvas, get_viewport_rect().size, TabletopLayout.facing_angle(_current_seat(), face_to_face()))
 	toast_label.text = message
+	toast_label.size = toast_label.get_minimum_size()
+	var toast_y := _toast_canvas.size.y - toast_label.size.y - 24.0 if face_to_face() else 24.0
+	toast_label.position = Vector2((_toast_canvas.size.x - toast_label.size.x) * 0.5, toast_y)
 	toast_label.modulate.a = 1.0
 	var tween := MotionKit.tween(self)
 	tween.tween_interval(seconds)
@@ -631,6 +727,12 @@ func begin_lesson(force: bool = false) -> void:
 	elif game_id == "military":
 		lesson_actions = ["select","move","pause"]
 		lesson_texts = ["双方棋子全部明示，红方先走。","点自己的棋子，再点亮起的位置移动。","点暂停，军棋会自动保存，回来继续。"]
+	elif game_id == "sudoku":
+		lesson_actions = ["select","move","pause"]
+		lesson_texts = ["先点一个空格。","再点下面的数字。","每行每列和小宫都不能重复，进度会自动保存。"]
+	elif game_id == "chess":
+		lesson_actions = ["select","move","pause"]
+		lesson_texts = ["红方先走，点自己的棋子。","点发光的交叉点走棋；炮要隔一颗棋子才能吃子。","吃掉对方将帅就获胜，进度会自动保存。"]
 	elif game_id in ["jungle","gomoku"]:
 		lesson_actions = ["select","move","pause"]
 		lesson_texts = ["点一枚自己的棋子；五子棋请按住空交叉点。","点亮起的位置，走出第一步。","试试上方暂停按钮，进度会自动保存。"]

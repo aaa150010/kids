@@ -40,8 +40,8 @@ func _run() -> void:
 	for script_path in all_scripts("res://src"):
 		var script: GDScript = load(script_path)
 		check(script != null and script.can_instantiate(), "%s parses and can be instantiated" % script_path)
-	check(content.games.size() == 11, "catalog contains 11 entries including the story library")
-	check(content.tuning.get("games", {}).size() == 11, "tuning covers all catalog entries")
+	check(content.games.size() == 13, "catalog contains 13 entries including chess and sudoku")
+	check(content.tuning.get("games", {}).size() == content.games.size(), "tuning covers all catalog entries")
 	StoryFixtures.new().run(content, Callable(self, "check"))
 	for icon_path in [
 		"res://assets/branding/app-icon-192.png",
@@ -70,6 +70,8 @@ func _run() -> void:
 		check(content.chapters.get(game_id, []).size() > 0, "%s adventure levels are loaded" % game_id)
 	for game_id in ["jungle", "gomoku"]:
 		check(content.puzzles.get(game_id, []).size() > 0, "%s puzzle fixtures are loaded" % game_id)
+	check(content.chess_puzzles().size() == 12, "chess has twelve fixed one-move puzzles")
+	check(content.sudoku_puzzles().size() == 32, "sudoku has 32 fixed puzzles")
 	check(content.military_formations().size() == 3, "military has three preset formations")
 	check(content.military_puzzles().size() == 24, "military has 24 fixed endgame puzzles")
 
@@ -113,6 +115,75 @@ func _run() -> void:
 	var gomoku_move: Dictionary = gomoku_rules.handle_input({"type":"move","to":gomoku_puzzle.line[0].to})
 	check(bool(gomoku_move.ok) and gomoku_state.phase == "finished", "gomoku puzzle completes at the prepared line")
 	check(gomoku_state.winningLine.size() >= 5, "gomoku puzzle exposes a winning line")
+
+	var chess_puzzle: Dictionary = content.chess_puzzles()[0]
+	var chess_rules = ChessRules.new()
+	var chess_state: Dictionary = chess_rules.create_session({
+		"gameId": "chess",
+		"modeId": "puzzle",
+		"players": [fake_player],
+		"seed": 46,
+		"puzzle": chess_puzzle,
+	})
+	var chess_line: Dictionary = chess_puzzle.line[0]
+	check(bool(chess_rules.handle_input({"type":"select","position":int(chess_line.from)}).ok), "chess puzzle piece can be selected")
+	check(bool(chess_rules.handle_input({"type":"move","to":int(chess_line.to)}).ok) and chess_state.phase == "finished", "chess puzzle completes a one-move capture")
+	check(int(chess_state.winner) == 0, "chess puzzle awards the attacking player")
+	var chess_classic = ChessRules.new()
+	var chess_classic_state: Dictionary = chess_classic.create_session({
+		"gameId": "chess",
+		"modeId": "classic",
+		"players": [fake_player, fake_player_two],
+		"seed": 48,
+	})
+	check(chess_classic_state.phase == "playing" and chess_classic_state.pieces.size() == 32, "chess classic starts with 32 pieces")
+	for side in 2:
+		var faction: Array = chess_classic_state.pieces.filter(func(piece): return int(piece.side) == side)
+		var soldiers: Array = faction.filter(func(piece): return str(piece.kind) == "soldier")
+		check(faction.size() == 16 and soldiers.size() == 5, "chess side %s starts with sixteen pieces and five soldiers" % side)
+		for soldier in soldiers:
+			check(chess_classic.piece_name(soldier) == ("兵" if side == 0 else "卒"), "soldier names follow their faction")
+	for cannon_position in [19, 25, 64, 70]:
+		check(str(chess_classic.piece_at(cannon_position).get("kind", "")) == "cannon", "chess cannon starts on its standard position %s" % cannon_position)
+	var restored_chess = ChessRules.new()
+	check(restored_chess.restore(chess_classic.snapshot()), "chess snapshot restores")
+	var chess_before_query: Dictionary = chess_classic.snapshot()
+	var cannon_targets: Array = chess_classic.legal_targets(64)
+	check(chess_classic.state == chess_before_query, "querying legal targets does not mutate the chess session")
+	check(1 in cannon_targets, "red cannon can capture the black horse over one screen")
+	check(bool(chess_classic.handle_input({"type":"select", "position":64}).ok), "red cannon can be selected")
+	check(bool(chess_classic.handle_input({"type":"move", "to":1}).ok), "red cannon captures the black horse")
+	check(int(chess_classic.piece_at(1).get("side", -1)) == 0, "capturing piece remains red across the board")
+	var chess_after_capture: Dictionary = chess_classic.snapshot()
+	var restored_capture = ChessRules.new()
+	check(restored_capture.restore(chess_after_capture), "chess capture snapshot restores")
+	check(restored_capture.state.pieces == chess_after_capture.pieces, "restoring a capture does not revive captured pieces")
+	restored_capture.legal_targets(0)
+	check(restored_capture.state.pieces == chess_after_capture.pieces, "querying a reply does not revive captured pieces")
+	check(restored_capture.undo_last_move(), "a restored capture can be undone")
+	check(restored_capture.state.pieces == chess_before_query.pieces, "undo restores the exact captured piece and initial board")
+
+	var sudoku_puzzle: Dictionary = content.sudoku_puzzles()[0]
+	var sudoku_rules = SudokuRules.new()
+	var sudoku_state: Dictionary = sudoku_rules.create_session({
+		"gameId": "sudoku",
+		"modeId": "classic",
+		"players": [fake_player],
+		"seed": 49,
+		"puzzle": sudoku_puzzle,
+	})
+	check(int(sudoku_rules.size()) == 4, "mini sudoku uses a 4x4 grid")
+	check(bool(sudoku_rules.is_given(0)), "sudoku givens are protected")
+	var first_empty := -1
+	for index in str(sudoku_state.values).length():
+		if str(sudoku_state.values)[index] == "0":
+			first_empty = index
+			break
+	sudoku_state.selected = first_empty
+	var sudoku_value := int(str(sudoku_state.solution)[first_empty])
+	check(bool(sudoku_rules.set_number(sudoku_value).ok), "sudoku accepts a correct number")
+	var restored_sudoku = SudokuRules.new()
+	check(restored_sudoku.restore(sudoku_rules.snapshot()), "sudoku snapshot restores")
 
 	var military_puzzle: Dictionary = content.military_puzzles()[0]
 	var military_rules = MilitaryRules.new()

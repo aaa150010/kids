@@ -92,22 +92,9 @@
       "use": "UI、棋盘与动物资源选型"
     },
     {
-      "id": "story-narration-qwen",
-      "url": "https://huggingface.co/Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice",
-      "license": "Apache-2.0",
-      "use": "制作阶段合成普通话故事；App 只播放 MP3，不运行模型或语音克隆"
-    },
-    {
-      "id": "story-narration-mlx",
-      "url": "https://github.com/Blaizzy/mlx-audio",
-      "version": "0.6.5",
-      "license": "MIT",
-      "use": "批量段落制作 API 参考；模型转换权重固定 revision 6415d95f88be018ff9e46813119dc3bc12261328"
-    },
-    {
-      "id": "story-audio-godot",
-      "url": "https://docs.godotengine.org/en/stable/classes/class_audiostreammp3.html",
-      "use": "原生运行时 MP3 加载、暂停与进度控制；不引入浏览器播放器"
+      "id": "story-system-tts",
+      "url": "https://docs.godotengine.org/en/stable/classes/class_displayserver.html",
+      "use": "App 运行时调用 Android 平板自带中文系统 TTS；不预生成、不下载 MP3、不调用云端或语音克隆"
     },
     {
       "id": "story-classics",
@@ -340,6 +327,12 @@
       "license": "MIT (README)",
       "accessedAt": "2026-11-19",
       "use": "二人陆战棋 5×13 棋盘、25 子、铁路、行营、大本营、炸弹/地雷/工兵与军旗规则的参考；本项目用 GDScript 重写，不引入 Python、联网、AI 或界面素材"
+    },
+    {
+      "title": "中国象棋规则与棋盘形制",
+      "url": "https://en.wikipedia.org/wiki/Xiangqi",
+      "license": "CC BY-SA 4.0",
+      "note": "核对走法、九宫、楚河汉界与吃将规则；本项目棋子与棋盘为原生矢量自绘。"
     }
   ]
 }

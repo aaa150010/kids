@@ -47,7 +47,9 @@ func _ready() -> void:
 
 
 func show_dialog(opts: Dictionary) -> Control:
-	var viewport_size := get_viewport().get_visible_rect().size
+	var screen_size := get_viewport().get_visible_rect().size
+	var angle := float(opts.get("facing_angle", 0.0))
+	var viewport_size := TabletopLayout.canvas_size(screen_size, angle)
 	var accent: Color = opts.get("accent", DEFAULT_ACCENT)
 	var layer := Control.new()
 	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -67,10 +69,15 @@ func show_dialog(opts: Dictionary) -> Control:
 			if clicked:
 				close_layer(layer, true)
 		)
+	var canvas := Control.new()
+	canvas.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layer.add_child(canvas)
+	TabletopLayout.layout_canvas(canvas, screen_size, angle)
+	layer.set_meta("facing_canvas", canvas)
 	var center := CenterContainer.new()
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	layer.add_child(center)
+	canvas.add_child(center)
 	var card := PanelContainer.new()
 	var panel_style := PlaygroundUI.style(
 		PlaygroundUI.PAPER, 28, PlaygroundUI.mix(accent, Color.WHITE, 0.55), 2, 12, Color(0, 0, 0, 0.22)
@@ -267,14 +274,19 @@ func _resize_dialogs() -> void:
 	for layer in _stack:
 		var card: Control = layer.get_meta("card")
 		var opts: Dictionary = layer.get_meta("options")
-		var target := _card_size(str(opts.get("size", "M")), get_viewport().get_visible_rect().size, opts)
+		var screen_size := get_viewport().get_visible_rect().size
+		var angle := float(opts.get("facing_angle", 0.0))
+		var viewport_size := TabletopLayout.canvas_size(screen_size, angle)
+		var canvas: Control = layer.get_meta("facing_canvas")
+		TabletopLayout.layout_canvas(canvas, screen_size, angle)
+		var target := _card_size(str(opts.get("size", "M")), viewport_size, opts)
 		card.custom_minimum_size = Vector2(target.x, 0.0)
 		if layer.has_meta("body_scroll"):
 			var body_scroll: ScrollContainer = layer.get_meta("body_scroll")
 			var body: Control = layer.get_meta("body")
 			body_scroll.custom_minimum_size.y = minf(
 				maxf(52.0, body.get_combined_minimum_size().y),
-				_body_limit(get_viewport().get_visible_rect().size, opts)
+				_body_limit(viewport_size, opts)
 			)
 
 

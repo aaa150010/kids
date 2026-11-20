@@ -18,21 +18,44 @@ func _ready() -> void:
 
 
 func speak(text: String) -> void:
+	begin(text)
+
+
+func begin(text: String, rate: float = 0.92) -> bool:
 	if text.strip_edges().is_empty():
-		return
+		return false
 	if not bool(SaveStore.settings().get("speechOn", true)) or float(SaveStore.settings().get("speechVolume", 0.72)) <= 0.0:
 		stop()
-		return
+		return false
 	_last_text = text
-	if _voice_id.is_empty() and not DisplayServer.tts_get_voices().is_empty():
-		_voice_id = str(DisplayServer.tts_get_voices()[0].get("id", ""))
-	if _voice_id.is_empty():
-		return
+	if not _ensure_chinese_voice():
+		return false
 	_speaking = true
 	_speaking_grace = 0.35
 	AudioFX.set_music_duck(true, &"tts")
 	var volume := int(round(clampf(float(SaveStore.settings().get("speechVolume", 0.72)), 0.0, 1.0) * 100.0))
-	DisplayServer.tts_speak(text, _voice_id, volume, 1.03, 0.92, 0, true)
+	DisplayServer.tts_speak(text, _voice_id, volume, 1.03, rate, 0, true)
+	return true
+
+
+func has_chinese_voice() -> bool:
+	return _ensure_chinese_voice()
+
+
+func is_speaking() -> bool:
+	return _speaking
+
+
+func _ensure_chinese_voice() -> bool:
+	if not _voice_id.is_empty():
+		return true
+	for voice in DisplayServer.tts_get_voices():
+		var language := str(voice.get("language", "")).to_lower()
+		var name := str(voice.get("name", "")).to_lower()
+		if language.begins_with("zh") or "chinese" in name or "中文" in name:
+			_voice_id = str(voice.get("id", ""))
+			return true
+	return false
 
 
 func repeat() -> void:

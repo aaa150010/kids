@@ -93,6 +93,7 @@ func _build_board() -> void:
 	game_header = header
 	surface = BoardSurface.new()
 	surface.game_id = game_id
+	surface.face_to_face = TabletopLayout.enabled(game_id, players, mode_id)
 	surface.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	surface.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	surface.cell_pressed.connect(_cell)
@@ -190,7 +191,8 @@ func _refresh(animate: bool = false) -> void:
 		else:
 			player_labels[side].text = "本关目标"
 	if not selected.is_empty():
-		detail.text = "%s\n%s个可走位置" % [BoardRules.NAMES[selected.kind],targets.size()]
+		var captures := targets.filter(func(target): return not engine.piece_at(int(target)).is_empty()).size()
+		detail.text = "%s\n可走 %s 格 · 可吃 %s 枚" % [BoardRules.NAMES[selected.kind],targets.size() - captures,captures]
 	elif mode_id == "puzzle":
 		detail.text = "第 %s 关\n目标 %s 步\n已走 %s 步" % [level_id,int(engine.state.puzzle.get("targetSteps",1)),int(engine.state.moveCount)]
 	else:
@@ -381,6 +383,7 @@ func _show_replay() -> void:
 	var content := VBoxContainer.new()
 	replay_surface = BoardSurface.new()
 	replay_surface.game_id = game_id
+	replay_surface.face_to_face = TabletopLayout.enabled(game_id, players, mode_id)
 	replay_surface.interactive = false
 	replay_surface.custom_minimum_size = Vector2(580,380)
 	content.add_child(replay_surface)

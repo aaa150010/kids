@@ -12,6 +12,8 @@ const FALLBACK := {
 	"memory": {"kind":"memory","pairsDelta":{"easy":-2,"normal":0,"challenge":2},"previewSeconds":{"easy":1.2,"normal":0.8,"challenge":0.55},"hints":{"easy":3,"normal":2,"challenge":1},"threeStarMistakes":{"easy":4,"normal":3,"challenge":2}},
 	"jungle": {"kind":"board","hintSeconds":{"easy":10,"normal":18,"challenge":0},"hints":{"easy":3,"normal":2,"challenge":1},"undos":{"easy":99,"normal":3,"challenge":1}},
 	"gomoku": {"kind":"board","hintSeconds":{"easy":10,"normal":18,"challenge":0},"hints":{"easy":3,"normal":2,"challenge":1},"undos":{"easy":99,"normal":3,"challenge":1}},
+	"sudoku": {"kind":"quiz","hintSeconds":{"easy":0,"normal":0,"challenge":0},"hints":{"easy":5,"normal":3,"challenge":1},"undos":{"easy":99,"normal":9,"challenge":3}},
+	"chess": {"kind":"board","hintSeconds":{"easy":10,"normal":18,"challenge":0},"hints":{"easy":3,"normal":2,"challenge":1},"undos":{"easy":99,"normal":3,"challenge":1}},
 	"military": {"kind":"board","hintSeconds":{"easy":10,"normal":18,"challenge":0},"hints":{"easy":3,"normal":2,"challenge":1},"undos":{"easy":99,"normal":3,"challenge":1}},
 	"poetry": {"kind":"poetry","difficultyEnabled":false},
 	"stories": {"kind":"stories","difficultyEnabled":false},

@@ -2,7 +2,7 @@ class_name StorySession
 extends RefCounted
 
 const CATEGORIES := ["all", "idiom", "myth", "folk", "fable", "history", "fairy"]
-const FILTERS := ["all", "age", "favorites", "recent", "downloaded"]
+const FILTERS := ["all", "age", "favorites", "recent"]
 var state: Dictionary = {}
 var library: Dictionary = {}
 

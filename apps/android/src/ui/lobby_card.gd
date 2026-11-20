@@ -118,10 +118,16 @@ func _build(animate: bool = true) -> void:
 	cover_tint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	cover_tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	cover_wrap.add_child(cover_tint)
-	var deco := PlaygroundUI.label(str(game.get("icon", "🎮")), 48, accent, 700)
-	deco.position = Vector2(16, 12)
-	deco.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	cover_wrap.add_child(deco)
+	var deco_token := str(game.get("icon", "🎮"))
+	if ArtLibrary.texture(deco_token) != null:
+		var deco := ArtLibrary.picture(deco_token, Vector2(48, 48))
+		deco.position = Vector2(16, 12)
+		cover_wrap.add_child(deco)
+	else:
+		var deco := PlaygroundUI.label(deco_token, 48, accent, 700)
+		deco.position = Vector2(16, 12)
+		deco.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cover_wrap.add_child(deco)
 	column.add_child(cover_wrap)
 	var tag_row := HBoxContainer.new()
 	tag_row.add_theme_constant_override("separation", 7)
@@ -133,7 +139,7 @@ func _build(animate: bool = true) -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tag_row.add_child(spacer)
-	var help := PlaygroundUI.button("📖", accent, func(): help_requested.emit(game_id), "soft")
+	var help := PlaygroundUI.icon_asset_button("📖", accent, func(): help_requested.emit(game_id), "查看玩法")
 	help.custom_minimum_size = Vector2(48, 48)
 	help.tooltip_text = "查看玩法"
 	tag_row.add_child(help)
