@@ -38,6 +38,8 @@ func create_session(context: Dictionary) -> Dictionary:
 		"givens": str(definition.get("givens", "")),
 		"solution": str(definition.get("solution", "")),
 		"selected": -1, "mistakes": 0, "hints": 0, "reported": false,
+		"undos": 0, "hintsMax": maxi(0, int(context.get("hintsMax", 3))),
+		"undosMax": maxi(0, int(context.get("undosMax", 3))),
 		"lastNumber": 0, "hintCell": -1, "hintPreview": {}, "undo": [],
 	}, true)
 	return state
@@ -67,13 +69,28 @@ func restore(value: Dictionary) -> bool:
 	var values := str(state.get("values", ""))
 	if values.length() != dimension * dimension:
 		return false
+	var givens := str(state.get("givens", ""))
+	var solution := str(state.get("solution", ""))
+	if givens.length() != dimension * dimension or solution.length() != dimension * dimension:
+		return false
 	for index in values.length():
 		var digit := int(values[index])
 		if digit < 0 or digit > dimension:
 			return false
+		var given_digit := int(givens[index])
+		if given_digit < 0 or given_digit > dimension:
+			return false
+		if given_digit > 0 and digit != given_digit:
+			return false
+		var solution_digit := int(solution[index])
+		if solution_digit < 1 or solution_digit > dimension:
+			return false
 	state.selected = clampi(int(state.get("selected", -1)), -1, dimension * dimension - 1)
 	state.mistakes = maxi(0, int(state.get("mistakes", 0)))
 	state.hints = maxi(0, int(state.get("hints", 0)))
+	state.undos = maxi(0, int(state.get("undos", 0)))
+	state.hintsMax = maxi(0, int(state.get("hintsMax", 3)))
+	state.undosMax = maxi(0, int(state.get("undosMax", 3)))
 	if not state.get("undo") is Array:
 		state.undo = []
 	if not state.get("hintPreview") is Dictionary:
@@ -161,6 +178,8 @@ func hint() -> Dictionary:
 func hint_analysis() -> Dictionary:
 	if str(state.get("phase", "")) != "playing":
 		return {"ok": false, "message": "这一局已经完成啦"}
+	if int(state.get("hints", 0)) >= int(state.get("hintsMax", 3)):
+		return {"ok": false, "message": "这一档难度的提示次数已经用完。"}
 	var values := str(state.get("values", ""))
 	var solution := str(state.get("solution", ""))
 	for index in values.length():
@@ -170,6 +189,7 @@ func hint_analysis() -> Dictionary:
 			state.hintCell = index
 			var related := conflict_cells(index, digit)
 			state.hintPreview = {"position": index, "digit": digit, "candidates": [], "related": related}
+			state.hints = int(state.get("hints", 0)) + 1
 			return {
 				"ok": true, "position": index, "digit": digit, "candidates": [],
 				"related": related, "reason": "这一格和关联格出现了相同的 %s，请先检查画圈的位置。" % digit,
@@ -191,6 +211,7 @@ func hint_analysis() -> Dictionary:
 	state.selected = best_position
 	state.hintCell = best_position
 	state.hintPreview = {"position": best_position, "digit": digit, "candidates": best_candidates, "related": []}
+	state.hints = int(state.get("hints", 0)) + 1
 	var reason := ""
 	if best_candidates.size() == 1:
 		reason = "这一格所在的行、列和小宫已经排除了其他数字，只剩 %s。" % digit
@@ -209,6 +230,8 @@ func hint_analysis() -> Dictionary:
 
 func fill_hint(position: int = -1, digit: int = -1) -> Dictionary:
 	var preview: Dictionary = state.get("hintPreview", {})
+	if preview.is_empty():
+		return {"ok": false, "message": "先看一次提示，再填写"}
 	if position < 0:
 		position = int(preview.get("position", -1))
 	if digit < 0:
@@ -223,7 +246,6 @@ func fill_hint(position: int = -1, digit: int = -1) -> Dictionary:
 	state.values = "".join(characters)
 	state.selected = position
 	state.hintCell = position
-	state.hints = int(state.hints) + 1
 	state.lastNumber = digit
 	state.hintPreview = {}
 	_push_undo(before)
@@ -253,10 +275,13 @@ func conflict_cells(position: int, digit: int) -> Array:
 func undo_last() -> bool:
 	if not state.get("undo") is Array or state.undo.is_empty():
 		return false
+	if int(state.get("undos", 0)) >= int(state.get("undosMax", 3)):
+		return false
 	var value: Variant = state.undo.pop_back()
 	if not value is Dictionary or str(value.get("values", "")).length() != size() * size():
 		return false
 	_restore_cell_snapshot(value)
+	state.undos = int(state.get("undos", 0)) + 1
 	return true
 
 

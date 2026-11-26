@@ -99,7 +99,7 @@ func _release(index: int, position: Vector2) -> void:
 	var elapsed := (Time.get_ticks_msec() - int(touch["msec"])) / 1000.0
 	if bool(touch["dragging"]):
 		drag_end.emit(position, index)
-	elif not bool(touch["long_fired"]) and (elapsed <= TAP_MAX_TIME or not not long_press.get_connections().is_empty()) and (position - touch["start"]).length() <= TAP_MAX_DISTANCE:
+	elif not bool(touch["long_fired"]) and (elapsed <= TAP_MAX_TIME or long_press.get_connections().is_empty()) and (position - touch["start"]).length() <= TAP_MAX_DISTANCE:
 		# 没有长按行为的控件与普通按钮一致：按住后抬起仍可点击。
 		tap.emit(position, index)
 

@@ -65,25 +65,35 @@ func _new_session() -> void:
 	var chapter := ContentDB.level(game_id,level_id)
 	var count := int(GameTuning.value(game_id, difficulty, "rounds", 8))
 	var pools: Array = []
-	var family_id := str(chapter.get("family","mixed")) if mode_id == "adventure" else family
+	var chapter_family := str(chapter.get("family","")).strip_edges()
+	var chapter_skill := str(chapter.get("skill","")).strip_edges()
+	var family_id := chapter_family if mode_id == "adventure" else family
+	var recent_ids: Array = []
 	for player in players:
 		var pool := ContentDB.questions(game_id,int(player.age))
 		var progress := SaveStore.learning(str(player.id),game_id,mode_id)
 		if mode_id == "review":
 			pool = pool.filter(func(question): return str(question.id) in progress.wrongIds)
-		elif family_id not in ["mixed",""]:
+		elif mode_id == "adventure" and not chapter_family.is_empty() and chapter_family != "mixed":
+			var family_pool := pool.filter(func(question): return str(question.get("family","")) == chapter_family)
+			if not family_pool.is_empty():
+				pool = family_pool
+		elif mode_id == "adventure" and not chapter_skill.is_empty():
+			var skill_pool := pool.filter(func(question): return str(question.get("skill","")) == chapter_skill)
+			if not skill_pool.is_empty():
+				pool = skill_pool
+		elif mode_id != "review" and family_id not in ["mixed",""]:
 			var family_pool := pool.filter(func(question): return str(question.get("family","")) == family_id)
 			if not family_pool.is_empty():
 				pool = family_pool
-		if mode_id != "review":
+		if mode_id != "review" and not pool.is_empty():
 			var fresh := pool.filter(func(question): return not (str(question.id) in progress.recentIds))
-			if fresh.size() < mini(count,pool.size()):
+			if fresh.is_empty():
+				# 只有整个题池都进入近期记录后才重置，单局不足部分由规则层从旧题补齐。
 				progress.recentIds = []
-			else:
-				pool = fresh
 		pools.append(pool)
-	engine.create_session({"gameId":game_id,"modeId":mode_id,"players":players.duplicate(true),"levelId":level_id,"difficulty":difficulty,"seed":int(chapter.get("seed",Time.get_ticks_usec())) if mode_id == "adventure" else Time.get_ticks_usec(),"pools":pools,"rounds":count,"family":family_id,"view":"question"})
-	engine.state.erase("pools")
+		recent_ids.append(progress.recentIds.duplicate())
+	engine.create_session({"gameId":game_id,"modeId":mode_id,"players":players.duplicate(true),"levelId":level_id,"difficulty":difficulty,"seed":int(chapter.get("seed",Time.get_ticks_usec())) if mode_id == "adventure" else Time.get_ticks_usec(),"pools":pools,"recentIds":recent_ids,"rounds":count,"family":family_id,"view":"question"})
 	view = "question"
 	_last_question = ""
 	_save("新的练习已开始")
@@ -172,7 +182,7 @@ func _on_immersive_changed(value: bool) -> void:
 		_last_immersive_player = int(engine.state.get("currentPlayer", 0)) if not engine.state.is_empty() else -1
 
 
-func _refresh() -> void:
+func _refresh(persist: bool = true) -> void:
 	if engine.state.get("phase","") == "empty":
 		PlaygroundUI.clear(content_root)
 		var empty := VBoxContainer.new()
@@ -225,11 +235,13 @@ func _refresh() -> void:
 		feedback_text.text = "慢慢想，也可以点“听题”再听一遍。答完后，一起看看为什么。"
 		if _last_question != str(question.id):
 			_last_question = str(question.id)
-	_save("正在看讲解" if engine.state.phase == "feedback" else "正在答题")
+	if persist:
+		_save("正在看讲解" if engine.state.phase == "feedback" else "正在答题")
 
 func _listen() -> void:
 	if paused:
 		return
+	Speech.stop()
 	var question := engine.question()
 	Speech.speak(str(question.get("narration",question.get("prompt",""))))
 	lesson_action("listen")
@@ -237,6 +249,7 @@ func _listen() -> void:
 func _answer(index: int) -> void:
 	if paused:
 		return
+	Speech.stop()
 	var result := engine.handle_input({"type":"answer","index":index})
 	if not bool(result.ok):
 		return
@@ -251,31 +264,39 @@ func _answer(index: int) -> void:
 	FeedbackKit.haptic(10 if bool(result.correct) else 16)
 	lesson_action("answer")
 	_save("答案与讲解已保存")
-	_refresh()
+	_refresh(false)
 
 func _next() -> void:
 	if paused:
 		return
+	Speech.stop()
 	var result := engine.handle_input({"type":"next"})
 	if not bool(result.ok):
 		return
 	lesson_action("next")
 	# 翻题的 whoosh 由答题舞台在滑出旧题时播放，这里不重复叠加
 	_save("继续下一题")
-	_refresh()
+	_refresh(false)
 
 func _finish() -> void:
 	if not bool(engine.state.get("reported",false)):
 		for index in players.size():
 			var score := int(engine.state.scores[index])
 			var total: int = int(engine.state.queues[index].size())
-			var outcome := "win" if players.size() == 1 or score > int(engine.state.scores[1-index]) else "draw" if score == int(engine.state.scores[1-index]) else "loss"
-			var axis := str({"math":"math","workbook":"math","pinyin":"language","animals":"science"}.get(game_id,"logic"))
+			var stars := GameTuning.stars(game_id,difficulty,score,total)
+			var outcome := "played"
+			if players.size() > 1:
+				var rival := int(engine.state.scores[1-index])
+				outcome = "win" if score > rival else "draw" if score == rival else "loss"
+			elif mode_id == "adventure":
+				outcome = "win" if stars > 0 else "played"
+			var axis := str({"math":"math","workbook":"math","pinyin":"language","animals":"science","trivia":"science"}.get(game_id,"logic"))
 			SaveStore.record_outcome(str(players[index].id),game_id,outcome,score,score,total,{axis:{"correct":score,"answered":total}},str(engine.state.sessionId))
 			if mode_id == "adventure":
-				SaveStore.complete_level(str(players[index].id),game_id,level_id,GameTuning.stars(game_id,difficulty,score,total),mode_id)
+				SaveStore.complete_level(str(players[index].id),game_id,level_id,stars,mode_id)
 		engine.state.reported = true
 		_save("练习完成",false)
+	Speech.stop()
 	PlaygroundUI.clear(content_root)
 	var panel := PlaygroundUI.panel(PlaygroundUI.mix(accent,Color.WHITE,0.9),28,accent,2)
 	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL

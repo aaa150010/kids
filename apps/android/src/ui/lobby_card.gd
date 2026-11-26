@@ -18,6 +18,7 @@ var viewport_size := Vector2(1600, 1000)
 
 var _recognizer: GestureRecognizer = null
 var _cover: TextureRect = null
+var _cover_fallback: Control = null
 var _sort_dragging := false
 var _pressed_visual := false
 var _last_global := Vector2.ZERO
@@ -39,6 +40,13 @@ func set_sorting(value: bool) -> void:
 	if sorting == value:
 		return
 	sorting = value
+	_build(false)
+
+
+func set_viewport_size(value: Vector2) -> void:
+	if viewport_size.is_equal_approx(value):
+		return
+	viewport_size = value
 	_build(false)
 
 
@@ -109,14 +117,31 @@ func _build(animate: bool = true) -> void:
 	_cover.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	_cover.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_cover.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var original_cover := ArtLibrary.cover_texture(game_id)
+	var illustrated_path := "res://assets/covers/%s.webp" % game_id
+	var original_cover := LobbyCoverCache.texture(illustrated_path)
 	if original_cover != null:
 		_cover.texture = original_cover
 	else:
-		var fallback_name := str(game.get("title", "小游戏"))
-		var glyph := ArtLibrary.semantic_picture(fallback_name, "cover", Vector2(240, 135))
-		glyph.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		cover_canvas.add_child(glyph)
+		if ResourceLoader.exists(illustrated_path):
+			var fallback_name := str(game.get("title", "小游戏"))
+			_cover_fallback = ArtLibrary.semantic_picture(fallback_name, "cover", Vector2(240, 135))
+			_cover_fallback.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+			cover_canvas.add_child(_cover_fallback)
+			LobbyCoverCache.request(illustrated_path, func(texture: Texture2D):
+				if texture != null and is_instance_valid(_cover):
+					_cover.texture = texture
+					if is_instance_valid(_cover_fallback):
+						_cover_fallback.hide()
+			)
+		else:
+			var atlas_cover := ArtLibrary.cover_texture(game_id)
+			if atlas_cover != null:
+				_cover.texture = atlas_cover
+			else:
+				var fallback_name := str(game.get("title", "小游戏"))
+				_cover_fallback = ArtLibrary.semantic_picture(fallback_name, "cover", Vector2(240, 135))
+				_cover_fallback.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+				cover_canvas.add_child(_cover_fallback)
 	cover_canvas.add_child(_cover)
 	var cover_tint := ColorRect.new()
 	cover_tint.color = Color(accent, 0.08)

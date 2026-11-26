@@ -1,18 +1,30 @@
 extends Node
 
 signal changed
+signal save_failed(message: String)
 
 const SAVE_PATH := "user://save-v1.json"
 const BACKUP_PATH := "user://save-v1.backup.json"
+const TEMP_SUFFIX := ".tmp"
+const STORE_SCHEMA_VERSION := 2
 const MAX_PROFILES := 8
 
 var data: Dictionary = {}
 var contexts: Dictionary = {}
+var last_save_ok := true
+var last_save_error := ""
+var _primary_was_valid := false
+var _save_path := SAVE_PATH
+var _backup_path := BACKUP_PATH
 
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	randomize()
+	var override_path := OS.get_environment("KIDS_PLAYGROUND_SAVE_PATH").strip_edges()
+	if not override_path.is_empty() and override_path.begins_with("user://"):
+		_save_path = override_path
+		_backup_path = override_path + ".backup"
 	data = _default_data() if OS.get_environment("KIDS_PLAYGROUND_AUDIT") == "1" else _load()
 
 
@@ -27,7 +39,7 @@ func _notification(what: int) -> void:
 
 func _default_data() -> Dictionary:
 	return {
-		"schemaVersion": 1,
+		"schemaVersion": STORE_SCHEMA_VERSION,
 		"profiles": [],
 		"settings": {
 			"soundOn": true,
@@ -52,12 +64,17 @@ func _default_data() -> Dictionary:
 
 
 func _load() -> Dictionary:
-	var loaded: Variant = _read_json(SAVE_PATH)
-	if not _valid_envelope(loaded):
-		loaded = _read_json(BACKUP_PATH)
-	if not _valid_envelope(loaded):
-		loaded = _default_data()
-	return _normalize(loaded)
+	var primary: Variant = _read_json(_save_path)
+	if _valid_envelope(primary):
+		_primary_was_valid = true
+		return _normalize(primary)
+	_primary_was_valid = false
+	for path in [_save_path + TEMP_SUFFIX, _backup_path]:
+		var recovered: Variant = _read_json(path)
+		if _valid_envelope(recovered):
+			push_warning("存档主文件不可用，已从 %s 恢复。" % path)
+			return _normalize(recovered)
+	return _default_data()
 
 
 func _read_json(path: String) -> Variant:
@@ -68,15 +85,19 @@ func _read_json(path: String) -> Variant:
 		return null
 	var text := file.get_as_text()
 	file.close()
-	return JSON.parse_string(text)
+	var parser := JSON.new()
+	if parser.parse(text) != OK:
+		return null
+	return parser.data
 
 
 func _valid_envelope(value: Variant) -> bool:
 	if not value is Dictionary:
 		return false
 	var source: Dictionary = value
+	var schema := int(source.get("schemaVersion", -1))
 	return (
-		int(source.get("schemaVersion", -1)) == 1
+		schema in [1, STORE_SCHEMA_VERSION]
 		and source.get("profiles") is Array
 		and source.get("settings") is Dictionary
 		and source.get("selections") is Dictionary
@@ -88,6 +109,7 @@ func _valid_envelope(value: Variant) -> bool:
 
 func _normalize(source: Dictionary) -> Dictionary:
 	var result := _default_data()
+	result.schemaVersion = STORE_SCHEMA_VERSION
 	result.settings.merge(source.get("settings", {}), true)
 	result.settings.soundOn = bool(result.settings.soundOn)
 	result.settings.musicOn = bool(result.settings.musicOn)
@@ -146,10 +168,27 @@ func _normalize(source: Dictionary) -> Dictionary:
 				continue
 			var entry: Dictionary = entries[session_key]
 			var participants := _participants(entry)
-			if participants.is_empty() or participants.any(func(id): return not (str(id) in valid_ids)):
+			if participants.is_empty():
+				continue
+			var archived_ids: Array = entry.get("archivedProfileIds", []) if entry.get("archivedProfileIds") is Array else []
+			var invalid_ids := participants.filter(func(id): return not (str(id) in valid_ids))
+			if not invalid_ids.is_empty() and invalid_ids.any(func(id): return not (str(id) in archived_ids)):
 				continue
 			clean_sessions[game_id][session_key] = entry
 	result.sessionSaves = clean_sessions
+	var clean_progress := {}
+	for progress_key in result.sessionProgress:
+		var meta: Variant = result.sessionProgress[progress_key]
+		if not meta is Dictionary:
+			continue
+		var meta_dict: Dictionary = meta
+		var game_id := str(meta_dict.get("gameId", ""))
+		var session_key := str(meta_dict.get("sessionKey", ""))
+		if not clean_sessions.get(game_id, {}).has(session_key):
+			continue
+		meta_dict.participantIds = meta_dict.get("participantIds", []).filter(func(id): return str(id) in valid_ids)
+		clean_progress[progress_key] = meta_dict
+	result.sessionProgress = clean_progress
 	return result
 
 
@@ -176,30 +215,74 @@ func _normalize_record(source: Dictionary) -> Dictionary:
 	}
 
 
-func flush() -> void:
+func flush() -> bool:
 	if OS.get_environment("KIDS_PLAYGROUND_AUDIT") == "1":
-		return
+		last_save_ok = true
+		last_save_error = ""
+		return true
 	if data.is_empty():
-		return
+		last_save_ok = false
+		last_save_error = "存档尚未初始化"
+		save_failed.emit(last_save_error)
+		return false
+	data.schemaVersion = STORE_SCHEMA_VERSION
 	var text := JSON.stringify(data, "\t")
-	var temporary := SAVE_PATH + ".tmp"
+	var parsed: Variant = JSON.parse_string(text)
+	if not _valid_envelope(parsed):
+		last_save_ok = false
+		last_save_error = "存档内容格式异常"
+		push_error(last_save_error)
+		save_failed.emit(last_save_error)
+		return false
+	var temporary := _save_path + TEMP_SUFFIX
 	var file := FileAccess.open(temporary, FileAccess.WRITE)
 	if file == null:
-		return
+		last_save_ok = false
+		last_save_error = "无法打开存档临时文件"
+		push_warning("自动保存未完成：%s" % last_save_error)
+		save_failed.emit(last_save_error)
+		return false
 	file.store_string(text)
 	file.flush()
 	file.close()
-	if FileAccess.file_exists(SAVE_PATH):
-		DirAccess.copy_absolute(
-			ProjectSettings.globalize_path(SAVE_PATH),
-			ProjectSettings.globalize_path(BACKUP_PATH)
+	# 只有确认主文件原本有效时才轮换备份，避免用损坏文件覆盖最后一个好备份。
+	if _primary_was_valid and FileAccess.file_exists(_save_path):
+		var backup_tmp := _backup_path + TEMP_SUFFIX
+		if FileAccess.file_exists(backup_tmp):
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(backup_tmp))
+		var copy_error := DirAccess.copy_absolute(
+			ProjectSettings.globalize_path(_save_path),
+			ProjectSettings.globalize_path(backup_tmp)
 		)
+		if copy_error == OK:
+			if FileAccess.file_exists(_backup_path):
+				DirAccess.remove_absolute(ProjectSettings.globalize_path(_backup_path))
+			DirAccess.rename_absolute(
+				ProjectSettings.globalize_path(backup_tmp),
+				ProjectSettings.globalize_path(_backup_path)
+			)
 	var error := DirAccess.rename_absolute(
 		ProjectSettings.globalize_path(temporary),
-		ProjectSettings.globalize_path(SAVE_PATH)
+		ProjectSettings.globalize_path(_save_path)
 	)
 	if error != OK:
-		push_warning("自动保存未完成，将在下次操作重试。")
+		last_save_ok = false
+		last_save_error = "存档替换失败，已保留临时文件供下次恢复"
+		push_warning("自动保存未完成：%s" % last_save_error)
+		save_failed.emit(last_save_error)
+		return false
+	_primary_was_valid = true
+	last_save_ok = true
+	last_save_error = ""
+	return true
+
+
+func save_status_text() -> String:
+	return "已保存" if last_save_ok else "等待重试：%s" % last_save_error
+
+
+func storage_paths() -> Dictionary:
+	return {"save": _save_path, "backup": _backup_path}
 
 
 func profiles() -> Array:
@@ -260,8 +343,19 @@ func delete_profile(profile_id: String) -> void:
 		for key in data.sessionSaves[game].keys():
 			var entry: Dictionary = data.sessionSaves[game][key]
 			var participants := _participants(entry)
-			if profile_id in participants:
+			if not (profile_id in participants):
+				continue
+			if participants.size() <= 1:
 				data.sessionSaves[game].erase(key)
+				data.sessionProgress.erase(str(game) + ":" + str(key))
+			else:
+				# 共享局属于多个孩子，删除一位档案时只归档，不静默清除另一位孩子的数据。
+				var archived: Array = entry.get("archivedProfileIds", [])
+				if not (profile_id in archived):
+					archived.append(profile_id)
+				entry.archivedProfileIds = archived
+				entry.archivedAt = Time.get_unix_time_from_system()
+				data.sessionSaves[game][key] = entry
 				data.sessionProgress.erase(str(game) + ":" + str(key))
 	flush()
 	changed.emit()
@@ -316,6 +410,10 @@ func save_state(game_id: String, profile_id: String, state: Dictionary, note: St
 	snapshot.modeId = mode_id
 	snapshot.participantIds = ids
 	snapshot.resume = resume
+	snapshot.saveFormat = STORE_SCHEMA_VERSION
+	snapshot.savedAt = Time.get_unix_time_from_system()
+	if not snapshot.has("gameId"):
+		snapshot.gameId = game_id
 	data.sessionSaves[game_id][key] = snapshot
 	var meta := {
 		"gameId": game_id,
@@ -325,6 +423,9 @@ func save_state(game_id: String, profile_id: String, state: Dictionary, note: St
 		"lastPlayedAt": Time.get_unix_time_from_system(),
 		"note": note,
 		"resume": resume,
+		"levelId": int(state.get("levelId", 1)),
+		"phase": str(state.get("phase", "")),
+		"difficulty": str(state.get("difficulty", "")),
 	}
 	data.progress[game_id] = meta
 	data.sessionProgress[game_id + ":" + key] = meta
@@ -336,7 +437,7 @@ func load_state(game_id: String, profile_ids: Array) -> Dictionary:
 	var mode_id := str(contexts.get(game_id, {}).get("modeId", "classic"))
 	var key := _session_key(mode_id, profile_ids)
 	var saved: Variant = data.sessionSaves.get(game_id, {}).get(key)
-	if saved is Dictionary:
+	if saved is Dictionary and _snapshot_matches(game_id, mode_id, profile_ids, saved):
 		return saved.duplicate(true)
 	if mode_id != "classic":
 		return {}
@@ -348,6 +449,23 @@ func load_state(game_id: String, profile_ids: Array) -> Dictionary:
 			if _session_key(mode_id, ids) == key or (ids.is_empty() and profile_ids.size() == 1):
 				return legacy.duplicate(true)
 	return {}
+
+
+func _snapshot_matches(game_id: String, mode_id: String, profile_ids: Array, snapshot: Dictionary) -> bool:
+	if snapshot.get("archivedProfileIds") is Array and not snapshot.archivedProfileIds.is_empty():
+		return false
+	if snapshot.has("gameId") and str(snapshot.gameId) != game_id:
+		return false
+	if str(snapshot.get("modeId", mode_id)) != mode_id:
+		return false
+	var participants := _participants(snapshot)
+	if participants.is_empty():
+		return false
+	var ordered_expected := profile_ids.duplicate()
+	ordered_expected.sort()
+	var ordered_actual := participants.duplicate()
+	ordered_actual.sort()
+	return ordered_actual == ordered_expected
 
 
 func clear_state(game_id: String, profile_id: String) -> void:
@@ -379,10 +497,11 @@ func settings() -> Dictionary:
 	return data.settings
 
 
-func set_setting(key: String, value: Variant) -> void:
+func set_setting(key: String, value: Variant, persist: bool = true) -> void:
 	data.settings[key] = value
-	flush()
 	changed.emit()
+	if persist:
+		flush()
 
 
 func difficulty(game_id: String, profile_id: String) -> String:
@@ -411,9 +530,32 @@ func lobby_order(defaults: Array) -> Array[String]:
 	for id in saved:
 		if id in defaults and not (id in result):
 			result.append(str(id))
+	var content := get_tree().root.get_node_or_null("/root/ContentDB")
 	for id in defaults:
-		if not (id in result):
-			result.append(str(id))
+		if id in result:
+			continue
+		var group := "games"
+		if content != null:
+			group = str(content.game(str(id)).get("group", "games"))
+		var insertion := result.size()
+		var found_group := false
+		for index in range(result.size() - 1, -1, -1):
+			var prior_group := "games"
+			if content != null:
+				prior_group = str(content.game(str(result[index])).get("group", "games"))
+			if prior_group == group:
+				insertion = index + 1
+				found_group = true
+				break
+		if not found_group and group == "games":
+			for index in result.size():
+				var prior_group := "games"
+				if content != null:
+					prior_group = str(content.game(str(result[index])).get("group", "games"))
+				if prior_group != "games":
+					insertion = index
+					break
+		result.insert(insertion, str(id))
 	return result
 
 
@@ -515,6 +657,13 @@ func resumable_sessions() -> Array:
 	var result: Array = []
 	for entry in data.sessionProgress.values():
 		if entry is Dictionary and bool(entry.get("resume", false)):
+			var game_id := str(entry.get("gameId", ""))
+			var session_key := str(entry.get("sessionKey", ""))
+			var snapshot: Variant = data.sessionSaves.get(game_id, {}).get(session_key)
+			if not snapshot is Dictionary:
+				continue
+			if snapshot.get("archivedProfileIds") is Array and not snapshot.archivedProfileIds.is_empty():
+				continue
 			var valid := true
 			for profile_id in entry.get("participantIds", []):
 				if profile(str(profile_id)).is_empty():
@@ -525,12 +674,40 @@ func resumable_sessions() -> Array:
 	for game_id in data.progress:
 		var entry: Dictionary = data.progress[game_id]
 		if not entry.has("sessionKey") and bool(entry.get("resume", false)):
+			var legacy_saves: Dictionary = data.gameSaves.get(game_id, {})
+			if legacy_saves.is_empty():
+				continue
+			var legacy_ids: Array = data.selections.get(game_id, [])
+			if legacy_ids.is_empty() or legacy_ids.any(func(id): return profile(str(id)).is_empty()):
+				continue
 			var legacy := entry.duplicate(true)
 			legacy.gameId = game_id
 			legacy.modeId = "classic"
 			legacy.participantIds = data.selections.get(game_id, []).duplicate()
 			result.append(legacy)
 	result.sort_custom(func(first, second): return float(first.get("lastPlayedAt", 0)) > float(second.get("lastPlayedAt", 0)))
+	return result
+
+
+func shared_sessions_for(profile_id: String) -> Array:
+	var result: Array = []
+	for game_id in data.sessionSaves:
+		var entries: Dictionary = data.sessionSaves.get(game_id, {})
+		for session_key in entries:
+			var snapshot: Variant = entries[session_key]
+			if not snapshot is Dictionary:
+				continue
+			var participants := _participants(snapshot)
+			if profile_id in participants and participants.size() > 1:
+				var archived: Array = snapshot.get("archivedProfileIds", []) if snapshot.get("archivedProfileIds") is Array else []
+				if profile_id in archived:
+					continue
+				result.append({
+					"gameId": game_id,
+					"modeId": str(snapshot.get("modeId", "classic")),
+					"sessionKey": session_key,
+					"participantIds": participants.duplicate(),
+				})
 	return result
 
 

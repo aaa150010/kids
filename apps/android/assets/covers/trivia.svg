@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">
+  <defs>
+    <linearGradient id="trivia-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#214f6d"/>
+      <stop offset="1" stop-color="#12354d"/>
+    </linearGradient>
+    <linearGradient id="trivia-paper" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fff9e8"/>
+      <stop offset="1" stop-color="#f1dfb9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="576" rx="42" fill="url(#trivia-bg)"/>
+  <circle cx="160" cy="120" r="9" fill="#f6cf63"/>
+  <circle cx="865" cy="88" r="7" fill="#f6cf63"/>
+  <circle cx="884" cy="466" r="10" fill="#f6cf63"/>
+  <path d="M90 400c92-34 173-30 246 10 82-42 174-46 260 0 88-34 178-32 250 2v104H90z" fill="#173f54" opacity=".74"/>
+  <path d="M170 330c105-38 205-27 295 34v160c-95-50-193-58-295-24z" fill="url(#trivia-paper)" stroke="#f6cf63" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M854 330c-105-38-205-27-295 34v160c95-50 193-58 295-24z" fill="url(#trivia-paper)" stroke="#f6cf63" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M512 364v160" stroke="#b98d4c" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="512" cy="188" r="100" fill="#f5c956" stroke="#fff2bb" stroke-width="12"/>
+  <circle cx="512" cy="188" r="66" fill="#fff7d7"/>
+  <path d="M482 164c7-31 58-35 58-2 0 21-25 25-25 46" fill="none" stroke="#1d4e6d" stroke-width="17" stroke-linecap="round"/>
+  <circle cx="515" cy="234" r="11" fill="#1d4e6d"/>
+  <path d="M367 122l17-39 17 39 39 17-39 17-17 39-17-39-39-17z" fill="#fff1a8" opacity=".9"/>
+  <path d="M681 110l12-27 12 27 27 12-27 12-12 27-12-27-27-12z" fill="#fff1a8" opacity=".9"/>
+  <text x="512" y="552" text-anchor="middle" font-family="Noto Sans CJK SC, sans-serif" font-size="34" font-weight="700" fill="#fff8df">生活 · 自然 · 文化</text>
+</svg>

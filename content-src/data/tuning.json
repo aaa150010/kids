@@ -115,6 +115,111 @@
         ]
       }
     },
+    "trivia": {
+      "kind": "quiz",
+      "rounds": {
+        "easy": 6,
+        "normal": 8,
+        "challenge": 10
+      },
+      "starThresholds": {
+        "easy": [
+          0.5,
+          0.75,
+          1
+        ],
+        "normal": [
+          0.6,
+          0.8,
+          1
+        ],
+        "challenge": [
+          0.75,
+          0.9,
+          1
+        ]
+      }
+    },
+    "tangram": {
+      "kind": "puzzle",
+      "hints": {
+        "easy": 3,
+        "normal": 2,
+        "challenge": 1
+      },
+      "threeStarMistakes": {
+        "easy": 0,
+        "normal": 0,
+        "challenge": 0
+      },
+      "twoStarMistakes": {
+        "easy": 4,
+        "normal": 3,
+        "challenge": 2
+      },
+      "undos": {
+        "easy": 99,
+        "normal": 9,
+        "challenge": 3
+      }
+    },
+    "spot": {
+      "kind": "spot",
+      "hints": {
+        "easy": 3,
+        "normal": 2,
+        "challenge": 1
+      }
+    },
+    "shop": {
+      "kind": "shop",
+      "rounds": {
+        "easy": 4,
+        "normal": 6,
+        "challenge": 8
+      },
+      "hints": {
+        "easy": 3,
+        "normal": 2,
+        "challenge": 1
+      },
+      "starThresholds": {
+        "easy": [0.5, 0.75, 1],
+        "normal": [0.6, 0.8, 1],
+        "challenge": [0.75, 0.9, 1]
+      }
+    },
+    "fruit_slice": {
+      "kind": "action",
+      "practiceWaves": 3,
+      "practiceFruits": 24,
+      "challengeSeconds": 60,
+      "spawnDelay": {
+        "easy": 1.55,
+        "normal": 1.15,
+        "challenge": 0.82
+      },
+      "maxFruits": {
+        "easy": 5,
+        "normal": 7,
+        "challenge": 9
+      },
+      "bombChance": {
+        "easy": 0.0,
+        "normal": 0.12,
+        "challenge": 0.18
+      },
+      "bonusChance": {
+        "easy": 0.08,
+        "normal": 0.10,
+        "challenge": 0.12
+      },
+      "comboWindow": {
+        "easy": 0.58,
+        "normal": 0.46,
+        "challenge": 0.36
+      }
+    },
     "workbook": {
       "kind": "quiz",
       "rounds": {

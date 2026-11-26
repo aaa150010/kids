@@ -51,8 +51,13 @@ func _build() -> void:
 	_title_group.add_theme_constant_override("separation", 8)
 	_title_group.modulate.a = 0.0
 	_title_group.hide()
-	var mark := PlaygroundUI.label("🎡", 82, Color("#f4c75c"), 700)
-	mark.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var mark := TextureRect.new()
+	mark.texture = load("res://assets/branding/app-icon-512.png")
+	mark.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	mark.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	mark.custom_minimum_size = Vector2(92, 92)
+	mark.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_title_group.add_child(mark)
 	var title := PlaygroundUI.label("童心游乐场", 70, Color("#fff7e5"), 700)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

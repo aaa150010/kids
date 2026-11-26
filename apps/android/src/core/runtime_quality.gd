@@ -19,7 +19,7 @@ var _stable_windows := 0
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	display_refresh = _detect_refresh()
-	target_fps = HIGH_REFRESH
+	target_fps = display_refresh
 	Engine.max_fps = target_fps
 	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED)
 

@@ -8,6 +8,11 @@ const GAME_SCRIPTS := {
 	"memory": "res://src/games/memory_game.gd",
 	"patterns": "res://src/games/quiz_game.gd",
 	"animals": "res://src/games/quiz_game.gd",
+	"tangram": "res://src/games/tangram_game.gd",
+	"spot": "res://src/games/spot_game.gd",
+	"shop": "res://src/games/shop_game.gd",
+	"fruit_slice": "res://src/games/fruit_slice_game.gd",
+	"trivia": "res://src/games/quiz_game.gd",
 	"gomoku": "res://src/games/board_game.gd",
 	"chess": "res://src/games/chess_game.gd",
 	"sudoku": "res://src/games/sudoku_game.gd",
@@ -29,6 +34,7 @@ var performance_lines: Array[String] = []
 var save_store: Node
 var content: Node
 var fatal_failure := false
+var dry_run := false
 
 
 func _init() -> void:
@@ -36,6 +42,7 @@ func _init() -> void:
 
 
 func _run() -> void:
+	dry_run = OS.get_environment("KIDS_UI_DRY_RUN") == "1"
 	save_store = root.get_node_or_null("SaveStore")
 	content = root.get_node_or_null("ContentDB")
 	if save_store == null or content == null:
@@ -134,6 +141,44 @@ func _capture_lobby(capture: Dictionary) -> void:
 	_audit(scene, "lobby")
 	await _sample_performance("lobby-%s" % capture.label)
 	await _save(viewport, capture, "lobby")
+	var search_edit: LineEdit = scene.get("_search_edit") as LineEdit
+	var search_empty: Control = scene.get("_search_empty") as Control
+	if grid != null and search_edit != null:
+		var original_order: Array[String] = []
+		for card in grid.get_children():
+			if card is LobbyGameCard:
+				original_order.append((card as LobbyGameCard).game_id)
+		search_edit.text = "水果"
+		scene.call("_on_lobby_search_changed", "水果")
+		scene.call("_apply_lobby_search")
+		await _frames(3)
+		var visible_cards := grid.get_children().filter(
+			func(card): return card is LobbyGameCard and (card as LobbyGameCard).visible
+		)
+		if visible_cards.size() != 1 or str((visible_cards[0] as LobbyGameCard).game_id) != "fruit_slice":
+			_fail("lobby: searching 水果 must leave only the fruit slice card visible")
+			viewport.queue_free()
+			return
+		var filtered_order: Array[String] = []
+		for card in grid.get_children():
+			if card is LobbyGameCard:
+				filtered_order.append((card as LobbyGameCard).game_id)
+		if filtered_order != original_order:
+			_fail("lobby: search filtering must not rebuild or reorder cards")
+			viewport.queue_free()
+			return
+		await _save(viewport, capture, "lobby-search")
+		search_edit.text = "完全不存在的小游戏"
+		scene.call("_on_lobby_search_changed", "完全不存在的小游戏")
+		scene.call("_apply_lobby_search")
+		await _frames(3)
+		if search_empty == null or not search_empty.visible:
+			_fail("lobby: unknown search must expose the empty state")
+			viewport.queue_free()
+			return
+		await _save(viewport, capture, "lobby-search-empty")
+		scene.call("_clear_lobby_search")
+		await _frames(3)
 	scene.call("_show_profile_form", {})
 	await _frames(8)
 	_audit(scene, "profile-form")
@@ -190,6 +235,19 @@ func _capture_games(capture: Dictionary) -> void:
 			return
 		await _sample_performance("%s-%s" % [game_id, capture.label])
 		await _save(viewport, capture, game_id)
+		if game_id in ["tangram", "spot", "shop"]:
+			screen.call("_choose_level", 1)
+			await _frames(14)
+			_audit(screen, "%s-play" % game_id)
+			await _save(viewport, capture, game_id + "-play")
+			if fatal_failure:
+				viewport.queue_free()
+				return
+		if game_id == "fruit_slice":
+			await _capture_fruit_effects(viewport, capture, screen)
+			if fatal_failure:
+				viewport.queue_free()
+				return
 		if game_id in TABLETOP_GAMES:
 			await _capture_board_play(viewport, capture, screen, game_id)
 			if fatal_failure:
@@ -217,10 +275,69 @@ func _capture_games(capture: Dictionary) -> void:
 		await _frames(2)
 
 
+func _capture_fruit_effects(viewport: SubViewport, capture: Dictionary, screen: Control) -> void:
+	var field: Control = screen.get("field") as Control
+	var engine: RefCounted = screen.get("engine") as RefCounted
+	if field == null or engine == null:
+		_fail("fruit_slice: effect capture has no field or session")
+		return
+	field.call("_start_game")
+	await _frames(3)
+	for _index in 3:
+		engine.call("_spawn_one")
+	var state: Dictionary = engine.get("state")
+	var fruits: Array = state.get("fruits", [])
+	if fruits.size() < 3:
+		_fail("fruit_slice: effect capture could not spawn three fruits")
+		return
+	for index in 3:
+		var fruit: Dictionary = fruits[index]
+		fruit.x = 0.28 + float(index) * 0.22
+		fruit.y = 0.46 + float(index % 2) * 0.08
+		fruit.vx = 0.0
+		fruit.vy = -0.08
+		fruit.spin = 0.0
+		fruit.special = ""
+	state.fruits = fruits
+	field.queue_redraw()
+	await _frames(5)
+	var field_size: Vector2 = field.size
+	for point_index in 5:
+		var trail_point := Vector2(
+			field_size.x * (0.18 + float(point_index) * 0.11),
+			field_size.y * (0.62 - float(point_index) * 0.035)
+		)
+		field.call("_add_trail", 0, trail_point)
+	_audit(screen, "fruit_slice-active")
+	await _save(viewport, capture, "fruit_slice-active")
+	for index in 3:
+		var fruit: Dictionary = fruits[index]
+		var point := Vector2(float(fruit.x) * field_size.x, float(fruit.y) * field_size.y)
+		field.call("_slice", point, point + Vector2(8.0, 0.0))
+	await _frames(2)
+	_audit(screen, "fruit_slice-combo")
+	await _save(viewport, capture, "fruit_slice-combo")
+	await _frames(12)
+	_audit(screen, "fruit_slice-halves")
+	await _save(viewport, capture, "fruit_slice-halves")
+	field.call("_apply_events", [{
+		"type": "bomb",
+		"x": 0.72,
+		"y": 0.5,
+		"radius": 0.06,
+		"delta": -5,
+		"penalty": 5,
+	}])
+	await _frames(4)
+	_audit(screen, "fruit_slice-bomb")
+	await _save(viewport, capture, "fruit_slice-bomb")
+
+
 func _screenshot_mode(game_id: String) -> Dictionary:
 	var modes: Array = content.modes(game_id)
 	var preferred: String = str({
-		"math":"practice", "pinyin":"practice", "patterns":"practice", "animals":"practice",
+		"math":"practice", "pinyin":"practice", "patterns":"practice", "animals":"practice", "trivia":"practice",
+		"tangram":"adventure", "spot":"adventure", "shop":"adventure", "fruit_slice":"practice",
 		"workbook":"classic", "memory":"classic", "jungle":"classic", "gomoku":"classic",
 		"chess":"classic", "sudoku":"classic", "military":"classic", "poetry":"classic",
 	}.get(game_id,"classic"))
@@ -584,6 +701,8 @@ func _audit(node: Node, label: String) -> void:
 
 
 func _save(viewport: SubViewport, capture: Dictionary, name: String) -> void:
+	if dry_run:
+		return
 	await _frames(2)
 	RenderingServer.force_draw(false)
 	var image := viewport.get_texture().get_image()

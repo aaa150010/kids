@@ -378,8 +378,31 @@ func _layout() -> void:
 		buttons[index].position = Vector2(pad+index*(width+gap),options_top)
 		buttons[index].size = Vector2(width,height)
 		buttons[index].pivot_offset = buttons[index].size*0.5
-		buttons[index].add_theme_font_size_override("font_size",answer_font)
+		_fit_button_text(buttons[index], answer_font, 16)
 	_fit_prompt()
+
+## 答案卡在平板上也可能遇到长拼音或双行反馈，按实际宽高收缩字号并允许换行。
+func _fit_button_text(button: Button, maximum: int, minimum: int) -> void:
+	button.set("autowrap_mode", TextServer.AUTOWRAP_WORD_SMART)
+	button.set("text_overrun_behavior", TextServer.OVERRUN_NO_TRIMMING)
+	button.set("clip_text", false)
+	var text := button.text.strip_edges()
+	if text.is_empty():
+		button.add_theme_font_size_override("font_size", maximum)
+		return
+	var available_width := maxf(24.0, button.size.x - 28.0)
+	var available_height := maxf(24.0, button.size.y - 22.0)
+	var font := PlaygroundUI.font()
+	var fitted := maximum
+	while fitted > minimum:
+		var line_count := 0
+		for line in text.split("\n"):
+			var width := font.get_string_size(line, HORIZONTAL_ALIGNMENT_LEFT, -1, fitted).x
+			line_count += maxi(1, ceili(width / available_width))
+		if float(line_count) * float(fitted) * 1.28 <= available_height:
+			break
+		fitted -= 1
+	button.add_theme_font_size_override("font_size", fitted)
 
 ## 题面文字超宽或超高时自动缩字号，保证短窗口也完整显示
 func _fit_prompt() -> void:
@@ -433,7 +456,7 @@ func _update_sparks(delta: float) -> void:
 
 func _draw() -> void:
 	var rectangle := Rect2(Vector2.ZERO,size)
-	var background := Color("#cbeafa") if game_id == "math" else Color("#fff7ea") if game_id in ["pinyin","workbook"] else Color("#f8e7b1") if game_id == "patterns" else Color("#dfedc1")
+	var background := Color("#cbeafa") if game_id == "math" else Color("#d8e7f0") if game_id == "trivia" else Color("#fff7ea") if game_id in ["pinyin","workbook"] else Color("#f8e7b1") if game_id == "patterns" else Color("#dfedc1")
 	draw_style_box(PlaygroundUI.style(background,28,PlaygroundUI.mix(accent,Color.WHITE,0.4),2),rectangle)
 	match game_id:
 		"math": _draw_water()
@@ -441,6 +464,7 @@ func _draw() -> void:
 		"patterns": _draw_patterns()
 		"animals": _draw_animals()
 		"workbook": _draw_workbook()
+		"trivia": _draw_trivia()
 	var prompt_card := Rect2(prompt.position-Vector2(14,10),prompt.size+Vector2(28,20))
 	draw_style_box(PlaygroundUI.style(Color(1,1,1,0.76),24,PlaygroundUI.mix(accent,Color.WHITE,0.5),2,4,Color(0,0,0,0.08)),prompt_card)
 	var visual_card := Rect2(size.x*0.16,size.y*0.37,size.x*0.68,size.y*0.24)
@@ -535,6 +559,36 @@ func _draw_workbook() -> void:
 		draw_arc(Vector2(27,50+index*52*unit),9*unit,PI*0.2,PI*1.8,20,Color("#7e858d"),3,true)
 	_draw_visual(Vector2(size.x*0.54,size.y*0.45),clampf(size.y*0.13,44.0,68.0))
 	_icon("✏️",Vector2(size.x-52,size.y*0.45),Vector2(52,74)*unit)
+
+
+func _draw_trivia() -> void:
+	var unit := clampf(size.y / 500.0, 0.7, 1.4)
+	var center := Vector2(size.x * 0.5, size.y * 0.48)
+	var book_y := center.y + 34.0 * unit
+	# A small open book and a gold knowledge star; no external emoji or text glyph.
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(-150.0, 8.0) * unit,
+		center + Vector2(-9.0, -10.0) * unit,
+		center + Vector2(-9.0, 62.0) * unit,
+		center + Vector2(-150.0, 76.0) * unit,
+	]), Color("#fffaf0"))
+	draw_colored_polygon(PackedVector2Array([
+		center + Vector2(150.0, 8.0) * unit,
+		center + Vector2(9.0, -10.0) * unit,
+		center + Vector2(9.0, 62.0) * unit,
+		center + Vector2(150.0, 76.0) * unit,
+	]), Color("#fffdf7"))
+	draw_line(center + Vector2(-136.0, 32.0) * unit, center + Vector2(-25.0, 20.0) * unit, PlaygroundUI.mix(accent, Color.WHITE, 0.58), 3.0 * unit, true)
+	draw_line(center + Vector2(136.0, 32.0) * unit, center + Vector2(25.0, 20.0) * unit, PlaygroundUI.mix(accent, Color.WHITE, 0.58), 3.0 * unit, true)
+	draw_line(center + Vector2(-136.0, 49.0) * unit, center + Vector2(-25.0, 37.0) * unit, PlaygroundUI.mix(accent, Color.WHITE, 0.72), 2.0 * unit, true)
+	draw_line(center + Vector2(136.0, 49.0) * unit, center + Vector2(25.0, 37.0) * unit, PlaygroundUI.mix(accent, Color.WHITE, 0.72), 2.0 * unit, true)
+	draw_line(center + Vector2(-3.0, -6.0) * unit, center + Vector2(-3.0, 62.0) * unit, accent, 3.0 * unit, true)
+	draw_circle(center + Vector2(0.0, -86.0) * unit, 36.0 * unit, Color("#f4cb58"))
+	draw_circle(center + Vector2(0.0, -86.0) * unit, 26.0 * unit, Color("#fff1ae"))
+	_draw_star(center + Vector2(0.0, -86.0) * unit, 17.0 * unit, accent, 0.0)
+	_draw_star(center + Vector2(-178.0, -32.0) * unit, 9.0 * unit, Color("#f4cb58"), 0.2)
+	_draw_star(center + Vector2(178.0, -32.0) * unit, 9.0 * unit, Color("#f4cb58"), -0.2)
+	draw_style_box(PlaygroundUI.style(Color("#ead8b9"), 18, Color("#b99363"), 2), Rect2(48, book_y + 66.0 * unit, size.x - 96, 14.0 * unit))
 
 func _draw_visual(center: Vector2, extent: float) -> void:
 	center.y += sin(clock * 1.35) * 2.2

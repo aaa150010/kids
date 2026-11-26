@@ -27,8 +27,9 @@ func _ready() -> void:
 		level_id = int(engine.state.get("levelId", 1))
 		view = str(engine.state.get("view", "board"))
 		if engine.state.phase == "finished" and not bool(stored.get("resume", true)):
+			var current_level := level_id
 			engine.state = {}
-			_create()
+			_create(current_level)
 	elif mode_id == "puzzle":
 		_create()
 	else:
@@ -49,9 +50,15 @@ func _create(number: int = 1) -> void:
 			engine.create_session({
 				"gameId": game_id, "modeId": "puzzle", "players": players,
 				"levelId": level_id, "puzzle": puzzles[level_id - 1], "seed": Time.get_ticks_usec(),
+				"hintsMax": int(GameTuning.value(game_id, difficulty, "hints", 2)),
+				"undosMax": int(GameTuning.value(game_id, difficulty, "undos", 3)),
 			})
 	else:
-		engine.create_session({"gameId": game_id, "modeId": "classic", "players": players, "seed": Time.get_ticks_usec()})
+		engine.create_session({
+			"gameId": game_id, "modeId": "classic", "players": players, "seed": Time.get_ticks_usec(),
+			"hintsMax": int(GameTuning.value(game_id, difficulty, "hints", 2)),
+			"undosMax": int(GameTuning.value(game_id, difficulty, "undos", 3)),
+		})
 	session_id = str(engine.state.sessionId)
 	view = "board"
 	_save("开始军棋" if mode_id == "classic" else "开始军棋残局")
@@ -93,6 +100,7 @@ func _build_board() -> void:
 	tools.add_theme_constant_override("h_separation", 12)
 	if mode_id == "puzzle":
 		tools.add_child(PlaygroundUI.button("残局列表", accent, _show_puzzle_map, "soft"))
+		tools.add_child(PlaygroundUI.button("看提示", accent, _hint, "soft"))
 	tools.add_child(PlaygroundUI.button("悔棋", accent, _undo, "soft"))
 	tools.add_child(PlaygroundUI.button("重新开始", accent, _confirm_restart, "ghost"))
 	content_root.add_child(tools)
@@ -152,6 +160,7 @@ func _extra_pause_actions() -> Array:
 	var actions: Array = [{"text":"悔棋", "icon":"undo", "kind":"soft", "callback":func(): _close_pause_tools(); _undo()}]
 	if mode_id == "puzzle":
 		actions.append({"text":"残局列表", "icon":"back", "kind":"soft", "callback":func(): _close_pause_tools(); _show_puzzle_map()})
+		actions.append({"text":"看提示", "icon":"hint", "kind":"soft", "callback":func(): _close_pause_tools(); _hint()})
 	return actions
 
 
@@ -162,7 +171,7 @@ func _refresh() -> void:
 		_show_result()
 	content_root.rotation = 0.0
 	board.visible = true
-	board.interactive = not paused and engine.state.phase == "playing"
+	board.interactive = not paused and engine.state.phase == "playing" and not engine.puzzle_is_blocked()
 	var selected := int(engine.state.get("selected", -1))
 	var targets := engine.legal_targets(selected) if selected >= 0 else []
 	board.update_board(engine, int(engine.state.get("turn", 0)), selected, targets, bool(engine.state.get("revealAll", true)))
@@ -180,26 +189,14 @@ func _refresh() -> void:
 			PlaygroundUI.mix(accent, Color.WHITE, 0.84 if current else 0.94), 22,
 			accent if current else PlaygroundUI.LINE, 3 if current else 1
 		))
-		var formation_name := ""
-		if side < engine.state.formations.size():
-			var formations := ContentDB.military_formations()
-			var index := int(engine.state.formations[side])
-			if index >= 0 and index < formations.size():
-				formation_name = str(formations[index].get("name", ""))
-		if mode_id == "puzzle":
-			if side == 0:
-				player_labels[side].text = "现在轮到你\n红方 · 残局" if current else "红方 · 残局"
-			else:
-				player_labels[side].text = "目标\n夺取红色军旗"
-		else:
-			var prefix := "现在轮到你" if current else "等一等"
-			if engine.state.phase == "finished":
-				prefix = "本局结束"
-			var formation_text := formation_name if not formation_name.is_empty() else "预置阵"
-			player_labels[side].text = "%s\n%s方 · %s" % [prefix, engine.side_name(side), formation_text]
+		var formation_name := _formation_name(side)
+		player_labels[side].text = _player_status_text(side, current, formation_name)
 	if engine.state.phase == "finished":
 		status.text = str(engine.state.get("reason", "本局结束"))
 		detail.text = "本局共走 %s 手，进度已经自动保存。" % int(engine.state.get("moveCount", 0))
+	elif engine.puzzle_is_blocked():
+		status.text = "还没夺旗，先撤回再试一次。"
+		detail.text = "已用 %s / %s 步。点“悔棋”回到起点；也可以看提示。" % [int(engine.state.get("moveCount", 0)), int(engine.state.get("targetSteps", 1))]
 	else:
 		status.text = "残局练习：点自己的棋子，再点亮起的位置" if mode_id == "puzzle" else "%s走棋：点自己的棋子，再点亮起的位置" % engine.side_name(turn)
 		var selected_piece := engine.piece_at(selected)
@@ -213,8 +210,33 @@ func _refresh() -> void:
 			detail.text = _battle_text(battle)
 
 
+func _formation_name(side: int) -> String:
+	if side < 0 or side >= engine.state.get("formations", []).size():
+		return ""
+	var formations := ContentDB.military_formations()
+	var index := int(engine.state.formations[side])
+	if index < 0 or index >= formations.size():
+		return ""
+	return str(formations[index].get("name", ""))
+
+
+func _player_status_text(side: int, current: bool, formation_name: String) -> String:
+	if mode_id == "puzzle":
+		if side == 0:
+			return "现在轮到你\n红方 · 残局" if current else "红方 · 残局"
+		return "目标\n夺取%s军旗" % engine.side_name(engine.puzzle_target_side())
+	var prefix := "现在轮到你" if current else "等一等"
+	if engine.state.phase == "finished":
+		prefix = "本局结束"
+	var formation_text := formation_name if not formation_name.is_empty() else "预置阵"
+	return "%s\n%s方 · %s" % [prefix, engine.side_name(side), formation_text]
+
+
 func _cell(position: int) -> void:
 	if paused or engine.state.phase != "playing":
+		return
+	if engine.puzzle_is_blocked():
+		show_toast("这一步还没夺旗，先点“悔棋”回到上一步。")
 		return
 	var selected := int(engine.state.get("selected", -1))
 	var piece := engine.piece_at(position)
@@ -265,6 +287,8 @@ func _cell(position: int) -> void:
 	engine.state.interactionNote = {}
 	_save("军棋进行中")
 	_refresh()
+	if bool(result.get("puzzleMiss", false)):
+		show_toast("这一步还没夺旗，可以撤回再试。")
 	if engine.state.phase == "finished":
 		_show_result()
 
@@ -287,6 +311,9 @@ func _undo() -> void:
 	if paused or engine.state.phase != "playing" or engine.state.history.is_empty():
 		show_toast("现在没有可以撤回的走法")
 		return
+	if int(engine.state.get("undos", 0)) >= int(engine.state.get("undosMax", 3)):
+		show_toast("这一档难度的悔棋次数已经用完。")
+		return
 	if mode_id == "classic" and players.size() == 2:
 		open_modal("悔棋确认", PlaygroundUI.label("请另一方确认，是否撤回最近一步？", 21, PlaygroundUI.INK, 500, true), [
 			{"text": "继续下棋", "kind": "soft", "callback": func(): _close_top_modal()},
@@ -294,6 +321,22 @@ func _undo() -> void:
 		], "双方棋局")
 		return
 	_perform_undo()
+
+
+func _hint() -> void:
+	if paused or engine.state.phase != "playing":
+		return
+	var result := engine.handle_input({"type": "hint"})
+	if not bool(result.get("ok", false)):
+		show_toast(str(result.get("message", "现在没有可用提示。")))
+		return
+	var text := str(result.get("hint", "先观察通往军旗的铁路。"))
+	var line: Array = engine.state.get("puzzle", {}).get("line", [])
+	var target := int(line[0].get("to", -1)) if line.size() > 0 and line[0] is Dictionary else engine.puzzle_target_position()
+	engine.state.interactionNote = {"message": text, "cells": [target] if target >= 0 else [], "side": 0}
+	Speech.speak(text)
+	_save("看过军棋残局提示")
+	_refresh()
 
 
 func _perform_undo() -> void:
@@ -335,20 +378,26 @@ func _show_puzzle_map() -> void:
 	grid.add_theme_constant_override("v_separation", 8)
 	for index in puzzles.size():
 		var puzzle: Dictionary = puzzles[index]
+		var number := index + 1
+		var unlocked := SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id)
 		var button := PlaygroundUI.button(
-			"%s\n一步夺旗" % str(puzzle.get("title", "残局")),
+			"%s\n%s" % [str(puzzle.get("title", "残局")), "一步夺旗" if unlocked else "尚未解锁"],
 			accent,
 			_open_puzzle.bind(index),
-			"primary" if index + 1 == level_id else "soft"
+			"primary" if number == level_id else "soft"
 		)
 		button.custom_minimum_size = Vector2(0, 88)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.disabled = not unlocked
 		grid.add_child(button)
 	body.add_child(grid)
 	open_modal("军棋残局", body, [{"text": "关闭", "kind": "soft", "callback": func(): _close_top_modal()}], "24 个固定练习")
 
 
 func _open_puzzle(index: int) -> void:
+	if not SaveStore.level_unlocked(str(players[0].id), game_id, index + 1, mode_id):
+		show_toast("先完成前一关，再来挑战这一关。")
+		return
 	_close_top_modal()
 	_result_visible = false
 	_create(index + 1)
@@ -357,16 +406,24 @@ func _open_puzzle(index: int) -> void:
 
 
 func _show_rules() -> void:
-	var lines := [
-		"棋盘横向摆放，双方各 25 枚棋子；军旗放在大本营，地雷放在后方。",
-		"棋子用两位数字和九格刻度表示军衔：数字越大、亮起的刻度越多，军衔越高；炸弹、地雷、军旗用“特”字印章和专属图形。",
-		"右上角白圆点代表红方，白菱形代表蓝方。",
-		"这是明棋对弈：双方棋子全部亮着，红方先走，轮流走棋。",
-		"司令 > 军长 > 师长 > 旅长 > 团长 > 营长 > 连长 > 排长 > 工兵，大吃小，同级同归于尽。",
-		"点自己的棋子，再点亮起的位置移动；行营里的棋子不能被攻击。",
-		"炸弹与任何棋子同归于尽；只有工兵可以排雷，其他棋子碰雷会失败。",
-		"铁路可以让棋子沿直线快速移动，工兵可以沿铁路转弯；夺取军旗获胜。",
-	]
+	var lines: Array = []
+	if mode_id == "puzzle":
+		lines = [
+			"这是单人残局：红方只走自己的明棋，目标是在目标步数内夺取蓝方军旗。",
+			"没夺到军旗的走法不会立刻判负，可以悔棋后换一条铁路或公路。",
+			"工兵可以沿铁路转弯并排雷；炸弹同归于尽，夺取军旗即过关。",
+		]
+	else:
+		lines = [
+			"棋盘横向摆放，双方各 25 枚棋子；军旗放在大本营，地雷放在后方。",
+			"棋子用两位数字和九格刻度表示军衔：数字越大、亮起的刻度越多，军衔越高；炸弹、地雷、军旗用“特”字印章和专属图形。",
+			"右上角白圆点代表红方，白菱形代表蓝方。",
+			"这是明棋对弈：双方棋子全部亮着，红方先走，轮流走棋。",
+			"司令 > 军长 > 师长 > 旅长 > 团长 > 营长 > 连长 > 排长 > 工兵，大吃小，同级同归于尽。",
+			"点自己的棋子，再点亮起的位置移动；行营里的棋子不能被攻击。",
+			"炸弹与任何棋子同归于尽；只有工兵可以排雷，其他棋子碰雷会失败。",
+			"铁路可以让棋子沿直线快速移动，工兵可以沿铁路转弯；夺取军旗获胜。",
+		]
 	var body := VBoxContainer.new()
 	body.add_theme_constant_override("separation", 10)
 	for index in lines.size():
@@ -387,8 +444,13 @@ func _show_result() -> void:
 	if not bool(state.get("reported", false)):
 		state.reported = true
 		if mode_id == "puzzle" and int(state.winner) == 0:
-			SaveStore.complete_level(str(players[0].id), game_id, level_id, 1, mode_id)
-			SaveStore.record_outcome(str(players[0].id), game_id, "win", 1, 0, 0, {"strategy": {"correct": 1, "answered": 1}}, str(state.get("sessionId", "military")))
+			var stars := 1
+			if int(state.get("hints", 0)) == 0 and int(state.get("undos", 0)) == 0:
+				stars = 3
+			elif int(state.get("hints", 0)) <= 1:
+				stars = 2
+			SaveStore.complete_level(str(players[0].id), game_id, level_id, stars, mode_id)
+			SaveStore.record_outcome(str(players[0].id), game_id, "win", stars, 1, 1, {"strategy": {"correct": 1, "answered": 1}}, str(state.get("sessionId", "military")))
 		elif mode_id == "classic":
 			var winner := int(state.winner)
 			for side in players.size():

@@ -5,6 +5,11 @@
   "runtimeSources": [
     "assets/original/ui/icons.svg",
     "assets/original/covers/covers.svg",
+    "assets/covers/trivia.svg",
+    "assets/covers/tangram.svg",
+    "assets/covers/spot.svg",
+    "assets/covers/shop.svg",
+    "assets/covers/fruit_slice.svg",
     "apps/android/src/ui/original_glyph.gd"
   ],
   "notes": [

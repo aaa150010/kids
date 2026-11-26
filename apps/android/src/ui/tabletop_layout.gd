@@ -30,7 +30,7 @@ static func input_blocked(surface: Control) -> bool:
 	var owner := surface.get_parent()
 	while owner != null:
 		if owner is NativeGameScreen:
-			if owner.paused or not owner._modal_stack.is_empty():
+			if owner.is_input_blocked():
 				return true
 			break
 		owner = owner.get_parent()

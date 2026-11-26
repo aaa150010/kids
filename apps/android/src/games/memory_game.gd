@@ -92,7 +92,10 @@ func _ready() -> void:
 	call_deferred("begin_lesson")
 
 func _new_session() -> void:
-	var cap := 5 if int(players[0].age) <= 5 else 8 if int(players[0].age) <= 7 else 10 if int(players[0].age) <= 9 else 12
+	var youngest := 12
+	for player in players:
+		youngest = mini(youngest, int(player.get("age", 12)))
+	var cap := 5 if youngest <= 5 else 8 if youngest <= 7 else 10 if youngest <= 9 else 12
 	var pairs := clampi(cap+int(GameTuning.value(game_id,difficulty,"pairsDelta",0)),3,12)
 	var chapter := ContentDB.level(game_id,level_id)
 	if mode_id == "adventure":
@@ -384,8 +387,16 @@ func _process(delta: float) -> void:
 func _finish() -> void:
 	if not bool(engine.state.reported):
 		for index in players.size():
-			var outcome := "win" if players.size() == 1 or int(engine.state.scores[index]) > int(engine.state.scores[1-index]) else "draw" if engine.state.scores[0] == engine.state.scores[1] else "loss"
-			SaveStore.record_outcome(str(players[index].id),game_id,outcome,int(engine.state.scores[index]),int(engine.state.scores[index]),int(engine.state.pairs),{"memory":{"correct":engine.state.scores[index],"answered":engine.state.pairs}},str(engine.state.sessionId))
+			var outcome := "played"
+			if players.size() > 1:
+				var rival := int(engine.state.scores[1-index])
+				outcome = "win" if int(engine.state.scores[index]) > rival else "draw" if int(engine.state.scores[index]) == rival else "loss"
+			else:
+				outcome = "win"
+			var attempts: Array = engine.state.get("attempts", [])
+			var answered := int(attempts[index]) if index < attempts.size() else int(engine.state.scores[index])
+			answered = maxi(answered, int(engine.state.scores[index]))
+			SaveStore.record_outcome(str(players[index].id),game_id,outcome,int(engine.state.scores[index]),int(engine.state.scores[index]),answered,{"memory":{"correct":engine.state.scores[index],"answered":answered}},str(engine.state.sessionId))
 		if mode_id == "adventure":
 			SaveStore.complete_level(str(players[0].id),game_id,level_id,engine.stars(),mode_id)
 		engine.state.reported = true

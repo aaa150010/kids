@@ -192,7 +192,7 @@ func _refresh(animate: bool = false) -> void:
 		return
 	var selected := engine.piece_by_id(str(engine.state.get("selected","")))
 	var targets: Array = engine.legal_moves(selected) if not selected.is_empty() else []
-	surface.interactive = not paused and view == "board" and engine.state.phase == "playing" and not (mode_id == "puzzle" and int(engine.state.turn) == 1)
+	surface.interactive = not paused and view == "board" and engine.state.phase == "playing" and not bool(engine.state.get("puzzleReplyFailed", false)) and not (mode_id == "puzzle" and int(engine.state.turn) == 1)
 	surface.update_state(engine.state,targets,animate)
 	if immersive and str(engine.state.phase) == "playing" and int(engine.state.turn) != _last_immersive_turn:
 		_last_immersive_turn = int(engine.state.turn)
@@ -215,14 +215,32 @@ func _refresh(animate: bool = false) -> void:
 		var captures := targets.filter(func(target): return not engine.piece_at(int(target)).is_empty()).size()
 		detail.text = "%s\n可走 %s 格 · 可吃 %s 枚" % [BoardRules.NAMES[selected.kind],targets.size() - captures,captures]
 	elif mode_id == "puzzle":
-		detail.text = "第 %s 关\n目标 %s 步\n已走 %s 步" % [level_id,int(engine.state.puzzle.get("targetSteps",1)),int(engine.state.moveCount)]
+		if bool(engine.state.get("puzzleReplyFailed", false)):
+			detail.text = "自动应手没有完成\n先悔棋，再换一条路线"
+		else:
+			detail.text = "第 %s 关\n目标 %s 步\n已走 %s 步" % [level_id,int(engine.state.puzzle.get("targetSteps",1)),int(engine.state.moveCount)]
 	else:
 		var military_hint := "先翻开暗棋；同一人连续翻出两次同色即可定阵营。" if game_id == "military" and not bool(engine.state.get("factionAssigned", false)) else "红蓝双方轮流行动"
 		detail.text = "第 %s 手\n%s" % [int(engine.state.moveCount)+1,"空交叉点落子" if game_id == "gomoku" else military_hint]
-	status.text = str(engine.state.reason) if engine.state.phase == "finished" else "点空交叉点落子，按住可以预览" if game_id == "gomoku" else "点亮起的位置移动" if not selected.is_empty() else "先翻两次同色定阵营，再选自己的亮棋" if game_id == "military" and not bool(engine.state.get("factionAssigned", false)) else "先翻暗棋，或选自己的亮棋" if game_id == "military" else "先选自己的动物，再点发光格子"
+	if str(engine.state.phase) == "finished":
+		status.text = str(engine.state.reason)
+	elif bool(engine.state.get("puzzleReplyFailed", false)):
+		status.text = str(engine.state.get("puzzleReplyError", "自动应手没有完成，先悔棋再试。"))
+	elif game_id == "gomoku":
+		status.text = "点空交叉点落子，按住可以预览"
+	elif not selected.is_empty():
+		status.text = "点亮起的位置移动"
+	elif game_id == "military" and not bool(engine.state.get("factionAssigned", false)):
+		status.text = "先翻两次同色定阵营，再选自己的亮棋"
+	elif game_id == "military":
+		status.text = "先翻暗棋，或选自己的亮棋"
+	else:
+		status.text = "先选自己的动物，再点发光格子"
 
 func _cell(position: int) -> void:
 	if paused or view != "board" or engine.state.phase != "playing" or (mode_id == "puzzle" and int(engine.state.turn) == 1):
+		return
+	if bool(engine.state.get("puzzleReplyFailed", false)):
 		return
 	var target := engine.piece_at(position)
 	var action := {"type":"move","to":position}
@@ -285,10 +303,18 @@ func _fixed_reply() -> void:
 	action.type = "move"
 	var result := engine.handle_input(action)
 	if bool(result.ok):
+		engine.state.puzzleReplyFailed = false
+		engine.state.puzzleReplyError = ""
 		_save("练习局面已保存")
 		_refresh(true)
 		if engine.state.phase == "finished":
 			_show_result()
+	else:
+		engine.state.puzzleReplyFailed = true
+		engine.state.puzzleReplyError = "自动应手没有完成，先悔棋再试。"
+		show_toast("这一步之后没有完成自动应手，先悔棋再试。")
+		_save("固定应手失败，等待悔棋")
+		_refresh(true)
 
 func _hint() -> void:
 	if paused or engine.state.phase != "playing":
@@ -378,9 +404,9 @@ func _show_result() -> void:
 	if not bool(state.get("reported",false)):
 		state.reported = true
 		var stars := 1
-		if int(state.hints) == 0:
+		if int(state.hints) == 0 and int(state.get("mistakes", 0)) <= 2:
 			stars = 2
-			if int(state.undos) == 0 and int(state.moveCount) <= int(state.get("puzzle",{}).get("targetSteps",9999)):
+			if int(state.undos) == 0 and int(state.get("mistakes", 0)) == 0 and int(state.moveCount) <= int(state.get("puzzle",{}).get("targetSteps",9999)):
 				stars = 3
 		if mode_id == "puzzle" and int(state.winner) == 0:
 			SaveStore.complete_level(str(players[0].id),game_id,level_id,stars,mode_id)
@@ -414,6 +440,7 @@ func _show_replay() -> void:
 	var content := VBoxContainer.new()
 	replay_surface = BoardSurface.new()
 	replay_surface.game_id = game_id
+	replay_surface.accent = accent
 	replay_surface.face_to_face = TabletopLayout.enabled(game_id, players, mode_id)
 	replay_surface.interactive = false
 	replay_surface.custom_minimum_size = Vector2(580,380)
@@ -447,8 +474,10 @@ func _confirm_restart() -> void:
 func _process(delta: float) -> void:
 	super._process(delta)
 	if is_instance_valid(surface):
-		surface.interactive = not paused and view == "board" and engine.state.get("phase","") == "playing" and not (mode_id == "puzzle" and int(engine.state.turn) == 1)
+		surface.interactive = not paused and view == "board" and engine.state.get("phase","") == "playing" and not bool(engine.state.get("puzzleReplyFailed", false)) and not (mode_id == "puzzle" and int(engine.state.turn) == 1)
 	if paused or view != "board" or engine.state.is_empty() or engine.state.phase != "playing":
+		return
+	if bool(engine.state.get("puzzleReplyFailed", false)):
 		return
 	if mode_id == "puzzle" and int(engine.state.turn) == 1:
 		if is_instance_valid(surface) and surface.motion >= 0.999:

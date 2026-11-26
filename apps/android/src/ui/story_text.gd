@@ -29,6 +29,7 @@ var _layout_generation := 0
 var _texture_cache: Dictionary = {}
 var _missing_illustrations := 0
 var _missing_anchor_ids: Array[String] = []
+var _illustration_state: Dictionary = {}
 
 
 func configure(value: Dictionary, pinyin_enabled: bool, font_size: int) -> void:
@@ -54,6 +55,7 @@ func configure_article(
 	_missing_illustrations = 0
 	_missing_anchor_ids.clear()
 	_placeholder_bounds.clear()
+	_illustration_state = {}
 	show_pinyin = pinyin_enabled
 	text_size = font_size
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -67,6 +69,11 @@ func set_highlighted_paragraph(paragraph_id: String) -> void:
 	if _highlight_paragraph_id == paragraph_id:
 		return
 	_highlight_paragraph_id = paragraph_id
+	queue_redraw()
+
+
+func set_illustration_state(value: Dictionary) -> void:
+	_illustration_state = value.duplicate(true)
 	queue_redraw()
 
 
@@ -162,6 +169,8 @@ func _layout_article() -> void:
 	if is_equal_approx(_last_width, size.x) and not _article_cells.is_empty():
 		return
 	_last_width = size.x
+	_missing_illustrations = 0
+	_missing_anchor_ids.clear()
 	var generation := _layout_generation
 	_article_cells.clear()
 	_article_images.clear()
@@ -332,6 +341,10 @@ func _prepare_illustrations() -> Dictionary:
 					texture = ImageTexture.create_from_image(image)
 					_texture_cache[asset] = texture
 		if texture == null:
+			_illustration_state["failed"] = true
+			_missing_illustrations += 1
+			if not (paragraph_id in _missing_anchor_ids):
+				_missing_anchor_ids.append(paragraph_id)
 			continue
 		var item: Dictionary = value.duplicate(true)
 		item.texture = texture
@@ -417,7 +430,7 @@ func _draw_article() -> void:
 		draw_string(
 			font,
 			Vector2(rect.position.x + 18.0, rect.position.y + rect.size.y * 0.5),
-			"插画加载中",
+			"插画未下载成功" if bool(_illustration_state.get("failed", false)) else "插画加载中",
 			HORIZONTAL_ALIGNMENT_CENTER,
 			rect.size.x - 36.0,
 			18,
@@ -436,7 +449,7 @@ func _draw_article() -> void:
 		draw_string(
 			font,
 			Vector2(16, size.y - 20),
-			"插画正在加载 · 可先继续阅读",
+			"插画下载失败 · 点下方重试，正文和朗读可继续" if bool(_illustration_state.get("failed", false)) else "插画正在加载 · 可先继续阅读",
 			HORIZONTAL_ALIGNMENT_LEFT,
 			size.x - 32,
 			15,

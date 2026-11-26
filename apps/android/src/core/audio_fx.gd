@@ -6,6 +6,7 @@ var _players: Array[AudioStreamPlayer] = []
 var _music_players: Array[AudioStreamPlayer] = []
 var _active_music := 0
 var _theme := ""
+var _last_theme := ""
 var _music_cache: Dictionary = {}
 var _sfx_cache: Dictionary = {}
 var _last_played: Dictionary = {}
@@ -113,7 +114,7 @@ func _configure_buses() -> void:
 
 
 func _prewarm_sfx() -> void:
-	for name in ["correct","wrong","turn","tap","select","back","pause","win","flip","pair","studio","title","whoosh"]:
+	for name in ["correct","wrong","turn","tap","select","back","pause","win","flip","pair","studio","title","whoosh","confirm","save","dialog_open","dialog_close","move","capture","drop","fruit_slice","fruit_splat","fruit_combo","fruit_bomb","fruit_bonus","fruit_miss"]:
 		_sfx_stream(name)
 
 
@@ -217,6 +218,18 @@ func _recipe(name: String) -> Dictionary:
 			return _notes([523.25, 659.25, 783.99, 1046.5], 0.1, [0.16, 0.16, 0.16, 0.36])
 		"whoosh":
 			return _notes([196.0, 246.94, 329.63, 440.0], 0.06, [0.08, 0.08, 0.08, 0.18])
+		"fruit_slice":
+			return _notes([1046.5, 1318.51], 0.035, [0.05, 0.09])
+		"fruit_splat":
+			return _notes([349.23, 220.0], 0.045, [0.05, 0.10])
+		"fruit_combo":
+			return _notes([523.25, 659.25, 880.0], 0.06, [0.07, 0.07, 0.16])
+		"fruit_bomb":
+			return _notes([130.81, 98.0], 0.18, [0.16, 0.30])
+		"fruit_bonus":
+			return _notes([880.0, 1174.66, 1567.98], 0.06, [0.06, 0.06, 0.22])
+		"fruit_miss":
+			return _notes([196.0, 174.61], 0.08, [0.08, 0.16])
 		_:
 			return _notes([523.25], 0.05, [0.1])
 
@@ -270,6 +283,7 @@ func start_music(theme: String) -> void:
 	if _theme == theme and _music_players[_active_music].playing:
 		return
 	_theme = theme
+	_last_theme = theme
 	if not _music_cache.has(theme):
 		_music_cache[theme] = _build_music(theme)
 	var old_index := _active_music
@@ -307,7 +321,7 @@ func refresh_settings() -> void:
 	if not bool(SaveStore.settings().get("musicOn", true)):
 		stop_music()
 	elif not _music_players[_active_music].playing:
-		start_music("lobby" if _theme.is_empty() else _theme)
+		start_music(_last_theme if not _last_theme.is_empty() else "lobby")
 
 
 func set_music_duck(active: bool, reason: StringName = &"story") -> void:

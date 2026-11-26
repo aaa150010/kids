@@ -12,7 +12,9 @@ const HEADQUARTERS := [1,3,56,58]
 
 func create_session(context: Dictionary) -> Dictionary:
 	super.create_session(context)
-	state.merge({"turn":0,"pieces":[],"board":[],"selected":"","winner":-1,"reason":"","quietPlies":0,"moveCount":0,"hints":0,"undos":0,"hintsMax":2,"undosMax":3,"autoHintShown":false,"lineIndex":0,"mistakes":0,"winningLine":[],"lastMove":{},"log":[],"factionSides":[0,1],"factionAssigned":true,"factionLastSides":[-1,-1]},true)
+	var hints_max := maxi(0, int(context.get("hintsMax", 2)))
+	var undos_max := maxi(0, int(context.get("undosMax", 3)))
+	state.merge({"turn":0,"pieces":[],"board":[],"selected":"","winner":-1,"reason":"","quietPlies":0,"moveCount":0,"hints":0,"undos":0,"hintsMax":hints_max,"undosMax":undos_max,"autoHintShown":false,"lineIndex":0,"mistakes":0,"winningLine":[],"lastMove":{},"log":[],"puzzleReplyFailed":false,"puzzleReplyError":"","factionSides":[0,1],"factionAssigned":true,"factionLastSides":[-1,-1]},true)
 	var puzzle: Dictionary = context.get("puzzle",{})
 	if not puzzle.is_empty():
 		state.pieces = puzzle.get("pieces",[]).duplicate(true)
@@ -88,7 +90,7 @@ func restore(value: Dictionary) -> bool:
 			identifiers[identifier] = true
 			if game == "jungle" and position in WATER and piece.kind != "rat":
 				return false
-	state.merge({"history":[],"log":[],"selected":"","lineIndex":0,"hints":0,"undos":0,"hintsMax":2,"undosMax":3,"autoHintShown":false,"mistakes":0,"winningLine":[],"lastMove":{},"moveCount":0,"quietPlies":0},false)
+	state.merge({"history":[],"log":[],"selected":"","lineIndex":0,"hints":0,"undos":0,"hintsMax":2,"undosMax":3,"autoHintShown":false,"mistakes":0,"winningLine":[],"lastMove":{},"moveCount":0,"quietPlies":0,"puzzleReplyFailed":false,"puzzleReplyError":""},false)
 	if game == "military" and state.players.size() == 2 and state.get("puzzle", {}).is_empty():
 		var sides_valid: bool = state.get("factionSides") is Array and state.factionSides.size() == 2
 		if sides_valid:
@@ -152,6 +154,8 @@ func restore(value: Dictionary) -> bool:
 	state.hintsMax = maxi(0, _integer(state.get("hintsMax", 2)))
 	state.undosMax = maxi(0, _integer(state.get("undosMax", 3)))
 	state.mistakes = maxi(0, _integer(state.get("mistakes", 0)))
+	state.puzzleReplyFailed = bool(state.get("puzzleReplyFailed", false))
+	state.puzzleReplyError = str(state.get("puzzleReplyError", ""))
 	state.turn = clampi(_integer(state.get("turn",0)),0,1)
 	state.winner = clampi(_integer(state.get("winner", -1)), -1, 1)
 	state.reason = str(state.get("reason", ""))

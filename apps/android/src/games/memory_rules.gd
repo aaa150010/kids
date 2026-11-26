@@ -20,16 +20,17 @@ func create_session(context: Dictionary) -> Dictionary:
 	var cards: Array = random.shuffled(unique_cards).slice(0,pairs)
 	if cards.is_empty():
 		state.erase("cards")
-		state.merge({"deck":[],"cardData":[],"pairs":0,"flipped":[],"matched":[],"scores":[],"currentPlayer":0,"pending":false,"remaining":0.0,"peekRemaining":0.0,"peekIndices":[],"hints":0,"mistakes":0,"moves":0,"previewSeconds":preview_seconds,"hintsMax":hints_max,"threeStarMistakes":three_star_mistakes,"phase":"empty"},true)
+		state.merge({"deck":[],"cardData":[],"pairs":0,"flipped":[],"matched":[],"scores":[],"attempts":[],"currentPlayer":0,"pending":false,"remaining":0.0,"peekRemaining":0.0,"peekIndices":[],"hints":0,"mistakes":0,"moves":0,"previewSeconds":preview_seconds,"hintsMax":hints_max,"threeStarMistakes":three_star_mistakes,"phase":"empty"},true)
 		return state
 	var deck: Array = []
 	for card in cards:
 		deck.append(str(card.id))
 		deck.append(str(card.id))
 	state.erase("cards")
-	state.merge({"deck":random.shuffled(deck),"cardData":cards,"pairs":cards.size(),"flipped":[],"matched":[],"scores":[],"currentPlayer":0,"pending":false,"remaining":0.0,"peekRemaining":0.0,"peekIndices":[],"hints":0,"mistakes":0,"moves":0,"previewSeconds":preview_seconds,"hintsMax":hints_max,"threeStarMistakes":three_star_mistakes},true)
+	state.merge({"deck":random.shuffled(deck),"cardData":cards,"pairs":cards.size(),"flipped":[],"matched":[],"scores":[],"attempts":[],"currentPlayer":0,"pending":false,"remaining":0.0,"peekRemaining":0.0,"peekIndices":[],"hints":0,"mistakes":0,"moves":0,"previewSeconds":preview_seconds,"hintsMax":hints_max,"threeStarMistakes":three_star_mistakes},true)
 	for player in state.players:
 		state.scores.append(0)
+		state.attempts.append(0)
 	return state
 
 func restore(value: Dictionary) -> bool:
@@ -57,7 +58,7 @@ func restore(value: Dictionary) -> bool:
 		if clean_index < 0 or clean_index >= state.deck.size() or seen.has(clean_index):
 			return false
 		seen[clean_index] = true
-	state.merge({"remaining":0.8 if state.flipped.size() == 2 else 0.0,"peekRemaining":0.0,"peekIndices":[],"hints":0,"mistakes":0,"moves":0,"previewSeconds":0.8,"hintsMax":2,"threeStarMistakes":3,"reported":false,"sessionId":"legacy-memory-"+str(state.deck.hash()),"cardData":[]},false)
+	state.merge({"remaining":0.8 if state.flipped.size() == 2 else 0.0,"peekRemaining":0.0,"peekIndices":[],"hints":0,"mistakes":0,"moves":0,"previewSeconds":0.8,"hintsMax":2,"threeStarMistakes":3,"reported":false,"sessionId":"legacy-memory-"+str(state.deck.hash()),"cardData":[],"attempts":[]},false)
 	var clean_card_data: Array = []
 	var card_data_ids := {}
 	var saved_card_data: Variant = state.get("cardData", [])
@@ -85,16 +86,26 @@ func restore(value: Dictionary) -> bool:
 	state.pending = state.flipped.size() == 2
 	state.mismatchShowing = bool(state.get("mismatchShowing",false)) and bool(state.pending)
 	state.remaining = clampf(_number(state.get("remaining", 0.8), 0.8),0.0,0.32 if bool(state.mismatchShowing) else 0.9)
-	state.peekRemaining = clampf(_number(state.get("peekRemaining", 0.0), 0.0), 0.0, 5.0)
+	state.previewSeconds = clampf(_number(state.get("previewSeconds", 0.8), 0.8), 0.2, 3.0)
+	if clean_peeks.is_empty() or str(state.get("phase", "")) != "playing":
+		state.peekRemaining = 0.0
+	else:
+		var saved_peek := _number(state.get("peekRemaining", 0.0), 0.0)
+		state.peekRemaining = clampf(saved_peek if saved_peek > 0.0 else float(state.previewSeconds) + 0.6, 0.2, 5.0)
 	state.hints = maxi(0, _integer(state.get("hints", 0)))
 	state.mistakes = maxi(0, _integer(state.get("mistakes", 0)))
 	state.moves = maxi(0, _integer(state.get("moves", 0)))
-	state.previewSeconds = clampf(_number(state.get("previewSeconds", 0.8), 0.8), 0.2, 3.0)
 	state.hintsMax = maxi(0, _integer(state.get("hintsMax", 2)))
 	state.threeStarMistakes = maxi(0, _integer(state.get("threeStarMistakes", 3)))
 	state.currentPlayer = clampi(_integer(state.get("currentPlayer",0)),0,state.players.size()-1)
 	for index in state.scores.size():
 		state.scores[index] = maxi(0, _integer(state.scores[index]))
+	var saved_attempts: Variant = state.get("attempts", [])
+	state.attempts = []
+	for index in state.players.size():
+		var saved_attempt: Variant = saved_attempts[index] if saved_attempts is Array and index < saved_attempts.size() else 0
+		var fallback_attempt := int(state.scores[index])
+		state.attempts.append(maxi(fallback_attempt, _integer(saved_attempt)))
 	for index in range(0, state.matched.size(), 2):
 		if index + 1 >= state.matched.size() or state.deck[int(state.matched[index])] != state.deck[int(state.matched[index + 1])]:
 			return false
@@ -179,6 +190,7 @@ func tick(delta: float) -> bool:
 				state.scores[int(state.currentPlayer)] = int(state.scores[int(state.currentPlayer)])+1
 			else:
 				state.mistakes = int(state.mistakes)+1
+			state.attempts[int(state.currentPlayer)] = int(state.attempts[int(state.currentPlayer)])+1
 			state.flipped = []
 			state.pending = false
 			if not bool(state.lastMatched):

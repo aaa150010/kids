@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">
+  <defs>
+    <linearGradient id="spot-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#5d778d"/>
+      <stop offset="1" stop-color="#344e66"/>
+    </linearGradient>
+    <linearGradient id="spot-paper" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fffaf0"/>
+      <stop offset="1" stop-color="#e8e1d1"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="576" rx="42" fill="url(#spot-bg)"/>
+  <circle cx="144" cy="92" r="8" fill="#f3d56d"/>
+  <circle cx="874" cy="104" r="6" fill="#f3d56d"/>
+  <circle cx="896" cy="478" r="9" fill="#f3d56d"/>
+  <path d="M64 104c0-35 28-63 63-63h296c35 0 63 28 63 63v368H64z" fill="url(#spot-paper)" stroke="#d8c6a4" stroke-width="6"/>
+  <path d="M538 104c0-35 28-63 63-63h296c35 0 63 28 63 63v368H538z" fill="url(#spot-paper)" stroke="#d8c6a4" stroke-width="6"/>
+  <path d="M132 398c68-40 120-36 178 4 60-42 120-44 182 0" fill="none" stroke="#8aae72" stroke-width="14" stroke-linecap="round"/>
+  <path d="M608 398c68-40 120-36 178 4 60-42 120-44 182 0" fill="none" stroke="#8aae72" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="251" cy="220" r="48" fill="#f0c84d"/>
+  <path d="M728 182l38 76h-76z" fill="#d66f5d"/>
+  <circle cx="750" cy="306" r="44" fill="#7e9bc3"/>
+  <path d="M245 308l77 0" stroke="#9a6c43" stroke-width="10" stroke-linecap="round"/>
+  <path d="M284 300v68" stroke="#9a6c43" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="795" cy="208" r="36" fill="none" stroke="#2e4560" stroke-width="12"/>
+  <path d="M822 238l48 54" stroke="#2e4560" stroke-width="16" stroke-linecap="round"/>
+  <path d="M795 208h.1" stroke="#2e4560" stroke-width="12"/>
+  <path d="M220 440h130" stroke="#b7a98d" stroke-width="8" stroke-linecap="round"/>
+  <path d="M698 440h130" stroke="#b7a98d" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="310" cy="218" r="10" fill="#fff5c4"/>
+  <circle cx="820" cy="316" r="8" fill="#fff5c4"/>
+  <text x="512" y="548" text-anchor="middle" font-family="Noto Sans CJK SC, sans-serif" font-size="32" font-weight="700" fill="#fff8df">找一找，哪里不一样？</text>
+</svg>

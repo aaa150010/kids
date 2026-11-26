@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">
+  <defs>
+    <linearGradient id="tangram-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f5dfd2"/>
+      <stop offset="1" stop-color="#d99a7d"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="576" rx="42" fill="url(#tangram-bg)"/>
+  <circle cx="150" cy="100" r="8" fill="#fff4dd"/>
+  <circle cx="858" cy="462" r="11" fill="#fff4dd"/>
+  <path d="M120 416h784l-55 44H175z" fill="#a85f47" opacity=".55"/>
+  <g stroke="#fff9ed" stroke-width="10" stroke-linejoin="round">
+    <path d="M260 382 352 236l104 146z" fill="#c86c4c"/>
+    <path d="m368 382 104-146 104 146z" fill="#e39468"/>
+    <path d="M472 382 524 310l52 72z" fill="#f0b67e"/>
+    <path d="m524 310 52 72 52-72z" fill="#b85c38"/>
+    <path d="m628 310 52-90 52 90z" fill="#f6c98b"/>
+    <rect x="420" y="394" width="104" height="72" rx="10" fill="#8e553e" transform="rotate(-10 472 430)"/>
+    <path d="m676 382 62-112 52 72-42 40z" fill="#f4a776"/>
+  </g>
+  <path d="M778 118c24 28 38 57 38 86 0 39-31 64-70 64s-70-25-70-64c0-29 14-58 38-86 16 19 32 19 64 0z" fill="#fff1bd" opacity=".9"/>
+  <circle cx="746" cy="194" r="18" fill="#b85c38" opacity=".7"/>
+  <text x="512" y="548" text-anchor="middle" font-family="Noto Sans CJK SC, sans-serif" font-size="34" font-weight="700" fill="#773e2e">七块 · 拼出想象</text>
+</svg>

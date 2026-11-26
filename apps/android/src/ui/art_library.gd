@@ -76,11 +76,19 @@ static func semantic_picture(name: String, kind: String = "ui", minimum: Vector2
 
 
 static func cover_texture(game_id: String) -> Texture2D:
-	if not COVER_SLOTS.has(game_id):
-		return null
 	var cache_key := "illustrated-cover:" + game_id
 	if cache.has(cache_key):
 		return cache[cache_key]
+	for direct_path in ["res://assets/covers/%s.webp" % game_id, "res://assets/covers/%s.svg" % game_id, "res://assets/covers/%s.png" % game_id]:
+		if not ResourceLoader.exists(direct_path):
+			continue
+		var direct: Texture2D = load(direct_path)
+		if direct != null:
+			cache[cache_key] = direct
+			return direct
+	if not COVER_SLOTS.has(game_id):
+		cache[cache_key] = null
+		return null
 	var illustrated_path := "res://assets/covers/" + game_id + ".webp"
 	if ResourceLoader.exists(illustrated_path):
 		var illustrated: Texture2D = load(illustrated_path)

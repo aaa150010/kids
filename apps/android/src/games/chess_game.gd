@@ -29,8 +29,9 @@ func _ready() -> void:
 		players = engine.state.players.duplicate(true)
 		level_id = int(engine.state.get("levelId", 1))
 		if engine.state.phase == "finished" and not bool(stored.get("resume", true)):
+			var current_level := level_id
 			engine.state = {}
-			_create()
+			_create(current_level)
 	else:
 		var stored_fields: Array = stored.keys().filter(func(key): return str(key) != "modeId")
 		if not stored_fields.is_empty():
@@ -58,9 +59,15 @@ func _create(number: int = 1) -> void:
 			engine.create_session({
 				"gameId": game_id, "modeId": "puzzle", "players": players,
 				"levelId": level_id, "puzzle": puzzles[level_id - 1], "seed": Time.get_ticks_usec(),
+				"hintsMax": int(GameTuning.value(game_id, difficulty, "hints", 2)),
+				"undosMax": int(GameTuning.value(game_id, difficulty, "undos", 3)),
 			})
 	else:
-		engine.create_session({"gameId": game_id, "modeId": "classic", "players": players, "seed": Time.get_ticks_usec()})
+		engine.create_session({
+			"gameId": game_id, "modeId": "classic", "players": players, "seed": Time.get_ticks_usec(),
+			"hintsMax": int(GameTuning.value(game_id, difficulty, "hints", 2)),
+			"undosMax": int(GameTuning.value(game_id, difficulty, "undos", 3)),
+		})
 	if not _recovery_snapshot.is_empty():
 		engine.state.recoverySnapshot = _recovery_snapshot.duplicate(true)
 	session_id = str(engine.state.sessionId)
@@ -103,6 +110,7 @@ func _build_board() -> void:
 	tools.add_theme_constant_override("h_separation", 12)
 	if mode_id == "puzzle":
 		tools.add_child(PlaygroundUI.button("关卡列表", accent, _show_puzzle_map, "soft"))
+		tools.add_child(PlaygroundUI.button("看提示", accent, _hint, "soft"))
 	tools.add_child(PlaygroundUI.button("悔棋", accent, _undo, "soft"))
 	tools.add_child(PlaygroundUI.button("重新开始", accent, _confirm_restart, "ghost"))
 	content_root.add_child(tools)
@@ -162,6 +170,7 @@ func _extra_pause_actions() -> Array:
 	var actions: Array = [{"text":"悔棋", "icon":"undo", "kind":"soft", "callback":func(): _close_pause_tools(); _undo()}]
 	if mode_id == "puzzle":
 		actions.append({"text":"残局列表", "icon":"back", "kind":"soft", "callback":func(): _close_pause_tools(); _show_puzzle_map()})
+		actions.append({"text":"看提示", "icon":"hint", "kind":"soft", "callback":func(): _close_pause_tools(); _hint()})
 	return actions
 
 
@@ -188,6 +197,14 @@ func _refresh() -> void:
 	if engine.state.phase == "finished":
 		status.text = str(engine.state.get("reason", "本局结束"))
 		detail.text = "本局共走 %s 步，进度已经自动保存。" % int(engine.state.get("moveCount", 0))
+	elif mode_id == "puzzle":
+		status.text = "只走红方：一步将死或吃掉黑将"
+		detail.text = "已尝试 %s 次 · 提示 %s / %s\n%s" % [
+			int(engine.state.get("mistakes", 0)),
+			int(engine.state.get("hints", 0)),
+			int(engine.state.get("hintsMax", 2)),
+			str(engine.state.get("lastPuzzleReply", engine.state.get("puzzle", {}).get("hint", "找一步直接吃掉黑将的走法。"))),
+		]
 	else:
 		status.text = "红方走棋" if turn == 0 else "黑方走棋"
 		if selected < 0:
@@ -237,6 +254,14 @@ func _cell(position: int) -> void:
 		return
 	var result := engine.handle_input(action)
 	if not bool(result.get("ok", false)):
+		if state_is_puzzle_miss(result):
+			engine.state.interactionNote = {
+				"message": str(result.get("message", "这一步还不是一步杀")),
+				"cells": result.get("cells", [position]),
+				"side": 0,
+			}
+			_save("一步杀再试一次")
+			_refresh()
 		SfxMap.play(&"error")
 		show_toast(str(result.get("message", "试试亮起的位置")))
 		return
@@ -251,9 +276,16 @@ func _cell(position: int) -> void:
 		_show_result()
 
 
+func state_is_puzzle_miss(result: Dictionary) -> bool:
+	return bool(result.get("puzzleMiss", false))
+
+
 func _undo() -> void:
 	if paused or engine.state.phase != "playing" or engine.state.history.is_empty():
 		show_toast("现在没有可以撤回的走法")
+		return
+	if int(engine.state.get("undos", 0)) >= int(engine.state.get("undosMax", 3)):
+		show_toast("这一档难度的悔棋次数已经用完。")
 		return
 	if mode_id == "classic" and players.size() == 2:
 		open_modal("悔棋确认", PlaygroundUI.label("请另一位小朋友确认，是否撤回最近一步？", 21, PlaygroundUI.INK, 500, true), [
@@ -273,6 +305,21 @@ func _perform_undo() -> void:
 		show_toast("现在没有可以撤回的走法")
 		return
 	_save("撤回了一步")
+	_refresh()
+
+
+func _hint() -> void:
+	if paused or engine.state.phase != "playing" or mode_id != "puzzle":
+		return
+	var result := engine.handle_input({"type": "hint"})
+	if not bool(result.get("ok", false)):
+		show_toast(str(result.get("message", "现在没有可用提示。")))
+		return
+	var text := str(result.get("hint", "找一步直接吃掉黑将的走法。"))
+	var target := int(result.get("cell", -1))
+	engine.state.interactionNote = {"message": text, "cells": [target] if target >= 0 else [], "side": 0}
+	Speech.speak(text)
+	_save("看过一步杀提示")
 	_refresh()
 
 
@@ -305,16 +352,26 @@ func _show_puzzle_map() -> void:
 	grid.add_theme_constant_override("v_separation", 8)
 	for index in puzzles.size():
 		var puzzle: Dictionary = puzzles[index]
-		var button := PlaygroundUI.button(str(puzzle.get("title", "一步杀")), accent,
-			_open_puzzle.bind(index), "primary" if index + 1 == level_id else "soft")
+		var number := index + 1
+		var unlocked := SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id)
+		var button := PlaygroundUI.button(
+			"%s\n%s" % [str(puzzle.get("title", "一步杀")), "一步杀" if unlocked else "尚未解锁"],
+			accent,
+			_open_puzzle.bind(index),
+			"primary" if number == level_id else "soft"
+		)
 		button.custom_minimum_size = Vector2(0, 76)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.disabled = not unlocked
 		grid.add_child(button)
 	body.add_child(grid)
 	open_modal("中国象棋残局", body, [{"text": "关闭", "kind": "soft", "callback": func(): _close_top_modal()}], "一步杀练习")
 
 
 func _open_puzzle(index: int) -> void:
+	if not SaveStore.level_unlocked(str(players[0].id), game_id, index + 1, mode_id):
+		show_toast("先完成前一关，再来挑战这一关。")
+		return
 	_close_top_modal()
 	_result_visible = false
 	_create(index + 1)
@@ -323,13 +380,22 @@ func _open_puzzle(index: int) -> void:
 
 
 func _show_rules() -> void:
-	var lines := [
-		"红方先走，双方轮流走一步；点自己的棋子，再点亮起的交叉点。",
-		"车走直线，炮吃子要隔一个棋子；马走日字，象走田字且不能塞象眼。",
-		"士和将只在九宫里走；兵卒没过河只能向前，过河后也能横着走。",
-		"不能让将帅直接照面，也不能走出让自己被将军的棋。",
-		"将死对方、让对方无棋可走，或吃掉对方的将帅就获胜；所有进度都会自动保存。",
-	]
+	var lines: Array = []
+	if mode_id == "puzzle":
+		lines = [
+			"这是单人一步杀练习：只走红方，目标是一步将死或吃掉黑将。",
+			"先点红方棋子，再点亮起的交叉点；不是一步杀的走法不会改变棋盘。",
+			"可以看提示，也可以重开；尝试次数和提示次数都会影响星级。",
+			"经典双人模式仍然是红方先走，双方轮流走棋。",
+		]
+	else:
+		lines = [
+			"红方先走，双方轮流走一步；点自己的棋子，再点亮起的交叉点。",
+			"车走直线，炮吃子要隔一个棋子；马走日字，象走田字且不能塞象眼。",
+			"士和将只在九宫里走；兵卒没过河只能向前，过河后也能横着走。",
+			"不能让将帅直接照面，也不能走出让自己被将军的棋。",
+			"将死对方、让对方无棋可走，或吃掉对方的将帅就获胜；所有进度都会自动保存。",
+		]
 	var body := VBoxContainer.new()
 	body.add_theme_constant_override("separation", 10)
 	for index in lines.size():
@@ -350,8 +416,13 @@ func _show_result() -> void:
 	if not bool(state.get("reported", false)):
 		state.reported = true
 		if mode_id == "puzzle" and int(state.winner) == 0:
-			SaveStore.complete_level(str(players[0].id), game_id, level_id, 1, mode_id)
-			SaveStore.record_outcome(str(players[0].id), game_id, "win", 1, 0, 0, {"strategy": {"correct": 1, "answered": 1}}, str(state.get("sessionId", "chess")))
+			var stars := 1
+			if int(state.get("hints", 0)) == 0 and int(state.get("mistakes", 0)) == 0:
+				stars = 3
+			elif int(state.get("hints", 0)) == 0:
+				stars = 2
+			SaveStore.complete_level(str(players[0].id), game_id, level_id, stars, mode_id)
+			SaveStore.record_outcome(str(players[0].id), game_id, "win", stars, 1, 1, {"strategy": {"correct": 1, "answered": 1}}, str(state.get("sessionId", "chess")))
 		elif mode_id == "classic":
 			for side in players.size():
 				var outcome := "draw" if int(state.winner) < 0 else "win" if side == int(state.winner) else "loss"

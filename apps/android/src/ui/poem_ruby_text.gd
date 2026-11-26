@@ -8,6 +8,7 @@ var hide_text := false
 var text_size := 32
 var _height := 60.0
 var _cells: Array = []
+var _rows: Array = []
 var _last_width := -1.0
 
 
@@ -45,7 +46,12 @@ func _pinyin_tokens() -> Array:
 
 
 func _is_punctuation(character: String) -> bool:
-	return character in ["，", "。", "！", "？", "；", "：", "、", ",", ".", "!", "?", ";", ":"]
+	return character in [
+		"，", "。", "！", "？", "；", "：", "、", "…", "—",
+		",", ".", "!", "?", ";", ":", "《", "》", "〈", "〉",
+		"（", "）", "(", ")", "【", "】", "「", "」", "『", "』",
+		"“", "”", "‘", "’", "·", "・",
+	]
 
 
 func _layout_line() -> void:
@@ -53,15 +59,24 @@ func _layout_line() -> void:
 		return
 	_last_width = size.x
 	_cells.clear()
+	_rows.clear()
 	var font := PlaygroundUI.font()
 	var pinyin_size := maxi(13, int(text_size * 0.44))
 	var ruby_height := float(pinyin_size + 10) if show_pinyin else 0.0
+	var line_height := ruby_height + float(text_size + 16)
 	var tokens := _pinyin_tokens()
 	var token_index := 0
-	var widths: Array = []
-	var total_width := 0.0
+	var available := maxf(1.0, size.x)
+	var row: Array = []
+	var row_width := 0.0
+
 	for index in line_text.length():
 		var character := line_text.substr(index, 1)
+		if character == "\n":
+			_flush_row(row, row_width, available, line_height)
+			row = []
+			row_width = 0.0
+			continue
 		var annotation := ""
 		if not _is_punctuation(character) and token_index < tokens.size():
 			annotation = str(tokens[token_index])
@@ -71,16 +86,31 @@ func _layout_line() -> void:
 		var width := character_width + 4.0
 		if show_pinyin and not annotation.is_empty():
 			width = maxf(width, font.get_string_size(annotation, HORIZONTAL_ALIGNMENT_LEFT, -1, pinyin_size).x + 6.0)
-		widths.append(width)
-		total_width += width
-		_cells.append({"text": shown, "ruby": annotation, "width": width})
-	var cursor := maxf(0.0, (size.x - total_width) * 0.5)
-	for index in _cells.size():
-		_cells[index].x = cursor
-		cursor += float(_cells[index].width)
-	_height = ruby_height + float(text_size + 16)
+		width = minf(width, available)
+		if not row.is_empty() and row_width + width > available:
+			_flush_row(row, row_width, available, line_height)
+			row = []
+			row_width = 0.0
+		row.append({"text": shown, "ruby": annotation, "width": width})
+		row_width += width
+	_flush_row(row, row_width, available, line_height)
+	_height = maxf(line_height, float(_rows.size()) * line_height)
 	update_minimum_size()
 	queue_redraw()
+
+
+func _flush_row(row: Array, row_width: float, available: float, line_height: float) -> void:
+	if row.is_empty():
+		return
+	var offset := maxf(0.0, (available - row_width) * 0.5)
+	var row_index := _rows.size()
+	var cursor := offset
+	for cell in row:
+		cell.x = cursor
+		cell.y = float(row_index) * line_height
+		cursor += float(cell.width)
+		_cells.append(cell)
+	_rows.append({"width": row_width, "offset": offset})
 
 
 func _draw() -> void:
@@ -88,7 +118,7 @@ func _draw() -> void:
 	var pinyin_size := maxi(13, int(text_size * 0.44))
 	var ruby_height := float(pinyin_size + 10) if show_pinyin else 0.0
 	for cell in _cells:
-		var origin := Vector2(float(cell.x), 0.0)
+		var origin := Vector2(float(cell.x), float(cell.y))
 		var cell_width := float(cell.width)
 		var annotation := str(cell.ruby)
 		if show_pinyin and not annotation.is_empty():

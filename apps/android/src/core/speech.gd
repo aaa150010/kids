@@ -1,7 +1,11 @@
 extends Node
 
+signal unavailable(message: String)
+
 var _voice_id := ""
 var _last_text := ""
+var _last_owner := ""
+var _current_owner := ""
 var _speaking := false
 var _speaking_grace := 0.0
 
@@ -17,19 +21,23 @@ func _ready() -> void:
 			break
 
 
-func speak(text: String) -> void:
-	begin(text)
+func speak(text: String, owner: String = "") -> bool:
+	return begin(text, 0.92, owner)
 
 
-func begin(text: String, rate: float = 0.92) -> bool:
+func begin(text: String, rate: float = 0.92, owner: String = "") -> bool:
 	if text.strip_edges().is_empty():
 		return false
 	if not bool(SaveStore.settings().get("speechOn", true)) or float(SaveStore.settings().get("speechVolume", 0.72)) <= 0.0:
 		stop()
 		return false
 	_last_text = text
+	_last_owner = owner
 	if not _ensure_chinese_voice():
+		unavailable.emit("平板没有检测到中文语音，请先在系统设置中安装中文 TTS。")
 		return false
+	DisplayServer.tts_stop()
+	_current_owner = owner
 	_speaking = true
 	_speaking_grace = 0.35
 	AudioFX.set_music_duck(true, &"tts")
@@ -60,13 +68,23 @@ func _ensure_chinese_voice() -> bool:
 
 func repeat() -> void:
 	if not _last_text.is_empty():
-		speak(_last_text)
+		speak(_last_text, _last_owner)
 
 
 func stop() -> void:
 	DisplayServer.tts_stop()
 	_speaking = false
+	_current_owner = ""
 	AudioFX.set_music_duck(false, &"tts")
+
+
+func stop_owner(owner: String) -> void:
+	if owner.is_empty() or _current_owner == owner:
+		stop()
+
+
+func is_owned_by(owner: String) -> bool:
+	return not owner.is_empty() and _current_owner == owner
 
 
 func _process(delta: float) -> void:

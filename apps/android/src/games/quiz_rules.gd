@@ -5,14 +5,36 @@ func create_session(context: Dictionary) -> Dictionary:
 	super.create_session(context)
 	state.merge({"queues":[],"positions":[],"scores":[],"answers":[],"currentPlayer":0,"phase":"question","selected":-1},true)
 	var pools: Array = context.get("pools",[])
-	var rounds := int(context.get("rounds",8))
-	for pool in pools:
-		var shuffled := random.shuffled(pool)
-		state.queues.append(shuffled.slice(0,mini(rounds,shuffled.size())))
+	var rounds := maxi(0, int(context.get("rounds",8)))
+	var recent_by_player: Array = context.get("recentIds",[])
+	for index in pools.size():
+		var pool: Variant = pools[index]
+		if not pool is Array:
+			pool = []
+		var recent: Array = recent_by_player[index] if index < recent_by_player.size() and recent_by_player[index] is Array else []
+		var seen := {}
+		for identifier in recent:
+			seen[str(identifier)] = true
+		var fresh: Array = []
+		var older: Array = []
+		for question in pool:
+			if not question is Dictionary:
+				continue
+			var identifier := str(question.get("id",""))
+			if not identifier.is_empty() and seen.has(identifier):
+				older.append(question)
+			else:
+				fresh.append(question)
+		var queue := random.shuffled(fresh)
+		if queue.size() < mini(rounds,pool.size()):
+			queue.append_array(random.shuffled(older))
+		state.queues.append(queue.slice(0,mini(rounds,pool.size())))
 		state.positions.append(0)
 		state.scores.append(0)
-	if pools.is_empty() or pools.any(func(pool): return pool.is_empty()):
+	if rounds <= 0 or pools.is_empty() or pools.any(func(pool): return not pool is Array or pool.is_empty()):
 		state.phase = "empty"
+	state.erase("pools")
+	state.erase("recentIds")
 	return state
 
 func restore(value: Dictionary) -> bool:
@@ -45,18 +67,56 @@ func restore(value: Dictionary) -> bool:
 	else:
 		var clean_answers: Array = []
 		for answer in state.answers:
-			if answer is Dictionary and _valid_question(answer.get("question", {})) and _numeric(answer.get("selected", -1)) and int(answer.selected) in [0,1,2]:
-				clean_answers.append(answer)
+			if not answer is Dictionary:
+				continue
+			var answer_question: Variant = answer.get("question", {})
+			if not _valid_question(answer_question):
+				continue
+			if not _numeric(answer.get("selected", -1)) or int(answer.selected) not in [0,1,2]:
+				continue
+			if not _numeric(answer.get("playerIndex", -1)):
+				continue
+			var answer_player := int(answer.playerIndex)
+			if answer_player < 0 or answer_player >= state.players.size():
+				continue
+			var selected := int(answer.selected)
+			var stored_correct: Variant = answer.get("correct", selected == int(answer_question.answer))
+			if not stored_correct is bool:
+				stored_correct = selected == int(answer_question.answer)
+			var clean_answer: Dictionary = answer.duplicate(true)
+			clean_answer.playerIndex = answer_player
+			clean_answer.selected = selected
+			clean_answer.correct = bool(stored_correct)
+			clean_answers.append(clean_answer)
 		state.answers = clean_answers
 	if not _whole(state.get("selected", -1)):
 		state.selected = -1
 	state.selected = clampi(int(state.selected), -1, 2)
 	state.currentPlayer = clampi(_integer(state.get("currentPlayer",0)),0,state.players.size()-1)
-	state.scores = state.scores.map(func(score): return maxi(0, _integer(score)))
-	if saved_phase == "feedback" and int(state.selected) not in [0,1,2]:
+	for index in state.scores.size():
+		state.scores[index] = clampi(_integer(state.scores[index]),0,state.queues[index].size())
+	if not state.answers.is_empty():
+		var computed_scores: Array = []
+		for index in state.players.size():
+			computed_scores.append(0)
+		for answer in state.answers:
+			if bool(answer.correct):
+				computed_scores[int(answer.playerIndex)] = int(computed_scores[int(answer.playerIndex)]) + 1
+		state.scores = computed_scores
+	if saved_phase == "question":
+		state.selected = -1
+	elif saved_phase == "feedback" and int(state.selected) not in [0,1,2]:
 		return false
 	if state.phase in ["question","feedback"] and int(state.positions[int(state.currentPlayer)]) >= state.queues[int(state.currentPlayer)].size():
 		return false
+	if saved_phase == "feedback":
+		var has_current_answer := false
+		for answer in state.answers:
+			if int(answer.playerIndex) == int(state.currentPlayer) and str(answer.get("questionId","")) == str(question().get("id","")):
+				has_current_answer = true
+				break
+		if not has_current_answer:
+			return false
 	return true
 
 

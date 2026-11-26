@@ -39,7 +39,7 @@ var lesson_step := 0
 var lesson_actions: Array = []
 var lesson_texts: Array = []
 var lesson_visible := false
-var _save_interval := 0.0
+var _lesson_icons: Array[String] = []
 var _resume_on_start := false
 var _suppress_resume_on_close := false
 const RAIL_WIDTH := 60.0
@@ -77,13 +77,12 @@ func build_shell() -> void:
 	margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	var metrics := PlaygroundUI.layout_metrics(get_viewport_rect().size)
 	var safe := PlaygroundUI.safe_insets(get_viewport_rect().size)
-	var vertical_safe := minf(float(safe.top), float(safe.bottom))
 	var side_margin := maxf(metrics.margin, float(safe.left) + SYSTEM_GESTURE_GUARD + RAIL_WIDTH + 8.0)
 	var opposite_margin := maxf(metrics.margin, float(safe.right) + SYSTEM_GESTURE_GUARD + RAIL_WIDTH + 8.0)
 	margin.add_theme_constant_override("margin_left", int(side_margin))
 	margin.add_theme_constant_override("margin_right", int(opposite_margin))
-	margin.add_theme_constant_override("margin_top", int(maxf(10.0,vertical_safe+6.0)))
-	margin.add_theme_constant_override("margin_bottom", int(maxf(10.0,vertical_safe+6.0)))
+	margin.add_theme_constant_override("margin_top", int(maxf(10.0,float(safe.top)+6.0)))
+	margin.add_theme_constant_override("margin_bottom", int(maxf(10.0,float(safe.bottom)+6.0)))
 	add_child(margin)
 	layout_root = VBoxContainer.new()
 	layout_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -250,6 +249,10 @@ func face_to_face() -> bool:
 	return TabletopLayout.enabled(game_id, players, mode_id)
 
 
+func is_input_blocked() -> bool:
+	return paused or not _modal_stack.is_empty()
+
+
 func _current_seat() -> int:
 	if not face_to_face():
 		return 0
@@ -350,17 +353,22 @@ func show_help() -> void:
 	var spoken_guide := PackedStringArray()
 	for line in guide:
 		spoken_guide.append(str(line))
-	Speech.speak("%s玩法。%s" % [
+	var spoken := "%s玩法。%s" % [
 		str(game_meta.get("title", "小游戏")),
 		" ".join(spoken_guide),
-	])
+	]
+	Speech.speak(spoken, "game-help")
+	var extra := HBoxContainer.new()
+	extra.add_theme_constant_override("separation", 10)
+	extra.add_child(PlaygroundUI.semantic_icon_button("play", "三步小课堂", accent, func(): _close_top_modal(); begin_lesson(true), "soft"))
+	if has_method("_show_rules"):
+		extra.add_child(PlaygroundUI.semantic_icon_button("rules", "更多规则", accent, func(): _close_top_modal(); call("_show_rules"), "soft"))
+	content.add_child(PlaygroundUI.separator(PlaygroundUI.TOOL_LINE))
+	content.add_child(extra)
 	var actions := [
 		{"text": "再读一遍", "icon": "repeat", "kind": "soft", "callback": func(): Speech.repeat()},
 		{"text": "知道了", "icon": "check", "kind": "primary", "callback": func(): _close_top_modal()},
 	]
-	actions.insert(0, {"text": "三步小课堂", "icon": "play", "kind": "soft", "callback": func(): _close_top_modal(); begin_lesson(true)})
-	if has_method("_show_rules"):
-		actions.insert(1, {"text": "更多规则", "icon": "rules", "kind": "soft", "callback": func(): call("_show_rules")})
 	open_modal("怎么玩", content, actions, "小玩家指南")
 
 
@@ -406,7 +414,13 @@ func _open_pause_tools() -> void:
 	)
 	summary_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	summary_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	var pause_status := "已保存，可以放心休息" if not _resume_on_start else "已接着上次进度，准备好再继续"
+	var pause_status := SaveStore.save_status_text()
+	if not SaveStore.last_save_ok:
+		pause_status = "存档暂时没有写完，继续操作时会自动重试"
+	elif not _resume_on_start:
+		pause_status = "已保存，可以放心休息"
+	else:
+		pause_status = "已接着上次进度，准备好再继续"
 	var primary_action := {
 		"text": "接着读" if game_id == "stories" else "继续游戏",
 		"icon": "play",
@@ -478,8 +492,15 @@ func _show_settings() -> void:
 	]
 	for entry in buttons:
 		var key := str(entry["key"])
-		var state := "开" if bool(settings.get(key, true)) else "关"
-		box.add_child(PlaygroundUI.semantic_icon_button(str(entry["icon"]), "%s：%s" % [str(entry["label"]), state], accent, _toggle_setting.bind(key), "soft"))
+		var button := PlaygroundUI.semantic_icon_button(str(entry["icon"]), "%s：%s" % [str(entry["label"]), "开" if bool(settings.get(key, true)) else "关"], accent, Callable(), "soft")
+		var toggle := func():
+			var value := not bool(SaveStore.settings().get(key, true))
+			SaveStore.set_setting(key, value)
+			button.text = "%s：%s" % [str(entry["label"]), "开" if value else "关"]
+			AudioFX.refresh_settings()
+			Speech.stop()
+		button.pressed.connect(toggle)
+		box.add_child(button)
 	box.add_child(volume_controls(accent))
 	open_modal("声音与朗读", box, [
 		{"text": "回到暂停", "icon": "back", "kind": "primary", "callback": func(): _close_top_modal()},
@@ -504,21 +525,46 @@ static func volume_controls(tint: Color) -> Control:
 		slider.value = value
 		slider.custom_minimum_size = Vector2(120, 48)
 		slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var slider_theme := PlaygroundUI.slider_style(tint)
+		slider.add_theme_stylebox_override("slider", slider_theme.track)
+		slider.add_theme_stylebox_override("grabber_area", slider_theme.fill)
+		slider.add_theme_stylebox_override("grabber_area_highlight", slider_theme.fill)
+		slider.add_theme_icon_override("grabber", _slider_grabber_icon(slider_theme.grabber))
+		slider.add_theme_icon_override("grabber_highlight", _slider_grabber_icon(slider_theme.grabber))
 		slider.value_changed.connect(func(volume: float):
 			caption.text = "%s %s%%" % [entry[0], roundi(volume * 100.0)]
-			AudioFX.call(str(entry[2]), volume)
+			SaveStore.set_setting(str(entry[1]), volume, false)
 		)
+		slider.drag_ended.connect(func(_changed: bool): SaveStore.flush())
+		slider.focus_exited.connect(func(): SaveStore.flush())
 		row.add_child(slider)
 		box.add_child(row)
 	return box
+
+
+static func _slider_grabber_icon(box: StyleBoxFlat) -> ImageTexture:
+	var size := 20
+	var image := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	image.fill(Color.TRANSPARENT)
+	for y in size:
+		for x in size:
+			var dx := float(x) - (size - 1) * 0.5
+			var dy := float(y) - (size - 1) * 0.5
+			if dx * dx + dy * dy <= pow(float(size) * 0.5 - 1.0, 2.0):
+				image.set_pixel(x, y, box.bg_color)
+	for angle_index in 40:
+		var angle := TAU * float(angle_index) / 40.0
+		var radius := float(size) * 0.5 - 1.5
+		var px := clampi(int(round((size - 1) * 0.5 + cos(angle) * radius)), 0, size - 1)
+		var py := clampi(int(round((size - 1) * 0.5 + sin(angle) * radius)), 0, size - 1)
+		image.set_pixel(px, py, box.border_color)
+	return ImageTexture.create_from_image(image)
 
 
 func _toggle_setting(key: String) -> void:
 	SaveStore.set_setting(key, not bool(SaveStore.settings().get(key, true)))
 	AudioFX.refresh_settings()
 	Speech.stop()
-	_close_top_modal()
-	_show_settings()
 
 
 func open_modal(
@@ -652,6 +698,7 @@ func _close_top_modal() -> void:
 
 func _on_dialog_closed(layer: Control) -> void:
 	_modal_stack.erase(layer)
+	Speech.stop_owner("game-help")
 	if layer == _pause_root_layer:
 		_pause_root_layer = null
 		if paused and not _suppress_resume_on_close:
@@ -767,14 +814,14 @@ func checkpoint(note: String = "实时自动保存") -> void:
 		call("_save", note)
 	elif has_method("_save_profile"):
 		call("_save_profile", note)
-	SaveStore.flush()
+	else:
+		SaveStore.flush()
+	if not SaveStore.last_save_ok:
+		show_toast("进度暂时没有写入成功，下一次操作会自动重试。", 2.8)
 
 
 func _process(delta: float) -> void:
-	_save_interval += delta
-	if _save_interval >= 2.0:
-		_save_interval = 0.0
-		checkpoint()
+	pass
 
 
 func _notification(what: int) -> void:
@@ -792,16 +839,25 @@ func level_map(on_chosen: Callable) -> Control:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	var grid := GridContainer.new()
-	grid.columns = 6
+	var width := get_viewport_rect().size.x
+	grid.columns = 3 if width <= 1180.0 else 4 if width < 1500.0 else 6
 	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	grid.add_theme_constant_override("h_separation", 16)
 	grid.add_theme_constant_override("v_separation", 16)
 	for entry in ContentDB.chapters.get(game_id, []):
 		var number := int(entry.id)
+		var chapter := ContentDB.level(game_id, number)
 		var unlocked := SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id)
 		var stars := clampi(int(SaveStore.learning(str(players[0].id),game_id,mode_id).stars.get(str(number),0)),0,3)
 		var state_text := "尚未解锁" if not unlocked else "已获 %s / 3 星" % stars
-		var button := PlaygroundUI.button("%s\n%s\n%s" % [str(number) if unlocked else "锁", str(entry.title), state_text], accent, on_chosen.bind(number), "soft")
+		var button := PlaygroundUI.semantic_icon_button(
+			"play" if unlocked else "lock",
+			"%s\n%s\n%s" % [str(number), str(chapter.get("title", entry.get("title", ""))), state_text],
+			accent,
+			on_chosen.bind(number),
+			"soft",
+			18
+		)
 		button.custom_minimum_size = Vector2(0, 136)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.disabled = not unlocked
@@ -855,36 +911,73 @@ func begin_lesson(force: bool = false) -> void:
 		lesson_actions = ["roll","answer","pause"]
 		lesson_texts = ["点掷骰子，看看角色走到哪里。","遇到题目慢慢答，讲解会留下。","试试暂停，回来继续本次冒险。"]
 		icon_names = ["game","next","pause"]
+	_lesson_icons = icon_names
+	_show_lesson_page(0)
+
+
+func _show_lesson_page(index: int) -> void:
+	if lesson_texts.is_empty():
+		return
+	var page := clampi(index, 0, lesson_texts.size() - 1)
+	Speech.stop()
 	var body := VBoxContainer.new()
-	body.add_theme_constant_override("separation", 12)
-	for index in lesson_texts.size():
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 12)
-		row.add_child(ArtLibrary.semantic_picture(icon_names[index], "ui", Vector2(38, 38)))
-		var copy := VBoxContainer.new()
-		copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		copy.add_child(PlaygroundUI.label("第 %s 步" % (index + 1), 15, accent, 700))
-		copy.add_child(PlaygroundUI.label(str(lesson_texts[index]), 20, PlaygroundUI.INK, 600, true))
-		row.add_child(copy)
-		body.add_child(row)
-	var spoken_steps := PackedStringArray()
-	for step in lesson_texts:
-		spoken_steps.append(str(step))
-	Speech.speak("小课堂。 %s" % " ".join(spoken_steps))
-	open_modal("怎么玩", body, [
-		{"text": "再读一遍", "icon": "repeat", "kind": "soft", "callback": func(): Speech.repeat()},
-		{"text": "开始试玩", "icon": "play", "kind": "primary", "callback": func(): _finish_lesson(); _close_top_modal()},
-	], "三步就能开始")
+	body.add_theme_constant_override("separation", 14)
+	var icon_name := str(_lesson_icons[page]) if page < _lesson_icons.size() else "game"
+	var icon := ArtLibrary.semantic_picture(icon_name, "ui", Vector2(72, 72))
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	body.add_child(icon)
+	var step_label := PlaygroundUI.label("第 %s 步 · 共 %s 步" % [page + 1, lesson_texts.size()], 16, accent, 700)
+	step_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	body.add_child(step_label)
+	var copy := PlaygroundUI.label(str(lesson_texts[page]), 24, PlaygroundUI.INK, 600, true)
+	copy.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	copy.custom_minimum_size.y = 76
+	body.add_child(copy)
+	var dots := HBoxContainer.new()
+	dots.alignment = BoxContainer.ALIGNMENT_CENTER
+	dots.add_theme_constant_override("separation", 8)
+	for dot_index in lesson_texts.size():
+		var dot := PanelContainer.new()
+		var dot_color := accent if dot_index == page else PlaygroundUI.mix(accent, Color.WHITE, 0.72)
+		dot.add_theme_stylebox_override("panel", PlaygroundUI.style(dot_color, 999, accent if dot_index == page else PlaygroundUI.TOOL_LINE, 1))
+		dot.custom_minimum_size = Vector2(10 if dot_index != page else 24, 10)
+		dots.add_child(dot)
+	body.add_child(dots)
+	Speech.speak(str(lesson_texts[page]), "game-help")
+	var actions: Array = []
+	if page > 0:
+		actions.append({
+			"text": "上一步",
+			"icon": "back",
+			"kind": "soft",
+			"callback": func(): _close_top_modal(); call_deferred("_show_lesson_page", page - 1),
+		})
+	if page < lesson_texts.size() - 1:
+		actions.append({
+			"text": "下一步",
+			"icon": "next",
+			"kind": "primary",
+			"callback": func(): _close_top_modal(); call_deferred("_show_lesson_page", page + 1),
+		})
+	else:
+		actions.append({
+			"text": "开始试玩",
+			"icon": "play",
+			"kind": "primary",
+			"callback": _finish_lesson_and_resume,
+		})
+	open_modal("三步小课堂", body, actions, "跟着小纸片一步一步来")
+
+
+func _finish_lesson_and_resume() -> void:
+	_finish_lesson()
+	_close_top_modal()
+	call_deferred("_close_pause_tools")
 
 
 func lesson_action(action: String) -> void:
-	if not lesson_visible or lesson_step >= lesson_actions.size() or action != lesson_actions[lesson_step]:
-		return
-	lesson_step += 1
-	if lesson_step == lesson_actions.size():
-		_finish_lesson()
-	else:
-		_show_lesson_step()
+	# 小课堂现在是一次展示三步说明，不再根据真实操作假装推进状态。
+	pass
 
 
 func _show_lesson_step() -> void:

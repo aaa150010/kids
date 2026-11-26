@@ -106,17 +106,18 @@ func show_dialog(opts: Dictionary) -> Control:
 	animation.set_parallel(true)
 	animation.tween_property(card, "modulate:a", 1.0, ANIM_IN)
 	animation.tween_property(card, "scale", Vector2.ONE, ANIM_IN).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	var focusables := card.find_children("*", "BaseButton", true, false).filter(
+	var focusables := card.find_children("*", "Control", true, false).filter(
 		func(control):
 			var item := control as Control
 			if item == null or item.focus_mode == Control.FOCUS_NONE or not item.is_visible_in_tree():
 				return false
 			if item is BaseButton:
 				return not item.disabled
-			return true
+			return item is LineEdit or item is TextEdit
 	)
 	if not focusables.is_empty():
-		focusables[0].call_deferred("grab_focus")
+		var text_input := focusables.filter(func(item): return item is LineEdit or item is TextEdit)
+		(text_input[0] if not text_input.is_empty() else focusables[0]).call_deferred("grab_focus")
 	_claim_ipc()
 	SfxMap.play(&"dialog_open")
 	dialog_opened.emit(layer)
@@ -201,9 +202,17 @@ func close_layer(layer: Control, respect_dismissible: bool = false) -> bool:
 		return false
 	if respect_dismissible and not bool(layer.get_meta("dismissible", true)):
 		return false
-	layer.hide()
+	layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var card: Control = layer.get_meta("card") if layer.has_meta("card") else null
 	_forget_layer(layer)
-	layer.queue_free()
+	if is_instance_valid(card):
+		var animation := MotionKit.tween(self)
+		animation.set_parallel(true)
+		animation.tween_property(card, "modulate:a", 0.0, ANIM_OUT)
+		animation.tween_property(card, "scale", Vector2.ONE * 0.96, ANIM_OUT).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+		animation.chain().tween_callback(layer.queue_free)
+	else:
+		layer.queue_free()
 	SfxMap.play(&"dialog_close")
 	return true
 
@@ -277,7 +286,9 @@ func top_layer() -> Control:
 
 func _card_size(tier: String, viewport_size: Vector2, opts: Dictionary) -> Vector2:
 	var ratio := float(SIZE_RATIOS.get(tier, SIZE_RATIOS["M"]))
-	var available := maxf(MIN_WIDTH, viewport_size.x - SAFE_MARGIN * 2.0)
+	var safe := PlaygroundUI.safe_insets(viewport_size)
+	var safe_width := maxf(1.0, viewport_size.x - float(safe.left) - float(safe.right) - SAFE_MARGIN * 2.0)
+	var available := maxf(MIN_WIDTH, safe_width)
 	var width := clampf(viewport_size.x * ratio, minf(MIN_WIDTH, available), minf(MAX_WIDTH, available))
 	if opts.has("width"):
 		width = clampf(float(opts["width"]), minf(MIN_WIDTH, available), minf(MAX_WIDTH, available))

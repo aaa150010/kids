@@ -8,6 +8,13 @@ var quizzes: Dictionary = {}
 var memory: Dictionary = {}
 var poems: Array = []
 var workbook_questions: Array = []
+var trivia_questions: Array = []
+var tangram_data: Dictionary = {}
+var tangram_levels: Array = []
+var spot_data: Dictionary = {}
+var spot_scenes: Array = []
+var shop_data: Dictionary = {}
+var fruit_data: Dictionary = {}
 var content_version: int = 1
 var chapters: Dictionary = {}
 var puzzles: Dictionary = {}
@@ -15,6 +22,8 @@ var tuning: Dictionary = {}
 var military: Dictionary = {}
 var stories: Array = []
 var story_map: Dictionary = {}
+var _sudoku_puzzles_cache: Array = []
+var _content_issues: Array[String] = []
 
 
 func _ready() -> void:
@@ -31,6 +40,21 @@ func _load_json_files() -> void:
 	memory = _json_dictionary("memory.json")
 	poems = _json_array("poems.json")
 	workbook_questions = _json_array("workbook.json")
+	trivia_questions = _json_array("trivia.json")
+	tangram_data = _json_dictionary("tangram.json")
+	tangram_levels = _expand_tangram_levels(tangram_data)
+	var spot_value: Variant = _json("spot.json")
+	if spot_value is Dictionary:
+		spot_data = spot_value
+		spot_scenes = spot_data.get("scenes", []) if spot_data.get("scenes") is Array else []
+	elif spot_value is Array:
+		spot_data = {"version": 1, "scenes": spot_value}
+		spot_scenes = spot_value
+	else:
+		spot_data = {}
+		spot_scenes = []
+	shop_data = _json_dictionary("shop.json")
+	fruit_data = _json_dictionary("fruit_slice.json")
 	chapters = _json_dictionary("chapters.json")
 	puzzles = _json_dictionary("puzzles.json")
 	tuning = _json_dictionary("tuning.json")
@@ -42,6 +66,8 @@ func _load_json_files() -> void:
 			story_map[str(entry.id)] = entry
 	var version_data := _json_dictionary("version.json")
 	content_version = int(version_data.get("version", 1))
+	_sudoku_puzzles_cache.clear()
+	_validate_content()
 
 
 func _read_text(filename: String) -> String:
@@ -112,6 +138,8 @@ func questions(game_id: String, age: int) -> Array:
 	var source: Array
 	if game_id == "workbook":
 		source = workbook_questions
+	elif game_id == "trivia":
+		source = trivia_questions
 	elif quizzes.get(game_id) is Array:
 		source = quizzes[game_id]
 	else:
@@ -119,6 +147,45 @@ func questions(game_id: String, age: int) -> Array:
 	return source.filter(func(question):
 		return int(question.get("age", 0)) == age
 	)
+
+
+func search_games(query: String) -> Array[String]:
+	var needle := query.strip_edges().to_lower()
+	if needle.is_empty():
+		return default_order()
+	var tokens := needle.split(" ", false)
+	var result: Array[String] = []
+	for item in games:
+		var game_id := str(item.get("id", ""))
+		var haystack := _game_search_text(item).to_lower()
+		var matched := true
+		for token in tokens:
+			if not haystack.contains(str(token)):
+				matched = false
+				break
+		if matched:
+			result.append(game_id)
+	return result
+
+
+func _game_search_text(item: Dictionary) -> String:
+	var parts: Array[String] = [
+		str(item.get("id", "")),
+		str(item.get("title", "")),
+		str(item.get("subtitle", "")),
+		str(item.get("category", "")),
+		str(item.get("group", "")),
+		str(item.get("players", "")),
+	]
+	for key in ["features", "guide", "searchTerms"]:
+		if item.get(key) is Array:
+			for value in item[key]:
+				parts.append(str(value))
+	for entry in item.get("modes", []):
+		if entry is Dictionary:
+			parts.append(str(entry.get("name", "")))
+			parts.append(str(entry.get("description", "")))
+	return " ".join(parts)
 
 
 func random_questions(game_id: String, age: int, count: int, exclude_ids: Array = []) -> Array:
@@ -176,7 +243,45 @@ func mode(game_id: String, mode_id: String) -> Dictionary:
 
 func level(game_id: String, level_id: int) -> Dictionary:
 	var entries: Array = chapters.get(game_id, [])
-	return entries[level_id-1].duplicate(true) if level_id > 0 and level_id <= entries.size() else {}
+	if level_id <= 0 or level_id > entries.size():
+		return {}
+	var entry: Dictionary = entries[level_id-1].duplicate(true)
+	_enrich_chapter(game_id, level_id, entry)
+	return entry
+
+
+func _enrich_chapter(game_id: String, level_id: int, entry: Dictionary) -> void:
+	if not (game_id in ["math", "pinyin", "patterns", "animals"]):
+		return
+	if not str(entry.get("skill", "")).strip_edges().is_empty():
+		return
+	var source: Array = quizzes.get(game_id, []) if quizzes.get(game_id) is Array else []
+	if source.is_empty():
+		return
+	var skill_info := {}
+	for question in source:
+		var skill := str(question.get("skill", "")).strip_edges()
+		if skill.is_empty():
+			continue
+		if not skill_info.has(skill):
+			skill_info[skill] = {"minAge": int(question.get("age", 99)), "count": 0}
+		var info: Dictionary = skill_info[skill]
+		info.minAge = mini(int(info.minAge), int(question.get("age", 99)))
+		info.count = int(info.count) + 1
+		skill_info[skill] = info
+	if skill_info.is_empty():
+		return
+	var skills: Array = skill_info.keys()
+	skills.sort_custom(func(first, second):
+		var a: Dictionary = skill_info[first]
+		var b: Dictionary = skill_info[second]
+		if int(a.minAge) == int(b.minAge):
+			return str(first) < str(second)
+		return int(a.minAge) < int(b.minAge)
+	)
+	var skill := str(skills[(level_id - 1) % skills.size()])
+	entry.skill = skill
+	entry.title = "第 %s 关 · %s" % [level_id, skill]
 
 
 func military_formations() -> Array:
@@ -191,6 +296,112 @@ func chess_puzzles() -> Array:
 	return puzzles.get("chess", [])
 
 
-func sudoku_puzzles() -> Array:
-	var value: Variant = _json_dictionary("sudoku.json").get("puzzles", [])
+func tangram_levels_data() -> Array:
+	return tangram_levels
+
+
+func _expand_tangram_levels(data: Dictionary) -> Array:
+	var result: Array = []
+	var templates: Dictionary = data.get("templates", {}) if data.get("templates") is Dictionary else {}
+	for raw in data.get("levels", []):
+		if not raw is Dictionary:
+			continue
+		var entry: Dictionary = raw.duplicate(true)
+		var template: Array = templates.get(str(entry.get("template", "")), []) if templates.get(str(entry.get("template", ""))) is Array else []
+		var turn := int(entry.get("turn", 0))
+		var target: Array = []
+		for piece in template:
+			if not piece is Dictionary:
+				continue
+			var source := Vector2(float(piece.get("x", 0.5)), float(piece.get("y", 0.5))) - Vector2(0.5, 0.5)
+			source = source.rotated(float(turn) * PI * 0.5) + Vector2(0.5, 0.5)
+			target.append({
+				"kind": str(piece.get("kind", "square")),
+				"x": source.x, "y": source.y,
+				"rotation": (int(piece.get("rotation", 0)) + turn) % 4,
+				"mirror": bool(piece.get("mirror", false)),
+			})
+		entry.targetPieces = target
+		result.append(entry)
+	return result
+
+
+func spot_scene_data() -> Array:
+	return spot_scenes
+
+
+func shop_items() -> Array:
+	var value: Variant = shop_data.get("items", [])
 	return value if value is Array else []
+
+
+func shop_orders() -> Array:
+	var value: Variant = shop_data.get("orders", [])
+	return value if value is Array else []
+
+
+func fruit_types() -> Array:
+	var value: Variant = fruit_data.get("fruits", [])
+	return value if value is Array else []
+
+
+func sudoku_puzzles() -> Array:
+	if _sudoku_puzzles_cache.is_empty():
+		var value: Variant = _json_dictionary("sudoku.json").get("puzzles", [])
+		if value is Array:
+			_sudoku_puzzles_cache = value.duplicate(true)
+	return _sudoku_puzzles_cache
+
+
+func content_issues() -> Array[String]:
+	return _content_issues.duplicate()
+
+
+func _validate_content() -> void:
+	_content_issues.clear()
+	if games.size() != 18:
+		_content_issues.append("游戏目录应为 18 项，实际 %s 项" % games.size())
+	for game_id in ["math", "pinyin", "patterns", "animals"]:
+		if questions(game_id, 5).is_empty() and questions(game_id, 6).is_empty():
+			_content_issues.append("%s 题库为空或年龄映射异常" % game_id)
+	for game_id in ["math", "pinyin", "patterns", "animals", "workbook"]:
+		for question in questions(game_id, 5).slice(0, 20):
+			if not question.get("options") is Array or question.options.size() != 3:
+				_content_issues.append("%s 题目 %s 的选项不是三项" % [game_id, str(question.get("id", ""))])
+				break
+			if int(question.get("answer", -1)) not in [0, 1, 2]:
+				_content_issues.append("%s 题目 %s 的答案索引越界" % [game_id, str(question.get("id", ""))])
+				break
+	if sudoku_puzzles().size() < 32:
+		_content_issues.append("数独题库不足 32 题")
+	if trivia_questions.size() < 100:
+		_content_issues.append("知识竞赛题库不足 100 题")
+	for age in range(4, 13):
+		if trivia_questions.filter(func(item): return int(item.get("age", 0)) == age).size() < 8:
+			_content_issues.append("知识竞赛缺少 %s 岁题目" % age)
+	if tangram_levels.size() < 24:
+		_content_issues.append("七巧板关卡不足 24 关")
+	if spot_scenes.size() < 24:
+		_content_issues.append("找不同场景不足 24 个")
+	if shop_items().size() < 16 or shop_orders().size() < 24:
+		_content_issues.append("小小商店商品或订单不足")
+	if fruit_types().size() < 8:
+		_content_issues.append("水果切切乐水果种类不足")
+	for level in tangram_levels:
+		if not level is Dictionary or not level.get("targetPieces") is Array or level.targetPieces.size() != 7:
+			_content_issues.append("七巧板关卡碎片配置异常")
+			break
+	for scene in spot_scenes:
+		if not scene is Dictionary or not scene.get("differences") is Array or scene.differences.size() != 5:
+			_content_issues.append("找不同场景差异配置异常")
+			break
+	for order in shop_orders():
+		if not order is Dictionary or not order.get("items") is Array or order.get("items").is_empty():
+			_content_issues.append("小小商店订单配置异常")
+			break
+	if chess_puzzles().is_empty():
+		_content_issues.append("中国象棋残局为空")
+	if military_puzzles().size() < 24:
+		_content_issues.append("军棋残局不足 24 题")
+	for issue in _content_issues:
+		push_warning("内容检查：" + issue)

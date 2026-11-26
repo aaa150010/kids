@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "specials": {
+    "bomb": {
+      "name": "炸弹",
+      "scorePenalty": 5,
+      "radius": 0.06
+    },
+    "bonus": {
+      "name": "金色水果",
+      "points": 50,
+      "radius": 0.055
+    }
+  },
+  "fruits": [
+    {"id":"watermelon","name":"西瓜","color":"#58a85c","flesh":"#ee6f65","leaf":"#2f6d42","shape":"watermelon"},
+    {"id":"apple","name":"苹果","color":"#d9534f","flesh":"#ffe0b8","leaf":"#4e8c48","shape":"apple"},
+    {"id":"orange","name":"橙子","color":"#e99032","flesh":"#ffd18d","leaf":"#3f824d","shape":"orange"},
+    {"id":"strawberry","name":"草莓","color":"#d84e62","flesh":"#ffd3d7","leaf":"#4a8a48","shape":"strawberry"},
+    {"id":"banana","name":"香蕉","color":"#e5bb3d","flesh":"#fff1b5","leaf":"#8a7c31","shape":"banana"},
+    {"id":"grape","name":"葡萄","color":"#82549b","flesh":"#d9b9e8","leaf":"#4c7c46","shape":"grape"},
+    {"id":"pear","name":"梨","color":"#a6bf54","flesh":"#f5f2bd","leaf":"#4a8249","shape":"pear"},
+    {"id":"peach","name":"桃子","color":"#e99a78","flesh":"#ffd6bd","leaf":"#4f8d4b","shape":"peach"},
+    {"id":"pineapple","name":"菠萝","color":"#c99535","flesh":"#ffe092","leaf":"#3c7a43","shape":"pineapple"},
+    {"id":"mango","name":"芒果","color":"#e8b83f","flesh":"#ffe7ab","leaf":"#4f8248","shape":"mango"},
+    {"id":"kiwi","name":"奇异果","color":"#8c713a","flesh":"#a7d56d","leaf":"#4a7e43","shape":"kiwi"},
+    {"id":"lemon","name":"柠檬","color":"#d8c43e","flesh":"#fff4b0","leaf":"#4d8247","shape":"lemon"}
+  ]
+}

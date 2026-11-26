@@ -21,6 +21,7 @@ const TOUCH_PRIMARY := 56.0
 
 static var _font: Font
 static var _heavy_font: Font
+static var _semi_font_cached: Font
 static var _emoji_font: Font
 
 
@@ -59,8 +60,29 @@ static func mix(base: Color, other: Color, amount: float) -> Color:
 
 
 static func on_accent(accent: Color) -> Color:
-	var luminance := accent.r * 0.2126 + accent.g * 0.7152 + accent.b * 0.0722
-	return INK_DARK if luminance >= 0.24 else Color.WHITE
+	var dark_ratio := contrast_ratio(accent, INK_DARK)
+	var light_ratio := contrast_ratio(accent, Color.WHITE)
+	return INK_DARK if dark_ratio >= light_ratio and dark_ratio >= 3.0 else Color.WHITE
+
+
+static func relative_luminance(color: Color) -> float:
+	var channels := [
+		_linear_channel(color.r),
+		_linear_channel(color.g),
+		_linear_channel(color.b),
+	]
+	return 0.2126 * float(channels[0]) + 0.7152 * float(channels[1]) + 0.0722 * float(channels[2])
+
+
+static func contrast_ratio(first: Color, second: Color) -> float:
+	var high := maxf(relative_luminance(first), relative_luminance(second))
+	var low := minf(relative_luminance(first), relative_luminance(second))
+	return (high + 0.05) / (low + 0.05)
+
+
+static func _linear_channel(value: float) -> float:
+	var channel := clampf(value, 0.0, 1.0)
+	return channel / 12.92 if channel <= 0.04045 else pow((channel + 0.055) / 1.055, 2.4)
 
 
 static func style(
@@ -108,6 +130,8 @@ static func label(
 	node.add_theme_constant_override("outline_size", 0)
 	if weight >= 700:
 		node.add_theme_font_override("font", _bold_font())
+	elif weight >= 600:
+		node.add_theme_font_override("font", _semi_font())
 	node.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART if wrap else TextServer.AUTOWRAP_OFF
 	node.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	return node
@@ -121,6 +145,16 @@ static func _bold_font() -> Font:
 		variation.fallbacks = [emoji_font()]
 		_heavy_font = variation
 	return _heavy_font
+
+
+static func _semi_font() -> Font:
+	if _semi_font_cached == null:
+		var variation := FontVariation.new()
+		variation.base_font = font()
+		variation.variation_embolden = 0.26
+		variation.fallbacks = [emoji_font()]
+		_semi_font_cached = variation
+	return _semi_font_cached
 
 
 static func emoji_font() -> Font:
@@ -442,6 +476,7 @@ static func text_field(placeholder: String, value: String, accent: Color) -> Lin
 static func chip(text: String, accent: Color) -> PanelContainer:
 	var node := panel(mix(accent, Color.WHITE, 0.82), 999, mix(accent, Color.WHITE, 0.3), 1)
 	node.custom_minimum_size = Vector2(0, 34)
+	node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 5)
 	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -452,12 +487,57 @@ static func chip(text: String, accent: Color) -> PanelContainer:
 			icon_token = str(symbol)
 			label_text = text.substr(icon_token.length()).strip_edges()
 			break
+	if not icon_token.is_empty():
+		var image := ArtLibrary.semantic_picture(icon_token, "ui", Vector2(17, 17))
+		image.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		row.add_child(image)
 	var content := label(label_text, 14, mix(accent, Color.BLACK, 0.25), 700)
 	content.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_theme_constant_override("outline_size", 0)
 	row.add_child(content)
 	node.add_child(row)
 	return node
+
+
+static func fit_label(node: Label, max_width: float, sizes: Array = [22, 20, 18, 16, 14]) -> void:
+	if node == null or not is_instance_valid(node):
+		return
+	var font := font()
+	var text := node.text
+	for size in sizes:
+		if font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, int(size)).x <= max_width:
+			node.add_theme_font_size_override("font_size", int(size))
+			return
+	node.add_theme_font_size_override("font_size", int(sizes[-1]) if not sizes.is_empty() else 14)
+
+
+static func slider_style(accent: Color) -> Dictionary:
+	var track := StyleBoxFlat.new()
+	track.bg_color = mix(accent, Color.WHITE, 0.78)
+	track.corner_radius_top_left = 999
+	track.corner_radius_top_right = 999
+	track.corner_radius_bottom_left = 999
+	track.corner_radius_bottom_right = 999
+	track.content_margin_top = 5
+	track.content_margin_bottom = 5
+	var fill := track.duplicate() as StyleBoxFlat
+	fill.bg_color = accent
+	var grabber := StyleBoxFlat.new()
+	grabber.bg_color = Color.WHITE
+	grabber.border_color = accent
+	grabber.border_width_left = 2
+	grabber.border_width_top = 2
+	grabber.border_width_right = 2
+	grabber.border_width_bottom = 2
+	grabber.corner_radius_top_left = 999
+	grabber.corner_radius_top_right = 999
+	grabber.corner_radius_bottom_left = 999
+	grabber.corner_radius_bottom_right = 999
+	grabber.content_margin_left = 10
+	grabber.content_margin_right = 10
+	grabber.content_margin_top = 10
+	grabber.content_margin_bottom = 10
+	return {"track": track, "fill": fill, "grabber": grabber}
 
 
 static func separator(tint: Color = LINE) -> HSeparator:

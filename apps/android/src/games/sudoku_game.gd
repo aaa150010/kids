@@ -10,6 +10,7 @@ var active_grid: Control
 var game_tools: Control
 var _puzzle_index := 0
 var _result_visible := false
+var _puzzle_cache: Array = []
 
 
 func _ready() -> void:
@@ -34,7 +35,9 @@ func _ready() -> void:
 
 
 func _puzzles() -> Array:
-	return ContentDB.sudoku_puzzles()
+	if _puzzle_cache.is_empty():
+		_puzzle_cache = ContentDB.sudoku_puzzles().duplicate(true)
+	return _puzzle_cache
 
 
 func _create(index: int = -1) -> void:
@@ -46,6 +49,8 @@ func _create(index: int = -1) -> void:
 		"gameId": game_id, "modeId": mode_id, "players": players.duplicate(true),
 		"levelId": level_id, "seed": Time.get_ticks_usec(), "puzzle": definition,
 		"difficulty": str(definition.get("difficulty", "normal")),
+		"hintsMax": int(GameTuning.value(game_id, difficulty, "hints", 3)),
+		"undosMax": int(GameTuning.value(game_id, difficulty, "undos", 3)),
 	})
 	session_id = str(engine.state.sessionId)
 	_save("开始数独")
@@ -58,17 +63,80 @@ func preview_ready() -> void:
 func _show_map() -> void:
 	PlaygroundUI.clear(content_root)
 	content_root.add_child(PlaygroundUI.label("今天挑战哪一格？", 30, accent, 700, true))
-	content_root.add_child(level_map(_choose_level))
+	content_root.add_child(PlaygroundUI.label("32 道固定题，从四宫格到九宫格。完成前一关就能继续。", 18, PlaygroundUI.INK_SOFT, 500, true))
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("h_separation", 12)
+	grid.add_theme_constant_override("v_separation", 12)
+	var puzzles := _puzzles()
+	for index in puzzles.size():
+		var number := index + 1
+		var unlocked := SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id)
+		var puzzle: Dictionary = puzzles[index]
+		var stars := clampi(int(SaveStore.learning(str(players[0].id), game_id, mode_id).stars.get(str(number), 0)), 0, 3)
+		var button := PlaygroundUI.button(
+			"第 %s 关\n%s\n%s" % [number, str(puzzle.get("title", "数独")), "已获 %s / 3 星" % stars if unlocked else "尚未解锁"],
+			accent,
+			_choose_level.bind(number),
+			"soft"
+		)
+		button.custom_minimum_size = Vector2(0, 120)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.disabled = not unlocked
+		grid.add_child(button)
+	scroll.add_child(grid)
+	content_root.add_child(scroll)
 	_save("正在选择数独关卡")
 
 
 func _choose_level(number: int) -> void:
 	if not SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id):
+		show_toast("先完成前一关，再来挑战这一关。")
 		return
 	_create(number - 1)
 	_build_session()
 	_refresh()
 	begin_lesson()
+
+
+func _show_puzzle_picker() -> void:
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(860, 420)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	var grid := GridContainer.new()
+	grid.columns = 4
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("h_separation", 10)
+	grid.add_theme_constant_override("v_separation", 10)
+	var puzzles := _puzzles()
+	for index in puzzles.size():
+		var puzzle: Dictionary = puzzles[index]
+		var button := PlaygroundUI.button(
+			"%s\n%s" % [str(puzzle.get("title", "数独")), "四宫格" if int(puzzle.get("size", 9)) == 4 else "九宫格"],
+			accent,
+			_open_puzzle_index.bind(index),
+			"primary" if index == _puzzle_index else "soft"
+		)
+		button.custom_minimum_size = Vector2(0, 92)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		grid.add_child(button)
+	scroll.add_child(grid)
+	open_modal("选择一道数独", scroll, [
+		{"text": "继续这题", "icon": "back", "kind": "soft", "callback": func(): _close_top_modal()},
+	], "自由数独")
+
+
+func _open_puzzle_index(index: int) -> void:
+	_close_top_modal()
+	_create(index)
+	_build_session()
+	_refresh()
 
 
 func _build_session() -> void:
@@ -78,6 +146,8 @@ func _build_session() -> void:
 	title_row.add_theme_constant_override("separation", 10)
 	title_row.add_child(PlaygroundUI.chip(engine.puzzle().get("title", "数独"), accent))
 	title_row.add_child(PlaygroundUI.chip("已填 %s 格" % _filled_count(), accent))
+	if mode_id != "adventure":
+		title_row.add_child(PlaygroundUI.button("选题", accent, _show_puzzle_picker, "soft"))
 	content_root.add_child(title_row)
 	var main := HBoxContainer.new()
 	main.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -189,6 +259,10 @@ func _refresh() -> void:
 			status.text = "这一格现在填的是 %s。" % digit
 	if int(engine.state.get("mistakes", 0)) > 0:
 		status.text += "\n本局已发现 %s 次重复。" % int(engine.state.mistakes)
+	status.text += "\n提示 %s / %s · 撤回 %s / %s" % [
+		int(engine.state.get("hints", 0)), int(engine.state.get("hintsMax", 3)),
+		int(engine.state.get("undos", 0)), int(engine.state.get("undosMax", 3)),
+	]
 
 
 func _cell(position: int) -> void:
@@ -241,6 +315,9 @@ func _hint() -> void:
 func _explain_hint() -> void:
 	if paused:
 		return
+	if int(engine.state.get("hints", 0)) >= int(engine.state.get("hintsMax", 3)):
+		show_toast("这一档难度的提示次数已经用完。")
+		return
 	var result: Dictionary = engine.hint_analysis()
 	if not bool(result.ok):
 		show_toast(str(result.message))
@@ -282,6 +359,9 @@ func _fill_hint() -> void:
 
 
 func _undo() -> void:
+	if int(engine.state.get("undos", 0)) >= int(engine.state.get("undosMax", 3)):
+		show_toast("这一档难度的撤回次数已经用完。")
+		return
 	if paused or not engine.undo_last():
 		show_toast("现在没有可以撤回的填写")
 		return
@@ -346,7 +426,11 @@ func _show_result() -> void:
 	var state: Dictionary = engine.state
 	if not bool(state.get("reported", false)):
 		state.reported = true
-		var stars := 3 if int(state.hints) == 0 else 2 if int(state.hints) <= 1 else 1
+		var stars := 1
+		if int(state.get("hints", 0)) == 0 and int(state.get("mistakes", 0)) == 0:
+			stars = 3
+		elif int(state.get("hints", 0)) <= 1:
+			stars = 2
 		SaveStore.complete_level(str(players[0].id), game_id, level_id, stars, mode_id)
 		SaveStore.record_outcome(str(players[0].id), game_id, "win", stars, 1, 1, {"logic":{"correct":1,"answered":1}}, str(state.get("sessionId", "sudoku")))
 		_save("数独完成", false)

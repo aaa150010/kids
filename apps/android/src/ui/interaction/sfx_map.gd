@@ -30,7 +30,12 @@ const FALLBACK := "tap"
 
 
 static func play(event: StringName) -> void:
-	AudioFX.play(str(MAP.get(event, FALLBACK)))
+	var tree: SceneTree = Engine.get_main_loop() as SceneTree
+	if tree == null:
+		return
+	var audio := tree.root.get_node_or_null("AudioFX")
+	if audio != null:
+		audio.call("play", str(MAP.get(event, FALLBACK)))
 
 
 static func sound_name(event: StringName) -> String:

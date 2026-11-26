@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">
+  <defs>
+    <linearGradient id="shop-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#8f8a3b"/>
+      <stop offset="1" stop-color="#5d6327"/>
+    </linearGradient>
+    <linearGradient id="shop-paper" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fff9e8"/>
+      <stop offset="1" stop-color="#f1e3b8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="576" rx="42" fill="url(#shop-bg)"/>
+  <path d="M90 176h844v270c0 22-18 40-40 40H130c-22 0-40-18-40-40z" fill="url(#shop-paper)" stroke="#f1d26a" stroke-width="10"/>
+  <path d="M90 176h844v-32c0-22-18-40-40-40H130c-22 0-40 18-40 40z" fill="#5b4b32"/>
+  <path d="M90 150h844" stroke="#f4cc5c" stroke-width="12"/>
+  <path d="M120 180h196l-30 50H120zM304 180h196l-30 50H304zM488 180h196l-30 50H488zM672 180h196l-30 50H672z" fill="#c25b42"/>
+  <path d="M154 270h150v116H154z" fill="#c7d99e" stroke="#7b8a55" stroke-width="5"/>
+  <path d="M346 270h150v116H346z" fill="#f3c75e" stroke="#b08b3b" stroke-width="5"/>
+  <path d="M538 270h150v116H538z" fill="#9bb8ca" stroke="#66899b" stroke-width="5"/>
+  <circle cx="230" cy="328" r="39" fill="#d45d45"/>
+  <path d="M230 289c4-24 16-33 30-38" fill="none" stroke="#47753d" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="421" cy="328" r="39" fill="#e9a944"/>
+  <path d="M421 289c-12-16-28-22-42-21" fill="none" stroke="#5f8c45" stroke-width="8" stroke-linecap="round"/>
+  <path d="M600 304l30-24 42 42 42-42 30 24-24 32 24 32-30 24-42-42-42 42-30-24 24-32z" fill="#fff3bd" stroke="#bc9447" stroke-width="5"/>
+  <circle cx="770" cy="300" r="45" fill="#f4cb58" stroke="#fff1a8" stroke-width="7"/>
+  <circle cx="770" cy="300" r="31" fill="#fff8d8"/>
+  <text x="770" y="313" text-anchor="middle" font-family="Noto Sans CJK SC, sans-serif" font-size="44" font-weight="700" fill="#7c7a2d">￥</text>
+  <path d="M190 432h642" stroke="#c9a84e" stroke-width="10" stroke-linecap="round"/>
+  <circle cx="204" cy="480" r="20" fill="#f4cb58" stroke="#8b7134" stroke-width="4"/>
+  <circle cx="250" cy="480" r="20" fill="#e6a84d" stroke="#8b7134" stroke-width="4"/>
+  <circle cx="296" cy="480" r="20" fill="#f4cb58" stroke="#8b7134" stroke-width="4"/>
+  <text x="512" y="548" text-anchor="middle" font-family="Noto Sans CJK SC, sans-serif" font-size="34" font-weight="700" fill="#fff8df">把商品和零钱都算清楚</text>
+</svg>

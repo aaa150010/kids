@@ -82,30 +82,61 @@ var library_box: VBoxContainer
 var route_section := 0
 var library_filter := "all"
 var _draw_sequence := 0
+var _attempt_id := ""
 var poem_scrolls: Dictionary = {}
 var poem_scroll: ScrollContainer = null
-var profile_panel: Control
+var route_scroll: ScrollContainer = null
+var route_buttons: Array[Button] = []
 var poem_line_labels: Array[Control] = []
 # 当前诗卡与待播放的入场动画（"flip" 抽诗翻面 / "pop" 换一首弹入 / "" 直接显示）
 var _card: Control = null
 var _pending_transition := ""
 var _advancing := false
 var _busy := false
+var _search_save_timer: Timer
+var _library_scroll_timer: Timer
+var _poem_scroll_timer: Timer
 
 
 func _ready() -> void:
 	build_shell()
+	_search_save_timer = _make_debounce_timer(0.45, _save_search_debounced)
+	_library_scroll_timer = _make_debounce_timer(0.35, _save_library_scroll_debounced)
+	_poem_scroll_timer = _make_debounce_timer(0.35, _save_poem_scroll_debounced)
 	var player: Dictionary = players[0]
 	var stored := SaveStore.load_state(game_id, [str(player.id)])
 	_restore_snapshot(stored, str(player.id))
 	var saved_font := _integer(SaveStore.settings().get("poetryFontSize", 0))
+	var font_explicit := bool(SaveStore.settings().get("poetryFontSizeExplicit", false)) or saved_font > 0
 	var responsive_font := 38 if get_viewport_rect().size.y >= 1000 else 32
 	var resolved_font := saved_font
-	if saved_font <= 0 or (saved_font == 30 and get_viewport_rect().size.y >= 760):
+	if not font_explicit or saved_font <= 0:
 		resolved_font = responsive_font
 	poem_font_size = clampi(resolved_font, 24, 46)
 	_render()
 	call_deferred("begin_lesson")
+
+
+func _make_debounce_timer(wait: float, on_timeout: Callable) -> Timer:
+	var timer := Timer.new()
+	timer.one_shot = true
+	timer.wait_time = wait
+	add_child(timer)
+	timer.timeout.connect(on_timeout)
+	return timer
+
+
+func _save_search_debounced() -> void:
+	_save("搜索诗词")
+
+
+func _save_library_scroll_debounced() -> void:
+	_save("浏览诗库")
+
+
+func _save_poem_scroll_debounced() -> void:
+	_capture_poem_scroll()
+	_save("保存诗卡位置")
 
 
 func _restore_snapshot(value: Dictionary, profile_id: String) -> bool:
@@ -138,10 +169,13 @@ func _restore_snapshot(value: Dictionary, profile_id: String) -> bool:
 	query = str(value.get("query", "")).left(80)
 	library_scroll_y = maxi(0, _integer(value.get("libraryScrollY", 0)))
 	library_page = maxi(0, _integer(value.get("libraryPage", 0)))
-	route_section = clampi(_integer(value.get("routeSection", 0)), 0, 5)
+	route_section = maxi(0, _integer(value.get("routeSection", 0)))
 	var saved_filter := str(value.get("libraryFilter", "all"))
 	library_filter = saved_filter if saved_filter in ["all", "age", "known", "review"] else "all"
 	_draw_sequence = maxi(0, _integer(value.get("drawSequence", 0)))
+	_attempt_id = str(value.get("attemptId", "")).strip_edges()
+	if _attempt_id.is_empty() and not current_poem.is_empty():
+		_attempt_id = _new_attempt_id()
 	poem_scrolls = {}
 	if value.get("poemScrolls") is Dictionary:
 		for poem_id in value.poemScrolls:
@@ -197,7 +231,6 @@ func _render() -> void:
 	var row := HBoxContainer.new()
 	row.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	row.add_theme_constant_override("separation", 14)
-	profile_panel = null
 	var main_panel := PlaygroundUI.panel(Color(1, 1, 1, 0.76), 28, PlaygroundUI.mix(accent, Color.WHITE, 0.55), 1)
 	main_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	main_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -234,41 +267,6 @@ func _btn(text: String, tint: Color, on_pressed: Callable, kind: String = "prima
 	return node
 
 
-func _profile_panel() -> Control:
-	var player: Dictionary = players[0]
-	var tint := PlaygroundUI.color(str(player.get("color", "#8657a7")))
-	var panel := PlaygroundUI.panel(PlaygroundUI.mix(tint, Color.WHITE, 0.9), 26, PlaygroundUI.mix(tint, Color.WHITE, 0.52), 2)
-	panel.custom_minimum_size.x = 265
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 12)
-	panel.add_child(column)
-	column.add_child(PlaygroundUI.label("今天抽查谁？", 14, PlaygroundUI.INK_SOFT, 700))
-	var player_card := HBoxContainer.new()
-	player_card.add_theme_constant_override("separation", 12)
-	player_card.add_child(ArtLibrary.profile_picture(player,Vector2(68,78)))
-	var info := VBoxContainer.new()
-	info.add_child(PlaygroundUI.label(str(player.name), 24, PlaygroundUI.INK, 700))
-	info.add_child(PlaygroundUI.label("%s 岁 · 家长抽诗，孩子背诵" % int(player.age), 13, PlaygroundUI.INK_SOFT, 500))
-	player_card.add_child(info)
-	column.add_child(player_card)
-	var pool_size := maxi(1, ContentDB.poem_for_age(int(player.age)).size())
-	var learned := _count_pool(known_ids)
-	var reviewing := _count_pool(review_ids)
-	var progress := PlaygroundUI.panel(PlaygroundUI.mix(tint, Color.WHITE, 0.82), 20, PlaygroundUI.mix(tint, Color.WHITE, 0.45), 1)
-	var copy := VBoxContainer.new()
-	copy.add_child(PlaygroundUI.label("适龄背诵进度", 13, PlaygroundUI.INK_SOFT, 700))
-	copy.add_child(PlaygroundUI.label("%s / %s 首" % [learned, pool_size], 30, tint, 700))
-	copy.add_child(PlaygroundUI.label("已会 %s 首 · 待复习 %s 首" % [known_ids.size(), review_ids.size()], 14, PlaygroundUI.INK_SOFT, 500, true))
-	progress.add_child(copy)
-	column.add_child(progress)
-	var note := PlaygroundUI.panel(Color("#fff8de"), 20, Color("#e4cc87"), 1)
-	note.add_child(PlaygroundUI.label("让孩子背对屏幕\n家长看诗句检查，点选结果后原诗仍会保留。", 15, PlaygroundUI.INK_SOFT, 500, true))
-	column.add_child(note)
-	column.add_child(_btn("随机抽背", tint, func(): mode = "draw"; draw_poem(), "soft", "shuffle"))
-	column.add_child(_btn("全库浏览", tint, func(): mode = "library"; _save("浏览诗库"); _render(), "ghost", "story"))
-	return panel
-
-
 func _tabs() -> Control:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation",12)
@@ -276,11 +274,15 @@ func _tabs() -> Control:
 	var context := PlaygroundUI.label("家长看诗，%s背诵" % str(players[0].name),22,accent,700,true)
 	context.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(context)
+	var learned := _count_pool(known_ids)
+	var reviewing := _count_pool(review_ids)
+	row.add_child(PlaygroundUI.chip("已会 %s · 待复习 %s" % [learned, reviewing], accent))
 	row.add_child(_btn("选诗",accent,_show_poem_menu,"soft","story"))
 	return row
 
 
 func _show_poem_menu() -> void:
+	Speech.stop()
 	var choices := VBoxContainer.new()
 	choices.add_theme_constant_override("separation",12)
 	for entry in [["draw","随机抽背","shuffle"],["library","全库浏览","story"],["route","背诵路线","game"]]:
@@ -291,14 +293,14 @@ func _show_poem_menu() -> void:
 
 func _select_poem_mode(target: String) -> void:
 	_close_top_modal()
+	Speech.stop()
 	mode = target
 	_save("切换选诗方式")
 	_render()
 
 
-func _on_immersive_changed(value: bool) -> void:
-	if profile_panel != null and is_instance_valid(profile_panel):
-		profile_panel.visible = not value
+func _on_immersive_changed(_value: bool) -> void:
+	pass
 
 
 func _draw_view() -> Control:
@@ -330,6 +332,10 @@ func _draw_view() -> Control:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	poem_scroll = scroll
+	scroll.get_v_scroll_bar().value_changed.connect(func(_value: float):
+		if is_instance_valid(_poem_scroll_timer):
+			_poem_scroll_timer.start()
+	)
 	poem_line_labels.clear()
 	var front_style := PlaygroundUI.style(Color("#fffaf0"), 22, Color("#d6c29b"), 2)
 	var back_style := PlaygroundUI.style(PlaygroundUI.mix(accent, Color.WHITE, 0.12), 22, PlaygroundUI.mix(accent, Color.WHITE, 0.5), 3)
@@ -372,8 +378,15 @@ func _draw_view() -> Control:
 		var line_block := VBoxContainer.new()
 		line_block.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var pinyin_text := str(pinyin_lines[index]) if index < pinyin_lines.size() else ""
+		var long_prose := str(line).length() > 80
 		var ruby := PoemRubyText.new()
-		ruby.configure(str(line), pinyin_text, poem_font_size, not hide_text, hide_text)
+		ruby.configure(
+			str(line),
+			pinyin_text,
+			maxi(22, poem_font_size - 6) if long_prose else poem_font_size,
+			not long_prose,
+			hide_text
+		)
 		line_block.add_child(ruby)
 		if transition == "flip":
 			line_block.modulate.a = 0.0
@@ -510,6 +523,8 @@ func _library_view() -> Control:
 		query = value
 		library_page = 0
 		library_scroll_y = 0
+		if is_instance_valid(_search_save_timer):
+			_search_save_timer.stop()
 		_save("搜索诗词")
 		_render()
 	)
@@ -517,7 +532,8 @@ func _library_view() -> Control:
 		query = value
 		library_page = 0
 		library_scroll_y = 0
-		_save("输入诗词搜索")
+		if is_instance_valid(_search_save_timer):
+			_search_save_timer.start()
 	)
 	var search_row := HBoxContainer.new()
 	search_row.add_theme_constant_override("separation", 8)
@@ -527,6 +543,8 @@ func _library_view() -> Control:
 		query = search.text
 		library_page = 0
 		library_scroll_y = 0
+		if is_instance_valid(_search_save_timer):
+			_search_save_timer.stop()
 		_save("搜索诗词")
 		_render()
 	, "soft"))
@@ -560,7 +578,11 @@ func _library_view() -> Control:
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	scroll.get_v_scroll_bar().value_changed.connect(func(value: float): library_scroll_y = int(value))
+	scroll.get_v_scroll_bar().value_changed.connect(func(value: float):
+		library_scroll_y = int(value)
+		if is_instance_valid(_library_scroll_timer):
+			_library_scroll_timer.start()
+	)
 	var list := VBoxContainer.new()
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	list.add_theme_constant_override("separation", 6)
@@ -598,6 +620,7 @@ func _library_view() -> Control:
 
 
 func _change_library_page(delta: int) -> void:
+	Speech.stop()
 	library_page = maxi(0, library_page + delta)
 	library_scroll_y = 0
 	_save("浏览诗库分页")
@@ -619,6 +642,7 @@ func _poem_excerpt(poem: Dictionary, needle: String) -> String:
 func draw_poem(transition: String = "flip") -> void:
 	if paused or _busy:
 		return
+	Speech.stop()
 	lesson_action("draw")
 	var player: Dictionary = players[0]
 	var pool: Array = ContentDB.poem_for_age(int(player.age))
@@ -635,6 +659,7 @@ func draw_poem(transition: String = "flip") -> void:
 	var poem: Dictionary = candidates.pick_random()
 	current_poem = poem
 	_draw_sequence += 1
+	_attempt_id = _new_attempt_id()
 	used_ids.append(str(poem.id))
 	evaluation = ""
 	reported_current = false
@@ -648,6 +673,7 @@ func draw_poem(transition: String = "flip") -> void:
 func evaluate_poem(result: String) -> void:
 	if paused or _busy or current_poem.is_empty() or not evaluation.is_empty():
 		return
+	Speech.stop()
 	evaluation = result
 	var poem_id := str(current_poem.id)
 	known_ids = known_ids.filter(func(id): return id != poem_id)
@@ -659,6 +685,8 @@ func evaluate_poem(result: String) -> void:
 	lesson_action("evaluate")
 	if not reported_current:
 		reported_current = true
+		if _attempt_id.is_empty():
+			_attempt_id = _new_attempt_id()
 		SaveStore.record_outcome(
 			str(players[0].id),
 			game_id,
@@ -667,7 +695,7 @@ func evaluate_poem(result: String) -> void:
 			1 if result == "known" else 0,
 			1,
 			{"language": {"correct": 1 if result == "known" else 0, "answered": 1}},
-			"poetry-" + str(current_poem.id) + "-" + str(_draw_sequence)
+			"poetry-" + str(current_poem.id) + "-" + _attempt_id
 		)
 	_save("记录背诵结果")
 	# 先提交讲解页，再播放装饰；暂停、离开和重建都不依赖计时器回调。
@@ -684,8 +712,10 @@ func evaluate_poem(result: String) -> void:
 
 
 func choose_library_poem(poem: Dictionary) -> void:
+	Speech.stop()
 	current_poem = poem
 	_draw_sequence += 1
+	_attempt_id = _new_attempt_id()
 	evaluation = ""
 	reported_current = false
 	mode = "draw"
@@ -702,9 +732,18 @@ func _read_poem() -> void:
 	Speech.speak("%s，%s。%s" % [current_poem.title,current_poem.author,current_poem.fullText])
 
 
+func _new_attempt_id() -> String:
+	return "%s-%s-%s" % [
+		str(Time.get_unix_time_from_system()).replace(".", ""),
+		str(Time.get_ticks_usec()),
+		str(randi()),
+	]
+
+
 func _adjust_poem_font(delta: int) -> void:
 	poem_font_size = clampi(poem_font_size + delta, 24, 46)
 	SaveStore.set_setting("poetryFontSize", poem_font_size)
+	SaveStore.set_setting("poetryFontSizeExplicit", true)
 	_save("调整诗文字号")
 	_render()
 
@@ -751,6 +790,7 @@ func _save(note: String) -> void:
 		"routeSection":route_section,
 		"libraryFilter":library_filter,
 		"drawSequence":_draw_sequence,
+		"attemptId":_attempt_id,
 		"poemScrolls":poem_scrolls,
 	}
 	SaveStore.save_state(game_id, str(players[0].id), data, note, not current_poem.is_empty())
@@ -877,6 +917,8 @@ func _route_view() -> Control:
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	route_scroll = scroll
+	route_buttons.clear()
 	var list := VBoxContainer.new()
 	list.add_theme_constant_override("separation",10)
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -887,12 +929,27 @@ func _route_view() -> Control:
 		var button := _btn("第 %s 组 · 已会 %s / %s 首" % [section+1,learned,group.size()],accent,_open_route_group.bind(section),"soft")
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		button.custom_minimum_size.y = 68
+		button.set_meta("route_section", section)
 		list.add_child(button)
+		route_buttons.append(button)
 	scroll.add_child(list)
+	call_deferred("_restore_route_scroll")
 	return scroll
 
 
+func _restore_route_scroll() -> void:
+	if not is_instance_valid(route_scroll) or route_buttons.is_empty():
+		return
+	var index := clampi(route_section, 0, route_buttons.size() - 1)
+	var button: Button = route_buttons[index]
+	if not is_instance_valid(button):
+		return
+	var top := button.get_global_rect().position.y - route_scroll.get_global_rect().position.y + float(route_scroll.scroll_vertical)
+	route_scroll.scroll_vertical = maxi(0, roundi(top))
+
+
 func _open_route_group(section: int) -> void:
+	Speech.stop()
 	route_section = section
 	var group := ContentDB.poems.slice(section*10,mini(ContentDB.poems.size(),section*10+10))
 	var list := VBoxContainer.new()
@@ -909,6 +966,7 @@ func _confirm_restart() -> void:
 	content.add_child(PlaygroundUI.label("重新抽一首当前小朋友的适龄诗，已会和待复习记录都会保留。", 17, PlaygroundUI.INK_SOFT, 500, true))
 	var redraw := func():
 		_close_top_modal()
+		Speech.stop()
 		toggle_pause(false)
 		_busy = false
 		current_poem = {}

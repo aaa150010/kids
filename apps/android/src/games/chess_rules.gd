@@ -105,7 +105,7 @@ func _start_puzzle(puzzle: Dictionary) -> void:
 			"position": int(entry.get("position", -1)),
 		})
 	state.phase = "playing"
-	state.turn = int(puzzle.get("turn", 0))
+	state.turn = 0
 	state.selected = -1
 	state.winner = -1
 	state.reason = ""
@@ -113,6 +113,11 @@ func _start_puzzle(puzzle: Dictionary) -> void:
 	state.moveCount = 0
 	state.lastMove = {}
 	state.history = []
+	state.hints = 0
+	state.undos = 0
+	state.mistakes = 0
+	state.puzzleBlocked = false
+	state.lastPuzzleReply = ""
 
 
 func create_session(context: Dictionary) -> Dictionary:
@@ -122,6 +127,10 @@ func create_session(context: Dictionary) -> Dictionary:
 		"phase": "playing", "pieces": [], "selected": -1, "turn": 0, "winner": -1,
 		"reason": "", "reported": false, "moveCount": 0, "lastMove": {}, "history": [],
 		"puzzle": context.get("puzzle", {}).duplicate(true),
+		"hints": 0, "undos": 0,
+		"hintsMax": maxi(0, int(context.get("hintsMax", 2))),
+		"undosMax": maxi(0, int(context.get("undosMax", 3))),
+		"mistakes": 0, "puzzleBlocked": false, "lastPuzzleReply": "",
 	}, true)
 	if str(state.modeId) == "puzzle":
 		_start_puzzle(state.puzzle)
@@ -175,7 +184,16 @@ func restore(value: Dictionary) -> bool:
 	if not state.get("lastMove") is Dictionary:
 		state.lastMove = {}
 	state.moveCount = int(state.moveCount)
+	state.hints = maxi(0, int(state.get("hints", 0)))
+	state.undos = maxi(0, int(state.get("undos", 0)))
+	state.hintsMax = maxi(0, int(state.get("hintsMax", 2)))
+	state.undosMax = maxi(0, int(state.get("undosMax", 3)))
+	state.mistakes = maxi(0, int(state.get("mistakes", 0)))
+	state.puzzleBlocked = bool(state.get("puzzleBlocked", false))
+	state.lastPuzzleReply = str(state.get("lastPuzzleReply", ""))
 	puzzle_definition = state.get("puzzle", {})
+	if str(state.get("modeId", "")) == "puzzle":
+		state.turn = 0
 	return true
 
 
@@ -491,10 +509,33 @@ func _legal_targets_in(position: int, board: Array) -> Array:
 
 
 func _has_legal_move(side: int) -> bool:
-	for piece in state.pieces:
-		if int(piece.side) == side and not _legal_targets_in(int(piece.position), state.pieces).is_empty():
+	return _has_legal_move_in(side, state.pieces)
+
+
+func _has_legal_move_in(side: int, board: Array) -> bool:
+	for piece in board:
+		if int(piece.side) == side and not _legal_targets_in(int(piece.position), board).is_empty():
 			return true
 	return false
+
+
+func _puzzle_move_is_goal(from: int, to: int) -> bool:
+	var captured := piece_at(to)
+	if str(captured.get("kind", "")) == "general":
+		return true
+	var moved := _moved_board(from, to, state.pieces)
+	return _in_check(1, moved) and not _has_legal_move_in(1, moved)
+
+
+func puzzle_target_cell() -> int:
+	var line: Array = state.get("puzzle", {}).get("line", [])
+	if line.is_empty() or not line[0] is Dictionary:
+		return -1
+	return int(line[0].get("to", -1))
+
+
+func puzzle_blocked() -> bool:
+	return str(state.get("modeId", "")) == "puzzle" and bool(state.get("puzzleBlocked", false))
 
 
 func _position_snapshot() -> Dictionary:
@@ -574,6 +615,16 @@ func explain_move(origin: int, destination: int) -> Dictionary:
 func handle_input(action: Dictionary) -> Dictionary:
 	if state.phase != "playing":
 		return {"ok": false, "message": "本局已经结束"}
+	if str(action.get("type", "")) == "hint":
+		var puzzle_value: Variant = state.get("puzzle", {})
+		if str(state.get("modeId", "")) != "puzzle" or not puzzle_value is Dictionary or puzzle_value.is_empty():
+			return {"ok": false, "message": "提示只在一步杀练习里使用。"}
+		if int(state.get("hints", 0)) >= int(state.get("hintsMax", 2)):
+			return {"ok": false, "message": "这一档难度的提示次数已经用完。"}
+		state.hints = int(state.get("hints", 0)) + 1
+		var hint := str(state.get("puzzle", {}).get("hint", "找一步能直接吃掉黑将的走法。"))
+		state.lastPuzzleReply = hint
+		return {"ok": true, "message": hint, "hint": hint, "cell": puzzle_target_cell()}
 	if str(action.get("type", "")) == "select":
 		var piece := piece_at(int(action.get("position", -1)))
 		if not _own_side(piece, int(state.turn)):
@@ -590,6 +641,16 @@ func handle_input(action: Dictionary) -> Dictionary:
 	if from < 0 or not (to in legal_targets(from)):
 		var explanation := explain_move(from, to)
 		return {"ok": false, "message": explanation.message, "cells": explanation.cells}
+	if str(state.get("modeId", "")) == "puzzle" and not _puzzle_move_is_goal(from, to):
+		state.mistakes = int(state.get("mistakes", 0)) + 1
+		state.selected = -1
+		state.lastPuzzleReply = "这一步还不是一步杀，再找一条直接将军或吃将的路线。"
+		return {
+			"ok": false,
+			"message": state.lastPuzzleReply,
+			"cells": [to],
+			"puzzleMiss": true,
+		}
 	var moving := piece_at(from)
 	var captured := piece_at(to)
 	var captured_kind := str(captured.get("kind", "")) if not captured.is_empty() else ""
@@ -601,6 +662,14 @@ func handle_input(action: Dictionary) -> Dictionary:
 	state.lastMove = {"from": from, "to": to, "side": int(state.turn), "kind": str(moving.kind), "captured": captured_kind}
 	state.selected = -1
 	state.moveCount = int(state.moveCount) + 1
+	if str(state.get("modeId", "")) == "puzzle":
+		state.turn = 0
+		state.phase = "finished"
+		state.winner = 0
+		state.reason = "一步杀成功！"
+		state.puzzleBlocked = false
+		state.lastPuzzleReply = "找到一步杀了。"
+		return {"ok": true, "solved": true, "captured": captured_kind}
 	if captured_kind == "general":
 		state.phase = "finished"
 		state.winner = int(state.turn)
@@ -617,6 +686,8 @@ func handle_input(action: Dictionary) -> Dictionary:
 func undo_last_move() -> bool:
 	if state.history.is_empty():
 		return false
+	if int(state.get("undos", 0)) >= int(state.get("undosMax", 3)):
+		return false
 	var last: Dictionary = state.history.back()
 	if not last.get("before") is Dictionary:
 		return false
@@ -625,6 +696,11 @@ func undo_last_move() -> bool:
 		return false
 	state.history.pop_back()
 	state.merge(before.duplicate(true), true)
+	state.undos = int(state.get("undos", 0)) + 1
 	state.selected = -1
 	state.reported = false
+	if str(state.get("modeId", "")) == "puzzle":
+		state.turn = 0
+		state.puzzleBlocked = false
+		state.lastPuzzleReply = ""
 	return true

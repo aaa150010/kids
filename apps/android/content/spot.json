@@ -1,0 +1,581 @@
+{
+  "version": 1,
+  "scenes": [
+  {
+    "id": "spot-forest-picnic",
+    "title": "森林野餐",
+    "theme": "forest",
+    "band": "easy",
+    "minAge": 4,
+    "objects": [
+      {"id": "sun", "kind": "sun", "x": 0.82, "y": 0.16, "size": 0.1, "color": "#f2c84d"},
+      {"id": "cloud", "kind": "cloud", "x": 0.26, "y": 0.18, "size": 0.1, "color": "#fffdf2", "right": {"size": 0.13}},
+      {"id": "tree", "kind": "tree", "x": 0.18, "y": 0.58, "size": 0.18, "color": "#5b9b58"},
+      {"id": "bush", "kind": "bush", "x": 0.78, "y": 0.68, "size": 0.13, "color": "#7dbd68", "right": {"color": "#5b9b58"}},
+      {"id": "flower", "kind": "flower", "x": 0.38, "y": 0.73, "size": 0.1, "color": "#e87d7c"},
+      {"id": "basket", "kind": "bucket", "x": 0.56, "y": 0.7, "size": 0.12, "color": "#d7a04b", "right": {"color": "#b9763d"}},
+      {"id": "apple", "kind": "apple", "x": 0.59, "y": 0.61, "size": 0.09, "color": "#df5d50", "right": {"color": "#83b94f"}},
+      {"id": "butterfly", "kind": "butterfly", "x": 0.68, "y": 0.34, "size": 0.08, "color": "#db8ac5", "right": {"visible": false}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "cloud", "x": 0.26, "y": 0.18, "radius": 0.08},
+      {"id": "d2", "objectId": "bush", "x": 0.78, "y": 0.68, "radius": 0.08},
+      {"id": "d3", "objectId": "basket", "x": 0.56, "y": 0.7, "radius": 0.08},
+      {"id": "d4", "objectId": "apple", "x": 0.59, "y": 0.61, "radius": 0.08},
+      {"id": "d5", "objectId": "butterfly", "x": 0.68, "y": 0.34, "radius": 0.08}
+    ]
+  },
+  {
+    "id": "spot-forest-treehouse",
+    "title": "树屋清晨",
+    "theme": "forest",
+    "band": "easy",
+    "minAge": 5,
+    "objects": [
+      {"id": "sun", "kind": "sun", "x": 0.18, "y": 0.17, "size": 0.1, "color": "#f4c84f", "right": {"color": "#f1a940"}},
+      {"id": "tree", "kind": "tree", "x": 0.23, "y": 0.58, "size": 0.2, "color": "#568f51"},
+      {"id": "house", "kind": "house", "x": 0.4, "y": 0.5, "size": 0.16, "color": "#d9a65b", "right": {"size": 0.18}},
+      {"id": "bird", "kind": "bird", "x": 0.76, "y": 0.28, "size": 0.1, "color": "#5d8fc8"},
+      {"id": "cloud", "kind": "cloud", "x": 0.71, "y": 0.12, "size": 0.1, "color": "#fffdf2", "right": {"visible": false}},
+      {"id": "flower", "kind": "flower", "x": 0.82, "y": 0.72, "size": 0.08, "color": "#e889a0", "right": {"color": "#8a6fc3"}},
+      {"id": "mushroom", "kind": "mushroom", "x": 0.15, "y": 0.8, "size": 0.09, "color": "#db655b"},
+      {"id": "rock", "kind": "rock", "x": 0.63, "y": 0.82, "size": 0.1, "color": "#9d9b94", "right": {"flip": true}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "sun", "x": 0.18, "y": 0.17, "radius": 0.08},
+      {"id": "d2", "objectId": "house", "x": 0.4, "y": 0.5, "radius": 0.09},
+      {"id": "d3", "objectId": "cloud", "x": 0.71, "y": 0.12, "radius": 0.08},
+      {"id": "d4", "objectId": "flower", "x": 0.82, "y": 0.72, "radius": 0.08},
+      {"id": "d5", "objectId": "rock", "x": 0.63, "y": 0.82, "radius": 0.08}
+    ]
+  },
+  {
+    "id": "spot-forest-firefly",
+    "title": "萤火虫小路",
+    "theme": "forest",
+    "band": "normal",
+    "minAge": 6,
+    "objects": [
+      {"id": "moon", "kind": "moon", "x": 0.8, "y": 0.16, "size": 0.12, "color": "#f3d786"},
+      {"id": "tree", "kind": "tree", "x": 0.16, "y": 0.58, "size": 0.19, "color": "#4f8658"},
+      {"id": "bush", "kind": "bush", "x": 0.78, "y": 0.7, "size": 0.12, "color": "#6eaa62", "right": {"color": "#548e57"}},
+      {"id": "firefly", "kind": "star", "x": 0.38, "y": 0.32, "size": 0.06, "color": "#f3d34f"},
+      {"id": "firefly2", "kind": "star", "x": 0.56, "y": 0.52, "size": 0.06, "color": "#f3d34f", "right": {"visible": false}},
+      {"id": "rock", "kind": "rock", "x": 0.62, "y": 0.82, "size": 0.11, "color": "#9a9990", "right": {"size": 0.14}},
+      {"id": "flower", "kind": "flower", "x": 0.27, "y": 0.79, "size": 0.08, "color": "#df8ab1", "right": {"color": "#8b78c4"}},
+      {"id": "owl", "kind": "bird", "x": 0.88, "y": 0.38, "size": 0.08, "color": "#b38a64", "right": {"kind": "cat"}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "bush", "x": 0.78, "y": 0.7, "radius": 0.08},
+      {"id": "d2", "objectId": "firefly2", "x": 0.56, "y": 0.52, "radius": 0.07},
+      {"id": "d3", "objectId": "rock", "x": 0.62, "y": 0.82, "radius": 0.08},
+      {"id": "d4", "objectId": "flower", "x": 0.27, "y": 0.79, "radius": 0.07},
+      {"id": "d5", "objectId": "owl", "x": 0.88, "y": 0.38, "radius": 0.08}
+    ]
+  },
+  {
+    "id": "spot-beach-castle",
+    "title": "海边沙堡",
+    "theme": "beach",
+    "band": "easy",
+    "minAge": 4,
+    "objects": [
+      {"id": "sun", "kind": "sun", "x": 0.83, "y": 0.17, "size": 0.11, "color": "#f4c750"},
+      {"id": "cloud", "kind": "cloud", "x": 0.24, "y": 0.15, "size": 0.11, "color": "#fffdf2", "right": {"color": "#d8effa"}},
+      {"id": "boat", "kind": "boat", "x": 0.73, "y": 0.53, "size": 0.14, "color": "#d46a4d", "right": {"color": "#4e7fbe"}},
+      {"id": "fish", "kind": "fish", "x": 0.46, "y": 0.59, "size": 0.08, "color": "#e7a548"},
+      {"id": "shell", "kind": "shell", "x": 0.26, "y": 0.82, "size": 0.08, "color": "#f0c9b2", "right": {"size": 0.11}},
+      {"id": "crab", "kind": "crab", "x": 0.62, "y": 0.82, "size": 0.08, "color": "#d86450"},
+      {"id": "ball", "kind": "ball", "x": 0.82, "y": 0.82, "size": 0.08, "color": "#e7c548", "right": {"visible": false}},
+      {"id": "bucket", "kind": "bucket", "x": 0.12, "y": 0.78, "size": 0.1, "color": "#e18b50", "right": {"color": "#5d9dc8"}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "cloud", "x": 0.24, "y": 0.15, "radius": 0.08},
+      {"id": "d2", "objectId": "boat", "x": 0.73, "y": 0.53, "radius": 0.09},
+      {"id": "d3", "objectId": "shell", "x": 0.26, "y": 0.82, "radius": 0.07},
+      {"id": "d4", "objectId": "ball", "x": 0.82, "y": 0.82, "radius": 0.07},
+      {"id": "d5", "objectId": "bucket", "x": 0.12, "y": 0.78, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-beach-shell",
+    "title": "贝壳收藏家",
+    "theme": "beach",
+    "band": "easy",
+    "minAge": 5,
+    "objects": [
+      {"id": "sun", "kind": "sun", "x": 0.18, "y": 0.18, "size": 0.1, "color": "#f2c84d", "right": {"size": 0.13}},
+      {"id": "fish", "kind": "fish", "x": 0.56, "y": 0.43, "size": 0.1, "color": "#d98555", "right": {"color": "#d8a53c"}},
+      {"id": "shell", "kind": "shell", "x": 0.24, "y": 0.78, "size": 0.1, "color": "#f3c8a7"},
+      {"id": "shell2", "kind": "shell", "x": 0.38, "y": 0.86, "size": 0.08, "color": "#e6b4b1", "right": {"visible": false}},
+      {"id": "star", "kind": "star", "x": 0.71, "y": 0.79, "size": 0.08, "color": "#e9c24c", "right": {"angle": 25}},
+      {"id": "crab", "kind": "crab", "x": 0.84, "y": 0.61, "size": 0.07, "color": "#cf6452"},
+      {"id": "cloud", "kind": "cloud", "x": 0.69, "y": 0.16, "size": 0.08, "color": "#fffdf2"},
+      {"id": "boot", "kind": "bucket", "x": 0.9, "y": 0.83, "size": 0.09, "color": "#dc9255", "right": {"kind": "rock"}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "sun", "x": 0.18, "y": 0.18, "radius": 0.08},
+      {"id": "d2", "objectId": "fish", "x": 0.56, "y": 0.43, "radius": 0.08},
+      {"id": "d3", "objectId": "shell2", "x": 0.38, "y": 0.86, "radius": 0.07},
+      {"id": "d4", "objectId": "star", "x": 0.71, "y": 0.79, "radius": 0.07},
+      {"id": "d5", "objectId": "boot", "x": 0.9, "y": 0.83, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-beach-sail",
+    "title": "帆船出发",
+    "theme": "beach",
+    "band": "normal",
+    "minAge": 6,
+    "objects": [
+      {"id": "sun", "kind": "sun", "x": 0.8, "y": 0.16, "size": 0.1, "color": "#f4c750"},
+      {"id": "boat", "kind": "boat", "x": 0.53, "y": 0.58, "size": 0.2, "color": "#d65f4e", "right": {"size": 0.17}},
+      {"id": "bird", "kind": "bird", "x": 0.23, "y": 0.24, "size": 0.09, "color": "#5e8db7", "right": {"flip": true}},
+      {"id": "cloud", "kind": "cloud", "x": 0.25, "y": 0.16, "size": 0.1, "color": "#fffdf2"},
+      {"id": "fish", "kind": "fish", "x": 0.76, "y": 0.8, "size": 0.08, "color": "#e8a34b"},
+      {"id": "flag", "kind": "flag", "x": 0.53, "y": 0.4, "size": 0.12, "color": "#e6c34b", "right": {"color": "#65a2cf"}},
+      {"id": "rock", "kind": "rock", "x": 0.12, "y": 0.84, "size": 0.09, "color": "#9a998f", "right": {"size": 0.12}},
+      {"id": "shell", "kind": "shell", "x": 0.9, "y": 0.85, "size": 0.07, "color": "#e9bda5", "right": {"color": "#d7a5d8"}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "boat", "x": 0.53, "y": 0.58, "radius": 0.1},
+      {"id": "d2", "objectId": "bird", "x": 0.23, "y": 0.24, "radius": 0.08},
+      {"id": "d3", "objectId": "flag", "x": 0.53, "y": 0.4, "radius": 0.08},
+      {"id": "d4", "objectId": "rock", "x": 0.12, "y": 0.84, "radius": 0.07},
+      {"id": "d5", "objectId": "shell", "x": 0.9, "y": 0.85, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-space-rocket",
+    "title": "火箭发射台",
+    "theme": "space",
+    "band": "normal",
+    "minAge": 6,
+    "objects": [
+      {"id": "planet", "kind": "planet", "x": 0.82, "y": 0.2, "size": 0.13, "color": "#da8c66", "right": {"color": "#7e9cd8"}},
+      {"id": "rocket", "kind": "rocket", "x": 0.5, "y": 0.53, "size": 0.22, "color": "#e4e1dc"},
+      {"id": "star", "kind": "star", "x": 0.17, "y": 0.25, "size": 0.08, "color": "#f4d75d"},
+      {"id": "star2", "kind": "star", "x": 0.73, "y": 0.72, "size": 0.07, "color": "#f4d75d", "right": {"visible": false}},
+      {"id": "robot", "kind": "robot", "x": 0.19, "y": 0.76, "size": 0.12, "color": "#b7c1cc", "right": {"color": "#e2b36f"}},
+      {"id": "moon", "kind": "moon", "x": 0.87, "y": 0.72, "size": 0.12, "color": "#dcd3a2"},
+      {"id": "flag", "kind": "flag", "x": 0.5, "y": 0.24, "size": 0.1, "color": "#e45e52", "right": {"color": "#f2c94c"}},
+      {"id": "rock", "kind": "rock", "x": 0.35, "y": 0.8, "size": 0.1, "color": "#81859b", "right": {"size": 0.13}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "planet", "x": 0.82, "y": 0.2, "radius": 0.09},
+      {"id": "d2", "objectId": "star2", "x": 0.73, "y": 0.72, "radius": 0.07},
+      {"id": "d3", "objectId": "flag", "x": 0.5, "y": 0.24, "radius": 0.08},
+      {"id": "d4", "objectId": "rock", "x": 0.35, "y": 0.8, "radius": 0.08},
+      {"id": "d5", "objectId": "robot", "x": 0.19, "y": 0.76, "radius": 0.08}
+    ]
+  },
+  {
+    "id": "spot-space-moon",
+    "title": "月亮基地",
+    "theme": "space",
+    "band": "normal",
+    "minAge": 7,
+    "objects": [
+      {"id": "moon", "kind": "moon", "x": 0.52, "y": 0.3, "size": 0.24, "color": "#f1df9e", "right": {"size": 0.2}},
+      {"id": "star", "kind": "star", "x": 0.18, "y": 0.2, "size": 0.08, "color": "#f4d75d", "right": {"color": "#8bc6ed"}},
+      {"id": "star2", "kind": "star", "x": 0.82, "y": 0.23, "size": 0.08, "color": "#f4d75d"},
+      {"id": "rocket", "kind": "rocket", "x": 0.19, "y": 0.68, "size": 0.14, "color": "#cfd7df"},
+      {"id": "robot", "kind": "robot", "x": 0.75, "y": 0.72, "size": 0.11, "color": "#b7c1cc", "right": {"color": "#e2b36f"}},
+      {"id": "flag", "kind": "flag", "x": 0.52, "y": 0.12, "size": 0.1, "color": "#d86b55"},
+      {"id": "rock", "kind": "rock", "x": 0.44, "y": 0.8, "size": 0.1, "color": "#81859b", "right": {"size": 0.13}},
+      {"id": "planet", "kind": "planet", "x": 0.9, "y": 0.6, "size": 0.1, "color": "#a785d0", "right": {"visible": false}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "star", "x": 0.18, "y": 0.2, "radius": 0.07},
+      {"id": "d2", "objectId": "moon", "x": 0.52, "y": 0.3, "radius": 0.1},
+      {"id": "d3", "objectId": "robot", "x": 0.75, "y": 0.72, "radius": 0.08},
+      {"id": "d4", "objectId": "planet", "x": 0.9, "y": 0.6, "radius": 0.07},
+      {"id": "d5", "objectId": "rock", "x": 0.44, "y": 0.8, "radius": 0.08}
+    ]
+  },
+  {
+    "id": "spot-space-alien",
+    "title": "外星朋友",
+    "theme": "space",
+    "band": "challenge",
+    "minAge": 8,
+    "objects": [
+      {"id": "planet", "kind": "planet", "x": 0.18, "y": 0.2, "size": 0.15, "color": "#77b8d7"},
+      {"id": "planet2", "kind": "planet", "x": 0.82, "y": 0.28, "size": 0.1, "color": "#d489bd", "right": {"angle": 20}},
+      {"id": "rocket", "kind": "rocket", "x": 0.5, "y": 0.53, "size": 0.2, "color": "#e1dcd0", "right": {"flip": true}},
+      {"id": "robot", "kind": "robot", "x": 0.7, "y": 0.77, "size": 0.12, "color": "#b7c1cc", "right": {"visible": false}},
+      {"id": "star", "kind": "star", "x": 0.39, "y": 0.15, "size": 0.06, "color": "#f4d75d"},
+      {"id": "star2", "kind": "star", "x": 0.64, "y": 0.78, "size": 0.06, "color": "#f4d75d", "right": {"color": "#e58db1"}},
+      {"id": "flag", "kind": "flag", "x": 0.88, "y": 0.78, "size": 0.1, "color": "#d86b55"},
+      {"id": "moon", "kind": "moon", "x": 0.12, "y": 0.8, "size": 0.1, "color": "#dcd3a2", "right": {"size": 0.13}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "planet2", "x": 0.82, "y": 0.28, "radius": 0.07},
+      {"id": "d2", "objectId": "rocket", "x": 0.5, "y": 0.53, "radius": 0.1},
+      {"id": "d3", "objectId": "robot", "x": 0.7, "y": 0.77, "radius": 0.08},
+      {"id": "d4", "objectId": "star2", "x": 0.64, "y": 0.78, "radius": 0.07},
+      {"id": "d5", "objectId": "moon", "x": 0.12, "y": 0.8, "radius": 0.08}
+    ]
+  },
+  {
+    "id": "spot-kitchen-breakfast",
+    "title": "早餐时间",
+    "theme": "kitchen",
+    "band": "easy",
+    "minAge": 4,
+    "objects": [
+      {"id": "sun", "kind": "sun", "x": 0.82, "y": 0.18, "size": 0.1, "color": "#f3c451"},
+      {"id": "cup", "kind": "cup", "x": 0.27, "y": 0.66, "size": 0.11, "color": "#d96c58", "right": {"color": "#5ba2c0"}},
+      {"id": "apple", "kind": "apple", "x": 0.43, "y": 0.72, "size": 0.1, "color": "#de5c50"},
+      {"id": "book", "kind": "book", "x": 0.7, "y": 0.73, "size": 0.13, "color": "#bc8a5d", "right": {"size": 0.16}},
+      {"id": "lamp", "kind": "lamp", "x": 0.14, "y": 0.49, "size": 0.13, "color": "#e2b95d"},
+      {"id": "flower", "kind": "flower", "x": 0.88, "y": 0.77, "size": 0.09, "color": "#db84a9", "right": {"visible": false}},
+      {"id": "cat", "kind": "cat", "x": 0.53, "y": 0.37, "size": 0.1, "color": "#c28c65", "right": {"color": "#987ec5"}},
+      {"id": "bowl", "kind": "cup", "x": 0.62, "y": 0.86, "size": 0.08, "color": "#e8d2a9", "right": {"color": "#d48d54"}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "cup", "x": 0.27, "y": 0.66, "radius": 0.08},
+      {"id": "d2", "objectId": "book", "x": 0.7, "y": 0.73, "radius": 0.08},
+      {"id": "d3", "objectId": "flower", "x": 0.88, "y": 0.77, "radius": 0.07},
+      {"id": "d4", "objectId": "bowl", "x": 0.62, "y": 0.86, "radius": 0.07},
+      {"id": "d5", "objectId": "cat", "x": 0.53, "y": 0.37, "radius": 0.08}
+    ]
+  },
+  {
+    "id": "spot-kitchen-bake",
+    "title": "烘焙小屋",
+    "theme": "kitchen",
+    "band": "normal",
+    "minAge": 6,
+    "objects": [
+      {"id": "bowl", "kind": "cup", "x": 0.35, "y": 0.69, "size": 0.15, "color": "#dba35c", "right": {"color": "#c56c50"}},
+      {"id": "apple", "kind": "apple", "x": 0.18, "y": 0.65, "size": 0.1, "color": "#d95a4f"},
+      {"id": "mushroom", "kind": "mushroom", "x": 0.66, "y": 0.75, "size": 0.1, "color": "#d88161", "right": {"size": 0.13}},
+      {"id": "cup", "kind": "cup", "x": 0.83, "y": 0.58, "size": 0.1, "color": "#8bb2d0", "right": {"visible": false}},
+      {"id": "book", "kind": "book", "x": 0.55, "y": 0.35, "size": 0.14, "color": "#b7865d"},
+      {"id": "lamp", "kind": "lamp", "x": 0.12, "y": 0.35, "size": 0.11, "color": "#e1b456", "right": {"angle": -15}},
+      {"id": "cat", "kind": "cat", "x": 0.82, "y": 0.82, "size": 0.09, "color": "#b98a64"},
+      {"id": "flower", "kind": "flower", "x": 0.72, "y": 0.23, "size": 0.08, "color": "#dd8aa8", "right": {"color": "#8caa64"}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "bowl", "x": 0.35, "y": 0.69, "radius": 0.09},
+      {"id": "d2", "objectId": "mushroom", "x": 0.66, "y": 0.75, "radius": 0.08},
+      {"id": "d3", "objectId": "cup", "x": 0.83, "y": 0.58, "radius": 0.07},
+      {"id": "d4", "objectId": "lamp", "x": 0.12, "y": 0.35, "radius": 0.08},
+      {"id": "d5", "objectId": "flower", "x": 0.72, "y": 0.23, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-kitchen-tea",
+    "title": "下午茶桌",
+    "theme": "kitchen",
+    "band": "normal",
+    "minAge": 7,
+    "objects": [
+      {"id": "cup", "kind": "cup", "x": 0.39, "y": 0.48, "size": 0.13, "color": "#df8b63", "right": {"color": "#7ea9c7"}},
+      {"id": "teapot", "kind": "bucket", "x": 0.62, "y": 0.48, "size": 0.15, "color": "#d7b16a"},
+      {"id": "book", "kind": "book", "x": 0.24, "y": 0.75, "size": 0.13, "color": "#b7875d", "right": {"flip": true}},
+      {"id": "flower", "kind": "flower", "x": 0.82, "y": 0.73, "size": 0.09, "color": "#d98aaa", "right": {"visible": false}},
+      {"id": "cat", "kind": "cat", "x": 0.72, "y": 0.8, "size": 0.09, "color": "#c79969", "right": {"color": "#a786bd"}},
+      {"id": "apple", "kind": "apple", "x": 0.23, "y": 0.61, "size": 0.08, "color": "#dc5e51"},
+      {"id": "lamp", "kind": "lamp", "x": 0.86, "y": 0.31, "size": 0.1, "color": "#e2b65e"},
+      {"id": "cookie", "kind": "star", "x": 0.5, "y": 0.78, "size": 0.07, "color": "#d9aa58", "right": {"angle": 30}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "cup", "x": 0.39, "y": 0.48, "radius": 0.08},
+      {"id": "d2", "objectId": "book", "x": 0.24, "y": 0.75, "radius": 0.08},
+      {"id": "d3", "objectId": "flower", "x": 0.82, "y": 0.73, "radius": 0.07},
+      {"id": "d4", "objectId": "cat", "x": 0.72, "y": 0.8, "radius": 0.07},
+      {"id": "d5", "objectId": "cookie", "x": 0.5, "y": 0.78, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-garden-butterfly",
+    "title": "蝴蝶花园",
+    "theme": "garden",
+    "band": "easy",
+    "minAge": 4,
+    "objects": [
+      {"id": "sun", "kind": "sun", "x": 0.82, "y": 0.18, "size": 0.1, "color": "#f3c750"},
+      {"id": "flower", "kind": "flower", "x": 0.3, "y": 0.73, "size": 0.12, "color": "#df7b9b", "right": {"color": "#a27ac5"}},
+      {"id": "flower2", "kind": "flower", "x": 0.6, "y": 0.78, "size": 0.1, "color": "#e5b84e"},
+      {"id": "butterfly", "kind": "butterfly", "x": 0.45, "y": 0.38, "size": 0.12, "color": "#e18abf", "right": {"size": 0.15}},
+      {"id": "bee", "kind": "star", "x": 0.7, "y": 0.35, "size": 0.06, "color": "#e8c84c", "right": {"visible": false}},
+      {"id": "tree", "kind": "tree", "x": 0.15, "y": 0.55, "size": 0.17, "color": "#5f9e58", "right": {"size": 0.2}},
+      {"id": "rock", "kind": "rock", "x": 0.86, "y": 0.78, "size": 0.09, "color": "#9d9a90", "right": {"flip": true}},
+      {"id": "bird", "kind": "bird", "x": 0.53, "y": 0.18, "size": 0.08, "color": "#5d8ec2"}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "flower", "x": 0.3, "y": 0.73, "radius": 0.08},
+      {"id": "d2", "objectId": "butterfly", "x": 0.45, "y": 0.38, "radius": 0.08},
+      {"id": "d3", "objectId": "bee", "x": 0.7, "y": 0.35, "radius": 0.07},
+      {"id": "d4", "objectId": "rock", "x": 0.86, "y": 0.78, "radius": 0.07},
+      {"id": "d5", "objectId": "tree", "x": 0.15, "y": 0.55, "radius": 0.08}
+    ]
+  },
+  {
+    "id": "spot-garden-bird",
+    "title": "小鸟来访",
+    "theme": "garden",
+    "band": "normal",
+    "minAge": 6,
+    "objects": [
+      {"id": "tree", "kind": "tree", "x": 0.2, "y": 0.55, "size": 0.2, "color": "#5a9b58", "right": {"size": 0.23}},
+      {"id": "bird", "kind": "bird", "x": 0.38, "y": 0.42, "size": 0.12, "color": "#d77763", "right": {"color": "#6c91c4"}},
+      {"id": "bird2", "kind": "bird", "x": 0.74, "y": 0.3, "size": 0.09, "color": "#7f9fc9", "right": {"visible": false}},
+      {"id": "flower", "kind": "flower", "x": 0.82, "y": 0.76, "size": 0.1, "color": "#e19aac"},
+      {"id": "bush", "kind": "bush", "x": 0.57, "y": 0.78, "size": 0.14, "color": "#75ae62"},
+      {"id": "butterfly", "kind": "butterfly", "x": 0.63, "y": 0.38, "size": 0.09, "color": "#d492ca", "right": {"angle": 20}},
+      {"id": "mushroom", "kind": "mushroom", "x": 0.3, "y": 0.82, "size": 0.09, "color": "#d66e5c", "right": {"size": 0.12}},
+      {"id": "cloud", "kind": "cloud", "x": 0.72, "y": 0.14, "size": 0.09, "color": "#fffdf2"}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "tree", "x": 0.2, "y": 0.55, "radius": 0.1},
+      {"id": "d2", "objectId": "bird", "x": 0.38, "y": 0.42, "radius": 0.08},
+      {"id": "d3", "objectId": "bird2", "x": 0.74, "y": 0.3, "radius": 0.07},
+      {"id": "d4", "objectId": "butterfly", "x": 0.63, "y": 0.38, "radius": 0.07},
+      {"id": "d5", "objectId": "mushroom", "x": 0.3, "y": 0.82, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-garden-rain",
+    "title": "雨后花园",
+    "theme": "garden",
+    "band": "challenge",
+    "minAge": 8,
+    "objects": [
+      {"id": "cloud", "kind": "cloud", "x": 0.48, "y": 0.16, "size": 0.16, "color": "#e8f4f7", "right": {"color": "#d4e3ed"}},
+      {"id": "rain", "kind": "rain", "x": 0.48, "y": 0.3, "size": 0.15, "color": "#70bfd2", "right": {"visible": false}},
+      {"id": "flower", "kind": "flower", "x": 0.24, "y": 0.74, "size": 0.12, "color": "#d985a8", "right": {"color": "#9b82cd"}},
+      {"id": "flower2", "kind": "flower", "x": 0.51, "y": 0.79, "size": 0.1, "color": "#e2b957", "right": {"size": 0.13}},
+      {"id": "flower3", "kind": "flower", "x": 0.76, "y": 0.74, "size": 0.11, "color": "#df7b82"},
+      {"id": "butterfly", "kind": "butterfly", "x": 0.65, "y": 0.4, "size": 0.09, "color": "#c487d0", "right": {"angle": 35}},
+      {"id": "puddle", "kind": "cloud", "x": 0.4, "y": 0.88, "size": 0.16, "color": "#9ed7e7", "right": {"size": 0.2}},
+      {"id": "bird", "kind": "bird", "x": 0.12, "y": 0.45, "size": 0.08, "color": "#668dba", "right": {"visible": false}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "rain", "x": 0.48, "y": 0.3, "radius": 0.1},
+      {"id": "d2", "objectId": "flower", "x": 0.24, "y": 0.74, "radius": 0.08},
+      {"id": "d3", "objectId": "flower2", "x": 0.51, "y": 0.79, "radius": 0.08},
+      {"id": "d4", "objectId": "butterfly", "x": 0.65, "y": 0.4, "radius": 0.08},
+      {"id": "d5", "objectId": "bird", "x": 0.12, "y": 0.45, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-classroom-books",
+    "title": "图书角",
+    "theme": "classroom",
+    "band": "easy",
+    "minAge": 5,
+    "objects": [
+      {"id": "book", "kind": "book", "x": 0.36, "y": 0.72, "size": 0.14, "color": "#b9785d", "right": {"color": "#5e92bd"}},
+      {"id": "book2", "kind": "book", "x": 0.53, "y": 0.79, "size": 0.11, "color": "#6ca26d", "right": {"visible": false}},
+      {"id": "lamp", "kind": "lamp", "x": 0.18, "y": 0.53, "size": 0.12, "color": "#e2b45c"},
+      {"id": "cup", "kind": "cup", "x": 0.72, "y": 0.75, "size": 0.1, "color": "#d88a6c", "right": {"size": 0.13}},
+      {"id": "apple", "kind": "apple", "x": 0.85, "y": 0.62, "size": 0.08, "color": "#d85c50"},
+      {"id": "cat", "kind": "cat", "x": 0.63, "y": 0.4, "size": 0.1, "color": "#b98861", "right": {"color": "#8f7dc0"}},
+      {"id": "star", "kind": "star", "x": 0.84, "y": 0.2, "size": 0.07, "color": "#e7c64f"},
+      {"id": "book3", "kind": "book", "x": 0.28, "y": 0.87, "size": 0.09, "color": "#9272bd", "right": {"flip": true}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "book", "x": 0.36, "y": 0.72, "radius": 0.08},
+      {"id": "d2", "objectId": "book2", "x": 0.53, "y": 0.79, "radius": 0.07},
+      {"id": "d3", "objectId": "cup", "x": 0.72, "y": 0.75, "radius": 0.07},
+      {"id": "d4", "objectId": "cat", "x": 0.63, "y": 0.4, "radius": 0.08},
+      {"id": "d5", "objectId": "book3", "x": 0.28, "y": 0.87, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-classroom-art",
+    "title": "美术课",
+    "theme": "classroom",
+    "band": "normal",
+    "minAge": 6,
+    "objects": [
+      {"id": "book", "kind": "book", "x": 0.23, "y": 0.76, "size": 0.13, "color": "#c68b62", "right": {"size": 0.16}},
+      {"id": "cup", "kind": "cup", "x": 0.73, "y": 0.75, "size": 0.1, "color": "#7b9fc9", "right": {"color": "#d58b60"}},
+      {"id": "lamp", "kind": "lamp", "x": 0.86, "y": 0.39, "size": 0.1, "color": "#e4b45a"},
+      {"id": "robot", "kind": "robot", "x": 0.5, "y": 0.48, "size": 0.14, "color": "#aab6c6", "right": {"angle": 15}},
+      {"id": "star", "kind": "star", "x": 0.18, "y": 0.2, "size": 0.08, "color": "#e8c84c", "right": {"visible": false}},
+      {"id": "apple", "kind": "apple", "x": 0.36, "y": 0.62, "size": 0.08, "color": "#dd5b50"},
+      {"id": "ball", "kind": "ball", "x": 0.83, "y": 0.84, "size": 0.09, "color": "#d985b4", "right": {"flip": true}},
+      {"id": "cat", "kind": "cat", "x": 0.62, "y": 0.38, "size": 0.08, "color": "#b98a63", "right": {"kind": "bird"}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "book", "x": 0.23, "y": 0.76, "radius": 0.08},
+      {"id": "d2", "objectId": "cup", "x": 0.73, "y": 0.75, "radius": 0.07},
+      {"id": "d3", "objectId": "robot", "x": 0.5, "y": 0.48, "radius": 0.09},
+      {"id": "d4", "objectId": "star", "x": 0.18, "y": 0.2, "radius": 0.07},
+      {"id": "d5", "objectId": "cat", "x": 0.62, "y": 0.38, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-classroom-weather",
+    "title": "天气播报",
+    "theme": "classroom",
+    "band": "challenge",
+    "minAge": 8,
+    "objects": [
+      {"id": "sun", "kind": "sun", "x": 0.76, "y": 0.2, "size": 0.1, "color": "#f4c84c", "right": {"size": 0.13}},
+      {"id": "cloud", "kind": "cloud", "x": 0.39, "y": 0.22, "size": 0.12, "color": "#eef6f9", "right": {"color": "#d2e5f0"}},
+      {"id": "rain", "kind": "rain", "x": 0.39, "y": 0.36, "size": 0.12, "color": "#73bdd2", "right": {"visible": false}},
+      {"id": "book", "kind": "book", "x": 0.2, "y": 0.75, "size": 0.13, "color": "#b77b5c"},
+      {"id": "lamp", "kind": "lamp", "x": 0.85, "y": 0.73, "size": 0.11, "color": "#dfb45a", "right": {"angle": 20}},
+      {"id": "robot", "kind": "robot", "x": 0.53, "y": 0.72, "size": 0.13, "color": "#a7b5c6", "right": {"visible": false}},
+      {"id": "cup", "kind": "cup", "x": 0.67, "y": 0.84, "size": 0.08, "color": "#d98667", "right": {"color": "#76a4c4"}},
+      {"id": "star", "kind": "star", "x": 0.65, "y": 0.4, "size": 0.06, "color": "#e6c34e", "right": {"angle": -20}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "sun", "x": 0.76, "y": 0.2, "radius": 0.08},
+      {"id": "d2", "objectId": "cloud", "x": 0.39, "y": 0.22, "radius": 0.08},
+      {"id": "d3", "objectId": "rain", "x": 0.39, "y": 0.36, "radius": 0.08},
+      {"id": "d4", "objectId": "robot", "x": 0.53, "y": 0.72, "radius": 0.08},
+      {"id": "d5", "objectId": "cup", "x": 0.67, "y": 0.84, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-farm-animals",
+    "title": "农场朋友",
+    "theme": "farm",
+    "band": "easy",
+    "minAge": 4,
+    "objects": [
+      {"id": "sun", "kind": "sun", "x": 0.82, "y": 0.18, "size": 0.11, "color": "#f3c750"},
+      {"id": "house", "kind": "house", "x": 0.23, "y": 0.58, "size": 0.2, "color": "#d69c5c", "right": {"size": 0.23}},
+      {"id": "tree", "kind": "tree", "x": 0.82, "y": 0.66, "size": 0.16, "color": "#5c9b55"},
+      {"id": "cat", "kind": "cat", "x": 0.5, "y": 0.77, "size": 0.1, "color": "#c18d62", "right": {"color": "#8a7bbe"}},
+      {"id": "bird", "kind": "bird", "x": 0.62, "y": 0.36, "size": 0.08, "color": "#6a94c0", "right": {"visible": false}},
+      {"id": "apple", "kind": "apple", "x": 0.39, "y": 0.71, "size": 0.08, "color": "#dd5f50"},
+      {"id": "bucket", "kind": "bucket", "x": 0.9, "y": 0.83, "size": 0.08, "color": "#d78b51", "right": {"flip": true}},
+      {"id": "flower", "kind": "flower", "x": 0.12, "y": 0.82, "size": 0.08, "color": "#dc8aa9", "right": {"color": "#99b55c"}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "house", "x": 0.23, "y": 0.58, "radius": 0.1},
+      {"id": "d2", "objectId": "cat", "x": 0.5, "y": 0.77, "radius": 0.08},
+      {"id": "d3", "objectId": "bird", "x": 0.62, "y": 0.36, "radius": 0.07},
+      {"id": "d4", "objectId": "bucket", "x": 0.9, "y": 0.83, "radius": 0.07},
+      {"id": "d5", "objectId": "flower", "x": 0.12, "y": 0.82, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-farm-harvest",
+    "title": "丰收果园",
+    "theme": "farm",
+    "band": "normal",
+    "minAge": 6,
+    "objects": [
+      {"id": "tree", "kind": "tree", "x": 0.2, "y": 0.57, "size": 0.2, "color": "#5e9d58", "right": {"size": 0.23}},
+      {"id": "apple", "kind": "apple", "x": 0.18, "y": 0.51, "size": 0.08, "color": "#dc5b4f", "right": {"color": "#85b951"}},
+      {"id": "apple2", "kind": "apple", "x": 0.29, "y": 0.6, "size": 0.07, "color": "#dc5b4f", "right": {"visible": false}},
+      {"id": "bucket", "kind": "bucket", "x": 0.54, "y": 0.78, "size": 0.12, "color": "#d88c50", "right": {"flip": true}},
+      {"id": "bird", "kind": "bird", "x": 0.79, "y": 0.3, "size": 0.09, "color": "#678fba"},
+      {"id": "house", "kind": "house", "x": 0.83, "y": 0.68, "size": 0.16, "color": "#d69c5c"},
+      {"id": "flower", "kind": "flower", "x": 0.7, "y": 0.84, "size": 0.08, "color": "#dd8aaa", "right": {"color": "#8c7bc2"}},
+      {"id": "cloud", "kind": "cloud", "x": 0.47, "y": 0.14, "size": 0.1, "color": "#fffdf2", "right": {"color": "#dbeeea"}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "tree", "x": 0.2, "y": 0.57, "radius": 0.1},
+      {"id": "d2", "objectId": "apple2", "x": 0.29, "y": 0.6, "radius": 0.07},
+      {"id": "d3", "objectId": "bucket", "x": 0.54, "y": 0.78, "radius": 0.08},
+      {"id": "d4", "objectId": "flower", "x": 0.7, "y": 0.84, "radius": 0.07},
+      {"id": "d5", "objectId": "cloud", "x": 0.47, "y": 0.14, "radius": 0.08}
+    ]
+  },
+  {
+    "id": "spot-farm-tractor",
+    "title": "拖拉机来了",
+    "theme": "farm",
+    "band": "normal",
+    "minAge": 7,
+    "objects": [
+      {"id": "sun", "kind": "sun", "x": 0.8, "y": 0.17, "size": 0.1, "color": "#f3c750"},
+      {"id": "tractor", "kind": "tractor", "x": 0.42, "y": 0.6, "size": 0.2, "color": "#d65e4f", "right": {"flip": true}},
+      {"id": "house", "kind": "house", "x": 0.78, "y": 0.58, "size": 0.16, "color": "#d79e5e", "right": {"color": "#b981cb"}},
+      {"id": "tree", "kind": "tree", "x": 0.12, "y": 0.6, "size": 0.16, "color": "#5c9b58"},
+      {"id": "cat", "kind": "cat", "x": 0.3, "y": 0.84, "size": 0.08, "color": "#b98b64", "right": {"visible": false}},
+      {"id": "bird", "kind": "bird", "x": 0.65, "y": 0.34, "size": 0.08, "color": "#658fbc", "right": {"color": "#d68465"}},
+      {"id": "bucket", "kind": "bucket", "x": 0.55, "y": 0.84, "size": 0.08, "color": "#d68a50", "right": {"size": 0.11}},
+      {"id": "star", "kind": "star", "x": 0.88, "y": 0.78, "size": 0.06, "color": "#e7c54f"}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "tractor", "x": 0.42, "y": 0.6, "radius": 0.09},
+      {"id": "d2", "objectId": "house", "x": 0.78, "y": 0.58, "radius": 0.08},
+      {"id": "d3", "objectId": "cat", "x": 0.3, "y": 0.84, "radius": 0.07},
+      {"id": "d4", "objectId": "bird", "x": 0.65, "y": 0.34, "radius": 0.07},
+      {"id": "d5", "objectId": "bucket", "x": 0.55, "y": 0.84, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-castle-flag",
+    "title": "城堡旗帜",
+    "theme": "castle",
+    "band": "normal",
+    "minAge": 6,
+    "objects": [
+      {"id": "castle", "kind": "house", "x": 0.29, "y": 0.57, "size": 0.22, "color": "#b99bc8", "right": {"size": 0.26}},
+      {"id": "flag", "kind": "flag", "x": 0.29, "y": 0.37, "size": 0.12, "color": "#d65d55", "right": {"color": "#5b82c0"}},
+      {"id": "moon", "kind": "moon", "x": 0.82, "y": 0.18, "size": 0.12, "color": "#f0db94"},
+      {"id": "star", "kind": "star", "x": 0.61, "y": 0.2, "size": 0.07, "color": "#f1cd58", "right": {"visible": false}},
+      {"id": "rock", "kind": "rock", "x": 0.76, "y": 0.8, "size": 0.1, "color": "#8f8a98", "right": {"flip": true}},
+      {"id": "flower", "kind": "flower", "x": 0.52, "y": 0.8, "size": 0.08, "color": "#d989b4", "right": {"color": "#88a464"}},
+      {"id": "bird", "kind": "bird", "x": 0.9, "y": 0.4, "size": 0.08, "color": "#6e7fc3", "right": {"angle": 20}},
+      {"id": "cloud", "kind": "cloud", "x": 0.17, "y": 0.16, "size": 0.09, "color": "#f7f1f8", "right": {"color": "#ded0ed"}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "castle", "x": 0.29, "y": 0.57, "radius": 0.1},
+      {"id": "d2", "objectId": "flag", "x": 0.29, "y": 0.37, "radius": 0.08},
+      {"id": "d3", "objectId": "star", "x": 0.61, "y": 0.2, "radius": 0.07},
+      {"id": "d4", "objectId": "rock", "x": 0.76, "y": 0.8, "radius": 0.08},
+      {"id": "d5", "objectId": "bird", "x": 0.9, "y": 0.4, "radius": 0.07}
+    ]
+  },
+  {
+    "id": "spot-castle-treasure",
+    "title": "宝箱房间",
+    "theme": "castle",
+    "band": "challenge",
+    "minAge": 8,
+    "objects": [
+      {"id": "castle", "kind": "house", "x": 0.24, "y": 0.58, "size": 0.18, "color": "#b89bc9", "right": {"color": "#d099bc"}},
+      {"id": "flag", "kind": "flag", "x": 0.8, "y": 0.22, "size": 0.1, "color": "#d85c54", "right": {"visible": false}},
+      {"id": "moon", "kind": "moon", "x": 0.86, "y": 0.17, "size": 0.1, "color": "#f2dd99", "right": {"size": 0.13}},
+      {"id": "book", "kind": "book", "x": 0.49, "y": 0.36, "size": 0.14, "color": "#a87a5c", "right": {"flip": true}},
+      {"id": "cup", "kind": "cup", "x": 0.61, "y": 0.7, "size": 0.1, "color": "#d79067", "right": {"color": "#78a0c1"}},
+      {"id": "robot", "kind": "robot", "x": 0.3, "y": 0.75, "size": 0.11, "color": "#a5b1c4", "right": {"visible": false}},
+      {"id": "rock", "kind": "rock", "x": 0.9, "y": 0.82, "size": 0.09, "color": "#918b9e"},
+      {"id": "star", "kind": "star", "x": 0.42, "y": 0.17, "size": 0.07, "color": "#efca57", "right": {"angle": 30}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "castle", "x": 0.24, "y": 0.58, "radius": 0.09},
+      {"id": "d2", "objectId": "flag", "x": 0.8, "y": 0.22, "radius": 0.07},
+      {"id": "d3", "objectId": "moon", "x": 0.86, "y": 0.17, "radius": 0.08},
+      {"id": "d4", "objectId": "cup", "x": 0.61, "y": 0.7, "radius": 0.07},
+      {"id": "d5", "objectId": "robot", "x": 0.3, "y": 0.75, "radius": 0.08}
+    ]
+  },
+  {
+    "id": "spot-castle-music",
+    "title": "城堡音乐盒",
+    "theme": "castle",
+    "band": "challenge",
+    "minAge": 9,
+    "objects": [
+      {"id": "castle", "kind": "house", "x": 0.7, "y": 0.57, "size": 0.2, "color": "#b99bc9", "right": {"size": 0.24}},
+      {"id": "flag", "kind": "flag", "x": 0.7, "y": 0.34, "size": 0.12, "color": "#d85c54", "right": {"color": "#5b81bf"}},
+      {"id": "star", "kind": "star", "x": 0.2, "y": 0.2, "size": 0.08, "color": "#efc94e", "right": {"visible": false}},
+      {"id": "star2", "kind": "star", "x": 0.86, "y": 0.2, "size": 0.07, "color": "#efc94e", "right": {"color": "#8dbed5"}},
+      {"id": "robot", "kind": "robot", "x": 0.3, "y": 0.7, "size": 0.13, "color": "#a8b3c5", "right": {"angle": 15}},
+      {"id": "flower", "kind": "flower", "x": 0.16, "y": 0.78, "size": 0.09, "color": "#d989b4"},
+      {"id": "rock", "kind": "rock", "x": 0.88, "y": 0.78, "size": 0.1, "color": "#918b9e", "right": {"size": 0.13}},
+      {"id": "cloud", "kind": "cloud", "x": 0.44, "y": 0.15, "size": 0.09, "color": "#f7f1f8", "right": {"color": "#d9cee8"}}
+    ],
+    "differences": [
+      {"id": "d1", "objectId": "castle", "x": 0.7, "y": 0.57, "radius": 0.1},
+      {"id": "d2", "objectId": "flag", "x": 0.7, "y": 0.34, "radius": 0.08},
+      {"id": "d3", "objectId": "star", "x": 0.2, "y": 0.2, "radius": 0.07},
+      {"id": "d4", "objectId": "star2", "x": 0.86, "y": 0.2, "radius": 0.07},
+      {"id": "d5", "objectId": "rock", "x": 0.88, "y": 0.78, "radius": 0.07}
+    ]
+  }
+  ]
+}

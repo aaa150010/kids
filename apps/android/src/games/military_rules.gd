@@ -260,13 +260,19 @@ func _start_classic() -> void:
 
 func _start_puzzle(puzzle: Dictionary) -> void:
 	state.pieces.clear()
+	state.puzzleTargetSide = 1
+	state.targetSteps = maxi(1, int(puzzle.get("targetSteps", 1)))
 	for enemy in puzzle.get("pieces", []):
 		if not enemy is Dictionary:
 			continue
+		var side := int(enemy.get("side", 1))
+		var kind := str(enemy.get("kind", "flag"))
+		if kind == "flag" and side != 0:
+			state.puzzleTargetSide = side
 		state.pieces.append({
 			"id": str(enemy.get("id", "puzzle-%s" % state.pieces.size())),
-			"side": int(enemy.get("side", 1)),
-			"kind": str(enemy.get("kind", "flag")),
+			"side": side,
+			"kind": kind,
 			"position": int(enemy.get("position", 0)),
 		})
 	state.phase = "playing"
@@ -284,17 +290,34 @@ func _start_puzzle(puzzle: Dictionary) -> void:
 	state.winner = -1
 	state.reason = ""
 	state.reported = false
+	state.puzzleBlocked = false
+	state.puzzleMiss = false
+	state.lastPuzzleReply = ""
 
 
 func create_session(context: Dictionary) -> Dictionary:
 	super.create_session(context)
+	var hints_max := maxi(0, int(context.get("hintsMax", 2)))
+	var undos_max := maxi(0, int(context.get("undosMax", 3)))
+	var formations := ContentDB.military_formations()
+	var formation_count := maxi(1, formations.size())
+	var seed_value := int(state.get("seed", 0))
+	var first_formation := ((seed_value % formation_count) + formation_count) % formation_count
+	var second_formation := first_formation
+	if formation_count > 1:
+		var quotient := int(floor(float(seed_value) / 7.0))
+		var offset := 1 + ((quotient % (formation_count - 1)) + (formation_count - 1)) % (formation_count - 1)
+		second_formation = (first_formation + offset) % formation_count
 	state.merge({
 		"militaryVersion": 3, "modeId": str(context.get("modeId", "classic")),
 		"phase": "playing", "pieces": [], "selected": -1, "turn": 0, "winner": -1,
 		"reason": "", "needsHandoff": false, "handoffPlayer": 0,
-		"setupDone": [true, true], "formations": [0, 0], "revealAll": true,
+		"setupDone": [true, true], "formations": [first_formation, second_formation], "revealAll": true,
 		"lastMove": {}, "lastBattle": {}, "moveCount": 0, "noCapturePlies": 0,
 		"history": [], "reported": false, "puzzle": context.get("puzzle", {}).duplicate(true),
+		"hints": 0, "undos": 0, "hintsMax": hints_max, "undosMax": undos_max,
+		"mistakes": 0, "puzzleBlocked": false, "puzzleMiss": false,
+		"puzzleTargetSide": 1, "targetSteps": 1, "lastPuzzleReply": "",
 	}, true)
 	if str(state.modeId) == "puzzle":
 		_start_puzzle(state.puzzle)
@@ -314,9 +337,72 @@ func restore(value: Dictionary) -> bool:
 		return false
 	if not state.get("pieces") is Array or not state.get("history") is Array:
 		return false
+	if not _valid_piece_snapshot(state.pieces) or state.pieces.size() > 50:
+		return false
+	for entry in state.history:
+		if not entry is Dictionary or not entry.get("pieces") is Array or not _valid_piece_snapshot(entry.pieces):
+			return false
+		if not (str(entry.get("phase", "")) in ["playing", "finished"]):
+			return false
+	if not state.get("formations") is Array or state.formations.size() != 2:
+		state.formations = [0, 0]
+	else:
+		var formation_total := ContentDB.military_formations().size()
+		for formation in state.formations:
+			if not _whole_number(formation) or int(formation) < 0:
+				return false
+			if formation_total > 0 and int(formation) >= formation_total:
+				return false
+	if not state.get("setupDone") is Array or state.setupDone.size() != 2:
+		state.setupDone = [true, true]
+	state.turn = clampi(int(state.get("turn", 0)), 0, 1)
+	state.selected = int(state.get("selected", -1))
+	state.phase = str(state.get("phase", "playing"))
+	state.needsHandoff = false
+	state.handoffPlayer = clampi(int(state.get("handoffPlayer", state.turn)), 0, 1)
+	state.moveCount = maxi(0, int(state.get("moveCount", 0)))
+	state.noCapturePlies = maxi(0, int(state.get("noCapturePlies", 0)))
+	state.hints = maxi(0, int(state.get("hints", 0)))
+	state.undos = maxi(0, int(state.get("undos", 0)))
+	state.hintsMax = maxi(0, int(state.get("hintsMax", 2)))
+	state.undosMax = maxi(0, int(state.get("undosMax", 3)))
+	state.mistakes = maxi(0, int(state.get("mistakes", 0)))
+	state.puzzleBlocked = bool(state.get("puzzleBlocked", false))
+	state.puzzleMiss = bool(state.get("puzzleMiss", false))
+	state.lastPuzzleReply = str(state.get("lastPuzzleReply", ""))
+	if not state.get("lastBattle") is Dictionary:
+		state.lastBattle = {}
+	if not state.get("lastMove") is Dictionary:
+		state.lastMove = {}
+	state.militaryVersion = 3
+	if str(state.modeId) == "classic" and str(state.phase) == "setup":
+		_start_classic()
+	else:
+		state.revealAll = true
+	if str(state.modeId) == "puzzle":
+		state.turn = 0
+		var puzzle: Dictionary = state.get("puzzle", {}) if state.get("puzzle", {}) is Dictionary else {}
+		state.targetSteps = maxi(1, int(puzzle.get("targetSteps", state.get("targetSteps", 1))))
+		state.puzzleTargetSide = int(state.get("puzzleTargetSide", 1))
+		if state.puzzleTargetSide not in [0, 1] or state.puzzleTargetSide == 0:
+			state.puzzleTargetSide = 1
+	var selected_position := int(state.get("selected", -1))
+	var selected_piece := piece_at(selected_position)
+	if not selected_piece.is_empty() and int(selected_piece.get("side", -1)) == int(state.turn):
+		state.selected = selected_position
+	else:
+		state.selected = -1
+	return true
+
+
+func _whole_number(value: Variant) -> bool:
+	return (value is int or value is float) and is_finite(float(value)) and is_equal_approx(float(value), float(int(value)))
+
+
+func _valid_piece_snapshot(pieces: Array) -> bool:
 	var seen_positions := {}
 	var seen_ids := {}
-	for piece in state.pieces:
+	for piece in pieces:
 		if not piece is Dictionary:
 			return false
 		var kind := str(piece.get("kind", ""))
@@ -328,34 +414,6 @@ func restore(value: Dictionary) -> bool:
 			return false
 		seen_positions[position] = true
 		seen_ids[identifier] = true
-	if state.pieces.size() > 50:
-		return false
-	if not state.get("formations") is Array or state.formations.size() != 2:
-		state.formations = [0, 0]
-	if not state.get("setupDone") is Array or state.setupDone.size() != 2:
-		state.setupDone = [true, true]
-	state.turn = clampi(int(state.get("turn", 0)), 0, 1)
-	state.selected = int(state.get("selected", -1))
-	state.phase = str(state.get("phase", "playing"))
-	state.needsHandoff = false
-	state.handoffPlayer = clampi(int(state.get("handoffPlayer", state.turn)), 0, 1)
-	state.moveCount = maxi(0, int(state.get("moveCount", 0)))
-	state.noCapturePlies = maxi(0, int(state.get("noCapturePlies", 0)))
-	if not state.get("lastBattle") is Dictionary:
-		state.lastBattle = {}
-	if not state.get("lastMove") is Dictionary:
-		state.lastMove = {}
-	state.militaryVersion = 3
-	if str(state.modeId) == "classic" and str(state.phase) == "setup":
-		_start_classic()
-	else:
-		state.revealAll = true
-	var selected_position := int(state.get("selected", -1))
-	var selected_piece := piece_at(selected_position)
-	if not selected_piece.is_empty() and int(selected_piece.get("side", -1)) == int(state.turn):
-		state.selected = selected_position
-	else:
-		state.selected = -1
 	return true
 
 
@@ -437,10 +495,32 @@ func _snapshot_before() -> Dictionary:
 		"reason": state.reason,
 		"lastMove": state.lastMove.duplicate(true),
 		"lastBattle": state.lastBattle.duplicate(true),
+		"puzzleBlocked": bool(state.get("puzzleBlocked", false)),
+		"puzzleMiss": bool(state.get("puzzleMiss", false)),
+		"lastPuzzleReply": str(state.get("lastPuzzleReply", "")),
 	}
 
 
 func _finish_if_needed() -> void:
+	if str(state.get("modeId", "")) == "puzzle":
+		var target_side := int(state.get("puzzleTargetSide", 1))
+		var target_flag := false
+		for piece in state.pieces:
+			if str(piece.get("kind", "")) == "flag" and int(piece.get("side", -1)) == target_side:
+				target_flag = true
+				break
+		if not target_flag:
+			state.phase = "finished"
+			state.winner = 0
+			state.reason = "夺取军旗，获得胜利"
+			state.needsHandoff = false
+			return
+		var target_steps := maxi(1, int(state.get("targetSteps", 1)))
+		if int(state.moveCount) >= target_steps:
+			state.puzzleBlocked = true
+			state.puzzleMiss = true
+			state.reason = "还没夺旗，撤回再试一次"
+		return
 	var flags := {0: false, 1: false}
 	for piece in state.pieces:
 		if str(piece.kind) == "flag":
@@ -546,11 +626,25 @@ func _execute_move(target: int) -> Dictionary:
 		state.turn = 1 - int(state.turn)
 		state.handoffPlayer = int(state.turn)
 	_finish_if_needed()
-	return {"ok": true, "battle": state.lastBattle.duplicate(true), "winner": int(state.winner), "finished": str(state.phase) == "finished"}
+	if str(state.modeId) == "puzzle" and str(state.phase) == "playing":
+		state.puzzleMiss = true
+		state.lastPuzzleReply = "还没夺旗，撤回再试一次。"
+		if int(state.moveCount) >= int(state.get("targetSteps", 1)):
+			state.puzzleBlocked = true
+	return {
+		"ok": true,
+		"battle": state.lastBattle.duplicate(true),
+		"winner": int(state.winner),
+		"finished": str(state.phase) == "finished",
+		"puzzleMiss": bool(state.get("puzzleMiss", false)),
+		"puzzleBlocked": bool(state.get("puzzleBlocked", false)),
+	}
 
 
 func undo_last_move() -> bool:
 	if state.history.is_empty() or str(state.phase) == "finished":
+		return false
+	if int(state.get("undos", 0)) >= int(state.get("undosMax", 3)):
 		return false
 	var before: Dictionary = state.history.pop_back()
 	state.pieces = before.pieces.duplicate(true)
@@ -561,10 +655,14 @@ func undo_last_move() -> bool:
 	state.reason = str(before.reason)
 	state.lastMove = before.lastMove.duplicate(true)
 	state.lastBattle = before.lastBattle.duplicate(true)
+	state.puzzleBlocked = bool(before.get("puzzleBlocked", false))
+	state.puzzleMiss = bool(before.get("puzzleMiss", false))
+	state.lastPuzzleReply = str(before.get("lastPuzzleReply", ""))
 	state.selected = -1
 	state.needsHandoff = false
 	state.handoffPlayer = int(state.turn)
 	state.moveCount = maxi(0, int(state.moveCount) - 1)
+	state.undos = int(state.get("undos", 0)) + 1
 	return true
 
 
@@ -585,7 +683,19 @@ func handle_input(action: Dictionary) -> Dictionary:
 		state.selected = -1
 		return {"ok": true}
 	if kind == "move":
+		if str(state.get("modeId", "")) == "puzzle" and bool(state.get("puzzleBlocked", false)):
+			return {"ok": false, "message": "这一步还没夺旗，先撤回再试。"}
 		return _execute_move(int(action.get("to", -1)))
+	if kind == "hint":
+		var puzzle_value: Variant = state.get("puzzle", {})
+		if not puzzle_value is Dictionary or puzzle_value.is_empty() or str(state.get("modeId", "")) != "puzzle":
+			return {"ok": false, "message": "提示只在残局练习里使用。"}
+		if int(state.get("hints", 0)) >= int(state.get("hintsMax", 2)):
+			return {"ok": false, "message": "这一档难度的提示次数已经用完。"}
+		state.hints = int(state.get("hints", 0)) + 1
+		var text := str(state.get("puzzle", {}).get("hint", "先找一条能直达军旗的路线。"))
+		state.lastPuzzleReply = text
+		return {"ok": true, "message": text, "hint": text}
 	if kind == "undo":
 		return {"ok": undo_last_move()}
 	return {"ok": false}
@@ -597,3 +707,19 @@ func current_player() -> int:
 
 func side_name(side: int) -> String:
 	return "红方" if side == 0 else "蓝方"
+
+
+func puzzle_target_side() -> int:
+	return int(state.get("puzzleTargetSide", 1))
+
+
+func puzzle_target_position() -> int:
+	var target_side := puzzle_target_side()
+	for piece in state.get("pieces", []):
+		if str(piece.get("kind", "")) == "flag" and int(piece.get("side", -1)) == target_side:
+			return int(piece.get("position", -1))
+	return -1
+
+
+func puzzle_is_blocked() -> bool:
+	return str(state.get("modeId", "")) == "puzzle" and bool(state.get("puzzleBlocked", false))

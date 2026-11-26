@@ -92,6 +92,16 @@ static func build(
 			column.add_child(_pause_tools(tool_actions, accent))
 		if not primary_action.is_empty():
 			column.add_child(_full_action(primary_action, accent, 68, 22))
+	elif buttons.size() > 3:
+		# 超过三项时，除最后的主操作外都进入正文选择区，避免底部出现无规律网格。
+		column.add_child(PlaygroundUI.separator(PlaygroundUI.TOOL_LINE))
+		var choices := VBoxContainer.new()
+		choices.add_theme_constant_override("separation", 10)
+		for action in buttons.slice(0, buttons.size() - 1):
+			choices.add_child(_action_button(action, accent, 56, 19, true))
+		column.add_child(choices)
+		column.add_child(PlaygroundUI.separator(PlaygroundUI.TOOL_LINE))
+		column.add_child(_full_action(buttons[-1], accent, 68, 22))
 	elif not buttons.is_empty():
 		column.add_child(PlaygroundUI.separator(PlaygroundUI.TOOL_LINE))
 		column.add_child(_standard_actions(buttons, accent))
@@ -105,7 +115,9 @@ static func build(
 
 
 static func body_limit(viewport_size: Vector2, opts: Dictionary = {}) -> float:
-	var max_card_height := minf(maxf(320.0, viewport_size.y - 48.0), 900.0)
+	var safe := PlaygroundUI.safe_insets(viewport_size)
+	var safe_height := maxf(320.0, viewport_size.y - float(safe.top) - float(safe.bottom) - 48.0)
+	var max_card_height := minf(safe_height, 900.0)
 	var limit := maxf(180.0, max_card_height - 250.0)
 	if opts.has("max_content_height"):
 		limit = minf(limit, maxf(120.0, float(opts["max_content_height"])))

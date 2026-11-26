@@ -18,6 +18,7 @@ var _play_button: Button
 var _follow_button: Button
 var _time_label: Label
 var _search_timer: Timer
+var _shelf_save_timer: Timer
 var _update_clock := 0.0
 var _programmatic_scroll := false
 var _follow_audio := true
@@ -32,6 +33,7 @@ var _tts_paragraph := 0
 var _tts_wait := 0.0
 var _illustration_state_label: Label
 var _illustration_retry: Button
+var _illustration_row: HBoxContainer
 
 
 func _ready() -> void:
@@ -41,6 +43,11 @@ func _ready() -> void:
 	_search_timer.wait_time = 0.3
 	add_child(_search_timer)
 	_search_timer.timeout.connect(_on_search_settled)
+	_shelf_save_timer = Timer.new()
+	_shelf_save_timer.one_shot = true
+	_shelf_save_timer.wait_time = 0.35
+	add_child(_shelf_save_timer)
+	_shelf_save_timer.timeout.connect(func(): _save("保存书架位置"))
 	var profile_id := str(players[0].id)
 	var learning_data: Dictionary = SaveStore.learning(profile_id, game_id)
 	var shelf: Dictionary = learning_data.get("storyShelf", {}) if learning_data.get("storyShelf") is Dictionary else {}
@@ -62,6 +69,8 @@ func _render() -> void:
 	_programmatic_scroll = false
 	_restoring_reading = false
 	_search_timer.stop()
+	if is_instance_valid(_shelf_save_timer):
+		_shelf_save_timer.stop()
 	_reader_scroll = null
 	_cards_root = null
 	_audio_label = null
@@ -70,6 +79,7 @@ func _render() -> void:
 	_time_label = null
 	_illustration_state_label = null
 	_illustration_retry = null
+	_illustration_row = null
 	_article_text = null
 	_paragraph_ids.clear()
 	_highlighted = -1
@@ -233,7 +243,11 @@ func _render_cards() -> void:
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.get_v_scroll_bar().value_changed.connect(func(value: float): session.state.shelfScroll = maxf(0.0, value))
+	scroll.get_v_scroll_bar().value_changed.connect(func(value: float):
+		session.state.shelfScroll = maxf(0.0, value)
+		if is_instance_valid(_shelf_save_timer):
+			_shelf_save_timer.start()
+	)
 	var grid := GridContainer.new()
 	grid.columns = 3 if get_viewport_rect().size.x >= 1450.0 else 2
 	grid.add_theme_constant_override("h_separation", 12)
@@ -382,7 +396,10 @@ func _render_reader() -> void:
 	page_frame.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_reader_scroll.add_child(page_frame)
 	var paper := PlaygroundUI.panel(PlaygroundUI.PAPER, 28, PlaygroundUI.mix(accent, Color.WHITE, 0.6), 2)
-	paper.custom_minimum_size.x = minf(1280.0, get_viewport_rect().size.x - 80.0)
+	var available_width := content_root.size.x
+	if available_width <= 320.0:
+		available_width = get_viewport_rect().size.x * 0.78
+	paper.custom_minimum_size.x = minf(1280.0, maxf(320.0, available_width - 8.0))
 	page_frame.add_child(paper)
 	var page_margin := MarginContainer.new()
 	page_margin.add_theme_constant_override("margin_left", 38)
@@ -418,24 +435,27 @@ func _render_reader() -> void:
 		not bool(state_before_request.get("ready", false))
 		and prepared_illustrations.size() < int(state_before_request.get("total", 0))
 	)
+	if not bool(illustration_state.get("ready", false)) and not bool(illustration_state.get("loading", false)) and prepared_illustrations.size() < int(illustration_state.get("total", 0)):
+		illustration_state["failed"] = true
 	_article_text.configure_article(
 		story.get("paragraphs", []),
 		prepared_illustrations,
 		bool(session.state.pinyin),
 		int(session.state.fontSize)
 	)
+	_article_text.set_illustration_state(illustration_state)
 	reading_column.add_child(_article_text)
 	if not bool(illustration_state.get("ready", false)):
-		var illustration_row := HBoxContainer.new()
-		illustration_row.add_theme_constant_override("separation", 12)
+		_illustration_row = HBoxContainer.new()
+		_illustration_row.add_theme_constant_override("separation", 12)
 		_illustration_state_label = PlaygroundUI.label(_illustration_status_text(illustration_state), 15, PlaygroundUI.INK_SOFT, 600, true)
 		_illustration_state_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		illustration_row.add_child(_illustration_state_label)
-		_illustration_retry = PlaygroundUI.semantic_icon_button("repeat", "重试插画", accent, func(): StoryImages.retry(_story()), "soft", 16)
+		_illustration_row.add_child(_illustration_state_label)
+		_illustration_retry = PlaygroundUI.semantic_icon_button("repeat", "重试插画", accent, _retry_story_images, "soft", 16)
 		_illustration_retry.visible = not bool(illustration_state.get("loading", false))
 		_illustration_retry.disabled = bool(illustration_state.get("loading", false))
-		illustration_row.add_child(_illustration_retry)
-		reading_column.add_child(illustration_row)
+		_illustration_row.add_child(_illustration_retry)
+		reading_column.add_child(_illustration_row)
 	reading_column.add_child(PlaygroundUI.label(
 		"故事出处：%s\n%s" % [
 			str(story.get("sourceLabel", "经典故事")),
@@ -479,19 +499,64 @@ func _illustration_status_text(state: Dictionary) -> String:
 func _on_story_images_ready(story_id: String) -> void:
 	if str(session.state.storyId) != story_id or not is_inside_tree():
 		return
+	if not is_instance_valid(_article_text) or not is_instance_valid(_reader_scroll):
+		return
 	_capture_reading()
+	_restoring_reading = true
+	var story := _story()
+	var prepared := StoryImages.prepare_story(story)
+	var state := StoryImages.story_state(story)
+	_article_text.configure_article(
+		story.get("paragraphs", []),
+		prepared,
+		bool(session.state.pinyin),
+		int(session.state.fontSize)
+	)
+	_article_text.set_illustration_state(state)
+	_article_text.set_highlighted_paragraph(_paragraph_id_for_index(_tts_paragraph))
+	_refresh_illustration_status(state)
+	await _restore_reading()
 	_save("插画下载完成")
-	_render()
+	if _audio_active:
+		_update_highlight(true)
 
 
 func _on_story_images_failed(story_id: String, message: String) -> void:
 	if str(session.state.storyId) != story_id or not is_inside_tree():
 		return
+	var state := StoryImages.story_state(_story())
+	state["failed"] = true
+	state["message"] = message
+	_refresh_illustration_status(state)
+	if is_instance_valid(_article_text):
+		_article_text.set_illustration_state(state)
+
+
+func _retry_story_images() -> void:
+	var story := _story()
+	if story.is_empty():
+		return
+	StoryImages.retry(story)
+	var state := StoryImages.story_state(story)
+	state["loading"] = true
+	_refresh_illustration_status(state)
+	if is_instance_valid(_article_text):
+		_article_text.set_illustration_state(state)
+
+
+func _refresh_illustration_status(state: Dictionary) -> void:
+	if is_instance_valid(_illustration_row):
+		_illustration_row.visible = not bool(state.get("ready", false))
 	if is_instance_valid(_illustration_state_label):
-		_illustration_state_label.text = "%s · 点重试插画，正文不受影响" % message
+		var text := str(state.get("message", ""))
+		if bool(state.get("failed", false)):
+			text = "%s · 点重试插画，正文和朗读不受影响" % (text if not text.is_empty() else "插画暂时不可用")
+		else:
+			text = _illustration_status_text(state)
+		_illustration_state_label.text = text
 	if is_instance_valid(_illustration_retry):
-		_illustration_retry.visible = true
-		_illustration_retry.disabled = false
+		_illustration_retry.visible = not bool(state.get("loading", false))
+		_illustration_retry.disabled = bool(state.get("loading", false))
 
 
 func _on_immersive_changed(_value: bool) -> void:
