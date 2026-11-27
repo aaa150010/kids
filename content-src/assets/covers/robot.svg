@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">
+  <defs>
+    <linearGradient id="robot-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#4266a8"/>
+      <stop offset="1" stop-color="#263f70"/>
+    </linearGradient>
+    <linearGradient id="robot-paper" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fffdf7"/>
+      <stop offset="1" stop-color="#e4eaf8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="576" rx="42" fill="url(#robot-bg)"/>
+  <circle cx="112" cy="94" r="9" fill="#e7bd56" opacity=".85"/>
+  <circle cx="918" cy="108" r="7" fill="#fff9ed" opacity=".68"/>
+  <circle cx="900" cy="486" r="12" fill="#9cb5e2" opacity=".7"/>
+  <path d="M86 122c0-30 24-54 54-54h584c30 0 54 24 54 54v332H86z" fill="url(#robot-paper)" stroke="#9cb5e2" stroke-width="7"/>
+  <g stroke="#c9d6ee" stroke-width="3">
+    <path d="M154 183h552M154 253h552M154 323h552M154 393h552"/>
+    <path d="M154 183v210M244 183v210M334 183v210M424 183v210M514 183v210M604 183v210"/>
+  </g>
+  <path d="M198 344h92v70h92v-70h92v-70h92v70h92" fill="none" stroke="#e7bd56" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#4266a8">
+    <circle cx="198" cy="344" r="10"/>
+    <circle cx="290" cy="414" r="10"/>
+    <circle cx="382" cy="344" r="10"/>
+    <circle cx="474" cy="274" r="10"/>
+    <circle cx="566" cy="344" r="10"/>
+    <circle cx="658" cy="274" r="10"/>
+  </g>
+  <g transform="translate(210 176)">
+    <circle cx="0" cy="-66" r="9" fill="#e7bd56"/>
+    <path d="M0-57v-16" stroke="#24395f" stroke-width="6" stroke-linecap="round"/>
+    <rect x="-37" y="-43" width="74" height="52" rx="18" fill="#e4eaf8" stroke="#24395f" stroke-width="7"/>
+    <circle cx="-15" cy="-17" r="7" fill="#4266a8"/>
+    <circle cx="15" cy="-17" r="7" fill="#4266a8"/>
+    <path d="M-13 3h26" stroke="#4266a8" stroke-width="5" stroke-linecap="round"/>
+    <rect x="-48" y="9" width="96" height="70" rx="24" fill="#4266a8" stroke="#24395f" stroke-width="7"/>
+    <rect x="-22" y="36" width="44" height="24" rx="9" fill="#fff9ed"/>
+    <circle cx="-23" cy="34" r="5" fill="#e7bd56"/>
+    <circle cx="23" cy="34" r="5" fill="#e7bd56"/>
+    <line x1="-42" y1="28" x2="-63" y2="44" stroke="#24395f" stroke-width="7" stroke-linecap="round"/>
+    <line x1="42" y1="28" x2="63" y2="44" stroke="#24395f" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="-31" cy="84" r="11" fill="#24395f"/>
+    <circle cx="31" cy="84" r="11" fill="#24395f"/>
+  </g>
+  <g transform="translate(704 90)">
+    <rect width="206" height="152" rx="24" fill="#fff9ed" stroke="#9cb5e2" stroke-width="6"/>
+    <path d="M32 40h142M32 76h142M32 112h142" stroke="#d8e0f0" stroke-width="3"/>
+    <g>
+      <rect x="40" y="24" width="40" height="32" rx="10" fill="#4266a8"/>
+      <path d="M60 28v20M53 35l7-7 7 7" fill="none" stroke="#fff9ed" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="88" y="24" width="40" height="32" rx="10" fill="#e4eaf8"/>
+      <path d="M108 39h16M118 31l8 8-8 8" fill="none" stroke="#4266a8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="136" y="24" width="40" height="32" rx="10" fill="#e4eaf8"/>
+      <path d="M156 51v-18M149 41l7 7 7-7" fill="none" stroke="#4266a8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <path d="M42 76h52M42 88h34" stroke="#4266a8" stroke-width="7" stroke-linecap="round"/>
+    <path d="M42 112h118" stroke="#e7bd56" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="170" cy="112" r="7" fill="#4266a8"/>
+  </g>
+  <g transform="translate(718 326)">
+    <path d="M62 0v112" stroke="#6f6257" stroke-width="8" stroke-linecap="round"/>
+    <path d="M64 4l72 24-72 32z" fill="#e7bd56"/>
+    <circle cx="62" cy="118" r="15" fill="#9cb5e2" opacity=".8"/>
+  </g>
+  <text x="512" y="540" text-anchor="middle" font-family="Noto Sans CJK SC, sans-serif" font-size="34" font-weight="700" fill="#fff9ed">路线小机器人 · 排出方向去旅行</text>
+</svg>

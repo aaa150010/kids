@@ -19,6 +19,20 @@ var _pressed_cell := -1
 var _preview_cell := -1
 var _press_seat := 0
 var notice: Dictionary = {}
+var _style_cache: Dictionary = {}
+var _cell_styles: Array = []
+var _metrics_cache: Dictionary = {}
+var _metrics_size := Vector2(-1.0, -1.0)
+var _pulse_redraw_elapsed := 0.0
+var _hint_cache: Dictionary = {}
+var _hint_piece: Dictionary = {}
+var _hint_kind := ""
+var _hint_selected := -2
+var _hint_rules_id := 0
+var _preview_message := ""
+var _preview_selected := -2
+var _preview_cell_cached := -2
+var _preview_rules_id := 0
 
 const BOARD_BG := Color("#5b63b2")
 const BOARD_SURFACE := Color("#fbf3df")
@@ -30,12 +44,14 @@ const TOKEN_PAPER := Color("#f3ead6")
 const TOKEN_INK := Color("#24271f")
 const TOKEN_RED := Color("#b43a33")
 const TOKEN_BLUE := Color("#326d9d")
+const PULSE_INTERVAL := 1.0 / 30.0
 
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(760, 380)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true
+	set_process(false)
 	resized.connect(queue_redraw)
 
 
@@ -49,16 +65,37 @@ func update_board(value: MilitaryRules, side: int, selected_position: int, legal
 	notice = value.state.get("interactionNote", {}).duplicate(true) if value.state.get("interactionNote", {}) is Dictionary else {}
 	if not interactive:
 		_cancel_press()
-	set_process(selected >= 0 or _touch_pressed)
+	_reset_hint_cache()
+	_preview_message = ""
+	_preview_selected = -2
+	_preview_cell_cached = -2
+	set_process(_needs_frames())
 	queue_redraw()
 
 
 func _process(delta: float) -> void:
-	_clock += delta
-	if not interactive or TabletopLayout.input_blocked(self):
+	if not interactive:
 		_cancel_press()
+		set_process(false)
 		return
-	queue_redraw()
+	if TabletopLayout.input_blocked(self):
+		_cancel_press()
+		if selected < 0:
+			set_process(false)
+		return
+	if selected < 0:
+		if not _touch_pressed:
+			set_process(false)
+		return
+	_clock += delta
+	_pulse_redraw_elapsed += delta
+	if _pulse_redraw_elapsed >= PULSE_INTERVAL:
+		_pulse_redraw_elapsed -= PULSE_INTERVAL
+		queue_redraw()
+
+
+func _needs_frames() -> bool:
+	return interactive and (selected >= 0 or _touch_pressed)
 
 
 func _pulse() -> float:
@@ -66,11 +103,15 @@ func _pulse() -> float:
 
 
 func metrics() -> Dictionary:
+	if _metrics_size == size:
+		return _metrics_cache
 	var gap_x := maxf(1.0, (size.x - 24.0) / 13.0)
 	var gap_y := maxf(1.0, (size.y - 24.0) / 5.0)
 	var extent := Vector2(12.0 * gap_x, 4.0 * gap_y)
 	var origin := (size - extent) * 0.5
-	return {"gap_x": gap_x, "gap_y": gap_y, "origin": origin}
+	_metrics_cache = {"gap_x": gap_x, "gap_y": gap_y, "origin": origin}
+	_metrics_size = size
+	return _metrics_cache
 
 
 func audit_bounds() -> Rect2:
@@ -107,20 +148,13 @@ func cell_at(point: Vector2) -> int:
 	return index
 
 
-func _draw() -> void:
-	var layout := metrics()
-	var gap_x := float(layout.gap_x)
-	var gap_y := float(layout.gap_y)
-	var unit := minf(gap_x, gap_y)
-	if gap_x <= 0 or gap_y <= 0:
+func _ensure_cell_styles() -> void:
+	if _cell_styles.size() == MilitaryRules.CELLS:
 		return
-	_draw_board_frame()
-	_draw_roads(unit)
+	_cell_styles.resize(MilitaryRules.CELLS)
 	for index in MilitaryRules.CELLS:
 		if int(index / MilitaryRules.COLS) == MilitaryRules.MIDLINE:
 			continue
-		var center := position_for(index)
-		var cell := Rect2(center - Vector2(gap_x * 0.42, gap_y * 0.42), Vector2(gap_x * 0.84, gap_y * 0.84))
 		var background := BOARD_CELL
 		var border := BOARD_CELL_BORDER
 		if index in MilitaryRules.CAMPS:
@@ -131,7 +165,25 @@ func _draw() -> void:
 			var hq_tint := TOKEN_RED if hq_side == 0 else TOKEN_BLUE
 			background = PlaygroundUI.mix(BOARD_CELL, hq_tint, 0.22)
 			border = Color(hq_tint.r, hq_tint.g, hq_tint.b, 0.50)
-		draw_style_box(PlaygroundUI.style(background, 12, border, 1), cell)
+		_cell_styles[index] = PlaygroundUI.style(background, 12, border, 1)
+
+
+func _draw() -> void:
+	var layout := metrics()
+	var gap_x := float(layout.gap_x)
+	var gap_y := float(layout.gap_y)
+	var unit := minf(gap_x, gap_y)
+	if gap_x <= 0 or gap_y <= 0:
+		return
+	_draw_board_frame()
+	_draw_roads(unit)
+	_ensure_cell_styles()
+	for index in MilitaryRules.CELLS:
+		if int(index / MilitaryRules.COLS) == MilitaryRules.MIDLINE:
+			continue
+		var center := position_for(index)
+		var cell := Rect2(center - Vector2(gap_x * 0.42, gap_y * 0.42), Vector2(gap_x * 0.84, gap_y * 0.84))
+		draw_style_box(_cell_styles[index], cell)
 		if index in MilitaryRules.CAMPS:
 			_draw_place_name("行营", index, center, unit * 0.19, Color("#d5bb7b"))
 		if index in MilitaryRules.HEADQUARTERS:
@@ -147,16 +199,16 @@ func _draw() -> void:
 	_draw_board_feedback(unit)
 	if rules != null and rules.state.get("phase", "") == "finished":
 		var panel := Rect2(size.x * 0.26, size.y * 0.43, size.x * 0.48, size.y * 0.14)
-		draw_style_box(PlaygroundUI.style(Color("#f3ead6"), 22, BOARD_BRASS, 2, 6, Color(0, 0, 0, 0.35)), panel)
+		draw_style_box(_cached_style("finished_panel", Color("#f3ead6"), 22, BOARD_BRASS, 2, 6, Color(0, 0, 0, 0.35)), panel)
 		_text(str(rules.state.get("reason", "本局结束")), panel.get_center(), unit * 0.22, TOKEN_INK)
 
 
 func _draw_board_frame() -> void:
-	draw_style_box(PlaygroundUI.style(BOARD_BG, 30, Color("#414a93"), 2, 8, Color(0, 0, 0, 0.20)), Rect2(Vector2.ZERO, size))
+	draw_style_box(_cached_style("board_outer", BOARD_BG, 30, Color("#414a93"), 2, 8, Color(0, 0, 0, 0.20)), Rect2(Vector2.ZERO, size))
 	var inner := Rect2(Vector2(8, 8), size - Vector2(16, 16))
-	draw_style_box(PlaygroundUI.style(BOARD_SURFACE, 24, BOARD_BRASS_SOFT, 1), inner)
+	draw_style_box(_cached_style("board_surface", BOARD_SURFACE, 24, BOARD_BRASS_SOFT, 1), inner)
 	var field := Rect2(Vector2(14, 14), size - Vector2(28, 28))
-	draw_style_box(PlaygroundUI.style(Color("#f6ead2"), 20, Color(0.52, 0.43, 0.28, 0.22), 1), field)
+	draw_style_box(_cached_style("board_field", Color("#f6ead2"), 20, Color(0.52, 0.43, 0.28, 0.22), 1), field)
 	var midline_x := position_for(MilitaryRules.MIDLINE * MilitaryRules.COLS).x
 	draw_rect(Rect2(midline_x - 4.0, 16.0, 8.0, size.y - 32.0), Color(0.35, 0.38, 0.69, 0.16))
 	draw_line(Vector2(midline_x, 18.0), Vector2(midline_x, size.y - 18.0), BOARD_BRASS_SOFT, 1.0)
@@ -220,7 +272,7 @@ func _draw_piece(piece: Dictionary, gap_x: float, gap_y: float) -> void:
 	var rect := Rect2(-card_size * 0.5, card_size)
 	_draw_token(piece, rect, side, tint)
 	if index == selected:
-		draw_style_box(PlaygroundUI.style(Color(0, 0, 0, 0.0), 15, Color("#e5bf5c"), 4, 3, Color(0, 0, 0, 0.24)), rect.grow(5.0))
+		draw_style_box(_cached_style("selected_token", Color(0, 0, 0, 0.0), 15, Color("#e5bf5c"), 4, 3, Color(0, 0, 0, 0.24)), rect.grow(5.0))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
@@ -228,13 +280,13 @@ func _draw_token(piece: Dictionary, rect: Rect2, side: int, tint: Color) -> void
 	var kind := str(piece.get("kind", ""))
 	var special := kind in ["flag", "mine", "bomb"]
 	var band_h := clampf(minf(rect.size.x, rect.size.y) * 0.22, 12.0, 30.0)
-	draw_style_box(PlaygroundUI.style(Color(0, 0, 0, 0.34), 13, Color.TRANSPARENT, 0, 5, Color(0, 0, 0, 0.20)), Rect2(rect.position + Vector2(2.0, 5.0), rect.size))
-	draw_style_box(PlaygroundUI.style(TOKEN_PAPER, 13, tint, 3), rect)
+	draw_style_box(_cached_style("token_shadow", Color(0, 0, 0, 0.34), 13, Color.TRANSPARENT, 0, 5, Color(0, 0, 0, 0.20)), Rect2(rect.position + Vector2(2.0, 5.0), rect.size))
+	draw_style_box(_token_style("paper", side), rect)
 	var band_rect := Rect2(rect.position, Vector2(rect.size.x, band_h + 8.0))
-	draw_style_box(PlaygroundUI.style(tint, 11, tint, 0), band_rect)
+	draw_style_box(_token_style("band", side), band_rect)
 	_draw_band_pattern(rect, band_h, tint)
 	var paper_rect := Rect2(rect.position + Vector2(3.0, band_h), Vector2(rect.size.x - 6.0, rect.size.y - band_h - 3.0))
-	draw_style_box(PlaygroundUI.style(TOKEN_PAPER, 8, Color(0.70, 0.61, 0.43, 0.58), 1), paper_rect)
+	draw_style_box(_cached_style("token_paper_inner", TOKEN_PAPER, 8, Color(0.70, 0.61, 0.43, 0.58), 1), paper_rect)
 	draw_line(
 		Vector2(rect.position.x + 4.0, paper_rect.position.y),
 		Vector2(rect.end.x - 4.0, paper_rect.position.y),
@@ -255,8 +307,18 @@ func _draw_token(piece: Dictionary, rect: Rect2, side: int, tint: Color) -> void
 		_draw_special_token(kind, rect, main_top, main_h, landscape, tint)
 	else:
 		_draw_rank_token(kind, rank, rect, main_top, main_h, landscape, tint)
-	draw_style_box(PlaygroundUI.style(Color(0, 0, 0, 0.0), 13, Color(tint.r, tint.g, tint.b, 0.78), 2), rect)
-	draw_style_box(PlaygroundUI.style(Color(0, 0, 0, 0.0), 9, Color(0.80, 0.72, 0.55, 0.50), 1), paper_rect)
+	draw_style_box(_token_style("outline", side), rect)
+	draw_style_box(_cached_style("token_paper_outline", Color(0, 0, 0, 0.0), 9, Color(0.80, 0.72, 0.55, 0.50), 1), paper_rect)
+
+
+func _token_style(part: String, side: int) -> StyleBoxFlat:
+	var tint := TOKEN_RED if side == 0 else TOKEN_BLUE
+	match part:
+		"band":
+			return _cached_style("token_band_%d" % side, tint, 11, tint, 0)
+		"outline":
+			return _cached_style("token_outline_%d" % side, Color(0, 0, 0, 0.0), 13, Color(tint.r, tint.g, tint.b, 0.78), 2)
+	return _cached_style("token_paper_%d" % side, TOKEN_PAPER, 13, tint, 3)
 
 
 func _draw_rank_token(kind: String, rank: int, rect: Rect2, main_top: float, main_h: float, landscape: bool, tint: Color) -> void:
@@ -282,7 +344,7 @@ func _draw_special_token(kind: String, rect: Rect2, main_top: float, main_h: flo
 	var stamp_size := clampf(minf(rect.size.x * 0.24, main_h * 0.42), 16.0, 34.0)
 	var stamp_center: Vector2 = Vector2(rect.position.x + rect.size.x * 0.17, main_top + main_h * 0.48) if landscape else Vector2(rect.position.x + rect.size.x * 0.26, main_top + main_h * 0.22)
 	var stamp_rect := Rect2(stamp_center - Vector2.ONE * stamp_size * 0.5, Vector2.ONE * stamp_size)
-	draw_style_box(PlaygroundUI.style(Color(0, 0, 0, 0.0), 3, tint, 2), stamp_rect)
+	draw_style_box(_cached_style("token_stamp_%s" % tint.to_html(), Color(0, 0, 0, 0.0), 3, tint, 2), stamp_rect)
 	_text("特", stamp_center, stamp_size * 0.72, tint)
 	if landscape:
 		_text(name, Vector2(rect.position.x + rect.size.x * 0.51, main_top + main_h * 0.42), clampf(main_h * 0.38, 15.0, 38.0), TOKEN_INK)
@@ -357,7 +419,8 @@ func _draw_emblem(kind: String, center: Vector2, radius: float, tint: Color) -> 
 func _draw_move_hints(gap_x: float, gap_y: float) -> void:
 	if rules == null or selected < 0 or targets.is_empty():
 		return
-	var piece := rules.piece_at(selected)
+	_ensure_hint_cache()
+	var piece := _hint_piece
 	if piece.is_empty():
 		return
 	var unit := minf(gap_x, gap_y)
@@ -366,12 +429,12 @@ func _draw_move_hints(gap_x: float, gap_y: float) -> void:
 	var route := Color(0.82, 0.69, 0.38, 0.42)
 	var selected_radius := maxf(unit * 0.52, gap_y * 0.42)
 	draw_arc(start, selected_radius + unit * 0.035 * pulse, 0, TAU, 44, Color("#e5c268"), 4.0, true)
-	var kind := str(piece.get("kind", ""))
 	for value in targets:
 		var target := int(value)
 		var finish := position_for(target)
-		if kind == "engineer":
-			var path: Array = rules._rail_path(selected, target)
+		var target_state := _target_state(target)
+		if _hint_kind == "engineer":
+			var path: Array = target_state.get("path", [])
 			if path.size() < 2:
 				draw_line(start, finish, route, maxf(2.0, unit * 0.035), true)
 			else:
@@ -379,17 +442,52 @@ func _draw_move_hints(gap_x: float, gap_y: float) -> void:
 					draw_line(position_for(int(path[index])), position_for(int(path[index + 1])), route, maxf(2.0, unit * 0.035), true)
 		else:
 			draw_line(start, finish, route, maxf(2.0, unit * 0.035), true)
-		var captured := not rules.piece_at(target).is_empty()
+		var captured := bool(target_state.get("captured", false))
 		if captured:
 			var radius := maxf(unit * 0.46, gap_y * 0.38) + unit * 0.025 * pulse
 			draw_circle(finish, radius, Color(0.88, 0.28, 0.22, 0.10))
 			draw_arc(finish, radius, 0, TAU, 36, Color("#e04b3f"), maxf(3.0, unit * 0.045), true)
 			draw_circle(finish + Vector2(0, -radius), unit * 0.07, Color("#e04b3f"))
-			_draw_engagement_badge(finish + Vector2(radius * 0.72, radius * 0.72), unit * 0.16, str(rules.engagement_preview(selected, target).get("result", "blocked")))
+			_draw_engagement_badge(finish + Vector2(radius * 0.72, radius * 0.72), unit * 0.16, str(target_state.get("engagement", "blocked")))
 		else:
 			draw_circle(finish, unit * (0.24 + 0.025 * pulse), Color(0.88, 0.28, 0.22, 0.16))
 			draw_circle(finish, unit * (0.115 + 0.01 * pulse), Color("#e04b3f"))
 			draw_circle(finish, unit * 0.04, Color("#fff7df"))
+
+
+func _ensure_hint_cache() -> void:
+	var rules_id := rules.get_instance_id() if rules != null else 0
+	if _hint_selected == selected and _hint_rules_id == rules_id:
+		return
+	_hint_selected = selected
+	_hint_rules_id = rules_id
+	_hint_cache.clear()
+	_hint_piece = rules.piece_at(selected) if rules != null and selected >= 0 else {}
+	_hint_kind = str(_hint_piece.get("kind", ""))
+
+
+func _reset_hint_cache() -> void:
+	_hint_cache.clear()
+	_hint_selected = -2
+	_hint_rules_id = 0
+	_hint_piece = {}
+	_hint_kind = ""
+
+
+func _target_state(target: int) -> Dictionary:
+	_ensure_hint_cache()
+	if _hint_cache.has(target):
+		return _hint_cache[target]
+	var info := {"captured": false, "engagement": "blocked", "path": []}
+	if rules != null:
+		var defender := rules.piece_at(target)
+		info["captured"] = not defender.is_empty()
+		if not defender.is_empty() and not _hint_piece.is_empty():
+			info["engagement"] = rules._resolve_combat(_hint_piece, defender)
+		if _hint_kind == "engineer":
+			info["path"] = rules._rail_path(selected, target)
+	_hint_cache[target] = info
+	return info
 
 
 func _draw_engagement_badge(center: Vector2, radius: float, result: String) -> void:
@@ -488,6 +586,22 @@ func _text_left(value: String, anchor: Vector2, font_size: float, tint: Color) -
 	draw_string(font, anchor + Vector2(0, pixels * 0.35), value, HORIZONTAL_ALIGNMENT_LEFT, -1, pixels, tint)
 
 
+func _cached_style(
+	cache_key: String,
+	background: Color,
+	radius: int = 20,
+	border: Color = Color.TRANSPARENT,
+	border_width: int = 0,
+	shadow_size: int = 0,
+	shadow_color: Color = Color.TRANSPARENT
+) -> StyleBoxFlat:
+	if _style_cache.has(cache_key):
+		return _style_cache[cache_key]
+	var style := PlaygroundUI.style(background, radius, border, border_width, shadow_size, shadow_color)
+	_style_cache[cache_key] = style
+	return style
+
+
 func _gui_input(event: InputEvent) -> void:
 	if not interactive or TabletopLayout.input_blocked(self):
 		_cancel_press()
@@ -531,7 +645,6 @@ func _begin_press(point: Vector2) -> void:
 	_press_seat = current_side
 	_touch_pressed = true
 	TabletopLayout.remember_seat(self, _press_seat)
-	set_process(true)
 	queue_redraw()
 
 
@@ -549,10 +662,13 @@ func _finish_press(point: Vector2) -> void:
 
 
 func _cancel_press() -> void:
+	if _touch_index < 0 and not _touch_pressed and _pressed_cell < 0 and _preview_cell < 0:
+		return
 	_touch_pressed = false
 	_touch_index = -1
 	_pressed_cell = -1
 	_preview_cell = -1
+	set_process(_needs_frames())
 	queue_redraw()
 
 
@@ -565,11 +681,11 @@ func _draw_board_feedback(unit: float) -> void:
 			draw_arc(position_for(index), unit * 0.52, 0, TAU, 36, Color("#c67c20"), 3.0, true)
 	if _preview_cell >= 0:
 		var center := position_for(_preview_cell)
-		draw_arc(center, minf(float(metrics().gap_x), float(metrics().gap_y)) * 0.57, 0, TAU, 40, accent, 4.0, true)
+		var layout := metrics()
+		draw_arc(center, minf(float(layout.gap_x), float(layout.gap_y)) * 0.57, 0, TAU, 40, accent, 4.0, true)
 		var message := ""
 		if selected >= 0:
-			var preview := rules.explain_move(selected, _preview_cell)
-			message = str(preview.get("message", ""))
+			message = _cached_preview_message()
 		else:
 			var piece := rules.piece_at(_preview_cell)
 			message = rules.piece_hint(piece) if not piece.is_empty() else "先选自己的棋子"
@@ -593,6 +709,17 @@ func _draw_board_feedback(unit: float) -> void:
 			[TOKEN_RED, TOKEN_BLUE],
 			str(rules.state.get("phase", "")) == "finished"
 		)
+
+
+func _cached_preview_message() -> String:
+	var rules_id := rules.get_instance_id() if rules != null else 0
+	if _preview_cell_cached == _preview_cell and _preview_selected == selected and _preview_rules_id == rules_id:
+		return _preview_message
+	_preview_cell_cached = _preview_cell
+	_preview_selected = selected
+	_preview_rules_id = rules_id
+	_preview_message = str(rules.explain_move(selected, _preview_cell).get("message", "")) if rules != null else ""
+	return _preview_message
 
 
 func _battle_message(battle: Dictionary) -> String:

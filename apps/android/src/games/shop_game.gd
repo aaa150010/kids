@@ -71,39 +71,26 @@ func _show_map() -> void:
 	heading.add_child(copy)
 	heading.add_child(PlaygroundUI.semantic_icon_button("hint", "怎么玩", accent, show_help, "soft"))
 	content_root.add_child(heading)
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	var grid := GridContainer.new()
-	var viewport_width := get_viewport_rect().size.x
-	grid.columns = 3 if viewport_width <= 1180.0 else 4 if viewport_width < 1500.0 else 5
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
+	var entries: Array = []
 	var learning := SaveStore.learning(str(players[0].id), game_id, mode_id)
+	var active_level := level_id if str(engine.state.get("phase", "")) in ["basket", "pay"] else -1
 	for index in _orders.size():
 		var number := index + 1
 		var order: Dictionary = _orders[index]
 		var unlocked := SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id)
 		var stars := clampi(int(learning.stars.get(str(number), 0)), 0, 3)
-		var button := PlaygroundUI.semantic_icon_button(
-			"play" if unlocked else "lock",
-			"第 %s 单\n%s\n%s" % [
-				number,
-				str(order.get("title", "小小商店")),
-				"已获 %s / 3 星" % stars if unlocked else "继续完成上一单解锁",
-			],
-			accent,
-			_choose_level.bind(number),
-			"soft"
-		)
-		button.custom_minimum_size = Vector2(0, 116)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.disabled = not unlocked
-		grid.add_child(button)
-	scroll.add_child(grid)
-	content_root.add_child(scroll)
+		entries.append({
+			"id": number,
+			"title": str(order.get("title", "小小商店")),
+			"subtitle": str(order.get("band", "")),
+			"locked": not unlocked,
+			"stars": stars,
+			"in_progress": number == active_level,
+		})
+	var browser := GameBrowser.new()
+	browser.configure(entries, {"accent": accent})
+	browser.entry_selected.connect(func(number: Variant): _choose_level(int(number)))
+	content_root.add_child(browser)
 	if not engine.state.is_empty():
 		_save("正在选择商店订单")
 
@@ -111,6 +98,14 @@ func _show_map() -> void:
 func _choose_level(number: int) -> void:
 	if not SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id):
 		show_toast("先完成上一单，再来挑战这一单。")
+		return
+	if str(engine.state.get("phase", "")) in ["basket", "pay"] and number == level_id:
+		_view = "counter"
+		_build_game()
+		_render(false)
+		return
+	if str(engine.state.get("phase", "")) in ["basket", "pay"]:
+		guard_level_switch(number, func(): _start_level(number))
 		return
 	_start_level(number)
 	begin_lesson()
@@ -265,9 +260,10 @@ func _fill_basket_panel() -> void:
 			var spacer := Control.new()
 			spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 			row.add_child(spacer)
-			var remove := PlaygroundUI.button("减一", accent, _remove_item.bind(str(item_id)), "ghost")
-			remove.custom_minimum_size = Vector2(62, 44)
-			row.add_child(remove)
+			if str(engine.state.phase) == "basket":
+				var remove := PlaygroundUI.button("减一", accent, _remove_item.bind(str(item_id)), "ghost")
+				remove.custom_minimum_size = Vector2(62, 44)
+				row.add_child(remove)
 			column.add_child(row)
 	var filler := Control.new()
 	filler.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -445,9 +441,11 @@ func _show_result() -> void:
 		star_row.add_child(star)
 	body.add_child(star_row)
 	var actions: Array = [{"text": "关卡地图", "icon": "back", "kind": "soft", "callback": func(): _close_top_modal(); _show_map()}]
+	actions.append({"text": "再练一次", "icon": "repeat", "kind": "soft", "callback": func(): _close_top_modal(); _start_level(level_id)})
 	if level_id < _orders.size():
 		actions.append({"text": "下一单", "icon": "next", "kind": "primary", "callback": func(): _close_top_modal(); _choose_level(level_id + 1)})
-	actions.append({"text": "再练一次", "icon": "repeat", "kind": "primary" if level_id >= _orders.size() else "soft", "callback": func(): _close_top_modal(); _start_level(level_id)})
+	else:
+		actions[-1].kind = "primary"
 	open_modal("订单完成", body, actions, "钱数算得清清楚楚")
 	SfxMap.play(&"win")
 	FeedbackKit.haptic(12)

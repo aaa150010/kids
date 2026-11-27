@@ -94,6 +94,7 @@ var _pending_transition := ""
 var _advancing := false
 var _busy := false
 var _search_save_timer: Timer
+var _tabs_control: Control
 var _library_scroll_timer: Timer
 var _poem_scroll_timer: Timer
 
@@ -241,7 +242,8 @@ func _render() -> void:
 	main_box = VBoxContainer.new()
 	main_box.add_theme_constant_override("separation", 12)
 	main_panel.add_child(main_box)
-	main_box.add_child(_tabs())
+	_tabs_control = _tabs()
+	main_box.add_child(_tabs_control)
 	if mode == "route":
 		main_box.add_child(_route_view())
 	elif mode == "library":
@@ -299,8 +301,9 @@ func _select_poem_mode(target: String) -> void:
 	_render()
 
 
-func _on_immersive_changed(_value: bool) -> void:
-	pass
+func _on_immersive_changed(value: bool) -> void:
+	if _tabs_control != null and is_instance_valid(_tabs_control):
+		_tabs_control.visible = not value or mode != "draw"
 
 
 func _draw_view() -> Control:
@@ -548,6 +551,15 @@ func _library_view() -> Control:
 		_save("搜索诗词")
 		_render()
 	, "soft"))
+	search_row.add_child(_btn("清空", accent, func():
+		query = ""
+		library_page = 0
+		library_scroll_y = 0
+		if is_instance_valid(_search_save_timer):
+			_search_save_timer.stop()
+		_save("清空诗词搜索")
+		_render()
+	, "ghost", "close"))
 	column.add_child(search_row)
 	var filters := HFlowContainer.new()
 	for entry in [["all","全库"],["age","适龄"],["known","已会"],["review","待复习"]]:
@@ -690,11 +702,11 @@ func evaluate_poem(result: String) -> void:
 		SaveStore.record_outcome(
 			str(players[0].id),
 			game_id,
-			"win" if result == "known" else "loss",
+			"win" if result == "known" else "played",
 			1 if result == "known" else 0,
 			1 if result == "known" else 0,
-			1,
-			{"language": {"correct": 1 if result == "known" else 0, "answered": 1}},
+			1 if result == "known" else 0,
+			{"language": {"correct": 1 if result == "known" else 0, "answered": 1 if result == "known" else 0}},
 			"poetry-" + str(current_poem.id) + "-" + _attempt_id
 		)
 	_save("记录背诵结果")

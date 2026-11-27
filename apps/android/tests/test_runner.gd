@@ -40,8 +40,10 @@ func _run() -> void:
 	for script_path in all_scripts("res://src"):
 		var script: GDScript = load(script_path)
 		check(script != null and script.can_instantiate(), "%s parses and can be instantiated" % script_path)
-	check(content.games.size() == 18, "catalog contains 18 entries including the four new games")
+	check(content.games.size() == 21, "catalog contains 21 entries including the seven new games")
 	check(content.tuning.get("games", {}).size() == content.games.size(), "tuning covers all catalog entries")
+	for content_issue in content.content_issues():
+		check(false, "content validation: %s" % str(content_issue))
 	StoryFixtures.new().run(content, Callable(self, "check"))
 	for icon_path in [
 		"res://assets/branding/app-icon-192.png",
@@ -66,7 +68,7 @@ func _run() -> void:
 	check(content.poems.size() >= 300, "poetry bank is loaded")
 	for game_id in ["math", "pinyin", "patterns", "animals"]:
 		check(content.quizzes.get(game_id, []).size() > 0, "%s questions are loaded" % game_id)
-	check(content.trivia_questions.size() == 100, "trivia bank contains 100 questions")
+	check(content.trivia_questions.size() >= 160, "trivia bank contains at least 160 questions")
 	for game_id in ["jungle", "gomoku", "memory", "math", "pinyin", "patterns", "animals", "workbook"]:
 		check(content.chapters.get(game_id, []).size() > 0, "%s adventure levels are loaded" % game_id)
 	for game_id in ["jungle", "gomoku"]:
@@ -80,18 +82,31 @@ func _run() -> void:
 	check(content.shop_items().size() == 16, "little shop has 16 products")
 	check(content.shop_orders().size() == 24, "little shop has 24 orders")
 	check(content.fruit_types().size() == 12, "fruit slice has 12 original fruit types")
+	check(content.robot_levels().size() == 24, "robot has 24 playable routes")
+	check(content.sentence_stations().size() == 24, "sentence train has 24 stations")
+	check(content.pipe_levels().size() == 36, "pipes has 36 playable gardens")
 	for cover_path in [
 		"res://assets/covers/tangram.svg",
 		"res://assets/covers/spot.svg",
 		"res://assets/covers/shop.svg",
 		"res://assets/covers/fruit_slice.svg",
+		"res://assets/covers/robot.svg",
+		"res://assets/covers/sentence_train.svg",
+		"res://assets/covers/pipes.svg",
 	]:
 		check(FileAccess.file_exists(cover_path), "%s is bundled" % cover_path)
 	check(content.search_games("拼图").has("tangram"), "lobby search finds tangram by Chinese alias")
 	check(content.search_games("水果").has("fruit_slice"), "lobby search finds fruit slice by category alias")
 	check(content.search_games("数学").has("math") and content.search_games("数学").has("workbook"), "lobby search matches multiple math games")
 	check(content.search_games("tangram").has("tangram"), "lobby search accepts English game ids")
+	check(content.search_games("编程").has("robot"), "lobby search finds the robot by learning goal")
+	check(content.search_games("组句").has("sentence_train"), "lobby search finds sentence train by alias")
+	check(content.search_games("水管").has("pipes"), "lobby search finds pipes by alias")
 	check(content.search_games("完全不存在的小游戏").is_empty(), "lobby search returns an empty result for an unknown query")
+	for quiz_game_id in ["math", "pinyin", "patterns", "animals", "trivia"]:
+		for sample_age in [4, 7, 10, 12]:
+			var rounds_needed := int(GameTuning.value(quiz_game_id, GameTuning.from_age(sample_age), "rounds", 10))
+			check(content.questions(quiz_game_id, sample_age).size() >= rounds_needed, "%s has a full age-band pool for age %s" % [quiz_game_id, sample_age])
 
 	var fake_player = {
 		"id": "test-player",
@@ -612,6 +627,72 @@ func _check_new_games(content: Node, player_one: Dictionary, player_two: Diction
 		check(shop_restored.restore(shop.snapshot()), "shop completed snapshot restores")
 		check(str(shop_restored.state.phase) == "finished" and int(shop_restored.result().stars) == 3, "restored shop keeps its paid order result")
 
+	var robot_level: Dictionary = content.robot_levels()[0]
+	var robot = RobotRules.new()
+	var robot_state: Dictionary = robot.create_session({
+		"gameId": "robot",
+		"modeId": "adventure",
+		"players": [player_one],
+		"levelId": 1,
+		"level": robot_level,
+		"difficulty": "normal",
+		"seed": 906,
+	})
+	for command in robot_level.solution:
+		check(bool(robot.handle_input({"type": "add_command", "command": str(command)}).get("ok", false)), "robot accepts a direction command")
+	var robot_steps := 0
+	while str(robot_state.phase) != "result" and robot_steps < 20:
+		robot.handle_input({"type": "step"})
+		robot_steps += 1
+	check(str(robot_state.phase) == "result" and int(robot_state.stars) == 3, "robot solution reaches the flag with three stars")
+	var robot_restored = RobotRules.new()
+	check(robot_restored.restore(robot.snapshot()), "robot completed snapshot restores")
+	check(str(robot_restored.state.phase) == "result" and int(robot_restored.result().stars) == 3, "restored robot keeps the completed route result")
+
+	var sentence_station: Dictionary = content.sentence_stations()[0]
+	var sentences = SentenceRules.new()
+	var sentence_state: Dictionary = sentences.create_session({
+		"gameId": "sentence_train",
+		"modeId": "adventure",
+		"players": [player_one],
+		"levelId": 1,
+		"station": sentence_station,
+		"seed": 907,
+	})
+	for sentence_index in 5:
+		var current_sentence: Dictionary = sentence_state.sentence
+		for chunk_id in current_sentence.answerOrder:
+			check(bool(sentences.handle_input({"type": "place_chunk", "chunkId": str(chunk_id)}).get("ok", false)), "sentence train accepts a word carriage")
+		var sentence_submit: Dictionary = sentences.handle_input({"type": "submit"})
+		check(bool(sentence_submit.get("correct", false)), "sentence train accepts the authored word order")
+		sentences.handle_input({"type": "next"})
+	check(str(sentence_state.phase) == "station_result" and int(sentence_state.stars) == 3, "sentence train completes a station with three stars")
+	var sentence_restored = SentenceRules.new()
+	check(sentence_restored.restore(sentences.snapshot()), "sentence train station snapshot restores")
+
+	var pipe_level: Dictionary = content.pipe_levels()[0]
+	var pipes = PipeRules.new()
+	var pipe_state: Dictionary = pipes.create_session({
+		"gameId": "pipes",
+		"modeId": "adventure",
+		"players": [player_one],
+		"levelId": 1,
+		"level": pipe_level,
+		"seed": 908,
+	})
+	for index in pipe_state.pieces.size():
+		var piece: Dictionary = pipe_state.pieces[index]
+		if bool(piece.get("locked", false)) or str(piece.get("type", "")) == "cross":
+			continue
+		var guard := 0
+		while int(piece.get("rotation", 0)) != int(piece.get("solutionRotation", 0)) and guard < 5:
+			pipes.handle_input({"type": "rotate", "index": index})
+			guard += 1
+	check(str(pipe_state.phase) == "finished" and int(pipes.result().stars) == 3, "pipes solution waters every goal with three stars")
+	var pipe_restored = PipeRules.new()
+	check(pipe_restored.restore(pipes.snapshot()), "pipes completed snapshot restores")
+	check(int(pipe_restored.result().wetGoals) == int(pipe_restored.result().goalCount), "restored pipes keep every goal watered")
+
 	var fruit_config := {
 		"practiceWaves": 1,
 		"practiceFruits": 1,
@@ -801,12 +882,31 @@ func _check_refactor_saves(save_store: Node) -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(str(save_paths.backup)))
 	var migrated: Dictionary = save_store._load()
 	check(int(migrated.get("schemaVersion", 0)) == 2, "legacy save envelope migrates to the current schema")
+	var malformed: Dictionary = save_store.data.duplicate(true)
+	malformed.schemaVersion = 2
+	malformed.selections = {"math": "oops"}
+	malformed.sessionSaves = "oops"
+	malformed.learning = {str(save_b.id): "oops"}
+	var malformed_file := FileAccess.open(str(save_paths.save), FileAccess.WRITE)
+	malformed_file.store_string(JSON.stringify(malformed, "\t"))
+	malformed_file.close()
+	var normalized_bad: Dictionary = save_store._load()
+	check(normalized_bad.get("profiles", []).any(func(item): return str(item.id) == str(save_b.id)), "nested corrupt save sections keep valid profiles")
+	check(normalized_bad.get("selections") is Dictionary and normalized_bad.selections.is_empty(), "corrupt selection section falls back to an empty map")
+	check(normalized_bad.get("sessionSaves") is Dictionary and normalized_bad.sessionSaves.is_empty(), "corrupt session section falls back without crashing")
 	var old_save_path: String = str(save_paths.save)
 	var old_backup_path: String = str(save_paths.backup)
 	save_store._save_path = "user://missing-save-dir/failure.json"
 	save_store._backup_path = "user://missing-save-dir/failure.backup.json"
 	check(not save_store.flush() and not save_store.last_save_ok, "save failure returns an error instead of claiming success")
+	var failed_outcome: bool = save_store.record_outcome(str(save_b.id), "save-retry-test", "win", 12, 1, 1, {}, "retry-outcome-fixture")
+	check(not failed_outcome, "failed record flush reports failure")
+	check(not save_store.data.recordedSessions.get(str(save_b.id), {}).has("retry-outcome-fixture"), "failed record does not commit the session dedupe marker")
+	check(int(save_store.records_for(str(save_b.id)).games.get("save-retry-test", {}).get("plays", 0)) == 0, "failed record is rolled back in memory")
 	save_store._save_path = old_save_path
 	save_store._backup_path = old_backup_path
+	var retried_outcome: bool = save_store.record_outcome(str(save_b.id), "save-retry-test", "win", 12, 1, 1, {}, "retry-outcome-fixture")
+	check(retried_outcome, "record retry succeeds after storage recovers")
+	check(int(save_store.records_for(str(save_b.id)).games.get("save-retry-test", {}).get("plays", 0)) == 1, "record retry commits exactly once")
 	save_store.data = save_store._default_data()
 	check(save_store.flush(), "save store can be reset after failure tests")

@@ -72,6 +72,14 @@ func _show_map() -> void:
 func _choose_level(number: int) -> void:
 	if not SaveStore.level_unlocked(str(players[0].id),game_id,number,mode_id):
 		return
+	guard_level_switch(number, func(): _start_level(number), func():
+		view = "board"
+		_build_board()
+		_refresh()
+	)
+
+
+func _start_level(number: int) -> void:
 	_create(number)
 	_build_board()
 	_refresh()
@@ -216,7 +224,7 @@ func _refresh(animate: bool = false) -> void:
 		detail.text = "%s\n可走 %s 格 · 可吃 %s 枚" % [BoardRules.NAMES[selected.kind],targets.size() - captures,captures]
 	elif mode_id == "puzzle":
 		if bool(engine.state.get("puzzleReplyFailed", false)):
-			detail.text = "自动应手没有完成\n先悔棋，再换一条路线"
+			detail.text = "这条路没接上\n先悔棋，再换一条路线"
 		else:
 			detail.text = "第 %s 关\n目标 %s 步\n已走 %s 步" % [level_id,int(engine.state.puzzle.get("targetSteps",1)),int(engine.state.moveCount)]
 	else:
@@ -225,7 +233,7 @@ func _refresh(animate: bool = false) -> void:
 	if str(engine.state.phase) == "finished":
 		status.text = str(engine.state.reason)
 	elif bool(engine.state.get("puzzleReplyFailed", false)):
-		status.text = str(engine.state.get("puzzleReplyError", "自动应手没有完成，先悔棋再试。"))
+		status.text = str(engine.state.get("puzzleReplyError", "这条路没接上，先悔棋再试。"))
 	elif game_id == "gomoku":
 		status.text = "点空交叉点落子，按住可以预览"
 	elif not selected.is_empty():
@@ -311,9 +319,9 @@ func _fixed_reply() -> void:
 			_show_result()
 	else:
 		engine.state.puzzleReplyFailed = true
-		engine.state.puzzleReplyError = "自动应手没有完成，先悔棋再试。"
-		show_toast("这一步之后没有完成自动应手，先悔棋再试。")
-		_save("固定应手失败，等待悔棋")
+		engine.state.puzzleReplyError = "这条路没接上，先悔棋再试。"
+		show_toast("这条路没接上，先悔棋再试。")
+		_save("残局路线未完成，等待悔棋")
 		_refresh(true)
 
 func _hint() -> void:

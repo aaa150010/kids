@@ -120,6 +120,14 @@ func _show_map() -> void:
 func _choose_level(number: int) -> void:
 	if not SaveStore.level_unlocked(str(players[0].id),game_id,number,mode_id):
 		return
+	guard_level_switch(number, func(): _start_level(number), func():
+		view = "table"
+		_build_table()
+		_refresh(false)
+	)
+
+
+func _start_level(number: int) -> void:
 	level_id = number
 	_new_session()
 	_build_table()

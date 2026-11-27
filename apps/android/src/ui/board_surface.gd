@@ -30,13 +30,24 @@ var _long_press_elapsed := 0.0
 var _long_press_fired := false
 var _tooltip_index := -1          # 长按气泡展示的格子
 var _rules: BoardRules            # 仅用于绘制时查询河界/铁路/占位，避免逐帧新建
+var _style_cache: Dictionary = {}
+var _grid_styles: Array = []
+var _grid_markers: Array = []
+var _grid_marker_sides: Array = []
+var _grid_style_game := ""
+var _metrics_cache: Dictionary = {}
+var _metrics_size := Vector2(-1.0, -1.0)
+var _metrics_game := ""
+var _pulse_redraw_elapsed := 0.0
 const SHAKE_TIME := 0.25
 const LONG_PRESS_TIME := 0.45
+const PULSE_INTERVAL := 1.0 / 30.0
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(400,340)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true
+	set_process(false)
 	resized.connect(queue_redraw)
 
 func _notification(what: int) -> void:
@@ -45,6 +56,8 @@ func _notification(what: int) -> void:
 		_cancel_press()
 
 func metrics() -> Dictionary:
+	if _metrics_size == size and _metrics_game == game_id:
+		return _metrics_cache
 	var columns := 15 if game_id == "gomoku" else 9 if game_id == "jungle" else 12
 	var rows := 15 if game_id == "gomoku" else 7 if game_id == "jungle" else 5
 	var padding := 24.0
@@ -55,7 +68,10 @@ func metrics() -> Dictionary:
 	var origin := (size-extent)*0.5
 	if game_id != "gomoku":
 		origin += Vector2.ONE*spacing*0.5
-	return {"spacing":spacing,"origin":origin,"columns":columns,"rows":rows}
+	_metrics_cache = {"spacing":spacing,"origin":origin,"columns":columns,"rows":rows}
+	_metrics_size = size
+	_metrics_game = game_id
+	return _metrics_cache
 
 func position_for(index: int) -> Vector2:
 	var layout := metrics()
@@ -97,7 +113,7 @@ func update_state(value: Dictionary, targets: Array = [], animate: bool = false)
 		_animation.tween_property(self,"motion",1.0,0.32).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 		_animation.step_finished.connect(func(_index): queue_redraw())
 	queue_redraw()
-	# 有动画/选中态/抖动时保持逐帧重绘，其余时候让引擎休眠省电
+	# 有动画/选中态/抖动时保持处理；选中呼吸按 30fps 重绘，其余时候让引擎休眠省电
 	set_process(_needs_frames())
 
 func _process(delta: float) -> void:
@@ -107,18 +123,29 @@ func _process(delta: float) -> void:
 		if _shake_elapsed >= SHAKE_TIME:
 			_shake_index = -1
 			_shake_elapsed = 0.0
+			queue_redraw()
 	if not interactive or (pressed and _blocked_by_dialog()):
 		_cancel_press()
+	var tooltip_before := _tooltip_index
 	_update_long_press(delta)
-	queue_redraw()
+	if _tooltip_index != tooltip_before:
+		queue_redraw()
+	if motion < 0.999 or _shake_index >= 0:
+		_pulse_redraw_elapsed = 0.0
+		queue_redraw()
+	elif interactive and not str(state.get("selected","")).is_empty():
+		_pulse_redraw_elapsed += delta
+		if _pulse_redraw_elapsed >= PULSE_INTERVAL:
+			_pulse_redraw_elapsed -= PULSE_INTERVAL
+			queue_redraw()
 	if not _needs_frames():
 		set_process(false)
 
-# 是否还需要逐帧重绘：动画中、抖动中、长按计时、选中呼吸
+# 是否还需要持续处理帧：动画中、抖动中、长按计时、选中呼吸
 func _needs_frames() -> bool:
 	if motion < 0.999:
 		return true
-	if _shake_index >= 0 or _long_press_index >= 0 or _tooltip_index >= 0:
+	if _shake_index >= 0 or _long_press_index >= 0:
 		return true
 	if interactive and pressed:
 		return true
@@ -151,7 +178,7 @@ func _draw() -> void:
 	if gap <= 0:
 		return
 	var background := Color("#ecd09a") if game_id == "gomoku" else Color("#d8eac1") if game_id == "jungle" else Color("#d9dfed")
-	draw_style_box(PlaygroundUI.style(background,30,Color("#a87c52") if game_id == "gomoku" else Color("#93ad7c") if game_id == "jungle" else Color("#727fac"),3,8,Color(0,0,0,0.12)),Rect2(Vector2.ZERO,size))
+	draw_style_box(_cached_style("board_background",background,30,Color("#a87c52") if game_id == "gomoku" else Color("#93ad7c") if game_id == "jungle" else Color("#727fac"),3,8,Color(0,0,0,0.12)),Rect2(Vector2.ZERO,size))
 	if game_id == "gomoku":
 		_draw_gomoku(gap)
 	else:
@@ -211,8 +238,39 @@ func _draw_gomoku(gap: float) -> void:
 		if reveal > 0.7:
 			draw_circle(position_for(int(index)),gap*0.08*(reveal-0.7)/0.3,Color(1.0,0.88,0.42,reveal))
 
+func _ensure_grid_styles() -> void:
+	var count := 63 if game_id == "jungle" else 60
+	if _grid_styles.size() == count and _grid_style_game == game_id:
+		return
+	_grid_styles.clear()
+	_grid_markers.clear()
+	_grid_marker_sides.clear()
+	_grid_style_game = game_id
+	for index in count:
+		var background := Color("#edf4d8") if game_id == "jungle" else Color("#edf0f8")
+		var border := Color("#bdd09b") if game_id == "jungle" else Color("#a4b0d1")
+		var marker := ""
+		if game_id == "jungle":
+			if index in BoardRules.WATER:
+				background = Color("#85c9df")
+			if index in BoardRules.TRAPS[0] or index in BoardRules.TRAPS[1]:
+				background = Color("#eccca3")
+			if index in BoardRules.DENS:
+				background = Color("#ffd77b")
+			marker = "兽穴" if index in BoardRules.DENS else "陷阱" if index in BoardRules.TRAPS[0] or index in BoardRules.TRAPS[1] else ""
+		else:
+			if index in BoardRules.CAMPS:
+				background = Color("#fff8d5")
+			if index in BoardRules.HEADQUARTERS:
+				background = Color("#c8d3ef")
+			marker = "行营" if index in BoardRules.CAMPS else "大本营" if index in BoardRules.HEADQUARTERS else ""
+		_grid_styles.append(PlaygroundUI.style(background,13,border,1))
+		_grid_markers.append(marker)
+		_grid_marker_sides.append(0 if index % 9 < 4 else 1)
+
 func _draw_grid(gap: float) -> void:
 	var count := 63 if game_id == "jungle" else 60
+	_ensure_grid_styles()
 	if _rules == null:
 		_rules = BoardRules.new()
 	_rules.state = state
@@ -229,31 +287,13 @@ func _draw_grid(gap: float) -> void:
 	for index in count:
 		var center := position_for(index)
 		var rectangle := Rect2(center-Vector2.ONE*gap*0.43,Vector2.ONE*gap*0.86)
-		var background := Color("#edf4d8") if game_id == "jungle" else Color("#edf0f8")
-		var border := Color("#bdd09b") if game_id == "jungle" else Color("#a4b0d1")
-		if game_id == "jungle":
-			if index in BoardRules.WATER:
-				background = Color("#85c9df")
-			if index in BoardRules.TRAPS[0] or index in BoardRules.TRAPS[1]:
-				background = Color("#eccca3")
-			if index in BoardRules.DENS:
-				background = Color("#ffd77b")
-		else:
-			if index in BoardRules.CAMPS:
-				background = Color("#fff8d5")
-			if index in BoardRules.HEADQUARTERS:
-				background = Color("#c8d3ef")
-		draw_style_box(PlaygroundUI.style(background,13,border,1),rectangle)
+		draw_style_box(_grid_styles[index],rectangle)
 		if game_id == "jungle" and index in BoardRules.WATER:
 			for wave in 3:
 				draw_line(center+Vector2(-gap*0.25,(wave-1)*gap*0.16),center+Vector2(gap*0.25,(wave-1)*gap*0.16),Color(1,1,1,0.35),2,true)
-		var marker := ""
-		if game_id == "jungle":
-			marker = "兽穴" if index in BoardRules.DENS else "陷阱" if index in BoardRules.TRAPS[0] or index in BoardRules.TRAPS[1] else ""
-		else:
-			marker = "行营" if index in BoardRules.CAMPS else "大本营" if index in BoardRules.HEADQUARTERS else ""
+		var marker := str(_grid_markers[index])
 		if not marker.is_empty():
-			var marker_side := 0 if index % 9 < 4 else 1
+			var marker_side := int(_grid_marker_sides[index])
 			_facing_text(marker, center, gap * 0.2, Color("#827759"), marker_side)
 		if game_id == "gomoku" and index in legal:
 			# 合法落点：半透明主色圆片 + 中心实心点，轻微呼吸缩放
@@ -297,7 +337,7 @@ func _draw_grid(gap: float) -> void:
 				# 按住盖牌时放大 + 白圈，提示这张牌可以翻开
 				hidden = hidden.grow(gap*0.05)
 				draw_arc(draw_center,gap*0.52,0,TAU,32,Color(1,1,1,0.7),2.5,true)
-			draw_style_box(PlaygroundUI.style(Color("#6974b2"),12,Color("#404d89"),3,3,Color(0,0,0,0.14)),hidden)
+			draw_style_box(_cached_style("hidden_piece",Color("#6974b2"),12,Color("#404d89"),3,3,Color(0,0,0,0.14)),hidden)
 			if flip_width > 0.45:
 				_text("?",draw_center,gap*0.4*flip_width,Color("#fff6d6"))
 			continue
@@ -320,7 +360,7 @@ func _draw_grid(gap: float) -> void:
 			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		else:
 			var rect := Rect2(draw_center-Vector2(gap*0.38*flip_width,gap*0.4),Vector2(gap*0.76*flip_width,gap*0.8))
-			draw_style_box(PlaygroundUI.style(Color("#fff9ec"),12,tint,3,4,Color(0,0,0,0.15)),rect)
+			draw_style_box(_cached_style("piece_face_%d" % int(piece.side),Color("#fff9ec"),12,tint,3,4,Color(0,0,0,0.15)),rect)
 			if flip_width > 0.6:
 				_text(str(BoardRules.NAMES[piece.kind]),draw_center,gap*0.25,tint)
 		if selected:
@@ -489,7 +529,7 @@ func _begin(point: Vector2) -> void:
 		_long_press_index = focused
 	previewed.emit()
 	FeedbackKit.haptic(5)
-	set_process(true)
+	set_process(_needs_frames())
 	queue_redraw()
 
 func _finish(point: Vector2) -> void:
@@ -524,6 +564,7 @@ func _cancel_press() -> void:
 	_tooltip_index = -1
 	_long_press_fired = false
 	focused = -1
+	set_process(_needs_frames())
 	queue_redraw()
 
 func _update_long_press(delta: float) -> void:
@@ -658,7 +699,7 @@ func _draw_tooltip(gap: float) -> void:
 	box_center.y = clampf(box_center.y, visual_extent.y * 0.5 + 6.0, size.y - visual_extent.y * 0.5 - 6.0)
 	draw_set_transform(box_center, angle, Vector2.ONE)
 	var rect := Rect2(Vector2(-width * 0.5, -height * 0.5), Vector2(width, height))
-	draw_style_box(PlaygroundUI.style(Color("#fffdf4"),16,Color("#b98a3e"),2,6,Color(0,0,0,0.2)),rect)
+	draw_style_box(_cached_style("tooltip",Color("#fffdf4"),16,Color("#b98a3e"),2,6,Color(0,0,0,0.2)),rect)
 	_text(title, Vector2(0, -height * 0.16), gap * 0.22, Color("#4a3a22"))
 	_text(caption, Vector2(0, height * 0.2), gap * 0.18, Color("#7a6644"))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
@@ -678,3 +719,18 @@ func _jungle_caption(kind: String) -> String:
 	if kind in ["lion","tiger"]:
 		text += "，能跳河"
 	return text
+
+func _cached_style(
+	cache_key: String,
+	background: Color,
+	radius: int = 20,
+	border: Color = Color.TRANSPARENT,
+	border_width: int = 0,
+	shadow_size: int = 0,
+	shadow_color: Color = Color.TRANSPARENT
+) -> StyleBoxFlat:
+	if _style_cache.has(cache_key):
+		return _style_cache[cache_key]
+	var style := PlaygroundUI.style(background, radius, border, border_width, shadow_size, shadow_color)
+	_style_cache[cache_key] = style
+	return style

@@ -71,10 +71,16 @@ func prepare_story(story: Dictionary) -> Array:
 	for illustration in story.get("illustrations", []):
 		var path := cached_path(illustration)
 		if path.is_empty():
-			missing.append(illustration)
+			if illustration is Dictionary:
+				missing.append(illustration)
+				var placeholder: Dictionary = illustration.duplicate(true)
+				placeholder.asset = ""
+				placeholder.pending = true
+				result.append(placeholder)
 		else:
 			var item: Dictionary = illustration.duplicate(true)
 			item.asset = path
+			item.pending = false
 			result.append(item)
 	if not missing.is_empty():
 		if is_instance_valid(self):

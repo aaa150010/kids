@@ -369,12 +369,25 @@ func _show_puzzle_map() -> void:
 
 
 func _open_puzzle(index: int) -> void:
-	if not SaveStore.level_unlocked(str(players[0].id), game_id, index + 1, mode_id):
+	var number := index + 1
+	if not SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id):
 		show_toast("先完成前一关，再来挑战这一关。")
 		return
 	_close_top_modal()
+	if str(engine.state.get("phase", "")) == "playing" and mode_id == "puzzle":
+		if number == level_id:
+			_result_visible = false
+			_build_board()
+			_refresh()
+			return
+		guard_level_switch(number, func(): _start_puzzle(number))
+		return
+	_start_puzzle(number)
+
+
+func _start_puzzle(number: int) -> void:
 	_result_visible = false
-	_create(index + 1)
+	_create(number)
 	_build_board()
 	_refresh()
 

@@ -10,6 +10,9 @@ var found_label: Label
 var hint_label: Label
 var player_row: HBoxContainer
 var game_tools: Control
+var map_button: Control
+var restart_button: Control
+var title_chip: Control
 var view := "map"
 var _scenes_cache: Array = []
 var _result_visible := false
@@ -118,41 +121,25 @@ func _show_map() -> void:
 		empty.add_child(PlaygroundUI.label("找不同的画页还没有准备好，请稍后再来看看。", 20, PlaygroundUI.INK_SOFT, 600, true))
 		content_root.add_child(empty)
 		return
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	var grid := GridContainer.new()
-	var viewport_width := get_viewport_rect().size.x
-	grid.columns = 3 if viewport_width <= 1180.0 else 4 if viewport_width < 1500.0 else 6
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 14)
-	grid.add_theme_constant_override("v_separation", 14)
+	var entries: Array = []
 	for index in scenes.size():
 		var scene: Dictionary = scenes[index]
 		var number := index + 1
 		var unlocked := _unlocked(number)
 		var stars := _stars_for(number)
 		var resume_here := _can_resume_level(number)
-		var state_text := "尚未解锁"
-		if unlocked and resume_here:
-			state_text = "继续这一页 · 已找到 %s / %s" % [engine.found_count(), engine.total()]
-		elif unlocked:
-			state_text = "已获 %s / 3 星" % stars if stars > 0 else "可以开始寻找"
-		var button := PlaygroundUI.semantic_icon_button(
-			"play" if unlocked else "lock",
-			"第 %s 关\n%s\n%s" % [number, str(scene.get("title", "找不同")), state_text],
-			accent,
-			_choose_level.bind(number),
-			"soft",
-			18
-		)
-		button.custom_minimum_size = Vector2(0, 124)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.disabled = not unlocked
-		grid.add_child(button)
-	scroll.add_child(grid)
-	content_root.add_child(scroll)
+		entries.append({
+			"id": number,
+			"title": str(scene.get("title", "找不同")),
+			"subtitle": str(scene.get("band", "")),
+			"locked": not unlocked,
+			"stars": stars,
+			"in_progress": resume_here,
+		})
+	var browser := GameBrowser.new()
+	browser.configure(entries, {"accent": accent})
+	browser.entry_selected.connect(func(number: Variant): _choose_level(int(number)))
+	content_root.add_child(browser)
 	if not engine.state.is_empty():
 		engine.state.view = view
 		_save("正在选择找不同关卡", false)
@@ -162,6 +149,24 @@ func _choose_level(number: int) -> void:
 	if not _unlocked(number):
 		show_toast("先完成前一关，再来挑战这一关。")
 		return
+	if str(engine.state.get("phase", "")) == "playing" and int(engine.state.get("levelId", 0)) != number:
+		guard_level_switch(number, func(): _start_level(number))
+		return
+	_resume_or_start(number)
+
+
+func _start_level(number: int) -> void:
+	level_id = number
+	if not _new_session():
+		return
+	view = "scene"
+	_result_visible = false
+	_build_scene()
+	_refresh()
+	begin_lesson()
+
+
+func _resume_or_start(number: int) -> void:
 	level_id = number
 	var resuming := _can_resume_level(number)
 	if not resuming and not _new_session():
@@ -234,7 +239,8 @@ func _build_scene() -> void:
 	PlaygroundUI.clear(content_root)
 	var tools := HBoxContainer.new()
 	tools.add_theme_constant_override("separation", 10)
-	tools.add_child(PlaygroundUI.semantic_icon_button("back", "关卡", accent, _show_map, "soft"))
+	map_button = PlaygroundUI.semantic_icon_button("back", "关卡", accent, _show_map, "soft")
+	tools.add_child(map_button)
 	found_chip = PlaygroundUI.chip("找到 0 / 5", accent)
 	tools.add_child(found_chip)
 	hint_chip = PlaygroundUI.chip("提示 0 / 3", accent)
@@ -242,12 +248,14 @@ func _build_scene() -> void:
 	found_label = found_chip.get_child(0).get_child(0) as Label
 	hint_label = hint_chip.get_child(0).get_child(0) as Label
 	var scene_title := str(engine.state.get("scene", {}).get("title", "找不同"))
-	tools.add_child(PlaygroundUI.chip("第 %s 关 · %s" % [level_id, scene_title], accent))
+	title_chip = PlaygroundUI.chip("第 %s 关 · %s" % [level_id, scene_title], accent)
+	tools.add_child(title_chip)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	tools.add_child(spacer)
 	tools.add_child(PlaygroundUI.button("看提示", accent, _hint, "soft"))
-	tools.add_child(PlaygroundUI.button("重新开始", accent, _confirm_restart, "ghost"))
+	restart_button = PlaygroundUI.button("重新开始", accent, _confirm_restart, "ghost")
+	tools.add_child(restart_button)
 	content_root.add_child(tools)
 	game_tools = tools
 	player_row = HBoxContainer.new()
@@ -273,6 +281,12 @@ func _on_immersive_changed(value: bool) -> void:
 		player_row.visible = not value and mode_id == "classic"
 	if game_tools != null and is_instance_valid(game_tools):
 		game_tools.visible = true
+	if map_button != null and is_instance_valid(map_button):
+		map_button.visible = not value
+	if restart_button != null and is_instance_valid(restart_button):
+		restart_button.visible = not value
+	if title_chip != null and is_instance_valid(title_chip):
+		title_chip.visible = not value
 	if status != null and is_instance_valid(status):
 		status.show()
 

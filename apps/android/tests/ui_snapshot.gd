@@ -12,6 +12,9 @@ const GAME_SCRIPTS := {
 	"spot": "res://src/games/spot_game.gd",
 	"shop": "res://src/games/shop_game.gd",
 	"fruit_slice": "res://src/games/fruit_slice_game.gd",
+	"robot": "res://src/games/robot_game.gd",
+	"sentence_train": "res://src/games/sentence_train_game.gd",
+	"pipes": "res://src/games/pipe_game.gd",
 	"trivia": "res://src/games/quiz_game.gd",
 	"gomoku": "res://src/games/board_game.gd",
 	"chess": "res://src/games/chess_game.gd",
@@ -338,6 +341,7 @@ func _screenshot_mode(game_id: String) -> Dictionary:
 	var preferred: String = str({
 		"math":"practice", "pinyin":"practice", "patterns":"practice", "animals":"practice", "trivia":"practice",
 		"tangram":"adventure", "spot":"adventure", "shop":"adventure", "fruit_slice":"practice",
+		"robot":"adventure", "sentence_train":"adventure", "pipes":"adventure",
 		"workbook":"classic", "memory":"classic", "jungle":"classic", "gomoku":"classic",
 		"chess":"classic", "sudoku":"classic", "military":"classic", "poetry":"classic",
 	}.get(game_id,"classic"))

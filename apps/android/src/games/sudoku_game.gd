@@ -8,6 +8,8 @@ var status: Label
 var detail: Label
 var active_grid: Control
 var game_tools: Control
+var title_row: Control
+var side_nav: Control
 var _puzzle_index := 0
 var _result_visible := false
 var _puzzle_cache: Array = []
@@ -62,35 +64,30 @@ func preview_ready() -> void:
 
 func _show_map() -> void:
 	PlaygroundUI.clear(content_root)
-	content_root.add_child(PlaygroundUI.label("今天挑战哪一格？", 30, accent, 700, true))
-	content_root.add_child(PlaygroundUI.label("32 道固定题，从四宫格到九宫格。完成前一关就能继续。", 18, PlaygroundUI.INK_SOFT, 500, true))
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	var grid := GridContainer.new()
-	grid.columns = 4
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 12)
-	grid.add_theme_constant_override("v_separation", 12)
+	var entries: Array = []
 	var puzzles := _puzzles()
+	var active_level := level_id if str(engine.state.get("phase", "")) == "playing" else -1
 	for index in puzzles.size():
 		var number := index + 1
 		var unlocked := SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id)
 		var puzzle: Dictionary = puzzles[index]
 		var stars := clampi(int(SaveStore.learning(str(players[0].id), game_id, mode_id).stars.get(str(number), 0)), 0, 3)
-		var button := PlaygroundUI.button(
-			"第 %s 关\n%s\n%s" % [number, str(puzzle.get("title", "数独")), "已获 %s / 3 星" % stars if unlocked else "尚未解锁"],
-			accent,
-			_choose_level.bind(number),
-			"soft"
-		)
-		button.custom_minimum_size = Vector2(0, 120)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.disabled = not unlocked
-		grid.add_child(button)
-	scroll.add_child(grid)
-	content_root.add_child(scroll)
+		entries.append({
+			"id": number,
+			"title": str(puzzle.get("title", "数独")),
+			"subtitle": "四宫格" if int(puzzle.get("size", 9)) == 4 else "九宫格",
+			"locked": not unlocked,
+			"stars": stars,
+			"in_progress": number == active_level,
+		})
+	var browser := GameBrowser.new()
+	browser.configure(entries, {
+		"title": "今天挑战哪一格？",
+		"subtitle": "32 道固定题，从四宫格到九宫格。完成前一关就能继续。",
+		"accent": accent,
+	})
+	browser.entry_selected.connect(func(number: Variant): _choose_level(int(number)))
+	content_root.add_child(browser)
 	_save("正在选择数独关卡")
 
 
@@ -98,6 +95,13 @@ func _choose_level(number: int) -> void:
 	if not SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id):
 		show_toast("先完成前一关，再来挑战这一关。")
 		return
+	guard_level_switch(number, func(): _start_level(number), func():
+		_build_session()
+		_refresh()
+	)
+
+
+func _start_level(number: int) -> void:
 	_create(number - 1)
 	_build_session()
 	_refresh()
@@ -142,7 +146,7 @@ func _open_puzzle_index(index: int) -> void:
 func _build_session() -> void:
 	PlaygroundUI.clear(content_root)
 	number_buttons.clear()
-	var title_row := HBoxContainer.new()
+	title_row = HBoxContainer.new()
 	title_row.add_theme_constant_override("separation", 10)
 	title_row.add_child(PlaygroundUI.chip(engine.puzzle().get("title", "数独"), accent))
 	title_row.add_child(PlaygroundUI.chip("已填 %s 格" % _filled_count(), accent))
@@ -208,6 +212,7 @@ func _build_session() -> void:
 		nav.add_child(PlaygroundUI.semantic_icon_button("shuffle", "换一题", accent, _confirm_next_puzzle, "ghost"))
 	nav.add_child(PlaygroundUI.semantic_icon_button("restart", "重玩", accent, _confirm_restart, "ghost"))
 	side.add_child(nav)
+	side_nav = nav
 	game_tools = side
 	_on_immersive_changed(immersive)
 
@@ -222,9 +227,13 @@ func show_game_rules() -> void:
 	_show_rules()
 
 
-func _on_immersive_changed(_value: bool) -> void:
+func _on_immersive_changed(value: bool) -> void:
 	if game_tools != null and is_instance_valid(game_tools):
 		game_tools.show()
+	if title_row != null and is_instance_valid(title_row):
+		title_row.visible = not value
+	if side_nav != null and is_instance_valid(side_nav):
+		side_nav.visible = not value
 	if status != null and is_instance_valid(status):
 		status.show()
 	if detail != null and is_instance_valid(detail):

@@ -239,8 +239,6 @@ func reset_pieces() -> Dictionary:
 		piece.slot = -1
 	state.selected = -1
 	state.hintSlot = -1
-	state.hints = 0
-	state.mistakes = 0
 	state.phase = "playing"
 	return {"ok": true}
 

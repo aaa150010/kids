@@ -286,6 +286,18 @@
         "challenge": 1
       }
     },
+    "robot": {
+      "kind": "puzzle",
+      "difficultyEnabled": false
+    },
+    "sentence_train": {
+      "kind": "language",
+      "difficultyEnabled": false
+    },
+    "pipes": {
+      "kind": "puzzle",
+      "difficultyEnabled": false
+    },
     "gomoku": {
       "kind": "board",
       "hintSeconds": {

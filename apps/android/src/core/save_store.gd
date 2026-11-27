@@ -16,6 +16,7 @@ var last_save_error := ""
 var _primary_was_valid := false
 var _save_path := SAVE_PATH
 var _backup_path := BACKUP_PATH
+var _flush_pending := false
 
 
 func _ready() -> void:
@@ -66,7 +67,9 @@ func _default_data() -> Dictionary:
 func _load() -> Dictionary:
 	var primary: Variant = _read_json(_save_path)
 	if _valid_envelope(primary):
-		_primary_was_valid = true
+		_primary_was_valid = _sections_are_typed(primary)
+		if not _primary_was_valid:
+			push_warning("存档部分内容损坏，已按可恢复部分载入，并保留现有备份。")
 		return _normalize(primary)
 	_primary_was_valid = false
 	for path in [_save_path + TEMP_SUFFIX, _backup_path]:
@@ -96,77 +99,136 @@ func _valid_envelope(value: Variant) -> bool:
 		return false
 	var source: Dictionary = value
 	var schema := int(source.get("schemaVersion", -1))
-	return (
-		schema in [1, STORE_SCHEMA_VERSION]
-		and source.get("profiles") is Array
-		and source.get("settings") is Dictionary
-		and source.get("selections") is Dictionary
-		and source.get("gameSaves") is Dictionary
-		and source.get("progress") is Dictionary
-		and source.get("records") is Dictionary
-	)
+	return schema in [1, STORE_SCHEMA_VERSION]
+
+
+func _sections_are_typed(source: Dictionary) -> bool:
+	var expected := {
+		"profiles": TYPE_ARRAY,
+		"settings": TYPE_DICTIONARY,
+		"selections": TYPE_DICTIONARY,
+		"lobbyOrder": TYPE_ARRAY,
+		"gameSaves": TYPE_DICTIONARY,
+		"progress": TYPE_DICTIONARY,
+		"records": TYPE_DICTIONARY,
+		"sessionSaves": TYPE_DICTIONARY,
+		"sessionProgress": TYPE_DICTIONARY,
+		"learning": TYPE_DICTIONARY,
+		"recordedSessions": TYPE_DICTIONARY,
+		"difficulty": TYPE_DICTIONARY,
+	}
+	for key in expected:
+		if source.has(key) and typeof(source[key]) != int(expected[key]):
+			return false
+	return true
 
 
 func _normalize(source: Dictionary) -> Dictionary:
 	var result := _default_data()
 	result.schemaVersion = STORE_SCHEMA_VERSION
-	result.settings.merge(source.get("settings", {}), true)
-	result.settings.soundOn = bool(result.settings.soundOn)
-	result.settings.musicOn = bool(result.settings.musicOn)
-	result.settings.speechOn = bool(result.settings.speechOn)
-	result.settings.hapticsOn = bool(result.settings.hapticsOn)
-	for key in ["sfxVolume", "musicVolume", "speechVolume"]:
-		var value: Variant = result.settings[key]
-		var fallback := 0.72 if key == "speechVolume" else 1.0
-		result.settings[key] = clampf(float(value), 0.0, 1.0) if (value is float or value is int) and is_finite(float(value)) else fallback
-	if source.get("lobbyOrder") is Array:
-		result.lobbyOrder = source.lobbyOrder.filter(func(id): return id is String)
-	for item in source.get("profiles", []):
-		if not item is Dictionary or result.profiles.size() >= MAX_PROFILES:
-			continue
-		var profile := _normalize_profile(item)
-		if profile.is_empty() or result.profiles.any(func(existing): return existing.id == profile.id):
-			continue
-		result.profiles.append(profile)
+	var source_settings: Variant = source.get("settings", {})
+	if source_settings is Dictionary:
+		for key in ["soundOn", "musicOn", "speechOn", "hapticsOn"]:
+			if source_settings.get(key) is bool:
+				result.settings[key] = bool(source_settings[key])
+		for key in ["sfxVolume", "musicVolume", "speechVolume"]:
+			var value: Variant = source_settings.get(key, result.settings[key])
+			var fallback := 0.72 if key == "speechVolume" else 1.0
+			result.settings[key] = clampf(float(value), 0.0, 1.0) if (value is float or value is int) and is_finite(float(value)) else fallback
+	var source_order: Variant = source.get("lobbyOrder", [])
+	if source_order is Array:
+		result.lobbyOrder = source_order.filter(func(id): return id is String)
+	var source_profiles: Variant = source.get("profiles", [])
+	if source_profiles is Array:
+		for item in source_profiles:
+			if not item is Dictionary or result.profiles.size() >= MAX_PROFILES:
+				continue
+			var profile := _normalize_profile(item)
+			if profile.is_empty() or result.profiles.any(func(existing): return str(existing.get("id", "")) == str(profile.id)):
+				continue
+			result.profiles.append(profile)
 	var valid_ids: Array = result.profiles.map(func(profile): return profile.id)
-	for game_id in source.get("selections", {}):
-		var ids: Array = source.selections[game_id]
-		if ids is Array:
-			result.selections[game_id] = ids.filter(func(id): return id in valid_ids).slice(0, 4)
-	for game_id in source.get("gameSaves", {}):
-		if not source.gameSaves[game_id] is Dictionary:
-			continue
-		result.gameSaves[game_id] = {}
-		for profile_id in source.gameSaves[game_id]:
-			if profile_id in valid_ids and source.gameSaves[game_id][profile_id] is Dictionary:
-				result.gameSaves[game_id][profile_id] = source.gameSaves[game_id][profile_id]
-	for game_id in source.get("progress", {}):
-		if source.progress[game_id] is Dictionary:
-			result.progress[game_id] = source.progress[game_id]
-	for profile_id in source.get("records", {}):
-		if profile_id in valid_ids and source.records[profile_id] is Dictionary:
-			result.records[profile_id] = _normalize_record(source.records[profile_id])
-	for key in ["sessionSaves", "sessionProgress", "learning", "recordedSessions"]:
-		if source.get(key) is Dictionary:
-			result[key] = source[key].duplicate(true)
-	if source.get("difficulty") is Dictionary:
-		for game_id in source.difficulty:
-			if not source.difficulty[game_id] is Dictionary:
+	var source_selections: Variant = source.get("selections", {})
+	if source_selections is Dictionary:
+		for game_id in source_selections:
+			var ids: Variant = source_selections[game_id]
+			if ids is Array:
+				result.selections[game_id] = ids.filter(func(id): return id in valid_ids).slice(0, 4)
+	var source_game_saves: Variant = source.get("gameSaves", {})
+	if source_game_saves is Dictionary:
+		for game_id in source_game_saves:
+			var saves: Variant = source_game_saves[game_id]
+			if not saves is Dictionary:
+				continue
+			result.gameSaves[game_id] = {}
+			for profile_id in saves:
+				if profile_id in valid_ids and saves[profile_id] is Dictionary:
+					result.gameSaves[game_id][profile_id] = saves[profile_id].duplicate(true)
+	var source_progress: Variant = source.get("progress", {})
+	if source_progress is Dictionary:
+		for game_id in source_progress:
+			if source_progress[game_id] is Dictionary:
+				result.progress[game_id] = source_progress[game_id].duplicate(true)
+	var source_records: Variant = source.get("records", {})
+	if source_records is Dictionary:
+		for profile_id in source_records:
+			if profile_id in valid_ids and source_records[profile_id] is Dictionary:
+				result.records[profile_id] = _normalize_record(source_records[profile_id])
+	var source_sessions: Variant = source.get("sessionSaves", {})
+	if source_sessions is Dictionary:
+		for game_id in source_sessions:
+			var entries: Variant = source_sessions[game_id]
+			if not entries is Dictionary:
+				continue
+			result.sessionSaves[game_id] = {}
+			for session_key in entries:
+				if entries[session_key] is Dictionary:
+					result.sessionSaves[game_id][str(session_key)] = entries[session_key].duplicate(true)
+	var source_session_progress: Variant = source.get("sessionProgress", {})
+	if source_session_progress is Dictionary:
+		for progress_key in source_session_progress:
+			if source_session_progress[progress_key] is Dictionary:
+				result.sessionProgress[str(progress_key)] = source_session_progress[progress_key].duplicate(true)
+	var source_learning: Variant = source.get("learning", {})
+	if source_learning is Dictionary:
+		for profile_id in source_learning:
+			if not (profile_id in valid_ids) or not source_learning[profile_id] is Dictionary:
+				continue
+			result.learning[profile_id] = {}
+			for learning_key in source_learning[profile_id]:
+				var learning_value: Variant = source_learning[profile_id][learning_key]
+				if learning_value is Dictionary:
+					result.learning[profile_id][str(learning_key)] = learning_value.duplicate(true)
+	var source_recorded: Variant = source.get("recordedSessions", {})
+	if source_recorded is Dictionary:
+		for profile_id in source_recorded:
+			if not (profile_id in valid_ids) or not source_recorded[profile_id] is Dictionary:
+				continue
+			result.recordedSessions[profile_id] = {}
+			for session_id in source_recorded[profile_id]:
+				result.recordedSessions[profile_id][str(session_id)] = bool(source_recorded[profile_id][session_id])
+	var source_difficulty: Variant = source.get("difficulty", {})
+	if source_difficulty is Dictionary:
+		for game_id in source_difficulty:
+			if not source_difficulty[game_id] is Dictionary:
 				continue
 			result.difficulty[game_id] = {}
-			for profile_id in source.difficulty[game_id]:
+			for profile_id in source_difficulty[game_id]:
 				if profile_id in valid_ids:
-					var difficulty_value := GameTuning.normalize(source.difficulty[game_id][profile_id])
+					var difficulty_value := GameTuning.normalize(source_difficulty[game_id][profile_id])
 					if difficulty_value != "auto":
 						result.difficulty[game_id][profile_id] = difficulty_value
 	var clean_sessions := {}
 	for game_id in result.sessionSaves:
-		var entries: Dictionary = result.sessionSaves.get(game_id, {})
+		var entries_value: Variant = result.sessionSaves.get(game_id, {})
+		if not entries_value is Dictionary:
+			continue
+		var entries: Dictionary = entries_value
 		clean_sessions[game_id] = {}
 		for session_key in entries:
 			if not (entries[session_key] is Dictionary):
 				continue
-			var entry: Dictionary = entries[session_key]
+			var entry: Dictionary = (entries[session_key] as Dictionary).duplicate(true)
 			var participants := _participants(entry)
 			if participants.is_empty():
 				continue
@@ -208,14 +270,51 @@ func _normalize_profile(source: Dictionary) -> Dictionary:
 
 
 func _normalize_record(source: Dictionary) -> Dictionary:
+	var games := {}
+	var source_games: Variant = source.get("games", {})
+	if source_games is Dictionary:
+		for game_id in source_games:
+			var entry: Variant = source_games[game_id]
+			if not entry is Dictionary:
+				continue
+			games[str(game_id)] = {
+				"plays": maxi(0, int(entry.get("plays", 0))),
+				"wins": maxi(0, int(entry.get("wins", 0))),
+				"draws": maxi(0, int(entry.get("draws", 0))),
+				"losses": maxi(0, int(entry.get("losses", 0))),
+				"correct": maxi(0, int(entry.get("correct", 0))),
+				"answered": maxi(0, int(entry.get("answered", 0))),
+				"bestScore": maxi(0, int(entry.get("bestScore", 0))),
+				"lastPlayedAt": maxi(0, int(entry.get("lastPlayedAt", 0))),
+				"lastOutcome": str(entry.get("lastOutcome", "played")),
+			}
+	var skills := {}
+	var source_skills: Variant = source.get("skills", {})
+	if source_skills is Dictionary:
+		for axis in source_skills:
+			var entry: Variant = source_skills[axis]
+			if entry is Dictionary:
+				skills[str(axis)] = {
+					"correct": maxi(0, int(entry.get("correct", 0))),
+					"answered": maxi(0, int(entry.get("answered", 0))),
+				}
+	var sessions: Array = []
+	var source_sessions: Variant = source.get("sessions", [])
+	if source_sessions is Array:
+		for entry in source_sessions:
+			if entry is Dictionary:
+				sessions.append(entry.duplicate(true))
+			if sessions.size() >= 40:
+				break
 	return {
-		"games": source.get("games", {}) if source.get("games") is Dictionary else {},
-		"skills": source.get("skills", {}) if source.get("skills") is Dictionary else {},
-		"sessions": source.get("sessions", []) if source.get("sessions") is Array else [],
+		"games": games,
+		"skills": skills,
+		"sessions": sessions,
 	}
 
 
 func flush() -> bool:
+	_flush_pending = false
 	if OS.get_environment("KIDS_PLAYGROUND_AUDIT") == "1":
 		last_save_ok = true
 		last_save_error = ""
@@ -226,14 +325,13 @@ func flush() -> bool:
 		save_failed.emit(last_save_error)
 		return false
 	data.schemaVersion = STORE_SCHEMA_VERSION
-	var text := JSON.stringify(data, "\t")
-	var parsed: Variant = JSON.parse_string(text)
-	if not _valid_envelope(parsed):
+	if not _sections_are_typed(data):
 		last_save_ok = false
 		last_save_error = "存档内容格式异常"
 		push_error(last_save_error)
 		save_failed.emit(last_save_error)
 		return false
+	var text := JSON.stringify(data, "\t")
 	var temporary := _save_path + TEMP_SUFFIX
 	var file := FileAccess.open(temporary, FileAccess.WRITE)
 	if file == null:
@@ -275,6 +373,19 @@ func flush() -> bool:
 	last_save_ok = true
 	last_save_error = ""
 	return true
+
+
+func _request_flush() -> void:
+	if _flush_pending:
+		return
+	_flush_pending = true
+	call_deferred("_flush_deferred")
+
+
+func _flush_deferred() -> void:
+	if not _flush_pending:
+		return
+	flush()
 
 
 func save_status_text() -> String:
@@ -429,7 +540,7 @@ func save_state(game_id: String, profile_id: String, state: Dictionary, note: St
 	}
 	data.progress[game_id] = meta
 	data.sessionProgress[game_id + ":" + key] = meta
-	flush()
+	_request_flush()
 	changed.emit()
 
 
@@ -566,13 +677,21 @@ func set_lobby_order(order: Array) -> void:
 
 
 func records_for(profile_id: String) -> Dictionary:
-	if not data.records.has(profile_id):
+	if not data.records.has(profile_id) or not data.records[profile_id] is Dictionary:
 		data.records[profile_id] = {
 			"games": {},
 			"skills": {},
 			"sessions": [],
 		}
-	return data.records[profile_id]
+	var record: Dictionary = data.records[profile_id]
+	if not record.get("games") is Dictionary:
+		record.games = {}
+	if not record.get("skills") is Dictionary:
+		record.skills = {}
+	if not record.get("sessions") is Array:
+		record.sessions = []
+	data.records[profile_id] = record
+	return record
 
 
 func record_outcome(
@@ -584,15 +703,20 @@ func record_outcome(
 	answered: int = 0,
 	skills: Dictionary = {},
 	session_id: String = ""
-) -> void:
+) -> bool:
+	var records_before: Dictionary = data.records.duplicate(true)
+	var recorded_before: Dictionary = data.recordedSessions.duplicate(true)
 	if not session_id.is_empty():
-		if not data.recordedSessions.has(profile_id):
+		if not data.recordedSessions.has(profile_id) or not data.recordedSessions[profile_id] is Dictionary:
 			data.recordedSessions[profile_id] = {}
 		if data.recordedSessions[profile_id].has(session_id):
-			return
+			return true
 		data.recordedSessions[profile_id][session_id] = true
 	var record := records_for(profile_id)
-	var game: Dictionary = record.games.get(game_id, {
+	var game_value: Variant = record.games.get(game_id, {})
+	var game: Dictionary = game_value if game_value is Dictionary else {}
+	if game.is_empty():
+		game = {
 		"plays": 0,
 		"wins": 0,
 		"draws": 0,
@@ -602,7 +726,7 @@ func record_outcome(
 		"bestScore": 0,
 		"lastPlayedAt": 0,
 		"lastOutcome": "played",
-	})
+		}
 	game.plays = int(game.plays) + 1
 	game.wins = int(game.wins) + (1 if outcome == "win" else 0)
 	game.draws = int(game.draws) + (1 if outcome == "draw" else 0)
@@ -614,9 +738,12 @@ func record_outcome(
 	game.lastOutcome = outcome
 	record.games[game_id] = game
 	for axis in skills:
-		var current: Dictionary = record.skills.get(axis, {"correct": 0, "answered": 0})
-		current.correct = int(current.correct) + int(skills[axis].get("correct", 0))
-		current.answered = int(current.answered) + int(skills[axis].get("answered", 0))
+		if not skills[axis] is Dictionary:
+			continue
+		var current_value: Variant = record.skills.get(axis, {"correct": 0, "answered": 0})
+		var current: Dictionary = current_value if current_value is Dictionary else {"correct": 0, "answered": 0}
+		current.correct = int(current.get("correct", 0)) + int(skills[axis].get("correct", 0))
+		current.answered = int(current.get("answered", 0)) + int(skills[axis].get("answered", 0))
 		record.skills[axis] = current
 	record.sessions.push_front({
 		"gameId": game_id,
@@ -627,8 +754,13 @@ func record_outcome(
 		"answered": answered,
 	})
 	record.sessions = record.sessions.slice(0, 40)
-	flush()
+	if not flush():
+		data.records = records_before
+		data.recordedSessions = recorded_before
+		changed.emit()
+		return false
 	changed.emit()
+	return true
 
 
 func set_context(game_id: String, mode_id: String, player_ids: Array) -> void:
@@ -712,12 +844,12 @@ func shared_sessions_for(profile_id: String) -> Array:
 
 
 func learning(profile_id: String, game_id: String, mode_id: String = "classic") -> Dictionary:
-	if not data.learning.has(profile_id):
+	if not data.learning.has(profile_id) or not data.learning[profile_id] is Dictionary:
 		data.learning[profile_id] = {}
 	var key := game_id + ":" + mode_id
 	if mode_id == "classic" and not data.learning[profile_id].has(key) and data.learning[profile_id].get(game_id) is Dictionary:
 		data.learning[profile_id][key] = data.learning[profile_id][game_id]
-	if not data.learning[profile_id].has(key):
+	if not data.learning[profile_id].has(key) or not data.learning[profile_id][key] is Dictionary:
 		data.learning[profile_id][key] = {"stars":{},"wrongIds":[],"recentIds":[],"learnedIds":[],"tutorialSeen":false}
 	var progress_data: Dictionary = data.learning[profile_id][key]
 	for field in ["wrongIds", "recentIds", "learnedIds"]:

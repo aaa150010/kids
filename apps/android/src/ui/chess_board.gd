@@ -17,12 +17,25 @@ var _pressed_cell := -1
 var _preview_cell := -1
 var _press_seat := 0
 var notice: Dictionary = {}
+var _style_cache: Dictionary = {}
+var _style_accent := Color(-1, -1, -1, -1)
+var _metrics_cache: Dictionary = {}
+var _metrics_size := Vector2(-1.0, -1.0)
+var _metrics_face := false
+var _pulse_redraw_elapsed := 0.0
+var _preview_message := ""
+var _preview_selected := -2
+var _preview_cell_cached := -2
+var _preview_rules_id := 0
+
+const PULSE_INTERVAL := 1.0 / 30.0
 
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(520, 420)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	clip_contents = true
+	set_process(false)
 	resized.connect(queue_redraw)
 
 
@@ -35,18 +48,36 @@ func update_board(value: ChessRules, side: int, selected_position: int, legal: A
 	if not interactive:
 		_cancel_press()
 	notice = value.state.get("interactionNote", {}).duplicate(true) if value.state.get("interactionNote", {}) is Dictionary else {}
-	set_process(selected >= 0 or _pressed_cell >= 0)
+	_preview_message = ""
+	_preview_selected = -2
+	_preview_cell_cached = -2
+	set_process(_needs_frames())
 	queue_redraw()
 
 
 func _process(delta: float) -> void:
-	if not interactive or TabletopLayout.input_blocked(self):
+	if not interactive:
 		_cancel_press()
+		set_process(false)
+		return
+	if TabletopLayout.input_blocked(self):
+		_cancel_press()
+		if selected < 0:
+			set_process(false)
+		return
+	if selected < 0:
+		if _pressed_cell < 0:
+			set_process(false)
 		return
 	_clock += delta
-	queue_redraw()
-	if selected < 0 and _pressed_cell < 0:
-		set_process(false)
+	_pulse_redraw_elapsed += delta
+	if _pulse_redraw_elapsed >= PULSE_INTERVAL:
+		_pulse_redraw_elapsed -= PULSE_INTERVAL
+		queue_redraw()
+
+
+func _needs_frames() -> bool:
+	return interactive and (selected >= 0 or _pressed_cell >= 0)
 
 
 func _notification(what: int) -> void:
@@ -59,12 +90,17 @@ func _pulse() -> float:
 
 
 func metrics() -> Dictionary:
+	if _metrics_size == size and _metrics_face == face_to_face:
+		return _metrics_cache
 	var steps := Vector2(9, 8) if face_to_face else Vector2(8, 9)
 	var gap_x := maxf(1.0, (size.x - 84.0) / (steps.x + 1.24))
 	var gap_y := maxf(1.0, (size.y - 76.0) / (steps.y + 1.24))
 	var extent := Vector2(steps.x * gap_x, steps.y * gap_y)
 	var origin := (size - extent) * 0.5
-	return {"gap": minf(gap_x, gap_y), "gap_x": gap_x, "gap_y": gap_y, "origin": origin}
+	_metrics_cache = {"gap": minf(gap_x, gap_y), "gap_x": gap_x, "gap_y": gap_y, "origin": origin}
+	_metrics_size = size
+	_metrics_face = face_to_face
+	return _metrics_cache
 
 
 func position_for(index: int) -> Vector2:
@@ -116,9 +152,10 @@ func _draw() -> void:
 	var origin: Vector2 = layout.origin
 	if gap <= 0:
 		return
-	draw_style_box(PlaygroundUI.style(PlaygroundUI.mix(accent, Color.WHITE, 0.92), 30, PlaygroundUI.mix(accent, Color.WHITE, 0.55), 2), Rect2(Vector2.ZERO, size))
+	_ensure_style_accent()
+	draw_style_box(_cached_style("board_outer", PlaygroundUI.mix(accent, Color.WHITE, 0.92), 30, PlaygroundUI.mix(accent, Color.WHITE, 0.55), 2), Rect2(Vector2.ZERO, size))
 	var board_rect := audit_bounds()
-	draw_style_box(PlaygroundUI.style(Color("#fff0cf"), 24, Color("#bc8458"), 3, 6, Color(0, 0, 0, 0.10)), board_rect)
+	draw_style_box(_cached_style("board_paper", Color("#fff0cf"), 24, Color("#bc8458"), 3, 6, Color(0, 0, 0, 0.10)), board_rect)
 	_draw_grid(origin, gap)
 	_draw_palaces(origin, gap)
 	_draw_river(origin, float(layout.gap_x), gap)
@@ -136,7 +173,7 @@ func _draw() -> void:
 		TabletopLayout.draw_turn_marks(self, rules.state.get("players", []), current_side, face_to_face, [Color("#b23b32"), Color("#29313a")], str(rules.state.get("phase", "")) == "finished")
 	if rules != null and rules.state.get("phase", "") == "finished":
 		var panel := Rect2(size.x * 0.20, size.y * 0.44, size.x * 0.60, size.y * 0.12)
-		draw_style_box(PlaygroundUI.style(Color("#fff9e9"), 24, accent, 3, 8, Color(0, 0, 0, 0.18)), panel)
+		draw_style_box(_cached_style("finished_panel", Color("#fff9e9"), 24, accent, 3, 8, Color(0, 0, 0, 0.18)), panel)
 		_text(str(rules.state.get("reason", "本局结束")), panel.get_center(), maxf(20.0, gap * 0.33), accent)
 
 
@@ -212,12 +249,23 @@ func _draw_board_feedback(gap: float) -> void:
 		var center := position_for(_preview_cell)
 		draw_arc(center, gap * 0.57, 0, TAU, 40, accent, 4.0, true)
 		var piece := rules.piece_at(_preview_cell)
-		var message := rules.piece_hint(piece) if not piece.is_empty() and int(piece.side) == current_side else str(rules.explain_move(selected, _preview_cell).message)
+		var message := rules.piece_hint(piece) if not piece.is_empty() and int(piece.side) == current_side else _cached_preview_message()
 		TabletopLayout.draw_note(self, center, message, TabletopLayout.facing_angle(_press_seat, face_to_face), accent)
 	elif not str(notice.get("message", "")).is_empty():
 		var cells: Array = notice.get("cells", [])
 		var anchor := position_for(int(cells[0])) if not cells.is_empty() and int(cells[0]) in range(ChessRules.CELLS) else size * 0.5
 		TabletopLayout.draw_note(self, anchor, str(notice.message), TabletopLayout.facing_angle(int(notice.get("side", current_side)), face_to_face), accent)
+
+
+func _cached_preview_message() -> String:
+	var rules_id := rules.get_instance_id() if rules != null else 0
+	if _preview_cell_cached == _preview_cell and _preview_selected == selected and _preview_rules_id == rules_id:
+		return _preview_message
+	_preview_cell_cached = _preview_cell
+	_preview_selected = selected
+	_preview_rules_id = rules_id
+	_preview_message = str(rules.explain_move(selected, _preview_cell).message) if rules != null else ""
+	return _preview_message
 
 
 func engine_name(piece: Dictionary) -> String:
@@ -354,7 +402,6 @@ func _begin_press(point: Vector2) -> void:
 	_preview_cell = _pressed_cell
 	_press_seat = current_side
 	TabletopLayout.remember_seat(self, _press_seat)
-	set_process(true)
 	queue_redraw()
 
 
@@ -372,7 +419,33 @@ func _finish_press(point: Vector2) -> void:
 
 
 func _cancel_press() -> void:
+	if _touch_index < 0 and _pressed_cell < 0 and _preview_cell < 0:
+		return
 	_touch_index = -1
 	_pressed_cell = -1
 	_preview_cell = -1
+	set_process(_needs_frames())
 	queue_redraw()
+
+
+func _ensure_style_accent() -> void:
+	if _style_accent == accent:
+		return
+	_style_accent = accent
+	_style_cache.clear()
+
+
+func _cached_style(
+	cache_key: String,
+	background: Color,
+	radius: int = 20,
+	border: Color = Color.TRANSPARENT,
+	border_width: int = 0,
+	shadow_size: int = 0,
+	shadow_color: Color = Color.TRANSPARENT
+) -> StyleBoxFlat:
+	if _style_cache.has(cache_key):
+		return _style_cache[cache_key]
+	var style := PlaygroundUI.style(background, radius, border, border_width, shadow_size, shadow_color)
+	_style_cache[cache_key] = style
+	return style

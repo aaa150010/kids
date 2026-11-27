@@ -358,6 +358,8 @@ func _push_history(action_type: String) -> void:
 	var before := state.duplicate(true)
 	before.erase("history")
 	state.history.append({"before":before,"type":action_type})
+	if state.history.size() > 24:
+		state.history = state.history.slice(state.history.size() - 24)
 
 func _complete_action(message: String) -> void:
 	state.moveCount = int(state.moveCount)+1

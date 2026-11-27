@@ -10,6 +10,7 @@ var next_button: Button
 var explain_button: Button
 var player_labels: Array[Label] = []
 var player_panels: Array[PanelContainer] = []
+var player_bar: HBoxContainer
 var game_controls: Control
 var view := "question"
 var family := "mixed"
@@ -55,6 +56,21 @@ func _show_map() -> void:
 func _choose_level(number: int) -> void:
 	if not SaveStore.level_unlocked(str(players[0].id),game_id,number,mode_id):
 		return
+	if not engine.state.is_empty() and str(engine.state.get("phase","")) in ["question","feedback"]:
+		if number == level_id:
+			view = "question"
+			_build_session()
+			_refresh()
+			return
+		open_modal("这一关还没完成", PlaygroundUI.label("现在换关会结束第 %s 关的进度。要继续本关，还是换到第 %s 关？" % [level_id, number], 20, PlaygroundUI.INK_SOFT, 500, true), [
+			{"text":"继续本关","icon":"play","kind":"primary","callback":func(): _close_top_modal(); _choose_level(level_id)},
+			{"text":"换一关","icon":"next","kind":"soft","callback":func(): _close_top_modal(); _start_level(number)},
+		], "当前进度已自动保存")
+		return
+	_start_level(number)
+
+
+func _start_level(number: int) -> void:
 	level_id = number
 	_new_session()
 	_build_session()
@@ -114,6 +130,12 @@ func _build_session() -> void:
 	controls.add_child(PlaygroundUI.button("重新开始",accent,_confirm_restart,"ghost"))
 	content_root.add_child(controls)
 	game_controls = controls
+	if players.size() > 1:
+		player_bar = HBoxContainer.new()
+		player_bar.add_theme_constant_override("separation", 10)
+		for index in mini(2, players.size()):
+			player_bar.add_child(_player_panel(index))
+		content_root.add_child(player_bar)
 	stage = QuizStage.new()
 	stage.game_id = game_id
 	stage.accent = accent
@@ -123,20 +145,17 @@ func _build_session() -> void:
 	stage.listen_requested.connect(_listen)
 	content_root.add_child(stage)
 	feedback_panel = PlaygroundUI.panel(Color("#fff9e9"),22,PlaygroundUI.mix(accent,Color.WHITE,0.5),2)
-	feedback_panel.custom_minimum_size.y = 218
+	feedback_panel.custom_minimum_size.y = 168
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation",8)
 	feedback_panel.add_child(column)
 	feedback_title = PlaygroundUI.label("",22,accent,700,true)
 	column.add_child(feedback_title)
-	var scroll := ScrollContainer.new()
-	scroll.custom_minimum_size.y = 72
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	feedback_text = PlaygroundUI.label("",20,PlaygroundUI.INK_SOFT,500,true)
+	feedback_text.custom_minimum_size.y = 54
 	feedback_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.add_child(feedback_text)
-	column.add_child(scroll)
+	feedback_text.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	column.add_child(feedback_text)
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation",12)
 	explain_button = PlaygroundUI.semantic_icon_button("speech","听讲解",accent,func(): Speech.speak(feedback_text.text),"soft")
@@ -153,20 +172,24 @@ func _build_session() -> void:
 	_on_immersive_changed(immersive)
 
 func _player_panel(index: int) -> Control:
-	var panel := PlaygroundUI.panel(PlaygroundUI.mix(accent,Color.WHITE,0.9),24,PlaygroundUI.LINE)
-	panel.custom_minimum_size.x = 156
-	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation",16)
-	panel.add_child(column)
+	var panel := PlaygroundUI.panel(PlaygroundUI.mix(accent,Color.WHITE,0.9),18,PlaygroundUI.LINE)
+	panel.custom_minimum_size = Vector2(0,72)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation",9)
+	panel.add_child(row)
 	var player: Dictionary = players[index] if index < players.size() else {}
 	if player.is_empty():
-		column.add_child(ArtLibrary.semantic_picture("profile","ui",Vector2(100,108)))
+		row.add_child(ArtLibrary.semantic_picture("profile","ui",Vector2(46,46)))
 	else:
-		column.add_child(ArtLibrary.profile_picture(player,Vector2(100,108)))
-	column.add_child(PlaygroundUI.label(str(player.get("name","慢慢想")),22,PlaygroundUI.INK,700,true))
-	var label := PlaygroundUI.label("",18,PlaygroundUI.INK_SOFT,500,true)
-	column.add_child(label)
+		row.add_child(ArtLibrary.profile_picture(player,Vector2(46,46)))
+	var copy := VBoxContainer.new()
+	copy.add_theme_constant_override("separation",1)
+	copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	copy.add_child(PlaygroundUI.label(str(player.get("name","慢慢想")),17,PlaygroundUI.INK,700,true))
+	var label := PlaygroundUI.label("",14,PlaygroundUI.INK_SOFT,500,true)
+	copy.add_child(label)
+	row.add_child(copy)
 	player_labels.append(label)
 	player_panels.append(panel)
 	return panel
@@ -175,9 +198,11 @@ func _player_panel(index: int) -> Control:
 func _on_immersive_changed(value: bool) -> void:
 	if game_controls != null and is_instance_valid(game_controls):
 		game_controls.visible = not value
+	if player_bar != null and is_instance_valid(player_bar):
+		player_bar.visible = not value and players.size() > 1
 	for panel in player_panels:
 		if panel != null and is_instance_valid(panel):
-			panel.visible = not value
+			panel.visible = not value and players.size() > 1
 	if value:
 		_last_immersive_player = int(engine.state.get("currentPlayer", 0)) if not engine.state.is_empty() else -1
 
@@ -215,6 +240,14 @@ func _refresh(persist: bool = true) -> void:
 	var totals: Array = engine.state.queues.map(func(queue): return queue.size())
 	stage.set_progress(int(engine.state.scores[current]),int(engine.state.positions[current]),int(totals[current]))
 	stage.player_name = str(players[current].get("name","")) if current < players.size() else ""
+	stage.score_caption = ""
+	if players.size() > 1 and engine.state.scores.size() >= 2:
+		stage.score_caption = "%s %s : %s %s" % [
+			str(players[0].get("name", "甲")).left(6),
+			int(engine.state.scores[0]),
+			int(engine.state.scores[1]),
+			str(players[1].get("name", "乙")).left(6),
+		]
 	stage.update_question(question,int(engine.state.selected),engine.state.phase == "feedback",engine.state.scores,totals)
 	for index in mini(2, players.size()):
 		if index < player_labels.size() and index < player_panels.size():

@@ -1,0 +1,19 @@
+《水管工坊》原创实现与参考记录
+
+查阅日期：2026-11-27
+
+玩法参考
+- Pipe Mania / Pipe Dream 的公开玩法资料：
+  https://en.wikipedia.org/wiki/Pipe_Mania
+  仅参考“网格水管、接口连通、实时水流”的通用玩法概念，未复用名称、画面、关卡或代码。
+- PAIPO（Godot，Unlicense）：
+  https://github.com/manokara/paipo
+  参考旋转水管、单一水源、目标连通的交互组织方式；未固定提交，未复制代码或素材。
+- EntroPipes（Pyxel，GPL-3.0）：
+  https://codeberg.org/son_link/EntroPipes
+  仅用于比较公开的旋转水管谜题规则；因许可证策略不同，未复制任何代码或资源。
+
+本项目的实现与素材
+- 36 个固定关卡、树状通水判定、双人轮转、提示与星级均由本项目独立实现。
+- 封面 content-src/assets/covers/pipes.svg、运行时管件/水源/花圃绘制与音效均为项目原创或使用项目已有原创声音合成。
+- 关卡由 scripts/native/author-pipes.mjs 生成并逐关按 solutionRotation 做通水校验。

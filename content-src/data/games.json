@@ -653,6 +653,171 @@
     ]
   },
   {
+    "id": "robot",
+    "title": "路线小机器人",
+    "subtitle": "排好指令，让机器人一步步走到小旗",
+    "icon": "🤖",
+    "category": "编程思维",
+    "accent": "#4266a8",
+    "soft": "#e4eaf8",
+    "cover": "res://assets/covers/robot.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [
+      1,
+      2
+    ],
+    "features": [
+      "🤖 方向指令",
+      "🧭 路线调试",
+      "🤝 双人协作"
+    ],
+    "searchTerms": [
+      "机器人",
+      "编程",
+      "指令",
+      "路线",
+      "算法",
+      "调试",
+      "方向"
+    ],
+    "guide": [
+      "先看机器人、旗子和纸墙，再按顺序添加方向指令。",
+      "点“出发”后机器人会一步一步执行；撞墙时停在原地，程序会保留。",
+      "可以删掉某一条指令重新排列，也可以看提示或重试。"
+    ],
+    "modes": [
+      {
+        "id": "adventure",
+        "name": "编程闯关",
+        "player_range": [
+          1,
+          1
+        ],
+        "description": "24 条机器人路线，从短路线到绕墙挑战"
+      },
+      {
+        "id": "classic",
+        "name": "一起编程序",
+        "player_range": [
+          2,
+          2
+        ],
+        "description": "两人轮流添加指令，共同完成路线，不比较输赢"
+      }
+    ]
+  },
+  {
+    "id": "sentence_train",
+    "title": "句子小火车",
+    "subtitle": "接好词语车厢，把一句话排通顺",
+    "icon": "🚂",
+    "category": "语言表达",
+    "accent": "#a35a2d",
+    "soft": "#f4e4d8",
+    "cover": "res://assets/covers/sentence_train.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [
+      1,
+      2
+    ],
+    "features": [
+      "🚂 词语车厢",
+      "💬 主动组句",
+      "🤝 轮流接词"
+    ],
+    "searchTerms": [
+      "句子",
+      "组句",
+      "词语",
+      "阅读",
+      "表达",
+      "火车",
+      "语法"
+    ],
+    "guide": [
+      "先看情境提示，再按顺序把词语卡放上火车。",
+      "点已放好的车厢可以取回；全部排好后点“出发”。",
+      "答完后会留下完整句子和解释，点“下一句”才继续。"
+    ],
+    "modes": [
+      {
+        "id": "adventure",
+        "name": "组句车站",
+        "player_range": [
+          1,
+          1
+        ],
+        "description": "24 个车站、120 句，从短句到较长的复句"
+      },
+      {
+        "id": "classic",
+        "name": "一起接车厢",
+        "player_range": [
+          2,
+          2
+        ],
+        "description": "两人轮流往同一句话里接词卡，共同完成句子"
+      }
+    ]
+  },
+  {
+    "id": "pipes",
+    "title": "水管工坊",
+    "subtitle": "转动水管，把水送到每一座花圃",
+    "icon": "🚿",
+    "category": "空间逻辑",
+    "accent": "#2b7d76",
+    "soft": "#dcefec",
+    "cover": "res://assets/covers/pipes.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [
+      1,
+      2
+    ],
+    "features": [
+      "🚿 水管旋转",
+      "💧 水流连通",
+      "🌸 花园开花"
+    ],
+    "searchTerms": [
+      "水管",
+      "管道",
+      "水流",
+      "花园",
+      "连通",
+      "逻辑",
+      "旋转"
+    ],
+    "guide": [
+      "点水管转九十度，先找到从水源出发的路。",
+      "水管接口要对齐，水才能继续流到下一格。",
+      "当所有花圃都接通后，水会流过去，小花就开了。"
+    ],
+    "modes": [
+      {
+        "id": "adventure",
+        "name": "修遍花园",
+        "player_range": [
+          1,
+          1
+        ],
+        "description": "36 座花园，从一条水管到分叉灌溉"
+      },
+      {
+        "id": "classic",
+        "name": "一起接水",
+        "player_range": [
+          2,
+          2
+        ],
+        "description": "两人轮流转动共享水管，一起让花园开花"
+      }
+    ]
+  },
+  {
     "id": "gomoku",
     "title": "五子棋",
     "subtitle": "黑先白后，连成五颗星",

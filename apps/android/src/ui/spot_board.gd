@@ -12,7 +12,10 @@ var _clock := 0.0
 var _wrong_at := Vector2(-1, -1)
 var _wrong_remaining := 0.0
 var _last_touch_msec := -1000
+var _press_position := Vector2.ZERO
+var _press_active := false
 const MIN_TOUCH_DIAMETER := 44.0
+const TAP_SLOP := 12.0
 
 
 func _ready() -> void:
@@ -30,6 +33,7 @@ func configure(value: Dictionary, tint: Color = Color("#526f88")) -> void:
 	interactive = true
 	_wrong_at = Vector2(-1, -1)
 	_wrong_remaining = 0.0
+	_press_active = false
 	set_process(false)
 	queue_redraw()
 
@@ -59,6 +63,12 @@ func _process(delta: float) -> void:
 	queue_redraw()
 	if hint_id.is_empty() and _wrong_remaining <= 0.0:
 		set_process(false)
+
+
+func _notification(what: int) -> void:
+	if what in [NOTIFICATION_APPLICATION_FOCUS_OUT, NOTIFICATION_WM_CLOSE_REQUEST]:
+		_press_active = false
+		queue_redraw()
 
 
 func panel_rects() -> Array:
@@ -108,12 +118,33 @@ func _gui_input(event: InputEvent) -> void:
 			return
 		_last_touch_msec = Time.get_ticks_msec()
 		if event.pressed:
-			_emit_tap(event.position)
+			_press_position = event.position
+			_press_active = true
+		else:
+			_release_tap(event.position)
+			_press_active = false
+	elif event is InputEventScreenDrag:
+		_last_touch_msec = Time.get_ticks_msec()
+		if _press_active and _press_position.distance_to(event.position) > TAP_SLOP:
+			_press_active = false
 	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if Time.get_ticks_msec() - _last_touch_msec < 500:
 			return
 		if event.pressed:
-			_emit_tap(event.position)
+			_press_position = event.position
+			_press_active = true
+		else:
+			_release_tap(event.position)
+			_press_active = false
+	elif event is InputEventMouseMotion and _press_active:
+		if _press_position.distance_to(event.position) > TAP_SLOP:
+			_press_active = false
+
+
+func _release_tap(point: Vector2) -> void:
+	if not _press_active or _press_position.distance_to(point) > TAP_SLOP:
+		return
+	_emit_tap(point)
 
 
 func _emit_tap(point: Vector2) -> void:

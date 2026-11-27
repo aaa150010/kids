@@ -153,10 +153,13 @@ func _make_pause_rail(side: int) -> PanelContainer:
 	var fold := VBoxContainer.new()
 	fold.alignment = BoxContainer.ALIGNMENT_CENTER
 	fold.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	fold.add_theme_constant_override("separation", 7)
+	fold.add_theme_constant_override("separation", 6)
+	var pause_icon := ArtLibrary.semantic_picture("pause", "ui", Vector2(34, 34))
+	pause_icon.modulate = Color(1, 1, 1, 0.72)
+	fold.add_child(pause_icon)
 	for index in 3:
 		var dot := ColorRect.new()
-		dot.color = Color(accent, 0.42)
+		dot.color = Color(accent, 0.55)
 		dot.custom_minimum_size = Vector2(5, 5)
 		dot.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		fold.add_child(dot)
@@ -179,8 +182,8 @@ func _layout_pause_rails() -> void:
 	var safe := PlaygroundUI.safe_insets(viewport)
 	var left_offset := float(safe.get("left", 0.0)) + SYSTEM_GESTURE_GUARD
 	var right_offset := float(safe.get("right", 0.0)) + SYSTEM_GESTURE_GUARD
-	var top := viewport.y * RAIL_MIN_HEIGHT_RATIO
-	var bottom := viewport.y * RAIL_MAX_HEIGHT_RATIO
+	var top := maxf(float(safe.get("top", 0.0)) + 34.0, viewport.y * 0.08)
+	var bottom := minf(viewport.y - float(safe.get("bottom", 0.0)) - 34.0, viewport.y * 0.92)
 	_left_pause_rail.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	_left_pause_rail.position = Vector2(left_offset, top)
 	_left_pause_rail.size = Vector2(RAIL_WIDTH, bottom - top)
@@ -809,15 +812,42 @@ func add_saved_meta(note: String, resume: bool = true) -> void:
 		SaveStore.save_state(game_id, primary, state, note, resume)
 
 
+func guard_level_switch(target_level: int, start_action: Callable, resume_action: Callable = Callable()) -> void:
+	var rules: Variant = get("engine")
+	if rules == null or not rules.get("state") is Dictionary:
+		start_action.call()
+		return
+	var current_state: Dictionary = rules.get("state")
+	var phase := str(current_state.get("phase", ""))
+	if not phase in ["playing", "question", "feedback", "pay", "basket", "scene", "program", "running", "retry"]:
+		start_action.call()
+		return
+	var active_level := int(current_state.get("levelId", level_id))
+	if active_level == target_level:
+		if resume_action.is_valid():
+			resume_action.call()
+		return
+	var body := PlaygroundUI.label(
+		"第 %s 关还没完成。现在换关会结束这一局的进度；继续本关，回来还能接着玩。" % active_level,
+		19,
+		PlaygroundUI.INK_SOFT,
+		500,
+		true
+	)
+	open_modal("这一关还没完成", body, [
+		{"text": "继续本关", "icon": "play", "kind": "primary", "callback": func(): _close_top_modal()},
+		{"text": "换一关", "icon": "next", "kind": "soft", "callback": func(): _close_top_modal(); start_action.call()},
+	], "当前进度已自动保存")
+
+
 func checkpoint(note: String = "实时自动保存") -> void:
 	if has_method("_save"):
 		call("_save", note)
 	elif has_method("_save_profile"):
 		call("_save_profile", note)
-	else:
-		SaveStore.flush()
+	SaveStore.flush()
 	if not SaveStore.last_save_ok:
-		show_toast("进度暂时没有写入成功，下一次操作会自动重试。", 2.8)
+		show_toast("刚才没记住，我再试一次。", 2.8)
 
 
 func _process(delta: float) -> void:
@@ -834,36 +864,29 @@ func _notification(what: int) -> void:
 
 
 func level_map(on_chosen: Callable) -> Control:
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	var grid := GridContainer.new()
-	var width := get_viewport_rect().size.x
-	grid.columns = 3 if width <= 1180.0 else 4 if width < 1500.0 else 6
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 16)
-	grid.add_theme_constant_override("v_separation", 16)
+	var entries: Array = []
+	var rules: Variant = get("engine")
+	var state_value: Variant = rules.get("state") if rules != null else {}
+	var state: Dictionary = state_value if state_value is Dictionary else {}
+	var active_level := -1
+	if str(state.get("phase", "")) in ["playing", "question", "feedback", "pending"]:
+		active_level = int(state.get("levelId", level_id))
 	for entry in ContentDB.chapters.get(game_id, []):
 		var number := int(entry.id)
 		var chapter := ContentDB.level(game_id, number)
-		var unlocked := SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id)
 		var stars := clampi(int(SaveStore.learning(str(players[0].id),game_id,mode_id).stars.get(str(number),0)),0,3)
-		var state_text := "尚未解锁" if not unlocked else "已获 %s / 3 星" % stars
-		var button := PlaygroundUI.semantic_icon_button(
-			"play" if unlocked else "lock",
-			"%s\n%s\n%s" % [str(number), str(chapter.get("title", entry.get("title", ""))), state_text],
-			accent,
-			on_chosen.bind(number),
-			"soft",
-			18
-		)
-		button.custom_minimum_size = Vector2(0, 136)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.disabled = not unlocked
-		grid.add_child(button)
-	scroll.add_child(grid)
-	return scroll
+		entries.append({
+			"id": number,
+			"title": str(chapter.get("title", entry.get("title", ""))),
+			"subtitle": str(chapter.get("skill", "")),
+			"locked": not SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id),
+			"stars": stars,
+			"in_progress": number == active_level,
+		})
+	var browser := GameBrowser.new()
+	browser.configure(entries, {"accent": accent})
+	browser.entry_selected.connect(func(number: Variant): on_chosen.call(int(number)))
+	return browser
 
 
 func begin_lesson(force: bool = false) -> void:

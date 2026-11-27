@@ -1,0 +1,317 @@
+{
+  "version": 1,
+  "stations": [
+    {
+      "id": "sentence-station-01",
+      "band": "easy",
+      "minAge": 4,
+      "title": "清早小站",
+      "sentences": [
+        {"id":"sentence-001","band":"easy","minAge":4,"prompt":"早晨出门，妈妈在校门口和你道别。","chunks":[{"id":"a","text":"妈妈"},{"id":"b","text":"在校门口"},{"id":"c","text":"向我"},{"id":"d","text":"挥手。"}],"answerOrder":["a","b","c","d"],"fullSentence":"妈妈在校门口向我挥手。","explanation":"先说“妈妈”，再说她“在哪里”和“做什么”，句子顺序就清楚了。","narration":"早晨出门时，妈妈来道别。请把词卡排成一句通顺的话。","skill":"language"},
+        {"id":"sentence-002","band":"easy","minAge":4,"prompt":"把书包里的东西介绍给大家。","chunks":[{"id":"a","text":"我的"},{"id":"b","text":"小书包"},{"id":"c","text":"里"},{"id":"d","text":"有"},{"id":"e","text":"一本图画书。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"我的小书包里有一本图画书。","explanation":"“我的”说明是谁的书包，“一本”说明图画书的数量。","narration":"来介绍小书包里的东西吧。把词卡一张一张接起来。","skill":"language"},
+        {"id":"sentence-003","band":"easy","minAge":4,"prompt":"小朋友准备坐火车去公园。","chunks":[{"id":"a","text":"我"},{"id":"b","text":"坐上"},{"id":"c","text":"红红的小火车"},{"id":"d","text":"去公园。"}],"answerOrder":["a","b","c","d"],"fullSentence":"我坐上红红的小火车去公园。","explanation":"先说“我”，再说坐什么、去哪里，动作顺序很自然。","narration":"小火车要开去公园了。请把谁、坐什么、去哪里排清楚。","skill":"language"},
+        {"id":"sentence-004","band":"easy","minAge":4,"prompt":"坐在车厢里，看看窗外的天空。","chunks":[{"id":"a","text":"窗外"},{"id":"b","text":"飘着"},{"id":"c","text":"几朵"},{"id":"d","text":"白云。"}],"answerOrder":["a","b","c","d"],"fullSentence":"窗外飘着几朵白云。","explanation":"“窗外”交代地点，“几朵”放在“白云”前面说明数量。","narration":"看看车窗外。白云是什么样子的？把词卡排好。","skill":"language"},
+        {"id":"sentence-005","band":"easy","minAge":4,"prompt":"到站了，大家要安全地下车。","chunks":[{"id":"a","text":"我们"},{"id":"b","text":"排好队"},{"id":"c","text":"慢慢"},{"id":"d","text":"下车。"}],"answerOrder":["a","b","c","d"],"fullSentence":"我们排好队慢慢下车。","explanation":"“排好队”说明下车前怎样做，“慢慢”说明下车时不能着急。","narration":"到站了，请排好队下车。把动作的顺序接出来。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-02",
+      "band": "easy",
+      "minAge": 4,
+      "title": "早餐小桌",
+      "sentences": [
+        {"id":"sentence-006","band":"easy","minAge":4,"prompt":"桌上摆着香香的早餐。","chunks":[{"id":"a","text":"牛奶"},{"id":"b","text":"和面包"},{"id":"c","text":"放在"},{"id":"d","text":"桌子上。"}],"answerOrder":["a","b","c","d"],"fullSentence":"牛奶和面包放在桌子上。","explanation":"“牛奶和面包”一起作主语，后面说它们放在哪里。","narration":"桌上有什么？它们放在哪里？请把词卡接好。","skill":"language"},
+        {"id":"sentence-007","band":"easy","minAge":4,"prompt":"请把勺子的位置说清楚。","chunks":[{"id":"a","text":"小勺子"},{"id":"b","text":"放在"},{"id":"c","text":"小碗的"},{"id":"d","text":"旁边。"}],"answerOrder":["a","b","c","d"],"fullSentence":"小勺子放在小碗的旁边。","explanation":"“小碗的旁边”说明具体位置，句子就会更准确。","narration":"勺子在小碗哪里呢？请把词卡排成一句完整的话。","skill":"language"},
+        {"id":"sentence-008","band":"easy","minAge":4,"prompt":"妹妹想吃苹果，把她的动作说完整。","chunks":[{"id":"a","text":"妹妹"},{"id":"b","text":"拿起"},{"id":"c","text":"一个苹果"},{"id":"d","text":"咬了一口。"}],"answerOrder":["a","b","c","d"],"fullSentence":"妹妹拿起一个苹果咬了一口。","explanation":"先“拿起”再“咬”，两个动作按发生的先后排列。","narration":"妹妹吃苹果了。请你按先后顺序接车厢。","skill":"language"},
+        {"id":"sentence-009","band":"easy","minAge":4,"prompt":"爸爸把热乎乎的早饭端来了。","chunks":[{"id":"a","text":"爸爸"},{"id":"b","text":"给我"},{"id":"c","text":"端来"},{"id":"d","text":"一碗热粥。"}],"answerOrder":["a","b","c","d"],"fullSentence":"爸爸给我端来一碗热粥。","explanation":"“给我”说明粥是端给谁的，“一碗”说明数量。","narration":"爸爸端来了什么？请把词卡排通顺。","skill":"language"},
+        {"id":"sentence-010","band":"easy","minAge":4,"prompt":"吃完早餐，自己收拾桌面。","chunks":[{"id":"a","text":"我"},{"id":"b","text":"把空碗"},{"id":"c","text":"放进"},{"id":"d","text":"厨房。"}],"answerOrder":["a","b","c","d"],"fullSentence":"我把空碗放进厨房。","explanation":"“把空碗”放在动作前面，说明被收拾的是什么东西。","narration":"吃完早餐要收拾桌面。请把谁、把什么、放到哪里排清楚。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-03",
+      "band": "easy",
+      "minAge": 5,
+      "title": "公园草地",
+      "sentences": [
+        {"id":"sentence-011","band":"easy","minAge":5,"prompt":"草地上的小朋友正在做什么？","chunks":[{"id":"a","text":"小朋友"},{"id":"b","text":"在草地上"},{"id":"c","text":"快乐地"},{"id":"d","text":"追泡泡。"}],"answerOrder":["a","b","c","d"],"fullSentence":"小朋友在草地上快乐地追泡泡。","explanation":"先说谁，再说在哪里、怎样做，最后说做什么。","narration":"公园里真热闹。请把小朋友的动作排完整。","skill":"language"},
+        {"id":"sentence-012","band":"easy","minAge":5,"prompt":"抬头看看树上的小鸟。","chunks":[{"id":"a","text":"一只小鸟"},{"id":"b","text":"站在"},{"id":"c","text":"树枝上"},{"id":"d","text":"唱歌。"}],"answerOrder":["a","b","c","d"],"fullSentence":"一只小鸟站在树枝上唱歌。","explanation":"“一只”说明数量，“站在树枝上”说明小鸟的位置。","narration":"小鸟在树上。请听听它在哪里唱歌，再把词卡排好。","skill":"language"},
+        {"id":"sentence-013","band":"easy","minAge":5,"prompt":"风筝乘着风，发生了什么变化？","chunks":[{"id":"a","text":"风筝"},{"id":"b","text":"乘着风"},{"id":"c","text":"越飞"},{"id":"d","text":"越高。"}],"answerOrder":["a","b","c","d"],"fullSentence":"风筝乘着风越飞越高。","explanation":"“越飞越高”说明风筝在风里不断向上飞。","narration":"风筝飞起来了。请你用词卡说说它怎样越飞越高。","skill":"language"},
+        {"id":"sentence-014","band":"easy","minAge":5,"prompt":"弟弟想玩滑梯，先把动作顺序想一想。","chunks":[{"id":"a","text":"弟弟"},{"id":"b","text":"先排队"},{"id":"c","text":"再"},{"id":"d","text":"滑下"},{"id":"e","text":"滑梯。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"弟弟先排队再滑下滑梯。","explanation":"“先”和“再”把排队与滑滑梯的先后顺序说明白了。","narration":"玩滑梯要先做什么，再做什么？请把词卡按顺序接好。","skill":"language"},
+        {"id":"sentence-015","band":"easy","minAge":5,"prompt":"太阳落山了，大家准备回家。","chunks":[{"id":"a","text":"太阳"},{"id":"b","text":"慢慢"},{"id":"c","text":"落下山，"},{"id":"d","text":"我们"},{"id":"e","text":"该回家啦。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"太阳慢慢落下山，我们该回家啦。","explanation":"逗号把“太阳落山”和“大家回家”分成两个相连的意思。","narration":"太阳要落山了。请把两个小意思用逗号接在一起。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-04",
+      "band": "easy",
+      "minAge": 5,
+      "title": "家里小帮手",
+      "sentences": [
+        {"id":"sentence-016","band":"easy","minAge":5,"prompt":"吃饭前，请妈妈坐到桌边。","chunks":[{"id":"a","text":"我"},{"id":"b","text":"搬来"},{"id":"c","text":"一把椅子"},{"id":"d","text":"请妈妈"},{"id":"e","text":"坐下。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"我搬来一把椅子请妈妈坐下。","explanation":"先搬椅子，再请妈妈坐下，两个动作前后相连。","narration":"你是家里的小帮手。请把搬椅子和请妈妈坐下的顺序排好。","skill":"language"},
+        {"id":"sentence-017","band":"easy","minAge":5,"prompt":"姐姐照顾窗边的花儿。","chunks":[{"id":"a","text":"姐姐"},{"id":"b","text":"拿着小水壶"},{"id":"c","text":"给窗边的"},{"id":"d","text":"花儿"},{"id":"e","text":"浇水。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"姐姐拿着小水壶给窗边的花儿浇水。","explanation":"“拿着小水壶”说明用什么浇水，“窗边的”说明是哪里的花。","narration":"姐姐在照顾花儿。请把拿着什么、给谁浇水接完整。","skill":"language"},
+        {"id":"sentence-018","band":"easy","minAge":5,"prompt":"弟弟要把积木收好。","chunks":[{"id":"a","text":"弟弟"},{"id":"b","text":"把积木"},{"id":"c","text":"一块块"},{"id":"d","text":"收回"},{"id":"e","text":"盒子里。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"弟弟把积木一块块收回盒子里。","explanation":"“一块块”说明积木被怎样收，“盒子里”说明收到哪里。","narration":"玩具要回家。请把弟弟收积木的句子接起来。","skill":"language"},
+        {"id":"sentence-019","band":"easy","minAge":5,"prompt":"擦桌子要用两块不同的布。","chunks":[{"id":"a","text":"我"},{"id":"b","text":"先用湿布"},{"id":"c","text":"擦桌子，"},{"id":"d","text":"再用干布"},{"id":"e","text":"擦一遍。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"我先用湿布擦桌子，再用干布擦一遍。","explanation":"“先”和“再”说明用湿布、干布做事的先后顺序。","narration":"擦桌子也有顺序。请把先做什么、再做什么排清楚。","skill":"language"},
+        {"id":"sentence-020","band":"easy","minAge":5,"prompt":"妈妈看见你帮忙，会怎样夸你？","chunks":[{"id":"a","text":"妈妈"},{"id":"b","text":"笑着"},{"id":"c","text":"摸摸我的头"},{"id":"d","text":"夸我"},{"id":"e","text":"真能干。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"妈妈笑着摸摸我的头夸我真能干。","explanation":"“笑着”“摸摸我的头”“夸我”是按妈妈动作的先后排下来的。","narration":"妈妈来表扬你啦。请把她的动作接成一句通顺的话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-05",
+      "band": "easy",
+      "minAge": 6,
+      "title": "天气观察站",
+      "sentences": [
+        {"id":"sentence-021","band":"easy","minAge":6,"prompt":"窗外下雨了，仔细听声音。","chunks":[{"id":"a","text":"雨点"},{"id":"b","text":"打在"},{"id":"c","text":"玻璃窗上"},{"id":"d","text":"发出"},{"id":"e","text":"沙沙的声音。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"雨点打在玻璃窗上发出沙沙的声音。","explanation":"先说雨点打在哪里，再说发出怎样的声音。","narration":"听，雨点敲窗户了。请把雨点的动作和声音接起来。","skill":"language"},
+        {"id":"sentence-022","band":"easy","minAge":6,"prompt":"雨停了，天边出现了什么？","chunks":[{"id":"a","text":"雨停了，"},{"id":"b","text":"一道彩虹"},{"id":"c","text":"挂在"},{"id":"d","text":"天边。"}],"answerOrder":["a","b","c","d"],"fullSentence":"雨停了，一道彩虹挂在天边。","explanation":"逗号前面先说雨停，后面再说彩虹出现，时间顺序很清楚。","narration":"雨停以后看天空。请把彩虹出现的样子排成一句话。","skill":"language"},
+        {"id":"sentence-023","band":"easy","minAge":6,"prompt":"一阵风吹过树梢，树叶动了。","chunks":[{"id":"a","text":"一阵风"},{"id":"b","text":"吹过"},{"id":"c","text":"树梢，"},{"id":"d","text":"树叶"},{"id":"e","text":"轻轻摇晃。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"一阵风吹过树梢，树叶轻轻摇晃。","explanation":"前一句说风吹过哪里，后一句说树叶有什么变化。","narration":"风来了。请把风吹树梢和树叶摇晃的顺序排好。","skill":"language"},
+        {"id":"sentence-024","band":"easy","minAge":6,"prompt":"雪花落在屋顶上，像什么呢？","chunks":[{"id":"a","text":"雪花"},{"id":"b","text":"一片一片"},{"id":"c","text":"落在"},{"id":"d","text":"屋顶上，"},{"id":"e","text":"像给房子"},{"id":"f","text":"盖了棉被。"}],"answerOrder":["a","b","c","d","e","f"],"fullSentence":"雪花一片一片落在屋顶上，像给房子盖了棉被。","explanation":"“像给房子盖了棉被”把白雪比成棉被，让画面更好懂。","narration":"下雪了，屋顶像盖了棉被。请把词卡接成一句完整的话。","skill":"language"},
+        {"id":"sentence-025","band":"easy","minAge":6,"prompt":"远处打雷了，在家里要做什么？","chunks":[{"id":"a","text":"远处"},{"id":"b","text":"传来"},{"id":"c","text":"轰隆隆的雷声，"},{"id":"d","text":"我"},{"id":"e","text":"赶紧"},{"id":"f","text":"关上窗户。"}],"answerOrder":["a","b","c","d","e","f"],"fullSentence":"远处传来轰隆隆的雷声，我赶紧关上窗户。","explanation":"先听见雷声，再赶紧关窗，句子把两件事按先后连了起来。","narration":"听见雷声了。请把声音和关窗的动作排成一句话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-06",
+      "band": "easy",
+      "minAge": 6,
+      "title": "动物小邻居",
+      "sentences": [
+        {"id":"sentence-026","band":"easy","minAge":6,"prompt":"小蚂蚁怎样把食物搬回家？","chunks":[{"id":"a","text":"一群蚂蚁"},{"id":"b","text":"排着长队"},{"id":"c","text":"把面包屑"},{"id":"d","text":"搬回"},{"id":"e","text":"洞里。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"一群蚂蚁排着长队把面包屑搬回洞里。","explanation":"“排着长队”说明蚂蚁怎样走，“把面包屑”说明搬的是什么。","narration":"小蚂蚁在搬食物。请把谁、怎样走、搬什么接好。","skill":"language"},
+        {"id":"sentence-027","band":"easy","minAge":6,"prompt":"小河里的鱼在做什么？","chunks":[{"id":"a","text":"小鱼"},{"id":"b","text":"在清清的河水里"},{"id":"c","text":"游来游去，"},{"id":"d","text":"吐着"},{"id":"e","text":"小泡泡。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"小鱼在清清的河水里游来游去，吐着小泡泡。","explanation":"先写小鱼在哪里游，再写它同时吐泡泡，画面更完整。","narration":"看看河里的小鱼。请把游动和吐泡泡接成一句话。","skill":"language"},
+        {"id":"sentence-028","band":"easy","minAge":6,"prompt":"午后的猫在哪里休息？","chunks":[{"id":"a","text":"小猫"},{"id":"b","text":"蜷在"},{"id":"c","text":"暖和的垫子上"},{"id":"d","text":"睡午觉。"}],"answerOrder":["a","b","c","d"],"fullSentence":"小猫蜷在暖和的垫子上睡午觉。","explanation":"“蜷在”写出小猫的身体样子，“暖和的”说明垫子怎样。","narration":"小猫在午睡。请按顺序说它在哪里、做什么。","skill":"language"},
+        {"id":"sentence-029","band":"easy","minAge":6,"prompt":"鸟妈妈怎样陪小鸟学飞？","chunks":[{"id":"a","text":"鸟妈妈"},{"id":"b","text":"站在巢边"},{"id":"c","text":"鼓励"},{"id":"d","text":"小鸟"},{"id":"e","text":"试着张开翅膀。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"鸟妈妈站在巢边鼓励小鸟试着张开翅膀。","explanation":"“站在巢边”说明鸟妈妈的位置，后面连着她鼓励小鸟做什么。","narration":"小鸟第一次学飞。请把鸟妈妈的鼓励排成一句通顺的话。","skill":"language"},
+        {"id":"sentence-030","band":"easy","minAge":6,"prompt":"蜜蜂采完花蜜要回哪里？","chunks":[{"id":"a","text":"蜜蜂"},{"id":"b","text":"从花丛中"},{"id":"c","text":"采完花蜜，"},{"id":"d","text":"飞回"},{"id":"e","text":"蜂巢。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"蜜蜂从花丛中采完花蜜，飞回蜂巢。","explanation":"“从花丛中”说明出发的地方，“飞回蜂巢”说明去哪里。","narration":"蜜蜂要回家了。请把从哪来、回哪里排清楚。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-07",
+      "band": "easy",
+      "minAge": 4,
+      "title": "我会照顾自己",
+      "sentences": [
+        {"id":"sentence-031","band":"easy","minAge":4,"prompt":"起床后，把自己的事情做好。","chunks":[{"id":"a","text":"我"},{"id":"b","text":"自己"},{"id":"c","text":"穿好衣服，"},{"id":"d","text":"再"},{"id":"e","text":"去洗脸。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"我自己穿好衣服，再去洗脸。","explanation":"“再”表示洗完脸是穿好衣服之后的事情。","narration":"早晨起床啦。请把穿衣服和洗脸的先后顺序排好。","skill":"language"},
+        {"id":"sentence-032","band":"easy","minAge":4,"prompt":"刷牙时要怎样照顾牙齿？","chunks":[{"id":"a","text":"刷牙时"},{"id":"b","text":"要"},{"id":"c","text":"从上往下"},{"id":"d","text":"轻轻刷"},{"id":"e","text":"每一颗牙。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"刷牙时要从上往下轻轻刷每一颗牙。","explanation":"“从上往下”“轻轻”说明刷牙方向与力度，“每一颗”说明不能漏掉。","narration":"刷刷小牙齿吧。请把方向和力度排成一句通顺的话。","skill":"language"},
+        {"id":"sentence-033","band":"easy","minAge":4,"prompt":"过马路前，安全步骤不能忘。","chunks":[{"id":"a","text":"过马路前"},{"id":"b","text":"先看"},{"id":"c","text":"红绿灯，"},{"id":"d","text":"再走"},{"id":"e","text":"斑马线。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"过马路前先看红绿灯，再走斑马线。","explanation":"“先”和“再”把看灯、走斑马线的安全顺序说明白了。","narration":"过马路要记住安全步骤。请把先做什么、再做什么排好。","skill":"language"},
+        {"id":"sentence-034","band":"easy","minAge":4,"prompt":"打喷嚏时，怎样保护大家？","chunks":[{"id":"a","text":"打喷嚏时"},{"id":"b","text":"用纸巾"},{"id":"c","text":"捂住口鼻，"},{"id":"d","text":"保护"},{"id":"e","text":"自己和别人。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"打喷嚏时用纸巾捂住口鼻，保护自己和别人。","explanation":"先写用纸巾做什么，再写这样做的原因，句子更完整。","narration":"打喷嚏时要做一件保护大家的事。请把词卡接好。","skill":"language"},
+        {"id":"sentence-035","band":"easy","minAge":4,"prompt":"睡觉前，把明天要用的书收好。","chunks":[{"id":"a","text":"睡觉前"},{"id":"b","text":"我"},{"id":"c","text":"把明天要用的书"},{"id":"d","text":"放进"},{"id":"e","text":"书包。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"睡觉前我把明天要用的书放进书包。","explanation":"“睡觉前”交代时间，“明天要用的”说明是哪几本书。","narration":"睡觉前还要准备明天。请把时间、书本和去处排成一句话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-08",
+      "band": "easy",
+      "minAge": 5,
+      "title": "周末小帮手",
+      "sentences": [
+        {"id":"sentence-036","band":"easy","minAge":5,"prompt":"周末和妈妈一起去买菜。","chunks":[{"id":"a","text":"周末"},{"id":"b","text":"我和妈妈"},{"id":"c","text":"去菜市场"},{"id":"d","text":"买回"},{"id":"e","text":"一篮青菜。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"周末我和妈妈去菜市场买回一篮青菜。","explanation":"“周末”交代时间，“我和妈妈”说明谁去买菜，“一篮”说明数量。","narration":"周末去菜市场啦。请把时间、人物和买回的东西接起来。","skill":"language"},
+        {"id":"sentence-037","band":"easy","minAge":5,"prompt":"妈妈把青菜洗得很干净。","chunks":[{"id":"a","text":"妈妈"},{"id":"b","text":"把青菜"},{"id":"c","text":"放进盆里，"},{"id":"d","text":"用清水"},{"id":"e","text":"洗得干干净净。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"妈妈把青菜放进盆里，用清水洗得干干净净。","explanation":"逗号前写放进盆里，逗号后写用清水洗，两个步骤很清楚。","narration":"青菜要洗干净。请把放进盆里和用清水洗的顺序排好。","skill":"language"},
+        {"id":"sentence-038","band":"easy","minAge":5,"prompt":"开饭前，你帮大家摆好什么？","chunks":[{"id":"a","text":"开饭前"},{"id":"b","text":"我"},{"id":"c","text":"帮大家"},{"id":"d","text":"摆好"},{"id":"e","text":"碗和筷子。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"开饭前我帮大家摆好碗和筷子。","explanation":"“开饭前”说明时间，“帮大家”说明为谁帮忙，“碗和筷子”是摆好的东西。","narration":"开饭前需要小帮手。请把时间、帮谁和摆放物品排清楚。","skill":"language"},
+        {"id":"sentence-039","band":"easy","minAge":5,"prompt":"妹妹是怎样扫地的？","chunks":[{"id":"a","text":"妹妹"},{"id":"b","text":"拿着扫帚"},{"id":"c","text":"把地上的纸屑"},{"id":"d","text":"扫进"},{"id":"e","text":"簸箕。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"妹妹拿着扫帚把地上的纸屑扫进簸箕。","explanation":"“拿着扫帚”说明用什么工具，“把纸屑”说明扫的是什么。","narration":"妹妹在扫地。请把工具、纸屑和簸箕的顺序接好。","skill":"language"},
+        {"id":"sentence-040","band":"easy","minAge":5,"prompt":"爸爸浇过水以后，花儿有什么变化？","chunks":[{"id":"a","text":"爸爸"},{"id":"b","text":"给阳台上的花"},{"id":"c","text":"浇了水，"},{"id":"d","text":"花儿"},{"id":"e","text":"看起来更有精神了。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"爸爸给阳台上的花浇了水，花儿看起来更有精神了。","explanation":"逗号前写爸爸浇花，逗号后写花儿的变化，意思连得很自然。","narration":"爸爸给花浇水了。请把浇水前后的变化接成一句话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-09",
+      "band": "normal",
+      "minAge": 7,
+      "title": "校园第一课",
+      "sentences": [
+        {"id":"sentence-041","band":"normal","minAge":7,"prompt":"上课铃响了，同学们怎样进教室？","chunks":[{"id":"a","text":"上课铃一响，"},{"id":"b","text":"同学们"},{"id":"c","text":"就安静地"},{"id":"d","text":"走进教室。"}],"answerOrder":["a","b","c","d"],"fullSentence":"上课铃一响，同学们就安静地走进教室。","explanation":"“一……就……”表示铃声刚响，同学们马上有了动作。","narration":"上课铃响了。请用词卡说出同学们怎样进入教室。","skill":"language"},
+        {"id":"sentence-042","band":"normal","minAge":7,"prompt":"老师怎样帮助大家看懂黑板上的题？","chunks":[{"id":"a","text":"老师"},{"id":"b","text":"指着黑板上的题目"},{"id":"c","text":"耐心地"},{"id":"d","text":"给我们"},{"id":"e","text":"讲解。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"老师指着黑板上的题目耐心地给我们讲解。","explanation":"“指着题目”先写动作，“耐心地”写态度，“给我们”说明听讲的人。","narration":"老师正在讲题。请把老师怎样讲、给谁讲排清楚。","skill":"language"},
+        {"id":"sentence-043","band":"normal","minAge":7,"prompt":"同桌忘带橡皮，你怎样帮助他？","chunks":[{"id":"a","text":"同桌"},{"id":"b","text":"忘带橡皮，"},{"id":"c","text":"我"},{"id":"d","text":"把橡皮"},{"id":"e","text":"借给了他。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"同桌忘带橡皮，我把橡皮借给了他。","explanation":"逗号前说遇到的问题，逗号后说你怎样解决，事情就很完整。","narration":"同桌忘带橡皮了。请把问题和你的帮助接成一句话。","skill":"language"},
+        {"id":"sentence-044","band":"normal","minAge":7,"prompt":"下课以后，操场上有哪些活动？","chunks":[{"id":"a","text":"下课以后，"},{"id":"b","text":"我们"},{"id":"c","text":"在操场上"},{"id":"d","text":"跳绳，"},{"id":"e","text":"踢毽子。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"下课以后，我们在操场上跳绳，踢毽子。","explanation":"“在操场上”说明地点，逗号把两种课间活动并列起来。","narration":"课间活动真丰富。请把地点和两种活动排成一句话。","skill":"language"},
+        {"id":"sentence-045","band":"normal","minAge":7,"prompt":"放学前，老师提醒大家做什么？","chunks":[{"id":"a","text":"放学前，"},{"id":"b","text":"老师"},{"id":"c","text":"提醒大家"},{"id":"d","text":"整理好"},{"id":"e","text":"自己的书包。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"放学前，老师提醒大家整理好自己的书包。","explanation":"“放学前”交代时间，“提醒大家”后面的内容是要做的准备。","narration":"快放学了。请把老师提醒的时间和内容接完整。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-10",
+      "band": "normal",
+      "minAge": 7,
+      "title": "超市购物车",
+      "sentences": [
+        {"id":"sentence-046","band":"normal","minAge":7,"prompt":"出门购物前，妈妈先做了什么准备？","chunks":[{"id":"a","text":"出门前，"},{"id":"b","text":"妈妈"},{"id":"c","text":"列了一张"},{"id":"d","text":"购物清单。"}],"answerOrder":["a","b","c","d"],"fullSentence":"出门前，妈妈列了一张购物清单。","explanation":"“出门前”说明时间，“一张”说明清单的数量。","narration":"去超市以前，妈妈做了一件准备。请把词卡排好。","skill":"language"},
+        {"id":"sentence-047","band":"normal","minAge":7,"prompt":"你在超市里跟在谁身边？","chunks":[{"id":"a","text":"我"},{"id":"b","text":"推着购物车"},{"id":"c","text":"跟在妈妈"},{"id":"d","text":"身后。"}],"answerOrder":["a","b","c","d"],"fullSentence":"我推着购物车跟在妈妈身后。","explanation":"先写“推着购物车”，再写跟在谁后面，动作顺序清楚。","narration":"在超市里要跟紧妈妈。请把推车和跟随的动作接起来。","skill":"language"},
+        {"id":"sentence-048","band":"normal","minAge":7,"prompt":"买好的苹果还要做什么？","chunks":[{"id":"a","text":"我们把"},{"id":"b","text":"挑好的苹果"},{"id":"c","text":"交给"},{"id":"d","text":"工作人员"},{"id":"e","text":"称重。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"我们把挑好的苹果交给工作人员称重。","explanation":"“挑好的”说明苹果已经选过，“交给工作人员称重”是接下来的步骤。","narration":"苹果挑好了。请把交给谁、做什么排成一句完整的话。","skill":"language"},
+        {"id":"sentence-049","band":"normal","minAge":7,"prompt":"收银台前队伍很长，大家怎样做？","chunks":[{"id":"a","text":"收银台前"},{"id":"b","text":"队伍"},{"id":"c","text":"虽然很长，"},{"id":"d","text":"大家"},{"id":"e","text":"还是按顺序等待。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"收银台前队伍虽然很长，大家还是按顺序等待。","explanation":"“虽然……还是……”说明队伍长，但大家仍然守秩序。","narration":"排队的人很多。请用词卡说出大家仍然怎样等待。","skill":"language"},
+        {"id":"sentence-050","band":"normal","minAge":7,"prompt":"付完钱后，找回的零钱放哪里？","chunks":[{"id":"a","text":"付完钱，"},{"id":"b","text":"我"},{"id":"c","text":"把找回的零钱"},{"id":"d","text":"放进"},{"id":"e","text":"妈妈的钱包。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"付完钱，我把找回的零钱放进妈妈的钱包。","explanation":"“付完钱”交代时间，“把找回的零钱”说明收好的是什么。","narration":"购物结束啦。请把零钱应该放回哪里排清楚。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-11",
+      "band": "normal",
+      "minAge": 8,
+      "title": "厨房小科学",
+      "sentences": [
+        {"id":"sentence-051","band":"normal","minAge":8,"prompt":"水烧开以后，壶嘴会冒出什么？","chunks":[{"id":"a","text":"水烧开后，"},{"id":"b","text":"壶嘴"},{"id":"c","text":"冒出"},{"id":"d","text":"白色的水汽。"}],"answerOrder":["a","b","c","d"],"fullSentence":"水烧开后，壶嘴冒出白色的水汽。","explanation":"“烧开后”说明时间，后面写壶嘴出现水汽的样子。","narration":"水开了，壶嘴有变化。请把时间和看到的景象接起来。","skill":"language"},
+        {"id":"sentence-052","band":"normal","minAge":8,"prompt":"妈妈把盐放进水里，盐粒怎样了？","chunks":[{"id":"a","text":"妈妈"},{"id":"b","text":"把一小勺盐"},{"id":"c","text":"放进水里，"},{"id":"d","text":"盐粒"},{"id":"e","text":"很快就看不见了。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"妈妈把一小勺盐放进水里，盐粒很快就看不见了。","explanation":"“放进水里”之后再说盐粒的变化，前后有清楚的因果关系。","narration":"盐遇到水会怎样？请把妈妈的动作和盐粒的变化接成一句话。","skill":"language"},
+        {"id":"sentence-053","band":"normal","minAge":8,"prompt":"苹果切开以后，果肉颜色有什么变化？","chunks":[{"id":"a","text":"切开苹果以后，"},{"id":"b","text":"果肉"},{"id":"c","text":"慢慢变成"},{"id":"d","text":"浅褐色。"}],"answerOrder":["a","b","c","d"],"fullSentence":"切开苹果以后，果肉慢慢变成浅褐色。","explanation":"“慢慢”说明颜色不是一下子改变，而是逐渐发生。","narration":"切开苹果，果肉颜色变了。请把变化说得慢一点、准确一点。","skill":"language"},
+        {"id":"sentence-054","band":"normal","minAge":8,"prompt":"面团发酵以后摸起来怎样？","chunks":[{"id":"a","text":"面团"},{"id":"b","text":"发酵以后，"},{"id":"c","text":"变得"},{"id":"d","text":"又大"},{"id":"e","text":"又松软。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"面团发酵以后，变得又大又松软。","explanation":"“又……又……”同时说明面团变大和变松软两个特点。","narration":"面团在长大。请把发酵后的两个变化排在一起。","skill":"language"},
+        {"id":"sentence-055","band":"normal","minAge":8,"prompt":"厨房里的安全提醒。","chunks":[{"id":"a","text":"热锅很烫，"},{"id":"b","text":"小朋友"},{"id":"c","text":"不能"},{"id":"d","text":"自己伸手"},{"id":"e","text":"去碰。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"热锅很烫，小朋友不能自己伸手去碰。","explanation":"先说明热锅烫，再提醒小朋友不能做什么，理由和提醒都很清楚。","narration":"厨房里有热锅。请把安全提醒排成一句完整的话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-12",
+      "band": "normal",
+      "minAge": 8,
+      "title": "四季车窗",
+      "sentences": [
+        {"id":"sentence-056","band":"normal","minAge":8,"prompt":"春天来了，小草怎样长出来？","chunks":[{"id":"a","text":"春天来了，"},{"id":"b","text":"小草"},{"id":"c","text":"从泥土里"},{"id":"d","text":"悄悄"},{"id":"e","text":"探出头来。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"春天来了，小草从泥土里悄悄探出头来。","explanation":"“从泥土里”说明从哪里长出来，“悄悄”把小草写得很可爱。","narration":"春天到了。请把时间和小草长出来的样子接起来。","skill":"language"},
+        {"id":"sentence-057","band":"normal","minAge":8,"prompt":"夏夜的池塘边有什么声音？","chunks":[{"id":"a","text":"夏夜的池塘边，"},{"id":"b","text":"青蛙"},{"id":"c","text":"呱呱地"},{"id":"d","text":"唱个不停。"}],"answerOrder":["a","b","c","d"],"fullSentence":"夏夜的池塘边，青蛙呱呱地唱个不停。","explanation":"“夏夜的池塘边”交代时间地点，“唱个不停”说明声音持续不断。","narration":"夏天的夜里有青蛙叫。请把时间地点和声音接好。","skill":"language"},
+        {"id":"sentence-058","band":"normal","minAge":8,"prompt":"秋风里的银杏叶像什么？","chunks":[{"id":"a","text":"秋风一吹，"},{"id":"b","text":"银杏叶"},{"id":"c","text":"像一把把小扇子，"},{"id":"d","text":"飘落到"},{"id":"e","text":"地面上。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"秋风一吹，银杏叶像一把把小扇子，飘落到地面上。","explanation":"“像一把把小扇子”写银杏叶的形状，后一句写它飘落下来。","narration":"秋风吹银杏叶。请把叶子的样子和落下的动作排完整。","skill":"language"},
+        {"id":"sentence-059","band":"normal","minAge":8,"prompt":"冬天的清晨，屋顶上多了什么？","chunks":[{"id":"a","text":"冬天的清晨，"},{"id":"b","text":"屋顶上"},{"id":"c","text":"结了"},{"id":"d","text":"一层"},{"id":"e","text":"薄薄的白霜。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"冬天的清晨，屋顶上结了一层薄薄的白霜。","explanation":"“冬天的清晨”交代时间，“一层薄薄的”说明霜不厚。","narration":"冬天的屋顶变白了。请把时间、地点和白霜接成一句话。","skill":"language"},
+        {"id":"sentence-060","band":"normal","minAge":8,"prompt":"天气变冷以后，人们为什么换衣服？","chunks":[{"id":"a","text":"因为天气渐渐变冷，"},{"id":"b","text":"所以"},{"id":"c","text":"人们"},{"id":"d","text":"换上了"},{"id":"e","text":"厚衣服。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"因为天气渐渐变冷，所以人们换上了厚衣服。","explanation":"“因为……所以……”把天气变冷和换厚衣服的因果关系说清楚。","narration":"天气冷起来了。请用因为和所以把原因、结果接好。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-13",
+      "band": "normal",
+      "minAge": 8,
+      "title": "朋友在一起",
+      "sentences": [
+        {"id":"sentence-061","band":"normal","minAge":8,"prompt":"你怎样把喜欢的书分享给朋友？","chunks":[{"id":"a","text":"我"},{"id":"b","text":"把最喜欢的图画书"},{"id":"c","text":"带到学校，"},{"id":"d","text":"借给"},{"id":"e","text":"好朋友看。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"我把最喜欢的图画书带到学校，借给好朋友看。","explanation":"“带到学校”之后“借给朋友”，两个动作有时间先后。","narration":"把喜欢的书分享给朋友吧。请把带书和借书排清楚。","skill":"language"},
+        {"id":"sentence-062","band":"normal","minAge":8,"prompt":"两个人想玩同一个秋千，后来怎样解决？","chunks":[{"id":"a","text":"我们"},{"id":"b","text":"为了谁先玩秋千"},{"id":"c","text":"争了几句，"},{"id":"d","text":"后来"},{"id":"e","text":"商量轮流玩。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"我们为了谁先玩秋千争了几句，后来商量轮流玩。","explanation":"“争了几句”说明发生了小矛盾，“后来”说明找到了解决办法。","narration":"朋友之间也会有小矛盾。请把问题和最后的解决办法接起来。","skill":"language"},
+        {"id":"sentence-063","band":"normal","minAge":8,"prompt":"发现自己说错话，接下来要怎样做？","chunks":[{"id":"a","text":"发现自己说错了话，"},{"id":"b","text":"我"},{"id":"c","text":"主动"},{"id":"d","text":"向朋友"},{"id":"e","text":"道歉。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"发现自己说错了话，我主动向朋友道歉。","explanation":"先说发现错误，再写主动道歉，勇敢承担的意思更清楚。","narration":"说错话时应该怎么办？请把发现问题后的行动排好。","skill":"language"},
+        {"id":"sentence-064","band":"normal","minAge":8,"prompt":"两个人怎样合作完成一件手工？","chunks":[{"id":"a","text":"合作做手工时，"},{"id":"b","text":"她"},{"id":"c","text":"剪彩纸，"},{"id":"d","text":"我"},{"id":"e","text":"贴图案，"},{"id":"f","text":"很快就完成了作品。"}],"answerOrder":["a","b","c","d","e","f"],"fullSentence":"合作做手工时，她剪彩纸，我贴图案，很快就完成了作品。","explanation":"句子先写两个人的分工，再写合作带来的结果。","narration":"两个人一起做手工。请把各自做什么和完成结果接成一句话。","skill":"language"},
+        {"id":"sentence-065","band":"normal","minAge":8,"prompt":"朋友摔倒后，你怎样关心她？","chunks":[{"id":"a","text":"朋友摔倒后，"},{"id":"b","text":"我"},{"id":"c","text":"扶她起来，"},{"id":"d","text":"轻声"},{"id":"e","text":"问她疼不疼。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"朋友摔倒后，我扶她起来，轻声问她疼不疼。","explanation":"“扶她起来”和“轻声问她”是连续发生的关心动作，逗号把它们连起来。","narration":"朋友摔倒了。请把关心她的两个动作排成一句通顺的话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-14",
+      "band": "normal",
+      "minAge": 9,
+      "title": "城市出行",
+      "sentences": [
+        {"id":"sentence-066","band":"normal","minAge":9,"prompt":"早高峰的地铁站是什么样子？","chunks":[{"id":"a","text":"早高峰时，"},{"id":"b","text":"地铁站里"},{"id":"c","text":"人来人往，"},{"id":"d","text":"广播"},{"id":"e","text":"不停地提醒乘客"},{"id":"f","text":"注意安全。"}],"answerOrder":["a","b","c","d","e","f"],"fullSentence":"早高峰时，地铁站里人来人往，广播不停地提醒乘客注意安全。","explanation":"“人来人往”写人多，后面写广播反复提醒，两个画面组成完整场景。","narration":"早高峰的地铁站很忙。请把人群和广播的提醒接成一句话。","skill":"language"},
+        {"id":"sentence-067","band":"normal","minAge":9,"prompt":"公交车靠站后，乘客怎样上下车？","chunks":[{"id":"a","text":"公交车"},{"id":"b","text":"缓缓靠站，"},{"id":"c","text":"乘客们"},{"id":"d","text":"先下后上，"},{"id":"e","text":"秩序井然。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"公交车缓缓靠站，乘客们先下后上，秩序井然。","explanation":"“缓缓”写车停得平稳，“先下后上”写乘客的顺序。","narration":"公交车到站了。请把靠站、上下车和秩序排清楚。","skill":"language"},
+        {"id":"sentence-068","band":"normal","minAge":9,"prompt":"绿灯亮起后，行人怎样过路口？","chunks":[{"id":"a","text":"绿灯亮起，"},{"id":"b","text":"行人"},{"id":"c","text":"沿着斑马线"},{"id":"d","text":"快速通过"},{"id":"e","text":"十字路口。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"绿灯亮起，行人沿着斑马线快速通过十字路口。","explanation":"“绿灯亮起”交代条件，“沿着斑马线”说明行人走的安全位置。","narration":"过马路的灯绿了。请把行人怎样通过路口排成一句话。","skill":"language"},
+        {"id":"sentence-069","band":"normal","minAge":9,"prompt":"在外地迷路时，可以怎样问路？","chunks":[{"id":"a","text":"如果迷路了，"},{"id":"b","text":"可以"},{"id":"c","text":"向路边的工作人员"},{"id":"d","text":"说清楚"},{"id":"e","text":"要去的地方。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"如果迷路了，可以向路边的工作人员说清楚要去的地方。","explanation":"“如果”提出情况，“可以”给出办法，后面说明问路要讲清楚目的地。","narration":"如果找不到路，可以请谁帮忙？请把情况和方法接好。","skill":"language"},
+        {"id":"sentence-070","band":"normal","minAge":9,"prompt":"雨天骑车，安全最重要。","chunks":[{"id":"a","text":"下雨天，"},{"id":"b","text":"骑车的哥哥"},{"id":"c","text":"穿上雨衣，"},{"id":"d","text":"放慢速度"},{"id":"e","text":"小心前行。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"下雨天，骑车的哥哥穿上雨衣，放慢速度小心前行。","explanation":"“穿上雨衣”和“放慢速度”都是雨天安全骑行的做法。","narration":"雨天路滑。请把哥哥的安全做法排成一句通顺的话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-15",
+      "band": "normal",
+      "minAge": 9,
+      "title": "图书馆安静角",
+      "sentences": [
+        {"id":"sentence-071","band":"normal","minAge":9,"prompt":"你怎样在图书馆找到一本关于星星的书？","chunks":[{"id":"a","text":"我"},{"id":"b","text":"按照书架上的编号"},{"id":"c","text":"找到了"},{"id":"d","text":"一本关于星星的书。"}],"answerOrder":["a","b","c","d"],"fullSentence":"我按照书架上的编号找到了一本关于星星的书。","explanation":"“按照书架上的编号”说明找书的方法，“关于星星的”说明书的主题。","narration":"去图书馆找一本星星的书。请把找书方法和结果排好。","skill":"language"},
+        {"id":"sentence-072","band":"normal","minAge":9,"prompt":"借到书以后，你坐在哪里阅读？","chunks":[{"id":"a","text":"借好书以后，"},{"id":"b","text":"我"},{"id":"c","text":"找了一个安静的座位"},{"id":"d","text":"认真读起来。"}],"answerOrder":["a","b","c","d"],"fullSentence":"借好书以后，我找了一个安静的座位认真读起来。","explanation":"“借好书以后”说明时间，“安静”说明图书馆里合适的阅读环境。","narration":"书借好了。请把座位和阅读的样子接成一句话。","skill":"language"},
+        {"id":"sentence-073","band":"normal","minAge":9,"prompt":"离开座位时，椅子应该怎样放？","chunks":[{"id":"a","text":"离开座位时，"},{"id":"b","text":"我"},{"id":"c","text":"把椅子"},{"id":"d","text":"轻轻推回"},{"id":"e","text":"桌边。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"离开座位时，我把椅子轻轻推回桌边。","explanation":"“轻轻”说明动作不吵闹，“推回桌边”说明椅子要放回的位置。","narration":"离开图书馆座位时，请把椅子轻轻放回去。把词卡接好。","skill":"language"},
+        {"id":"sentence-074","band":"normal","minAge":9,"prompt":"读过的书要什么时候还？还到哪里？","chunks":[{"id":"a","text":"读完的书"},{"id":"b","text":"应该在规定日期前"},{"id":"c","text":"还给"},{"id":"d","text":"图书馆。"}],"answerOrder":["a","b","c","d"],"fullSentence":"读完的书应该在规定日期前还给图书馆。","explanation":"“在规定日期前”说明时间，“还给图书馆”说明把书送到哪里。","narration":"读完的图书馆书要按时归还。请把时间、地点和动作排清楚。","skill":"language"},
+        {"id":"sentence-075","band":"normal","minAge":9,"prompt":"手机在图书馆响了，要怎样做？","chunks":[{"id":"a","text":"手机突然响了，"},{"id":"b","text":"我"},{"id":"c","text":"赶紧把它"},{"id":"d","text":"调成静音，"},{"id":"e","text":"免得打扰别人。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"手机突然响了，我赶紧把它调成静音，免得打扰别人。","explanation":"“免得”说明调静音是为了避免什么，礼貌的原因很清楚。","narration":"图书馆要保持安静。请把手机响起后的做法和原因接好。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-16",
+      "band": "normal",
+      "minAge": 9,
+      "title": "小小科学家",
+      "sentences": [
+        {"id":"sentence-076","band":"normal","minAge":9,"prompt":"观察植物时，怎样记录叶片？","chunks":[{"id":"a","text":"观察植物时，"},{"id":"b","text":"我们"},{"id":"c","text":"先记录叶片的形状，"},{"id":"d","text":"再比较"},{"id":"e","text":"它们的大小。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"观察植物时，我们先记录叶片的形状，再比较它们的大小。","explanation":"“先……再……”说明记录形状、比较大小两个观察步骤。","narration":"观察植物也要有顺序。请把先记录什么、再比较什么接好。","skill":"language"},
+        {"id":"sentence-077","band":"normal","minAge":9,"prompt":"做实验前，老师让大家先看什么？","chunks":[{"id":"a","text":"做实验前，"},{"id":"b","text":"老师"},{"id":"c","text":"让我们"},{"id":"d","text":"认真读一遍"},{"id":"e","text":"安全要求。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"做实验前，老师让我们认真读一遍安全要求。","explanation":"“做实验前”交代时间，“认真读一遍”说明不能马虎。","narration":"实验开始前先读安全要求。请把时间、人物和动作排完整。","skill":"language"},
+        {"id":"sentence-078","band":"normal","minAge":9,"prompt":"把测量数据写整齐有什么好处？","chunks":[{"id":"a","text":"把测量的数据"},{"id":"b","text":"工整地写在表格里，"},{"id":"c","text":"更容易"},{"id":"d","text":"发现"},{"id":"e","text":"变化规律。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"把测量的数据工整地写在表格里，更容易发现变化规律。","explanation":"前半句写整理数据的方法，后半句写这样做带来的好处。","narration":"数据要写清楚。请把怎样记录和这样做的作用接成一句话。","skill":"language"},
+        {"id":"sentence-079","band":"normal","minAge":9,"prompt":"实验没有成功，大家怎样面对？","chunks":[{"id":"a","text":"实验没有成功，"},{"id":"b","text":"大家"},{"id":"c","text":"没有灰心，"},{"id":"d","text":"而是"},{"id":"e","text":"一起找出问题。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"实验没有成功，大家没有灰心，而是一起找出问题。","explanation":"“没有……而是……”把不灰心、继续找问题的态度说清楚了。","narration":"实验失败时不要灰心。请把大家的做法排成一句完整的话。","skill":"language"},
+        {"id":"sentence-080","band":"normal","minAge":9,"prompt":"经过多次尝试，科学家记录了结论。","chunks":[{"id":"a","text":"经过反复尝试，"},{"id":"b","text":"我们"},{"id":"c","text":"终于得出结论，"},{"id":"d","text":"把它"},{"id":"e","text":"写进观察记录。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"经过反复尝试，我们终于得出结论，把它写进观察记录。","explanation":"“经过反复尝试”说明过程不容易，“终于”表示坚持后有了结果。","narration":"反复尝试以后，终于有了发现。请把过程和记录结论接好。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-17",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "时间顺序侦探",
+      "sentences": [
+        {"id":"sentence-081","band":"challenge","minAge":10,"prompt":"清晨出门前有哪些连续的准备？","chunks":[{"id":"a","text":"清晨，"},{"id":"b","text":"我"},{"id":"c","text":"先整理书包，"},{"id":"d","text":"接着检查水杯，"},{"id":"e","text":"最后"},{"id":"f","text":"穿好外套出门。"}],"answerOrder":["a","b","c","d","e","f"],"fullSentence":"清晨，我先整理书包，接着检查水杯，最后穿好外套出门。","explanation":"“先”“接着”“最后”把三件准备事情的先后顺序完整串起来。","narration":"清晨出门前做好三件事。请按先后顺序接好词卡。","skill":"language"},
+        {"id":"sentence-082","band":"challenge","minAge":10,"prompt":"路上堵车了，怎样反而更早到学校？","chunks":[{"id":"a","text":"因为路上堵车，"},{"id":"b","text":"我们"},{"id":"c","text":"改乘地铁，"},{"id":"d","text":"所以"},{"id":"e","text":"反而更早到了学校。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"因为路上堵车，我们改乘地铁，所以反而更早到了学校。","explanation":"“因为……所以……”说明原因和结果，“反而”表示结果出乎原来的预想。","narration":"路上堵车时换一种交通方式。请把原因、办法和结果排清楚。","skill":"language"},
+        {"id":"sentence-083","band":"challenge","minAge":10,"prompt":"写完作业后，你选择先做什么？","chunks":[{"id":"a","text":"写完作业以后，"},{"id":"b","text":"我"},{"id":"c","text":"没有马上玩游戏，"},{"id":"d","text":"而是先"},{"id":"e","text":"帮妈妈收拾餐桌。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"写完作业以后，我没有马上玩游戏，而是先帮妈妈收拾餐桌。","explanation":"“没有……而是……”把放弃的做法和实际选择对比得很清楚。","narration":"写完作业可以做不同选择。请把“没有”和“而是”接成一句话。","skill":"language"},
+        {"id":"sentence-084","band":"challenge","minAge":10,"prompt":"雨刚停，操场上出现了什么画面？","chunks":[{"id":"a","text":"雨刚停，"},{"id":"b","text":"天空还灰蒙蒙的，"},{"id":"c","text":"操场上"},{"id":"d","text":"已经出现了"},{"id":"e","text":"几个踩水洼的孩子。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"雨刚停，天空还灰蒙蒙的，操场上已经出现了几个踩水洼的孩子。","explanation":"前两个分句交代天气，最后写孩子们的活动，“还”和“已经”形成对照。","narration":"雨刚停，操场已经有孩子玩了。请把天气和画面接完整。","skill":"language"},
+        {"id":"sentence-085","band":"challenge","minAge":10,"prompt":"第一次学骑车时是什么样子？","chunks":[{"id":"a","text":"第一次学骑车时，"},{"id":"b","text":"我"},{"id":"c","text":"紧紧握住车把，"},{"id":"d","text":"眼睛"},{"id":"e","text":"一直盯着前方。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"第一次学骑车时，我紧紧握住车把，眼睛一直盯着前方。","explanation":"“紧紧”“一直”写出第一次骑车既紧张又专注的样子。","narration":"第一次骑车有点紧张。请把手的动作和眼睛看的方向排好。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-18",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "因果小站",
+      "sentences": [
+        {"id":"sentence-086","band":"challenge","minAge":10,"prompt":"连续下雨后，体育课为什么换了地点？","chunks":[{"id":"a","text":"因为连续下了几天雨，"},{"id":"b","text":"操场变得湿漉漉的，"},{"id":"c","text":"体育课"},{"id":"d","text":"只好"},{"id":"e","text":"改在教室里上。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"因为连续下了几天雨，操场变得湿漉漉的，体育课只好改在教室里上。","explanation":"下雨导致操场湿，操场湿又使体育课换地点，因果关系一层连一层。","narration":"连续下雨改变了体育课。请把原因和结果一层层接清楚。","skill":"language"},
+        {"id":"sentence-087","band":"challenge","minAge":10,"prompt":"怎样减少因为粗心出错的次数？","chunks":[{"id":"a","text":"他先把问题听清楚，"},{"id":"b","text":"再动手计算，"},{"id":"c","text":"所以"},{"id":"d","text":"很少因为粗心"},{"id":"e","text":"而出错。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"他先把问题听清楚，再动手计算，所以很少因为粗心而出错。","explanation":"先听清、再计算是做法，“所以”引出这种做法带来的结果。","narration":"先听清楚再计算有什么好处？请把做法和结果排成一句话。","skill":"language"},
+        {"id":"sentence-088","band":"challenge","minAge":10,"prompt":"为了保护眼睛，看书时要注意什么？","chunks":[{"id":"a","text":"为了保护眼睛，"},{"id":"b","text":"我看书时"},{"id":"c","text":"会保持合适的光线，"},{"id":"d","text":"并让眼睛"},{"id":"e","text":"定时休息。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"为了保护眼睛，我看书时会保持合适的光线，并让眼睛定时休息。","explanation":"“为了”说明目的，“并”把光线和休息两个保护眼睛的方法连在一起。","narration":"看书也要保护眼睛。请把目的和两个好习惯接完整。","skill":"language"},
+        {"id":"sentence-089","band":"challenge","minAge":10,"prompt":"赶路太快可能错过什么？","chunks":[{"id":"a","text":"如果只顾着赶路，"},{"id":"b","text":"就"},{"id":"c","text":"容易错过"},{"id":"d","text":"路边"},{"id":"e","text":"美丽的风景。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"如果只顾着赶路，就容易错过路边美丽的风景。","explanation":"“如果……就……”说明只赶路会带来错过风景的结果。","narration":"只顾着赶路会失去什么？请把条件和结果接好。","skill":"language"},
+        {"id":"sentence-090","band":"challenge","minAge":10,"prompt":"车厢里为什么突然变得温暖？","chunks":[{"id":"a","text":"同学把座位让给老人，"},{"id":"b","text":"老人笑着道谢，"},{"id":"c","text":"车厢里"},{"id":"d","text":"顿时"},{"id":"e","text":"多了几分温暖。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"同学把座位让给老人，老人笑着道谢，车厢里顿时多了几分温暖。","explanation":"让座、道谢是发生的事，“顿时”说明温暖的感觉马上出现。","narration":"一个小小的让座让车厢温暖起来。请把三幅画面连成一句话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-19",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "转折与小台阶",
+      "sentences": [
+        {"id":"sentence-091","band":"challenge","minAge":11,"prompt":"难题看起来复杂，其实可以怎样面对？","chunks":[{"id":"a","text":"虽然这道题看起来很难，"},{"id":"b","text":"只要"},{"id":"c","text":"一步一步分析，"},{"id":"d","text":"就会发现"},{"id":"e","text":"其实并没有那么复杂。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"虽然这道题看起来很难，只要一步一步分析，就会发现其实并没有那么复杂。","explanation":"“虽然”先承认难，“只要……就……”说明耐心分析能改变看法。","narration":"难题不一定真的难。请把转折和解决办法排成一句话。","skill":"language"},
+        {"id":"sentence-092","band":"challenge","minAge":11,"prompt":"他做完值日，还做了什么好事？","chunks":[{"id":"a","text":"他不仅认真完成了值日，"},{"id":"b","text":"还主动"},{"id":"c","text":"帮助同学"},{"id":"d","text":"整理了"},{"id":"e","text":"课桌。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"他不仅认真完成了值日，还主动帮助同学整理了课桌。","explanation":"“不仅……还……”说明除了完成值日，他又多做了一件好事。","narration":"他不只完成了自己的事。请用“不仅、还”把两件事排好。","skill":"language"},
+        {"id":"sentence-093","band":"challenge","minAge":11,"prompt":"雨很大，运动会却怎样了？","chunks":[{"id":"a","text":"雨下得很大，"},{"id":"b","text":"可是"},{"id":"c","text":"运动会"},{"id":"d","text":"仍然按计划"},{"id":"e","text":"开始了。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"雨下得很大，可是运动会仍然按计划开始了。","explanation":"“可是”表示转折，“仍然”说明结果没有因为雨大而改变。","narration":"雨大时运动会还开吗？请把转折后的结果接出来。","skill":"language"},
+        {"id":"sentence-094","band":"challenge","minAge":11,"prompt":"讨论时，怎样听完别人再表达自己？","chunks":[{"id":"a","text":"我不再急着回答，"},{"id":"b","text":"而是先"},{"id":"c","text":"听完别人的想法，"},{"id":"d","text":"再补充"},{"id":"e","text":"自己的意见。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"我不再急着回答，而是先听完别人的想法，再补充自己的意见。","explanation":"“不再……而是……”说明改变了习惯，“先……再……”说明新的交流顺序。","narration":"讨论时先听再表达。请把改变后的做法按顺序接好。","skill":"language"},
+        {"id":"sentence-095","band":"challenge","minAge":11,"prompt":"小树经过几年成长，有什么变化？","chunks":[{"id":"a","text":"小树刚栽下时很矮，"},{"id":"b","text":"经过几年浇灌，"},{"id":"c","text":"终于"},{"id":"d","text":"长得比院墙"},{"id":"e","text":"还高了。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"小树刚栽下时很矮，经过几年浇灌，终于长得比院墙还高了。","explanation":"前后对比小树的高度，“经过几年”和“终于”说明成长经历了很长时间。","narration":"小树慢慢长高了。请把原来的样子和现在的变化接成一句话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-20",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "描写风景站",
+      "sentences": [
+        {"id":"sentence-096","band":"challenge","minAge":11,"prompt":"秋天的枫叶像什么？远看又怎样？","chunks":[{"id":"a","text":"秋天的枫叶"},{"id":"b","text":"红得像一团团火，"},{"id":"c","text":"远远望去，"},{"id":"d","text":"整条小路"},{"id":"e","text":"都亮了起来。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"秋天的枫叶红得像一团团火，远远望去，整条小路都亮了起来。","explanation":"比喻写枫叶的颜色和形状，远看的感觉进一步把画面放大。","narration":"枫叶红得像火。请把近看和远看的画面接成一句话。","skill":"language"},
+        {"id":"sentence-097","band":"challenge","minAge":11,"prompt":"清晨的雾让河面变得怎样？","chunks":[{"id":"a","text":"清晨的雾气"},{"id":"b","text":"轻轻笼着河面，"},{"id":"c","text":"连岸边的芦苇"},{"id":"d","text":"也变得"},{"id":"e","text":"朦朦胧胧。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"清晨的雾气轻轻笼着河面，连岸边的芦苇也变得朦朦胧胧。","explanation":"“轻轻笼着”写雾的动作，“朦朦胧胧”写雾里看东西不清晰的样子。","narration":"清晨河上有雾。请把雾气和芦苇的样子排成一句完整的话。","skill":"language"},
+        {"id":"sentence-098","band":"challenge","minAge":11,"prompt":"爷爷说话的声音有什么特点？","chunks":[{"id":"a","text":"爷爷说话不快，"},{"id":"b","text":"声音却很稳，"},{"id":"c","text":"每句话"},{"id":"d","text":"都像"},{"id":"e","text":"一颗落在心里的石子。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"爷爷说话不快，声音却很稳，每句话都像一颗落在心里的石子。","explanation":"“不快”与“很稳”形成转折，最后的比喻说明每句话都让人记得住。","narration":"爷爷说话慢慢稳稳的。请把声音特点和心里的感觉接起来。","skill":"language"},
+        {"id":"sentence-099","band":"challenge","minAge":11,"prompt":"安静的图书馆里，灯光和翻页声带来什么感觉？","chunks":[{"id":"a","text":"图书馆的灯光柔和，"},{"id":"b","text":"翻页声"},{"id":"c","text":"沙沙作响，"},{"id":"d","text":"让安静的夜晚"},{"id":"e","text":"多了一点温暖。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"图书馆的灯光柔和，翻页声沙沙作响，让安静的夜晚多了一点温暖。","explanation":"灯光和翻页声是看到的、听到的细节，最后写出它们带来的感觉。","narration":"图书馆的夜晚很安静。请把灯光、声音和温暖的感觉排在一起。","skill":"language"},
+        {"id":"sentence-100","band":"challenge","minAge":11,"prompt":"风穿过竹林时，会听到什么？","chunks":[{"id":"a","text":"风穿过竹林，"},{"id":"b","text":"竹叶"},{"id":"c","text":"相互摩擦，"},{"id":"d","text":"发出"},{"id":"e","text":"细碎的响声。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"风穿过竹林，竹叶相互摩擦，发出细碎的响声。","explanation":"句子按“风吹来、竹叶相碰、声音出现”的顺序描写，很有画面感。","narration":"听听风吹竹林的声音。请把风、竹叶和声音接成一句话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-21",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "说明步骤站",
+      "sentences": [
+        {"id":"sentence-101","band":"challenge","minAge":11,"prompt":"制作书签分哪几步？","chunks":[{"id":"a","text":"制作书签时，"},{"id":"b","text":"先剪好卡纸，"},{"id":"c","text":"再画上图案，"},{"id":"d","text":"最后"},{"id":"e","text":"系上一条细绳。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"制作书签时，先剪好卡纸，再画上图案，最后系上一条细绳。","explanation":"“先”“再”“最后”把制作书签的三个步骤排得清清楚楚。","narration":"做一张小书签需要三个步骤。请按顺序接好词卡。","skill":"language"},
+        {"id":"sentence-102","band":"challenge","minAge":11,"prompt":"遇到问题时，可以用哪些方式找答案？","chunks":[{"id":"a","text":"遇到问题时，"},{"id":"b","text":"可以先查资料，"},{"id":"c","text":"也可以向别人请教，"},{"id":"d","text":"但不能"},{"id":"e","text":"未经思考"},{"id":"f","text":"就放弃。"}],"answerOrder":["a","b","c","d","e","f"],"fullSentence":"遇到问题时，可以先查资料，也可以向别人请教，但不能未经思考就放弃。","explanation":"“可以……也可以……但不能……”先提出两种方法，再说不能轻易放弃。","narration":"遇到问题有多种办法。请用可以、也可以、但不能把意思接完整。","skill":"language"},
+        {"id":"sentence-103","band":"challenge","minAge":11,"prompt":"按时间顺序整理资料有什么好处？","chunks":[{"id":"a","text":"整理资料时，"},{"id":"b","text":"按时间顺序分类，"},{"id":"c","text":"能让内容更清楚，"},{"id":"d","text":"也更容易"},{"id":"e","text":"查找。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"整理资料时，按时间顺序分类，能让内容更清楚，也更容易查找。","explanation":"“按时间顺序”是方法，“更清楚”和“更容易查找”是这样做的好处。","narration":"整理资料要讲顺序。请把分类方法和两个好处接成一句话。","skill":"language"},
+        {"id":"sentence-104","band":"challenge","minAge":11,"prompt":"使用放大镜观察叶片时要注意什么？","chunks":[{"id":"a","text":"使用放大镜观察叶片时，"},{"id":"b","text":"不要正对强光，"},{"id":"c","text":"以免"},{"id":"d","text":"伤害"},{"id":"e","text":"眼睛。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"使用放大镜观察叶片时，不要正对强光，以免伤害眼睛。","explanation":"“不要”给出禁止的动作，“以免”说明这样做是为了避免伤害。","narration":"观察叶片时也要注意安全。请把提醒和原因接成一句话。","skill":"language"},
+        {"id":"sentence-105","band":"challenge","minAge":11,"prompt":"一篇说明文要怎样安排才容易读懂？","chunks":[{"id":"a","text":"一篇说明文"},{"id":"b","text":"既要交代清楚信息，"},{"id":"c","text":"又要"},{"id":"d","text":"安排合理的顺序，"},{"id":"e","text":"让读者容易理解。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"一篇说明文既要交代清楚信息，又要安排合理的顺序，让读者容易理解。","explanation":"“既要……又要……”说明说明文同时需要清楚的信息和合理的顺序。","narration":"说明文要让人看得懂。请把两个必要条件接完整。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-22",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "观点与理由站",
+      "sentences": [
+        {"id":"sentence-106","band":"challenge","minAge":12,"prompt":"为什么课间应该到户外活动？","chunks":[{"id":"a","text":"我认为课间应当到户外活动，"},{"id":"b","text":"因为"},{"id":"c","text":"适当运动"},{"id":"d","text":"能让头脑"},{"id":"e","text":"更加清醒。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"我认为课间应当到户外活动，因为适当运动能让头脑更加清醒。","explanation":"先用“我认为”提出观点，再用“因为”给出理由，表达很有条理。","narration":"说说你对课间活动的看法。请把观点和理由接在一起。","skill":"language"},
+        {"id":"sentence-107","band":"challenge","minAge":12,"prompt":"阅读笔记写多长才够用？","chunks":[{"id":"a","text":"阅读笔记不必写得很长，"},{"id":"b","text":"只要"},{"id":"c","text":"记下最关键的想法，"},{"id":"d","text":"就足够"},{"id":"e","text":"帮助回忆。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"阅读笔记不必写得很长，只要记下最关键的想法，就足够帮助回忆。","explanation":"“不必……只要……就……”说明笔记重点不在长度，而在记录关键内容。","narration":"阅读笔记怎样写才有用？请把要求和作用排成一句话。","skill":"language"},
+        {"id":"sentence-108","band":"challenge","minAge":12,"prompt":"遇到不同意见时，怎样交流更合适？","chunks":[{"id":"a","text":"遇到不同意见时，"},{"id":"b","text":"与其急着反驳，"},{"id":"c","text":"不如"},{"id":"d","text":"先找出对方"},{"id":"e","text":"说得有道理的地方。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"遇到不同意见时，与其急着反驳，不如先找出对方说得有道理的地方。","explanation":"“与其……不如……”比较两种做法，提倡先理解对方再回应。","narration":"不同意见也可以好好交流。请把不急着反驳和先理解接起来。","skill":"language"},
+        {"id":"sentence-109","band":"challenge","minAge":12,"prompt":"看似简单的事情，真正做起来怎样？","chunks":[{"id":"a","text":"这件事看似简单，"},{"id":"b","text":"真正做起来，"},{"id":"c","text":"才知道"},{"id":"d","text":"每一个步骤"},{"id":"e","text":"都需要耐心。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"这件事看似简单，真正做起来，才知道每一个步骤都需要耐心。","explanation":"“看似”与“真正做起来”形成对比，最后说明耐心是完成事情的关键。","narration":"简单的事情也许并不简单。请把前后对比和体会接完整。","skill":"language"},
+        {"id":"sentence-110","band":"challenge","minAge":12,"prompt":"旧书整理后可以怎样安排？","chunks":[{"id":"a","text":"我们决定把旧书整理出来，"},{"id":"b","text":"一部分留给弟弟，"},{"id":"c","text":"另一部分"},{"id":"d","text":"送给"},{"id":"e","text":"社区图书角。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"我们决定把旧书整理出来，一部分留给弟弟，另一部分送给社区图书角。","explanation":"“一部分……另一部分……”把旧书的两项清楚安排并列说明。","narration":"旧书也能找到新去处。请把两部分安排接成一句话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-23",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "想象小列车",
+      "sentences": [
+        {"id":"sentence-111","band":"challenge","minAge":12,"prompt":"月光照着小城，像披上了什么？","chunks":[{"id":"a","text":"月光洒在屋顶上，"},{"id":"b","text":"整座小城"},{"id":"c","text":"像披上"},{"id":"d","text":"一层"},{"id":"e","text":"银色的薄纱。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"月光洒在屋顶上，整座小城像披上一层银色的薄纱。","explanation":"“像披上一层银色的薄纱”把月光下的城市写得轻柔又有想象。","narration":"月光照着小城。请把看到的景色和想象接成一句话。","skill":"language"},
+        {"id":"sentence-112","band":"challenge","minAge":12,"prompt":"如果有会飞的火车，你想带朋友看什么？","chunks":[{"id":"a","text":"如果我有一列会飞的火车，"},{"id":"b","text":"一定带你去看"},{"id":"c","text":"云上的日出，"},{"id":"d","text":"再穿过"},{"id":"e","text":"星星搭成的隧道。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"如果我有一列会飞的火车，一定带你去看云上的日出，再穿过星星搭成的隧道。","explanation":"“如果”打开想象，“再”把看日出和穿隧道两段旅程连接起来。","narration":"想象一列会飞的火车。请把两个奇妙的旅程接成一句话。","skill":"language"},
+        {"id":"sentence-113","band":"challenge","minAge":12,"prompt":"旧钟摆轻轻摇晃，像是在做什么？","chunks":[{"id":"a","text":"旧钟摆轻轻摇晃，"},{"id":"b","text":"仿佛在"},{"id":"c","text":"低声讲述"},{"id":"d","text":"许多年前的"},{"id":"e","text":"故事。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"旧钟摆轻轻摇晃，仿佛在低声讲述许多年前的故事。","explanation":"“仿佛在”把钟摆想象成会讲故事的人，让旧物有了温度。","narration":"旧钟摆摇啊摇。请把它的动作和想象中的声音接起来。","skill":"language"},
+        {"id":"sentence-114","band":"challenge","minAge":12,"prompt":"纸船离开岸边，像什么？","chunks":[{"id":"a","text":"风把纸船推离岸边，"},{"id":"b","text":"它摇摇晃晃地"},{"id":"c","text":"驶向远处，"},{"id":"d","text":"像一个"},{"id":"e","text":"勇敢的小探险家。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"风把纸船推离岸边，它摇摇晃晃地驶向远处，像一个勇敢的小探险家。","explanation":"“摇摇晃晃”写纸船不稳，“像探险家”写出它勇敢前进的样子。","narration":"纸船要出发了。请把风吹、船走和勇敢的想象排好。","skill":"language"},
+        {"id":"sentence-115","band":"challenge","minAge":12,"prompt":"最后一片叶子落下后，森林在准备什么？","chunks":[{"id":"a","text":"等到最后一片叶子落下，"},{"id":"b","text":"森林"},{"id":"c","text":"就会开始"},{"id":"d","text":"准备春天"},{"id":"e","text":"的新衣裳。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"等到最后一片叶子落下，森林就会开始准备春天的新衣裳。","explanation":"“等到……就……”说明时间条件，“新衣裳”把春天发芽长叶想象成换衣服。","narration":"叶子落完了，森林在等待春天。请把时间和想象接成一句话。","skill":"language"}
+      ]
+    },
+    {
+      "id": "sentence-station-24",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "终点站",
+      "sentences": [
+        {"id":"sentence-116","band":"challenge","minAge":12,"prompt":"火车进站时，旅途中的风景怎样留在脑海里？","chunks":[{"id":"a","text":"火车缓缓进站，"},{"id":"b","text":"旅途中看到的风景"},{"id":"c","text":"仍在我的脑海里"},{"id":"d","text":"一幕幕"},{"id":"e","text":"浮现。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"火车缓缓进站，旅途中看到的风景仍在我的脑海里一幕幕浮现。","explanation":"“仍”说明风景没有忘记，“一幕幕”说明画面接连出现在脑海里。","narration":"火车到终点站了。请把进站和回忆旅途的画面接在一起。","skill":"language"},
+        {"id":"sentence-117","band":"challenge","minAge":12,"prompt":"旅途中遇到不顺利时，也能收获什么？","chunks":[{"id":"a","text":"这一路并不总是顺利，"},{"id":"b","text":"但每一次停下来，"},{"id":"c","text":"都让我"},{"id":"d","text":"学会了"},{"id":"e","text":"新的东西。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"这一路并不总是顺利，但每一次停下来，都让我学会了新的东西。","explanation":"“并不总是顺利”先承认困难，“但”转出每次停留带来的成长。","narration":"旅途不总是一帆风顺。请把困难和收获接成一句完整的话。","skill":"language"},
+        {"id":"sentence-118","band":"challenge","minAge":12,"prompt":"到站后，你想把哪一句旅程记忆写下来？","chunks":[{"id":"a","text":"我把车票夹进笔记本，"},{"id":"b","text":"又在旁边写下"},{"id":"c","text":"今天"},{"id":"d","text":"最想记住的"},{"id":"e","text":"一句话。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"我把车票夹进笔记本，又在旁边写下今天最想记住的一句话。","explanation":"先夹车票、再写句子，两个纪念动作按先后排列，“今天”说明时间。","narration":"给这趟旅程留个纪念。请把车票和写下的那句话接起来。","skill":"language"},
+        {"id":"sentence-119","band":"challenge","minAge":12,"prompt":"车站钟声响起，人们带着行李去哪里？","chunks":[{"id":"a","text":"车站的钟声响起，"},{"id":"b","text":"人们带着行李"},{"id":"c","text":"走向各自"},{"id":"d","text":"新的"},{"id":"e","text":"目的地。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"车站的钟声响起，人们带着行李走向各自新的目的地。","explanation":"“各自”说明每个人去的地方不同，“新的目的地”表示下一段旅程开始。","narration":"车站钟声响了。请把钟声、行李和人们前进的方向排清楚。","skill":"language"},
+        {"id":"sentence-120","band":"challenge","minAge":12,"prompt":"终点站和下一段旅程有什么关系？","chunks":[{"id":"a","text":"终点并不是故事的结束，"},{"id":"b","text":"而是"},{"id":"c","text":"下一段旅程"},{"id":"d","text":"刚刚"},{"id":"e","text":"开始的地方。"}],"answerOrder":["a","b","c","d","e"],"fullSentence":"终点并不是故事的结束，而是下一段旅程刚刚开始的地方。","explanation":"“并不是……而是……”把“终点等于结束”的想法转成“新旅程开始”的理解。","narration":"到终点也意味着新的开始。请把这句话的理解排成完整句子。","skill":"language"}
+      ]
+    }
+  ]
+}

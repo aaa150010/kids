@@ -15,6 +15,9 @@ var spot_data: Dictionary = {}
 var spot_scenes: Array = []
 var shop_data: Dictionary = {}
 var fruit_data: Dictionary = {}
+var robot_data: Dictionary = {}
+var sentence_train_data: Dictionary = {}
+var pipe_data: Dictionary = {}
 var content_version: int = 1
 var chapters: Dictionary = {}
 var puzzles: Dictionary = {}
@@ -55,6 +58,9 @@ func _load_json_files() -> void:
 		spot_scenes = []
 	shop_data = _json_dictionary("shop.json")
 	fruit_data = _json_dictionary("fruit_slice.json")
+	robot_data = _json_dictionary("robot.json")
+	sentence_train_data = _json_dictionary("sentence_train.json")
+	pipe_data = _json_dictionary("pipes.json")
 	chapters = _json_dictionary("chapters.json")
 	puzzles = _json_dictionary("puzzles.json")
 	tuning = _json_dictionary("tuning.json")
@@ -144,8 +150,9 @@ func questions(game_id: String, age: int) -> Array:
 		source = quizzes[game_id]
 	else:
 		return []
+	var max_age := 6 if age <= 6 else 9 if age <= 9 else 12
 	return source.filter(func(question):
-		return int(question.get("age", 0)) == age
+		return int(question.get("age", 0)) >= 4 and int(question.get("age", 0)) <= max_age
 	)
 
 
@@ -345,6 +352,21 @@ func fruit_types() -> Array:
 	return value if value is Array else []
 
 
+func robot_levels() -> Array:
+	var value: Variant = robot_data.get("levels", [])
+	return value if value is Array else []
+
+
+func sentence_stations() -> Array:
+	var value: Variant = sentence_train_data.get("stations", [])
+	return value if value is Array else []
+
+
+func pipe_levels() -> Array:
+	var value: Variant = pipe_data.get("levels", [])
+	return value if value is Array else []
+
+
 func sudoku_puzzles() -> Array:
 	if _sudoku_puzzles_cache.is_empty():
 		var value: Variant = _json_dictionary("sudoku.json").get("puzzles", [])
@@ -359,8 +381,8 @@ func content_issues() -> Array[String]:
 
 func _validate_content() -> void:
 	_content_issues.clear()
-	if games.size() != 18:
-		_content_issues.append("游戏目录应为 18 项，实际 %s 项" % games.size())
+	if games.size() != 21:
+		_content_issues.append("游戏目录应为 21 项，实际 %s 项" % games.size())
 	for game_id in ["math", "pinyin", "patterns", "animals"]:
 		if questions(game_id, 5).is_empty() and questions(game_id, 6).is_empty():
 			_content_issues.append("%s 题库为空或年龄映射异常" % game_id)
@@ -374,8 +396,8 @@ func _validate_content() -> void:
 				break
 	if sudoku_puzzles().size() < 32:
 		_content_issues.append("数独题库不足 32 题")
-	if trivia_questions.size() < 100:
-		_content_issues.append("知识竞赛题库不足 100 题")
+	if trivia_questions.size() < 160:
+		_content_issues.append("知识竞赛题库不足 160 题")
 	for age in range(4, 13):
 		if trivia_questions.filter(func(item): return int(item.get("age", 0)) == age).size() < 8:
 			_content_issues.append("知识竞赛缺少 %s 岁题目" % age)
@@ -387,6 +409,12 @@ func _validate_content() -> void:
 		_content_issues.append("小小商店商品或订单不足")
 	if fruit_types().size() < 8:
 		_content_issues.append("水果切切乐水果种类不足")
+	if robot_levels().size() < 24:
+		_content_issues.append("路线小机器人关卡不足 24 关")
+	if sentence_stations().size() < 24:
+		_content_issues.append("句子小火车车站不足 24 站")
+	if pipe_levels().size() < 36:
+		_content_issues.append("水管工坊关卡不足 36 关")
 	for level in tangram_levels:
 		if not level is Dictionary or not level.get("targetPieces") is Array or level.targetPieces.size() != 7:
 			_content_issues.append("七巧板关卡碎片配置异常")
@@ -398,6 +426,18 @@ func _validate_content() -> void:
 	for order in shop_orders():
 		if not order is Dictionary or not order.get("items") is Array or order.get("items").is_empty():
 			_content_issues.append("小小商店订单配置异常")
+			break
+	for level in robot_levels():
+		if not level is Dictionary or not level.get("solution") is Array or level.solution.is_empty():
+			_content_issues.append("路线小机器人关卡缺少固定解法")
+			break
+	for station in sentence_stations():
+		if not station is Dictionary or not station.get("sentences") is Array or station.sentences.size() != 5:
+			_content_issues.append("句子小火车车站应有 5 句")
+			break
+	for level in pipe_levels():
+		if not level is Dictionary or not level.get("pieces") is Array or level.pieces.is_empty():
+			_content_issues.append("水管工坊关卡管件配置异常")
 			break
 	if chess_puzzles().is_empty():
 		_content_issues.append("中国象棋残局为空")

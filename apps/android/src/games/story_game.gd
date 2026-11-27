@@ -10,6 +10,9 @@ var _audio_active := false
 var _cards_root: VBoxContainer
 var _reader_scroll: ScrollContainer
 var reader_tools: Control
+var _reader_player: Control
+var _shelf_button: Button
+var _reading_settings_button: Button
 var _article_text: StoryText
 var _paragraph_ids: Array[String] = []
 var _audio_label: Label
@@ -55,6 +58,8 @@ func _ready() -> void:
 	var stored := SaveStore.load_state(game_id, [profile_id])
 	if not stored.is_empty(): session.restore(stored)
 	players = [session.state.player.duplicate(true)]
+	if str(session.state.get("phase", "")) != "reading":
+		_resume_on_start = false
 	SaveStore.changed.connect(_on_settings_changed)
 	pause_changed.connect(func(value: bool):
 		if value: _pause_audio()
@@ -81,6 +86,9 @@ func _render() -> void:
 	_illustration_retry = null
 	_illustration_row = null
 	_article_text = null
+	_reader_player = null
+	_shelf_button = null
+	_reading_settings_button = null
 	_paragraph_ids.clear()
 	_highlighted = -1
 	_tts_mode = false
@@ -150,6 +158,14 @@ func _render_library() -> void:
 	)
 	search.text_submitted.connect(func(_value: String): _search_timer.stop(); _on_search_settled())
 	search_row.add_child(search)
+	var clear_search := PlaygroundUI.semantic_icon_button("close", "清空", accent, func():
+		_search_timer.stop()
+		search.text = ""
+		session.handle_input({"type":"query", "value":""})
+		_on_search_settled()
+	, "ghost", 17)
+	clear_search.custom_minimum_size = Vector2(92, 48)
+	search_row.add_child(clear_search)
 	var filters := MenuButton.new()
 	filters.custom_minimum_size = Vector2(184, 48)
 	filters.text = _story_filter_label(str(session.state.filter))
@@ -444,7 +460,6 @@ func _render_reader() -> void:
 		int(session.state.fontSize)
 	)
 	_article_text.set_illustration_state(illustration_state)
-	reading_column.add_child(_article_text)
 	if not bool(illustration_state.get("ready", false)):
 		_illustration_row = HBoxContainer.new()
 		_illustration_row.add_theme_constant_override("separation", 12)
@@ -456,6 +471,7 @@ func _render_reader() -> void:
 		_illustration_retry.disabled = bool(illustration_state.get("loading", false))
 		_illustration_row.add_child(_illustration_retry)
 		reading_column.add_child(_illustration_row)
+	reading_column.add_child(_article_text)
 	reading_column.add_child(PlaygroundUI.label(
 		"故事出处：%s\n%s" % [
 			str(story.get("sourceLabel", "经典故事")),
@@ -481,7 +497,8 @@ func _render_reader() -> void:
 		elif event is InputEventMouseButton and not event.pressed: _save("保存阅读位置")
 	)
 	content_root.add_child(_reader_scroll)
-	content_root.add_child(_build_player())
+	_reader_player = _build_player()
+	content_root.add_child(_reader_player)
 	_on_immersive_changed(immersive)
 	_restore_reading.call_deferred()
 
@@ -559,8 +576,15 @@ func _refresh_illustration_status(state: Dictionary) -> void:
 		_illustration_retry.disabled = bool(state.get("loading", false))
 
 
-func _on_immersive_changed(_value: bool) -> void:
-	reader_tools = null
+func _on_immersive_changed(value: bool) -> void:
+	if reader_tools != null and is_instance_valid(reader_tools):
+		reader_tools.visible = true
+	if _shelf_button != null and is_instance_valid(_shelf_button):
+		_shelf_button.visible = not value
+	if _reading_settings_button != null and is_instance_valid(_reading_settings_button):
+		_reading_settings_button.visible = not value
+	if _time_label != null and is_instance_valid(_time_label):
+		_time_label.visible = not value
 
 
 func _build_player() -> Control:
@@ -570,10 +594,12 @@ func _build_player() -> Control:
 	panel.add_child(column)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
-	row.add_child(PlaygroundUI.semantic_icon_button("back", "书架", accent, _back_to_shelf, "soft"))
+	_shelf_button = PlaygroundUI.semantic_icon_button("back", "书架", accent, _back_to_shelf, "soft")
+	row.add_child(_shelf_button)
 	_play_button = PlaygroundUI.semantic_icon_button("listen", "系统朗读", accent, _toggle_audio, "primary")
 	row.add_child(_play_button)
-	row.add_child(PlaygroundUI.semantic_icon_button("settings", "阅读设置", accent, _show_reading_settings, "soft"))
+	_reading_settings_button = PlaygroundUI.semantic_icon_button("settings", "阅读设置", accent, _show_reading_settings, "soft")
+	row.add_child(_reading_settings_button)
 	_follow_button = PlaygroundUI.semantic_icon_button("search", "跟着听", accent, _resume_follow_reading, "soft")
 	row.add_child(_follow_button)
 	_time_label = PlaygroundUI.label("", 17, PlaygroundUI.INK_SOFT)
@@ -890,7 +916,8 @@ func _save(note: String = "自动保存听读进度") -> void:
 	session.set_follow_reading(_follow_audio)
 	var learning_data := SaveStore.learning(str(players[0].id), game_id)
 	learning_data.storyShelf = session.learning_snapshot()
-	SaveStore.save_state(game_id, str(players[0].id), session.snapshot(), note)
+	var resumable := str(session.state.get("phase", "")) == "reading"
+	SaveStore.save_state(game_id, str(players[0].id), session.snapshot(), note, resumable)
 	_reading_dirty = false
 	_reading_save_clock = 0.0
 

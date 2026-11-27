@@ -8,6 +8,8 @@
     "native:military": "node scripts/native/author-military.mjs",
     "native:poetry:pinyin": "node scripts/native/author-poem-pinyin.mjs",
     "native:levels": "node scripts/native/author-levels.mjs",
+    "native:pipes": "node scripts/native/author-pipes.mjs",
+    "native:trivia": "node scripts/native/author-trivia-extra.mjs --check",
     "native:icons": "node scripts/native/import-icons.mjs",
     "native:icons:brand": "bash scripts/native/render-brand-icons.sh",
     "native:audit": "bash scripts/native/audit-ui.sh",

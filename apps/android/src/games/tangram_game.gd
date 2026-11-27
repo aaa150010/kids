@@ -92,40 +92,30 @@ func _show_map() -> void:
 	view = "map"
 	_result_visible = false
 	PlaygroundUI.clear(content_root)
-	content_root.add_child(PlaygroundUI.label("七块积木，拼出想象", 30, accent, 700))
-	content_root.add_child(PlaygroundUI.label("拖动积木到轮廓上，旋转和翻转方向。拼好后会亮起来。", 18, PlaygroundUI.INK_SOFT, 500, true))
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
-	var grid := GridContainer.new()
-	grid.columns = 3 if get_viewport_rect().size.x <= 1180.0 else 4 if get_viewport_rect().size.x < 1500.0 else 6
-	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	grid.add_theme_constant_override("h_separation", 14)
-	grid.add_theme_constant_override("v_separation", 14)
+	var entries: Array = []
 	var levels := _levels()
+	var active_level := level_id if str(engine.state.get("phase", "")) == "playing" else -1
 	for index in levels.size():
 		var number := index + 1
 		var entry: Dictionary = levels[index]
 		var unlocked := SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id)
 		var stars := clampi(int(SaveStore.learning(str(players[0].id), game_id, mode_id).stars.get(str(number), 0)), 0, 3)
-		var state_text := "可以挑战" if unlocked else "先完成前一关"
-		if unlocked and stars > 0:
-			state_text = "已获 %s / 3 星" % stars
-		var button := PlaygroundUI.semantic_icon_button(
-			"play" if unlocked else "lock",
-			"第 %s 关\n%s\n%s" % [number, str(entry.get("title", "七巧板")), state_text],
-			accent,
-			_choose_level.bind(number),
-			"soft",
-			17
-		)
-		button.custom_minimum_size = Vector2(0, 132)
-		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		button.disabled = not unlocked
-		grid.add_child(button)
-	scroll.add_child(grid)
-	content_root.add_child(scroll)
+		entries.append({
+			"id": number,
+			"title": str(entry.get("title", "七巧板")),
+			"subtitle": str(entry.get("band", "")),
+			"locked": not unlocked,
+			"stars": stars,
+			"in_progress": number == active_level,
+		})
+	var browser := GameBrowser.new()
+	browser.configure(entries, {
+		"title": "七块积木，拼出想象",
+		"subtitle": "拖动积木到轮廓上，旋转和翻转方向。拼好后会亮起来。",
+		"accent": accent,
+	})
+	browser.entry_selected.connect(func(number: Variant): _choose_level(int(number)))
+	content_root.add_child(browser)
 	if not engine.state.is_empty():
 		_save("正在选择拼图关卡")
 
@@ -134,6 +124,14 @@ func _choose_level(number: int) -> void:
 	if not SaveStore.level_unlocked(str(players[0].id), game_id, number, mode_id):
 		show_toast("先完成前一关，再来挑战这一关。")
 		return
+	guard_level_switch(number, func(): _start_level(number), func():
+		view = "board"
+		_build_board()
+		_refresh()
+	)
+
+
+func _start_level(number: int) -> void:
 	level_id = number
 	_new_session()
 	_build_board()

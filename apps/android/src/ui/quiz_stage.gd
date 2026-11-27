@@ -74,6 +74,8 @@ var _position := 0
 var _total := 0
 var _correct := 0
 var player_name := ""
+var score_caption := ""
+var _redraw_accum := 0.0
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(420,390)
@@ -433,7 +435,11 @@ func _process(delta: float) -> void:
 		return
 	clock += delta
 	_update_sparks(delta)
-	queue_redraw()
+	_redraw_accum += delta
+	var interval := 1.0 / 120.0 if not _sparks.is_empty() else 1.0 / 30.0
+	if _redraw_accum >= interval:
+		_redraw_accum = 0.0
+		queue_redraw()
 
 func _update_sparks(delta: float) -> void:
 	if _sparks.is_empty():
@@ -492,6 +498,12 @@ func _draw_progress() -> void:
 			_draw_star(center,10.0,tint,0.0)
 		else:
 			draw_arc(center,9.0,0,TAU,20,tint,2.0,true)
+	if not score_caption.is_empty():
+		var caption_size := font.get_string_size(score_caption, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size)
+		var caption_width := caption_size.x + 26.0
+		var caption_rect := Rect2(size.x - caption_width - 16.0, 12.0, caption_width, 34.0)
+		draw_style_box(PlaygroundUI.style(PlaygroundUI.mix(accent, Color.WHITE, 0.84), 17, PlaygroundUI.mix(accent, Color.WHITE, 0.4), 2), caption_rect)
+		draw_string(font, caption_rect.position + Vector2(13, 17 + font_size * 0.36), score_caption, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, PlaygroundUI.mix(accent, PlaygroundUI.INK, 0.4))
 
 
 func _draw_sparks() -> void:
@@ -586,9 +598,62 @@ func _draw_trivia() -> void:
 	draw_circle(center + Vector2(0.0, -86.0) * unit, 36.0 * unit, Color("#f4cb58"))
 	draw_circle(center + Vector2(0.0, -86.0) * unit, 26.0 * unit, Color("#fff1ae"))
 	_draw_star(center + Vector2(0.0, -86.0) * unit, 17.0 * unit, accent, 0.0)
+	_draw_trivia_skill_badge(center + Vector2(0.0, -86.0) * unit, unit, str(question.get("skill", "生活常识")))
 	_draw_star(center + Vector2(-178.0, -32.0) * unit, 9.0 * unit, Color("#f4cb58"), 0.2)
 	_draw_star(center + Vector2(178.0, -32.0) * unit, 9.0 * unit, Color("#f4cb58"), -0.2)
 	draw_style_box(PlaygroundUI.style(Color("#ead8b9"), 18, Color("#b99363"), 2), Rect2(48, book_y + 66.0 * unit, size.x - 96, 14.0 * unit))
+
+
+func _draw_trivia_skill_badge(center: Vector2, unit: float, skill: String) -> void:
+	var tint := Color("#b57926")
+	var ink := Color("#fff9ec")
+	match skill:
+		"中国文化":
+			tint = Color("#b95245")
+		"地理天气":
+			tint = Color("#3f8bb3")
+		"安全健康":
+			tint = Color("#4c9663")
+		"动物朋友":
+			tint = Color("#9a6b3e")
+		"自然观察":
+			tint = Color("#6c9b4c")
+		"科学启蒙":
+			tint = Color("#6b5aa6")
+	draw_circle(center, 16.0 * unit, tint)
+	match skill:
+		"地理天气":
+			draw_arc(center, 9.0 * unit, 0, TAU, 20, ink, 1.8 * unit, true)
+			draw_line(center + Vector2(0, -9) * unit, center + Vector2(0, 9) * unit, ink, 1.6 * unit, true)
+			draw_line(center + Vector2(-9, 0) * unit, center + Vector2(9, 0) * unit, ink, 1.6 * unit, true)
+		"安全健康":
+			draw_colored_polygon(PackedVector2Array([
+				center + Vector2(0, -10) * unit, center + Vector2(9, -6) * unit,
+				center + Vector2(7, 5) * unit, center + Vector2(0, 11) * unit,
+				center + Vector2(-7, 5) * unit, center + Vector2(-9, -6) * unit,
+			]), ink)
+		"动物朋友":
+			for offset in [Vector2(-6, -5), Vector2(6, -5), Vector2(-8, 3), Vector2(8, 3), Vector2(0, 7)]:
+				draw_circle(center + offset * unit, 3.2 * unit, ink)
+		"自然观察":
+			draw_colored_polygon(PackedVector2Array([
+				center + Vector2(-9, 7) * unit, center + Vector2(-5, -9) * unit,
+				center + Vector2(10, -7) * unit, center + Vector2(5, 8) * unit,
+			]), ink)
+			draw_line(center + Vector2(-7, 8) * unit, center + Vector2(8, -6) * unit, tint, 1.8 * unit, true)
+		"中国文化":
+			draw_rect(Rect2(center + Vector2(-8, -8) * unit, Vector2(16, 16) * unit), ink, false, 2.0 * unit, true)
+			_draw_star(center, 5.5 * unit, ink, 0.0)
+		"科学启蒙":
+			draw_circle(center, 4.5 * unit, ink)
+			draw_arc(center, 10.0 * unit, -0.65, 3.75, 24, ink, 1.8 * unit, true)
+		_:
+			draw_colored_polygon(PackedVector2Array([
+				center + Vector2(-10, 7) * unit, center + Vector2(0, -6) * unit,
+				center + Vector2(10, 7) * unit,
+			]), ink)
+			draw_rect(Rect2(center + Vector2(-6, 2) * unit, Vector2(12, 8) * unit), ink)
+
 
 func _draw_visual(center: Vector2, extent: float) -> void:
 	center.y += sin(clock * 1.35) * 2.2

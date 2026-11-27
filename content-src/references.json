@@ -340,6 +340,26 @@
       "license": "项目原创",
       "accessedAt": "2026-11-20",
       "note": "操作图标、游戏封面图集、档案头像和内容图形由项目自绘或由原生矢量绘制生成；旧第三方资源仅保留历史许可记录。"
+  },
+  {
+    "title": "方向指令、逐步执行与调试式路线玩法",
+    "url": "https://en.wikipedia.org/wiki/Logo_(programming_language)",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "仅参考儿童编程中的方向序列、逐格执行和错误后修改程序的通用概念；路线、机器人、棋盘和界面均为本项目原创。"
+  },
+  {
+    "title": "儿童词序与组句练习设计",
+    "license": "项目教研整理",
+    "accessedAt": "2026-11-27",
+    "note": "按口语到书面语的顺序组织短句、连接词和复句内容；所有句子、切分和解释由本项目重新编写。"
+  },
+  {
+    "title": "Pipe Mania rotation-puzzle gameplay",
+    "url": "https://en.wikipedia.org/wiki/Pipe_Mania",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考旋转管件、连接水源与目标的通用玩法概念；水管、花圃、关卡和视觉素材均为本项目原创。"
     }
   ]
 }

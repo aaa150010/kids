@@ -13,6 +13,9 @@ const GAME_SCRIPTS := {
 	"spot": "res://src/games/spot_game.gd",
 	"shop": "res://src/games/shop_game.gd",
 	"fruit_slice": "res://src/games/fruit_slice_game.gd",
+	"robot": "res://src/games/robot_game.gd",
+	"sentence_train": "res://src/games/sentence_train_game.gd",
+	"pipes": "res://src/games/pipe_game.gd",
 	"gomoku": "res://src/games/board_game.gd",
 	"chess": "res://src/games/chess_game.gd",
 	"sudoku": "res://src/games/sudoku_game.gd",
@@ -33,6 +36,9 @@ const MUSIC_THEMES := {
 	"spot": "forest",
 	"shop": "lobby",
 	"fruit_slice": "rainbow",
+	"robot": "rainbow",
+	"sentence_train": "forest",
+	"pipes": "rainbow",
 	"gomoku": "lobby",
 	"chess": "poetry",
 	"sudoku": "math",
@@ -71,6 +77,8 @@ var _sort_drag_card: LobbyGameCard = null
 var _insert_line: ColorRect = null
 var _drag_pointer := Vector2.ZERO
 var _lobby_query := ""
+var _lobby_filter := "all"
+var _filter_buttons: Array[Button] = []
 var _search_edit: LineEdit = null
 var _search_timer: Timer = null
 var _search_holder: Control = null
@@ -116,7 +124,7 @@ func _ready() -> void:
 	UpdateService.content_downloaded.connect(func(version: int): show_toast("新内容已下载，下次启动会生效（内容版本 %s）" % version))
 	UpdateService.check_failed.connect(_on_update_error)
 	Speech.unavailable.connect(func(message: String): show_toast(message, 3.0))
-	SaveStore.save_failed.connect(func(_message: String): show_toast("自动保存暂时没有完成，下一次操作会继续重试。", 3.0))
+	SaveStore.save_failed.connect(func(_message: String): show_toast("刚才没记住，我再试一次。", 3.0))
 	_rebuild_lobby()
 	AudioFX.stop_music()
 	intro_sequence = load("res://src/ui/intro_sequence.gd").new()
@@ -172,6 +180,13 @@ func _rebuild_lobby() -> void:
 	_cancel_sort_drag()
 	if sorting:
 		_lobby_query = ""
+		_lobby_filter = "all"
+	var resumable := SaveStore.resumable_sessions()
+	var resume_by_game := {}
+	for entry in resumable:
+		var entry_game := str(entry.get("gameId", ""))
+		if not entry_game.is_empty() and not resume_by_game.has(entry_game):
+			resume_by_game[entry_game] = entry
 	if is_instance_valid(scroll):
 		_lobby_scroll_offset = scroll.scroll_vertical
 	if is_instance_valid(lobby_root):
@@ -204,10 +219,16 @@ func _rebuild_lobby() -> void:
 	scroll.add_child(page)
 	page_scroll.resized.connect(func(): page.custom_minimum_size.x = maxf(1.0, page_scroll.size.x))
 	page.add_child(_lobby_header())
+	var hero := _lobby_continue_hero(resumable)
+	if hero != null and not sorting:
+		page.add_child(hero)
 	_heading_row = _lobby_heading() as HBoxContainer
 	page.add_child(_heading_row)
 	_search_holder = _lobby_search()
 	page.add_child(_search_holder)
+	var filter_bar := _lobby_filters()
+	filter_bar.visible = not sorting
+	page.add_child(filter_bar)
 	# 排序说明条槽位：隐藏时不占布局间距，切换排序只增删内部节点
 	_sort_note_holder = VBoxContainer.new()
 	_sort_note_holder.visible = sorting
@@ -222,12 +243,12 @@ func _rebuild_lobby() -> void:
 	card_grid.add_theme_constant_override("v_separation", int(metrics.gap))
 	page.add_child(card_grid)
 	_game_order = SaveStore.lobby_order(ContentDB.default_order())
-	var resumable := SaveStore.resumable_sessions()
 	for meta in ContentDB.ordered_games(_game_order):
 		var game_id := str(meta.id)
-		var can_resume := resumable.any(func(entry): return str(entry.get("gameId","")) == game_id)
+		var resume_entry: Dictionary = resume_by_game.get(game_id, {})
+		var can_resume := not resume_entry.is_empty()
 		var card := LobbyGameCard.new()
-		card.configure(meta, can_resume, sorting, get_viewport_rect().size)
+		card.configure(meta, can_resume, sorting, get_viewport_rect().size, resume_entry)
 		card.launch_requested.connect(_open_game_picker)
 		card.resume_requested.connect(_continue_saved_game)
 		card.help_requested.connect(_show_game_help)
@@ -264,6 +285,118 @@ func _rebuild_lobby() -> void:
 	_apply_lobby_search()
 	if sorting:
 		show_toast("按住任意游戏卡拖到新位置")
+
+
+func _lobby_continue_hero(entries: Array) -> Control:
+	if entries.is_empty():
+		return null
+	var entry: Dictionary = entries[0]
+	var game_id := str(entry.get("gameId", ""))
+	var meta := ContentDB.game(game_id)
+	if meta.is_empty():
+		return null
+	var tint := PlaygroundUI.color(str(meta.get("accent", "#99644f")))
+	var panel := PlaygroundUI.panel(PlaygroundUI.mix(tint, Color.WHITE, 0.88), 24, PlaygroundUI.mix(tint, Color.WHITE, 0.46), 2)
+	panel.custom_minimum_size.y = 176
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 18)
+	panel.add_child(row)
+	var metrics := PlaygroundUI.layout_metrics(get_viewport_rect().size)
+	var compact := bool(metrics.compact_cards)
+	var cover_wrap := PanelContainer.new()
+	cover_wrap.custom_minimum_size = Vector2(220, 124) if compact else Vector2(300, 150)
+	cover_wrap.clip_contents = true
+	cover_wrap.add_theme_stylebox_override("panel", PlaygroundUI.style(PlaygroundUI.mix(tint, Color.WHITE, 0.78), 18))
+	row.add_child(cover_wrap)
+	var cover := ArtLibrary.cover_texture(game_id)
+	if cover != null:
+		var image := TextureRect.new()
+		image.texture = cover
+		image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+		image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		cover_wrap.add_child(image)
+	else:
+		cover_wrap.add_child(ArtLibrary.semantic_picture("continue", "ui", Vector2(72, 72)))
+	var copy := VBoxContainer.new()
+	copy.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	copy.add_theme_constant_override("separation", 4)
+	copy.add_child(PlaygroundUI.label("接着上次玩", 17, tint, 700))
+	copy.add_child(PlaygroundUI.label(str(meta.get("title", "小游戏")), 30 if not compact else 26, PlaygroundUI.INK_DARK, 700, true))
+	var names := PackedStringArray()
+	for profile_id in entry.get("participantIds", []):
+		var profile := SaveStore.profile(str(profile_id))
+		if not profile.is_empty():
+			names.append(str(profile.get("name", "小朋友")))
+	var mode_name := str(ContentDB.mode(game_id, str(entry.get("modeId", "classic"))).get("name", "正在玩"))
+	var detail := "%s · %s" % [mode_name, "、".join(names) if not names.is_empty() else "本机档案"]
+	var level := int(entry.get("levelId", 1))
+	if level > 1:
+		detail += " · 第 %s 关" % level
+	copy.add_child(PlaygroundUI.label(detail, 17, PlaygroundUI.INK_SOFT, 600, true))
+	var note := str(entry.get("note", "")).strip_edges()
+	if not note.is_empty():
+		copy.add_child(PlaygroundUI.label(note, 15, PlaygroundUI.INK_SOFT, 500, true))
+	copy.add_child(PlaygroundUI.label(SaveStore.save_status_text(), 14, PlaygroundUI.INK_SOFT, 500))
+	row.add_child(copy)
+	var actions := VBoxContainer.new()
+	actions.custom_minimum_size.x = 220
+	actions.alignment = BoxContainer.ALIGNMENT_CENTER
+	actions.add_theme_constant_override("separation", 8)
+	var resume := PlaygroundUI.semantic_icon_button("continue", "继续游戏", tint, _continue_saved_game.bind(game_id), "primary", 20)
+	resume.custom_minimum_size = Vector2(210, 62)
+	actions.add_child(resume)
+	actions.add_child(PlaygroundUI.semantic_icon_button("profile", "所有未完成", tint, _show_continue_dialog, "soft", 16))
+	row.add_child(actions)
+	return panel
+
+
+func _lobby_filters() -> Control:
+	_filter_buttons.clear()
+	var row := HFlowContainer.new()
+	row.add_theme_constant_override("h_separation", 8)
+	row.add_theme_constant_override("v_separation", 6)
+	var group := ButtonGroup.new()
+	var entries := [
+		["all", "全部"],
+		["think", "动脑"],
+		["language", "语言"],
+		["science", "科学"],
+		["life", "生活"],
+		["board", "棋类"],
+		["story", "故事"],
+	]
+	for entry in entries:
+		var value := str(entry[0])
+		var button := PlaygroundUI.choice_button(str(entry[1]), Color("#99644f"), group, value, value == _lobby_filter, Vector2(104, 50), 17)
+		button.pressed.connect(_set_lobby_filter.bind(value))
+		row.add_child(button)
+		_filter_buttons.append(button)
+	return row
+
+
+func _set_lobby_filter(value: String) -> void:
+	_lobby_filter = value
+	AudioFX.play("select")
+	for button in _filter_buttons:
+		if is_instance_valid(button):
+			button.set_pressed_no_signal(str(button.get_meta("choice_value", "")) == value)
+	_apply_lobby_search()
+
+
+func _game_matches_filter(meta: Dictionary, filter_id: String) -> bool:
+	if filter_id == "all" or filter_id.is_empty():
+		return true
+	var category := str(meta.get("category", ""))
+	var groups := {
+		"think": ["数学思维", "空间拼搭", "编程思维", "空间逻辑", "逻辑观察", "观察记忆", "观察发现"],
+		"language": ["识字启蒙", "诗词文化", "语言表达", "故事听读"],
+		"science": ["科学常识", "常识百科", "动作观察"],
+		"life": ["生活应用"],
+		"board": ["双人棋局"],
+		"story": ["故事听读"],
+	}
+	return category in groups.get(filter_id, [])
 
 
 func _lobby_search() -> Control:
@@ -308,27 +441,37 @@ func _apply_lobby_search() -> void:
 	var matched := {}
 	for game_id in ContentDB.search_games(_lobby_query):
 		matched[str(game_id)] = true
+	var has_query := not _lobby_query.strip_edges().is_empty()
 	var visible_count := 0
 	for card in card_grid.get_children():
 		if card is LobbyGameCard:
-			var is_visible := matched.has(card.game_id) if not _lobby_query.strip_edges().is_empty() else true
+			var search_ok := matched.has(card.game_id) if has_query else true
+			var filter_ok := _game_matches_filter(ContentDB.game(card.game_id), _lobby_filter)
+			var is_visible := search_ok and filter_ok
 			card.visible = is_visible
 			if is_visible:
 				visible_count += 1
 	if is_instance_valid(_search_empty) and is_instance_valid(_search_empty_label):
-		var no_results := visible_count == 0 and not _lobby_query.strip_edges().is_empty()
+		var no_results := visible_count == 0 and (has_query or _lobby_filter != "all")
 		card_grid.visible = not no_results
 		_search_empty.visible = no_results
 		if no_results:
-			_search_empty_label.text = "没有找到“%s”这个小游戏\n换个词试试，或者清空搜索。" % _lobby_query.strip_edges()
+			if has_query:
+				_search_empty_label.text = "没有找到“%s”这个小游戏\n换个词试试，或者清空搜索。" % _lobby_query.strip_edges()
+			else:
+				_search_empty_label.text = "这个分类里暂时没有小游戏\n可以看看别的分类，或者回到全部。"
 
 
 func _clear_lobby_search() -> void:
 	_lobby_query = ""
+	_lobby_filter = "all"
 	if is_instance_valid(_search_edit):
 		_search_edit.text = ""
 	if is_instance_valid(_search_timer):
 		_search_timer.stop()
+	for button in _filter_buttons:
+		if is_instance_valid(button):
+			button.set_pressed_no_signal(str(button.get_meta("choice_value", "")) == "all")
 	_apply_lobby_search()
 	if is_instance_valid(_search_edit):
 		_search_edit.grab_focus()
@@ -528,7 +671,9 @@ func _open_game_picker(game_id: String, chosen_mode: String = "") -> void:
 	choices.add_theme_constant_override("v_separation", 10)
 	player_column.add_child(choices)
 	for profile in SaveStore.profiles():
-		var button := PlaygroundUI.choice_button("%s · %s 岁" % [profile.name, profile.age], PlaygroundUI.color(str(profile.color)), null, str(profile.id), str(profile.id) in chosen_ids, Vector2(200, 60), 20)
+		var base_label := "%s · %s 岁" % [profile.name, profile.age]
+		var button := PlaygroundUI.choice_button(base_label, PlaygroundUI.color(str(profile.color)), null, str(profile.id), str(profile.id) in chosen_ids, Vector2(220, 74), 19)
+		button.set_meta("base_label", base_label)
 		var avatar_picture := ArtLibrary.profile_picture(profile, Vector2(38, 38))
 		avatar_picture.position = Vector2(10, 11)
 		button.add_child(avatar_picture)
@@ -626,7 +771,19 @@ func _refresh_preparation() -> void:
 	for button in _preparation.modeButtons:
 		button.set_pressed_no_signal(str(button.get_meta("choice_value")) == str(_preparation.modeId))
 	for button in _preparation.profileButtons:
-		button.set_pressed_no_signal(str(button.get_meta("choice_value")) in ids)
+		var profile_id := str(button.get_meta("choice_value"))
+		button.set_pressed_no_signal(profile_id in ids)
+		var base_label := str(button.get_meta("base_label", "小朋友"))
+		if profile_id in ids and ids.size() > 1:
+			var seat := ids.find(profile_id)
+			var seat_label := ""
+			if TabletopLayout.enabled(game_id, selected, str(_preparation.modeId)) or game_id in ["chess", "military", "jungle", "gomoku"]:
+				seat_label = "左座" if seat == 0 else "右座"
+			else:
+				seat_label = "先手" if seat == 0 else "后手"
+			button.text = "%s\n%s" % [seat_label, base_label]
+		else:
+			button.text = base_label
 	for button in _preparation.difficultyButtons:
 		var value := str(button.get_meta("choice_value"))
 		button.set_pressed_no_signal(value == str(_preparation.preference))
@@ -647,6 +804,12 @@ func _refresh_preparation() -> void:
 	var start_button: Button = _preparation.get("startButton")
 	if is_instance_valid(start_button):
 		start_button.disabled = ids.size() < minimum or ids.size() > maximum
+		if ids.size() < minimum:
+			start_button.text = "还差 %s 位小朋友" % (minimum - ids.size())
+		else:
+			var mode_label := str(definition.get("name", "开始"))
+			var difficulty_label := GameTuning.label(GameTuning.resolve(str(_preparation.preference), selected)) if GameTuning.supports(game_id) else "自由玩"
+			start_button.text = "开始游戏 · %s · %s" % [mode_label, difficulty_label]
 
 
 func _start_from_preparation() -> void:
@@ -761,6 +924,9 @@ func _return_to_lobby() -> void:
 	var leaving := current_screen
 	current_screen = null
 	_screen_game = ""
+	Speech.stop()
+	AudioFX.stop_all()
+	SaveStore.flush()
 	if is_instance_valid(leaving):
 		leaving.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var fade := MotionKit.tween(leaving)
@@ -771,6 +937,7 @@ func _return_to_lobby() -> void:
 	_rebuild_lobby()
 	if is_instance_valid(lobby_root):
 		lobby_root.show()
+	AudioFX.start_music("lobby")
 
 
 func _show_game_help(game_id: String) -> void:
@@ -790,8 +957,10 @@ func _show_game_help(game_id: String) -> void:
 	], "给家长和小玩家")
 
 
-func _show_continue_dialog() -> void:
+func _show_continue_dialog(game_id_filter: String = "") -> void:
 	var items := SaveStore.resumable_sessions()
+	if not game_id_filter.is_empty():
+		items = items.filter(func(entry): return str(entry.get("gameId", "")) == game_id_filter)
 	if items.is_empty():
 		show_toast("选一张游戏卡，开始新的发现吧")
 		return
@@ -835,7 +1004,7 @@ func _continue_saved_game(game_id: String) -> void:
 	elif matching.size() == 1:
 		_resume_entry(matching[0])
 	else:
-		_show_continue_dialog()
+		_show_continue_dialog(game_id)
 
 
 func _show_random_game() -> void:
@@ -1472,7 +1641,9 @@ func _update_insert_line() -> void:
 	for card in card_grid.get_children():
 		if card is LobbyGameCard and card.game_id == target:
 			var rect: Rect2 = card.get_global_rect()
-			_insert_line.position = modal_root.get_global_transform_with_canvas().affine_inverse() * (rect.position - Vector2(4, 0))
+			var insert_after := _sort_insert_after(rect)
+			var line_x := rect.end.x + 2.0 if insert_after else rect.position.x - 7.0
+			_insert_line.position = modal_root.get_global_transform_with_canvas().affine_inverse() * Vector2(line_x, rect.position.y)
 			_insert_line.size = Vector2(5, rect.size.y)
 			return
 
@@ -1503,10 +1674,7 @@ func _sort_drop(payload: Variant, _position: Vector2, target: Variant) -> void:
 	for card in card_grid.get_children():
 		if card is LobbyGameCard and card.game_id == str(target):
 			var rect: Rect2 = (card as LobbyGameCard).get_global_rect()
-			insert_after = _drag_pointer.y > rect.get_center().y + rect.size.y * 0.18 or (
-				absf(_drag_pointer.y - rect.get_center().y) <= rect.size.y * 0.32
-				and _drag_pointer.x > rect.get_center().x
-			)
+			insert_after = _sort_insert_after(rect)
 			break
 	_game_order.remove_at(from)
 	var target_index := _game_order.find(str(target))
@@ -1519,6 +1687,13 @@ func _sort_drop(payload: Variant, _position: Vector2, target: Variant) -> void:
 			if card is LobbyGameCard and card.game_id == _game_order[index]:
 				card_grid.move_child(card, index)
 				break
+
+
+func _sort_insert_after(rect: Rect2) -> bool:
+	return _drag_pointer.y > rect.get_center().y + rect.size.y * 0.18 or (
+		absf(_drag_pointer.y - rect.get_center().y) <= rect.size.y * 0.32
+		and _drag_pointer.x > rect.get_center().x
+	)
 
 
 func _clear_sort_visuals() -> void:

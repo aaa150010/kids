@@ -1,0 +1,5805 @@
+{
+  "version": 1,
+  "levels": [
+    {
+      "id": "pipes-01",
+      "band": "easy",
+      "minAge": 4,
+      "title": "小水壶醒了",
+      "width": 4,
+      "height": 3,
+      "source": {
+        "x": 0,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 3,
+          "y": 2
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 2
+        }
+      ],
+      "walls": [
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 2
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 0,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-02",
+      "band": "easy",
+      "minAge": 5,
+      "title": "绕过蘑菇石",
+      "width": 4,
+      "height": 3,
+      "source": {
+        "x": 3,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 1
+        }
+      ],
+      "fixed": [
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        }
+      ],
+      "walls": [
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 2
+        }
+      ],
+      "pieces": [
+        {
+          "x": 2,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 3,
+          "locked": false
+        }
+      ]
+    },
+    {
+      "id": "pipes-03",
+      "band": "easy",
+      "minAge": 6,
+      "title": "草莓圃送水",
+      "width": 5,
+      "height": 3,
+      "source": {
+        "x": 0,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 4,
+          "y": 2
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 2
+        }
+      ],
+      "walls": [
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 0,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-04",
+      "band": "easy",
+      "minAge": 4,
+      "title": "弯弯小水渠",
+      "width": 5,
+      "height": 4,
+      "source": {
+        "x": 4,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 0
+        }
+      ],
+      "fixed": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        }
+      ],
+      "walls": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        }
+      ],
+      "pieces": [
+        {
+          "x": 1,
+          "y": 0,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "tee",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 3,
+          "locked": false
+        }
+      ]
+    },
+    {
+      "id": "pipes-05",
+      "band": "easy",
+      "minAge": 5,
+      "title": "向日葵的第一桶水",
+      "width": 5,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 2
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 3
+        }
+      ],
+      "walls": [
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 0,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-06",
+      "band": "easy",
+      "minAge": 6,
+      "title": "薄荷叶清凉路",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 5,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 1
+        }
+      ],
+      "fixed": [
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        }
+      ],
+      "walls": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 3,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        }
+      ]
+    },
+    {
+      "id": "pipes-07",
+      "band": "easy",
+      "minAge": 4,
+      "title": "南瓜苗喝饱啦",
+      "width": 5,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 0
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 2
+        }
+      ],
+      "walls": [
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 0,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-08",
+      "band": "easy",
+      "minAge": 5,
+      "title": "两朵雏菊",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 5,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 0
+        }
+      ],
+      "fixed": [
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 2
+        }
+      ],
+      "walls": [
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 2
+        }
+      ],
+      "pieces": [
+        {
+          "x": 2,
+          "y": 0,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "tee",
+          "rotation": 1,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-09",
+      "band": "easy",
+      "minAge": 6,
+      "title": "小桥边的花盆",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 0
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        }
+      ],
+      "walls": [
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 0,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 0,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-10",
+      "band": "easy",
+      "minAge": 4,
+      "title": "三叶草分岔",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 5,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 1
+        }
+      ],
+      "fixed": [
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 3
+        }
+      ],
+      "walls": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        }
+      ],
+      "pieces": [
+        {
+          "x": 1,
+          "y": 1,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "tee",
+          "rotation": 1,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-11",
+      "band": "easy",
+      "minAge": 5,
+      "title": "葡萄架下",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 3
+        }
+      ],
+      "walls": [
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "tee",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "tee",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-12",
+      "band": "easy",
+      "minAge": 6,
+      "title": "雨后小池塘",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 5,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 2
+        }
+      ],
+      "fixed": [
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "walls": [
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 2,
+          "y": 1
+        }
+      ],
+      "pieces": [
+        {
+          "x": 3,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "cross",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-13",
+      "band": "normal",
+      "minAge": 7,
+      "title": "玫瑰园早班",
+      "width": 5,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 3
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 3
+        }
+      ],
+      "walls": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "tee",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-14",
+      "band": "normal",
+      "minAge": 8,
+      "title": "风车磨坊引水",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 5,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "fixed": [
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "walls": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 3,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-15",
+      "band": "normal",
+      "minAge": 9,
+      "title": "竹林三岔口",
+      "width": 6,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 5,
+          "y": 4
+        },
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 2
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 2
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 0,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "tee",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "tee",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-16",
+      "band": "normal",
+      "minAge": 7,
+      "title": "香草迷宫",
+      "width": 6,
+      "height": 5,
+      "source": {
+        "x": 5,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 2,
+          "y": 4
+        }
+      ],
+      "fixed": [
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 2,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 4
+        }
+      ],
+      "pieces": [
+        {
+          "x": 3,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "type": "tee",
+          "rotation": 1,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-17",
+      "band": "normal",
+      "minAge": 8,
+      "title": "菜畦环游记",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 6,
+          "y": 4
+        },
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 2
+        }
+      ],
+      "fixed": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 3
+        },
+        {
+          "x": 6,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 6,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 1,
+          "y": 0,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "tee",
+          "rotation": 1,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "tee",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 4,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-18",
+      "band": "normal",
+      "minAge": 9,
+      "title": "橘子园巡水",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 6,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 6,
+          "y": 1
+        }
+      ],
+      "fixed": [
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 6,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 4,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 6,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "cross",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 1,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 3,
+          "locked": false
+        }
+      ]
+    },
+    {
+      "id": "pipes-19",
+      "band": "normal",
+      "minAge": 7,
+      "title": "石阶上的水声",
+      "width": 6,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 5,
+          "y": 4
+        },
+        {
+          "x": 2,
+          "y": 2
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 0,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-20",
+      "band": "normal",
+      "minAge": 8,
+      "title": "番茄架接力",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 6,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 5,
+          "y": 2
+        }
+      ],
+      "fixed": [
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 6,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        }
+      ],
+      "walls": [
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 4
+        },
+        {
+          "x": 5,
+          "y": 4
+        }
+      ],
+      "pieces": [
+        {
+          "x": 3,
+          "y": 0,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "type": "tee",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "tee",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-21",
+      "band": "normal",
+      "minAge": 9,
+      "title": "月季花廊",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 6,
+          "y": 4
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 3
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 4
+        },
+        {
+          "x": 5,
+          "y": 4
+        },
+        {
+          "x": 6,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 6,
+          "y": 4,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-22",
+      "band": "normal",
+      "minAge": 7,
+      "title": "小木屋后院",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 6,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 1
+        }
+      ],
+      "fixed": [
+        {
+          "x": 6,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 3
+        }
+      ],
+      "walls": [
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 4
+        },
+        {
+          "x": 6,
+          "y": 4
+        }
+      ],
+      "pieces": [
+        {
+          "x": 4,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "tee",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "tee",
+          "rotation": 1,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-23",
+      "band": "normal",
+      "minAge": 8,
+      "title": "蓝莓坡浇水",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 6,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 3
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 6,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 3
+        }
+      ],
+      "walls": [
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 4
+        },
+        {
+          "x": 4,
+          "y": 4
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 0,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "tee",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 2,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-24",
+      "band": "normal",
+      "minAge": 9,
+      "title": "向日葵方阵",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 6,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 4
+        },
+        {
+          "x": 1,
+          "y": 2
+        }
+      ],
+      "fixed": [
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 6,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 4,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 1,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "cross",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-25",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "老磨坊总闸",
+      "width": 6,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 2
+      },
+      "goals": [
+        {
+          "x": 5,
+          "y": 4
+        },
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 5,
+          "y": 3
+        }
+      ],
+      "fixed": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 3,
+          "y": 4
+        }
+      ],
+      "pieces": [
+        {
+          "x": 1,
+          "y": 0,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "tee",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-26",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "迷雾温室",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 6,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 3
+        }
+      ],
+      "fixed": [
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        },
+        {
+          "x": 0,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 6,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 4
+        }
+      ],
+      "pieces": [
+        {
+          "x": 2,
+          "y": 1,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 6,
+          "y": 1,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        }
+      ]
+    },
+    {
+      "id": "pipes-27",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "四角花园",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 6,
+          "y": 4
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 6,
+          "y": 2
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 6,
+          "y": 2
+        },
+        {
+          "x": 6,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 6,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 4
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 0,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 6,
+          "y": 2,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 4,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-28",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "石板迷宫",
+      "width": 7,
+      "height": 6,
+      "source": {
+        "x": 6,
+        "y": 2
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 5
+        },
+        {
+          "x": 5,
+          "y": 4
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 0
+        }
+      ],
+      "fixed": [
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 6,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 4
+        },
+        {
+          "x": 0,
+          "y": 5
+        },
+        {
+          "x": 1,
+          "y": 5
+        }
+      ],
+      "walls": [
+        {
+          "x": 6,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 6,
+          "y": 4
+        },
+        {
+          "x": 3,
+          "y": 5
+        },
+        {
+          "x": 5,
+          "y": 5
+        }
+      ],
+      "pieces": [
+        {
+          "x": 5,
+          "y": 0,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "cross",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 6,
+          "y": 2,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 3,
+          "locked": false
+        }
+      ]
+    },
+    {
+      "id": "pipes-29",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "上下双渠",
+      "width": 7,
+      "height": 6,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 6,
+          "y": 4
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 4
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 4
+        },
+        {
+          "x": 4,
+          "y": 4
+        },
+        {
+          "x": 5,
+          "y": 4
+        },
+        {
+          "x": 6,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 1,
+          "y": 4
+        },
+        {
+          "x": 2,
+          "y": 4
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 6,
+          "y": 4,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-30",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "喷泉庭院",
+      "width": 8,
+      "height": 6,
+      "source": {
+        "x": 7,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 5
+        },
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 2
+        }
+      ],
+      "fixed": [
+        {
+          "x": 7,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 1,
+          "y": 4
+        },
+        {
+          "x": 0,
+          "y": 5
+        },
+        {
+          "x": 1,
+          "y": 5
+        },
+        {
+          "x": 2,
+          "y": 5
+        }
+      ],
+      "walls": [
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 7,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 5,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 0,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 7,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-31",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "葡萄园水道",
+      "width": 8,
+      "height": 6,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 7,
+          "y": 4
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 7,
+          "y": 3
+        }
+      ],
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 7,
+          "y": 3
+        },
+        {
+          "x": 7,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 2
+        }
+      ],
+      "pieces": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 7,
+          "y": 3,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 4,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 7,
+          "y": 4,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-32",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "苔藓水闸",
+      "width": 7,
+      "height": 6,
+      "source": {
+        "x": 6,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 3,
+          "y": 4
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 1
+        }
+      ],
+      "fixed": [
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 6,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 3
+        },
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 3,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 5
+        },
+        {
+          "x": 6,
+          "y": 5
+        }
+      ],
+      "pieces": [
+        {
+          "x": 4,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 0,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-33",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "花园十字路",
+      "width": 8,
+      "height": 6,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 7,
+          "y": 4
+        },
+        {
+          "x": 6,
+          "y": 5
+        },
+        {
+          "x": 4,
+          "y": 4
+        },
+        {
+          "x": 5,
+          "y": 0
+        }
+      ],
+      "fixed": [
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 4
+        },
+        {
+          "x": 7,
+          "y": 4
+        },
+        {
+          "x": 6,
+          "y": 5
+        }
+      ],
+      "walls": [
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 5
+        }
+      ],
+      "pieces": [
+        {
+          "x": 5,
+          "y": 0,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "tee",
+          "rotation": 2,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 4,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 7,
+          "y": 4,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 6,
+          "y": 5,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-34",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "水车大回环",
+      "width": 8,
+      "height": 6,
+      "source": {
+        "x": 7,
+        "y": 1
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "fixed": [
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 7,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 3
+        }
+      ],
+      "walls": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 0
+        },
+        {
+          "x": 7,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 4
+        },
+        {
+          "x": 0,
+          "y": 5
+        },
+        {
+          "x": 1,
+          "y": 5
+        },
+        {
+          "x": 6,
+          "y": 5
+        }
+      ],
+      "pieces": [
+        {
+          "x": 5,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 1,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 7,
+          "y": 1,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "tee",
+          "rotation": 3,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "tee",
+          "rotation": 1,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-35",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "古井引水图",
+      "width": 8,
+      "height": 6,
+      "source": {
+        "x": 0,
+        "y": 2
+      },
+      "goals": [
+        {
+          "x": 7,
+          "y": 5
+        },
+        {
+          "x": 6,
+          "y": 4
+        },
+        {
+          "x": 2,
+          "y": 5
+        },
+        {
+          "x": 1,
+          "y": 0
+        }
+      ],
+      "fixed": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 4
+        },
+        {
+          "x": 6,
+          "y": 4
+        },
+        {
+          "x": 2,
+          "y": 5
+        },
+        {
+          "x": 7,
+          "y": 5
+        }
+      ],
+      "walls": [
+        {
+          "x": 7,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 7,
+          "y": 3
+        }
+      ],
+      "pieces": [
+        {
+          "x": 1,
+          "y": 0,
+          "type": "goal",
+          "rotation": 3,
+          "solutionRotation": 3,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "source",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "tee",
+          "rotation": 1,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "tee",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "straight",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 2,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "straight",
+          "rotation": 3,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 6,
+          "y": 4,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 5,
+          "y": 5,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 5,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 7,
+          "y": 5,
+          "type": "goal",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        }
+      ]
+    },
+    {
+      "id": "pipes-36",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "童心大花园",
+      "width": 8,
+      "height": 6,
+      "source": {
+        "x": 7,
+        "y": 0
+      },
+      "goals": [
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 4
+        },
+        {
+          "x": 1,
+          "y": 1
+        }
+      ],
+      "fixed": [
+        {
+          "x": 7,
+          "y": 0
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 4
+        }
+      ],
+      "walls": [
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 7,
+          "y": 1
+        },
+        {
+          "x": 6,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 4
+        },
+        {
+          "x": 7,
+          "y": 4
+        }
+      ],
+      "pieces": [
+        {
+          "x": 5,
+          "y": 0,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 0,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 7,
+          "y": 0,
+          "type": "source",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "tee",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "tee",
+          "rotation": 3,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "elbow",
+          "rotation": 2,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 6,
+          "y": 1,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "straight",
+          "rotation": 1,
+          "solutionRotation": 0,
+          "locked": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "goal",
+          "rotation": 2,
+          "solutionRotation": 2,
+          "locked": true
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 1,
+          "locked": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "elbow",
+          "rotation": 0,
+          "solutionRotation": 3,
+          "locked": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "straight",
+          "rotation": 0,
+          "solutionRotation": 0,
+          "locked": true
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "goal",
+          "rotation": 1,
+          "solutionRotation": 1,
+          "locked": true
+        }
+      ]
+    }
+  ]
+}

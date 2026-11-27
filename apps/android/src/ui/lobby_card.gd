@@ -14,6 +14,7 @@ var game_id := ""
 var accent := Color("#d56c29")
 var sorting := false
 var can_resume := false
+var resume_meta: Dictionary = {}
 var viewport_size := Vector2(1600, 1000)
 
 var _recognizer: GestureRecognizer = null
@@ -25,11 +26,12 @@ var _last_global := Vector2.ZERO
 var _hover_bound := false
 
 
-func configure(meta: Dictionary, resume: bool, sort_mode: bool, current_viewport_size: Vector2 = Vector2(1600, 1000)) -> void:
+func configure(meta: Dictionary, resume: bool, sort_mode: bool, current_viewport_size: Vector2 = Vector2(1600, 1000), resume_entry: Dictionary = {}) -> void:
 	game = meta
 	game_id = str(meta.get("id", ""))
 	accent = PlaygroundUI.color(str(meta.get("accent", "#d56c29")))
 	can_resume = resume
+	resume_meta = resume_entry.duplicate(true)
 	sorting = sort_mode
 	viewport_size = current_viewport_size
 	_build(true)
@@ -157,10 +159,11 @@ func _build(animate: bool = true) -> void:
 	column.add_child(cover_wrap)
 	var tag_row := HBoxContainer.new()
 	tag_row.add_theme_constant_override("separation", 7)
+	tag_row.clip_contents = true
 	tag_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	tag_row.add_child(PlaygroundUI.chip(str(game.get("category", "小游戏")), accent))
 	if can_resume:
-		tag_row.add_child(PlaygroundUI.chip("可继续", Color("#d98b2b")))
+		tag_row.add_child(PlaygroundUI.chip(_resume_chip_text(), Color("#d98b2b")))
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -192,8 +195,13 @@ func _build(animate: bool = true) -> void:
 	column.add_child(stretch)
 	var footer := HBoxContainer.new()
 	footer.add_theme_constant_override("separation", 8)
+	footer.clip_contents = true
 	footer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var players := PlaygroundUI.label(str(game.get("players", "1 人")), 12, PlaygroundUI.INK_SOFT, 700)
+	players.custom_minimum_size.x = 28
+	players.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+	if can_resume:
+		players.text = _resume_footer_text()
 	players.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	players.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	footer.add_child(players)
@@ -239,6 +247,37 @@ func _build(animate: bool = true) -> void:
 	_bind_hover_once()
 	if animate:
 		MotionKit.fade_in(self, self, MotionKit.CARD_IN, 0.0)
+
+
+func _resume_chip_text() -> String:
+	return "进行中"
+
+
+func _resume_footer_text() -> String:
+	var mode_id := str(resume_meta.get("modeId", "classic"))
+	var mode_name := "本局"
+	var content := _content_db()
+	if content != null:
+		var value: Variant = content.call("mode", game_id, mode_id)
+		if value is Dictionary:
+			mode_name = str(value.get("name", mode_name))
+	var level := int(resume_meta.get("levelId", 1))
+	var note := str(resume_meta.get("note", "")).strip_edges()
+	if not note.is_empty():
+		return "%s · %s" % [mode_name.left(6), note.left(7)]
+	if level > 1:
+		return "%s · %s 关" % [mode_name.left(6), level]
+	return mode_name.left(8)
+
+
+func _save_store() -> Node:
+	var tree: SceneTree = Engine.get_main_loop() as SceneTree
+	return tree.root.get_node_or_null("SaveStore") if tree != null else null
+
+
+func _content_db() -> Node:
+	var tree: SceneTree = Engine.get_main_loop() as SceneTree
+	return tree.root.get_node_or_null("ContentDB") if tree != null else null
 
 
 # 排序模式的呼吸摆动提示（仅 scale，交错相位避免整屏同步晃动）
