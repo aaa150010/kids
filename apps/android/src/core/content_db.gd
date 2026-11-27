@@ -21,6 +21,16 @@ var pipe_data: Dictionary = {}
 var tank_data: Dictionary = {}
 var sokoban_data: Dictionary = {}
 var circuit_data: Dictionary = {}
+var pinball_data: Dictionary = {}
+var breakout_data: Dictionary = {}
+var air_hockey_data: Dictionary = {}
+var rhythm_data: Dictionary = {}
+var garbage_data: Dictionary = {}
+var kitchen_data: Dictionary = {}
+var maze_data: Dictionary = {}
+var slide_data: Dictionary = {}
+var bubble_data: Dictionary = {}
+var pixel_art_data: Dictionary = {}
 var content_version: int = 1
 var chapters: Dictionary = {}
 var puzzles: Dictionary = {}
@@ -67,6 +77,16 @@ func _load_json_files() -> void:
 	tank_data = _json_dictionary("tank.json")
 	sokoban_data = _json_dictionary("sokoban.json")
 	circuit_data = _json_dictionary("circuit.json")
+	pinball_data = _json_dictionary("pinball.json")
+	breakout_data = _json_dictionary("breakout.json")
+	air_hockey_data = _json_dictionary("air_hockey.json")
+	rhythm_data = _json_dictionary("rhythm.json")
+	garbage_data = _json_dictionary("garbage_sort.json")
+	kitchen_data = _json_dictionary("kitchen.json")
+	maze_data = _json_dictionary("maze.json")
+	slide_data = _json_dictionary("slide_puzzle.json")
+	bubble_data = _json_dictionary("bubble.json")
+	pixel_art_data = _json_dictionary("pixel_art.json")
 	chapters = _json_dictionary("chapters.json")
 	puzzles = _json_dictionary("puzzles.json")
 	tuning = _json_dictionary("tuning.json")
@@ -388,6 +408,56 @@ func circuit_levels() -> Array:
 	return value if value is Array else []
 
 
+func pinball_tables() -> Array:
+	var value: Variant = pinball_data.get("tables", [])
+	return value if value is Array else []
+
+
+func breakout_levels() -> Array:
+	var value: Variant = breakout_data.get("levels", [])
+	return value if value is Array else []
+
+
+func air_hockey_arenas() -> Array:
+	var value: Variant = air_hockey_data.get("arenas", [])
+	return value if value is Array else []
+
+
+func rhythm_charts() -> Array:
+	var value: Variant = rhythm_data.get("charts", [])
+	return value if value is Array else []
+
+
+func garbage_levels() -> Array:
+	var value: Variant = garbage_data.get("levels", [])
+	return value if value is Array else []
+
+
+func kitchen_levels() -> Array:
+	var value: Variant = kitchen_data.get("levels", [])
+	return value if value is Array else []
+
+
+func maze_levels() -> Array:
+	var value: Variant = maze_data.get("levels", [])
+	return value if value is Array else []
+
+
+func slide_levels() -> Array:
+	var value: Variant = slide_data.get("levels", [])
+	return value if value is Array else []
+
+
+func bubble_levels() -> Array:
+	var value: Variant = bubble_data.get("levels", [])
+	return value if value is Array else []
+
+
+func pixel_art_pages() -> Array:
+	var value: Variant = pixel_art_data.get("levels", [])
+	return value if value is Array else []
+
+
 func sudoku_puzzles() -> Array:
 	if _sudoku_puzzles_cache.is_empty():
 		var value: Variant = _json_dictionary("sudoku.json").get("puzzles", [])
@@ -402,8 +472,8 @@ func content_issues() -> Array[String]:
 
 func _validate_content() -> void:
 	_content_issues.clear()
-	if games.size() != 24:
-		_content_issues.append("游戏目录应为 24 项，实际 %s 项" % games.size())
+	if games.size() != 34:
+		_content_issues.append("游戏目录应为 34 项，实际 %s 项" % games.size())
 	for game_id in ["math", "pinyin", "patterns", "animals"]:
 		if questions(game_id, 5).is_empty() and questions(game_id, 6).is_empty():
 			_content_issues.append("%s 题库为空或年龄映射异常" % game_id)
@@ -442,9 +512,39 @@ func _validate_content() -> void:
 		_content_issues.append("仓库推推乐关卡应为 48 关，实际 %s 关" % sokoban_levels().size())
 	if circuit_levels().size() != 32:
 		_content_issues.append("电路小工坊关卡应为 32 关，实际 %s 关" % circuit_levels().size())
+	if bubble_levels().size() != 24:
+		_content_issues.append("泡泡星星关卡应为 24 关，实际 %s 关" % bubble_levels().size())
+	if rhythm_charts().size() != 24:
+		_content_issues.append("节奏拍拍乐谱面应为 24 张，实际 %s 张" % rhythm_charts().size())
+	if garbage_levels().size() != 30:
+		_content_issues.append("垃圾分类站关卡应为 30 关，实际 %s 关" % garbage_levels().size())
+	if kitchen_levels().size() != 24:
+		_content_issues.append("小小厨房订单应为 24 个，实际 %s 个" % kitchen_levels().size())
+	if maze_levels().size() != 32:
+		_content_issues.append("迷宫小探险关卡应为 32 关，实际 %s 关" % maze_levels().size())
+	if slide_levels().size() != 32:
+		_content_issues.append("数字华容道关卡应为 32 关，实际 %s 关" % slide_levels().size())
+	if pixel_art_pages().size() != 30:
+		_content_issues.append("像素小画家画稿应为 30 张，实际 %s 张" % pixel_art_pages().size())
+	if pinball_tables().size() != 24:
+		_content_issues.append("弹珠星轨关卡应为 24 张，实际 %s 张" % pinball_tables().size())
+	if breakout_levels().size() != 24:
+		_content_issues.append("砖块小城堡关卡应为 24 关，实际 %s 关" % breakout_levels().size())
+	if air_hockey_arenas().size() != 18:
+		_content_issues.append("冰球碰碰台场地应为 18 个，实际 %s 个" % air_hockey_arenas().size())
 	_append_rule_issues("坦克小卫士", TankRules.validate_catalog(tank_data))
 	_append_rule_issues("仓库推推乐", SokobanRules.validate_catalog(sokoban_data))
 	_append_rule_issues("电路小工坊", CircuitRules.validate_catalog(circuit_data))
+	_append_rule_issues("泡泡星星", BubbleRules.validate_catalog(bubble_data))
+	_append_rule_issues("节奏拍拍乐", RhythmRules.validate_catalog(rhythm_data))
+	_append_rule_issues("垃圾分类站", GarbageSortRules.validate_catalog(garbage_data))
+	_append_rule_issues("小小厨房", KitchenRules.validate_catalog(kitchen_data))
+	_append_rule_issues("迷宫小探险", MazeRules.validate_catalog(maze_data))
+	_append_rule_issues("数字华容道", SlidePuzzleRules.validate_catalog(slide_data))
+	_append_rule_issues("像素小画家", PixelArtRules.validate_catalog(pixel_art_data))
+	_append_rule_issues("弹珠星轨", PinballRules.validate_catalog(pinball_data))
+	_append_rule_issues("砖块小城堡", BreakoutRules.validate_catalog(breakout_data))
+	_append_rule_issues("冰球碰碰台", AirHockeyRules.validate_catalog(air_hockey_data))
 	for level in tangram_levels:
 		if not level is Dictionary or not level.get("targetPieces") is Array or level.targetPieces.size() != 7:
 			_content_issues.append("七巧板关卡碎片配置异常")

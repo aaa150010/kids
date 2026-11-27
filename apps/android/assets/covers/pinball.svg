@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">
+  <defs>
+    <linearGradient id="pinball-room" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#6f4b98"/>
+      <stop offset=".52" stop-color="#4d3270"/>
+      <stop offset="1" stop-color="#241a3c"/>
+    </linearGradient>
+    <linearGradient id="pinball-paper" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fff9e9"/>
+      <stop offset="1" stop-color="#eadff5"/>
+    </linearGradient>
+    <linearGradient id="pinball-table" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#362550"/>
+      <stop offset=".58" stop-color="#2b1d43"/>
+      <stop offset="1" stop-color="#1e1532"/>
+    </linearGradient>
+    <linearGradient id="pinball-gold" x1="0" y1="0" x2=".8" y2="1">
+      <stop stop-color="#ffe99b"/>
+      <stop offset="1" stop-color="#d9a43f"/>
+    </linearGradient>
+    <linearGradient id="pinball-flipper" x1="0" y1="0" x2=".7" y2="1">
+      <stop stop-color="#ffd08d"/>
+      <stop offset="1" stop-color="#d27a43"/>
+    </linearGradient>
+    <filter id="pinball-shadow" x="-35%" y="-35%" width="170%" height="170%">
+      <feDropShadow dx="0" dy="10" stdDeviation="11" flood-color="#171021" flood-opacity=".42"/>
+    </filter>
+    <filter id="pinball-glow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="576" rx="44" fill="url(#pinball-room)"/>
+  <circle cx="94" cy="90" r="4" fill="#ffe9a2" opacity=".88"/>
+  <circle cx="139" cy="145" r="2.5" fill="#fff9e8" opacity=".62"/>
+  <circle cx="908" cy="78" r="4.5" fill="#ffe9a2" opacity=".78"/>
+  <circle cx="874" cy="133" r="2.2" fill="#e7d6ff" opacity=".66"/>
+  <path d="M58 116c102-50 189-43 264 13M771 90c61-35 126-38 190-12" fill="none" stroke="#ddc9f4" stroke-width="3" stroke-linecap="round" opacity=".20"/>
+  <path d="M100 480c74-31 145-25 210 9 70-39 143-37 218 3 74-37 147-39 218-6 55-25 108-25 160-5" fill="none" stroke="#bba5df" stroke-width="4" stroke-linecap="round" opacity=".15"/>
+
+  <g transform="translate(30 82) rotate(-7 118 40)" filter="url(#pinball-shadow)">
+    <rect width="228" height="78" rx="24" fill="#fff4d8" stroke="#dcb467" stroke-width="4"/>
+    <path d="M48 23l9 17 19 8-19 8-9 17-9-17-19-8 19-8z" fill="#e5ae43"/>
+    <path d="M118 27l6 11 12 5-12 5-6 11-6-11-12-5 12-5z" fill="#c78add"/>
+    <path d="M181 25l5 9 10 4-10 4-5 9-5-9-10-4 10-4z" fill="#8ac7d4"/>
+  </g>
+
+  <g filter="url(#pinball-shadow)">
+    <rect x="278" y="42" width="468" height="486" rx="54" fill="url(#pinball-paper)" stroke="#f1dcae" stroke-width="7"/>
+    <rect x="300" y="64" width="424" height="442" rx="40" fill="url(#pinball-table)" stroke="#c8b0e5" stroke-width="4"/>
+    <rect x="313" y="78" width="398" height="414" rx="31" fill="#281b41" stroke="#eadcf9" stroke-width="3"/>
+  </g>
+
+  <g opacity=".72">
+    <circle cx="357" cy="134" r="3.2" fill="#ffe39a"/>
+    <circle cx="423" cy="107" r="2.3" fill="#fff8e8"/>
+    <circle cx="621" cy="145" r="3.4" fill="#cdb7ea"/>
+    <circle cx="667" cy="197" r="2.3" fill="#ffe39a"/>
+    <circle cx="365" cy="307" r="2.6" fill="#f7e7b0"/>
+    <path d="M349 225h322M338 286h348M332 351h361M342 416h338" stroke="#e8d7f6" stroke-width="1.8" stroke-dasharray="7 14" opacity=".18"/>
+  </g>
+
+  <path d="M334 93h358" stroke="#d7c4ee" stroke-width="7" stroke-linecap="round" opacity=".58"/>
+  <path d="M679 142v296" stroke="#d7c4ee" stroke-width="5" stroke-linecap="round" opacity=".56"/>
+  <path d="M330 338c52 37 61 75 95 100M695 338c-42 37-52 74-84 100" fill="none" stroke="#e5d5f5" stroke-width="5" stroke-linecap="round" opacity=".34"/>
+
+  <g filter="url(#pinball-glow)" opacity=".55">
+    <circle cx="517" cy="145" r="38" fill="#ffe995"/>
+    <circle cx="436" cy="248" r="27" fill="#d6a8ef"/>
+    <circle cx="599" cy="247" r="27" fill="#b8d8ee"/>
+  </g>
+
+  <g filter="url(#pinball-shadow)">
+    <circle cx="421" cy="257" r="34" fill="#704d94" stroke="#ead9fb" stroke-width="4"/>
+    <circle cx="421" cy="257" r="25" fill="#ae8cc8"/>
+    <path d="M421 237l6 13 15 6-15 6-6 13-6-13-15-6 15-6z" fill="#ffe59b"/>
+    <circle cx="596" cy="257" r="34" fill="#704d94" stroke="#ead9fb" stroke-width="4"/>
+    <circle cx="596" cy="257" r="25" fill="#ae8cc8"/>
+    <path d="M596 237l6 13 15 6-15 6-6 13-6-13-15-6 15-6z" fill="#ffe59b"/>
+    <circle cx="511" cy="363" r="27" fill="#704d94" stroke="#ead9fb" stroke-width="4"/>
+    <circle cx="511" cy="363" r="18" fill="#b79cd0"/>
+    <path d="M511 348l5 10 11 5-11 5-5 10-5-10-11-5 11-5z" fill="#fff0b5"/>
+  </g>
+
+  <g filter="url(#pinball-shadow)">
+    <circle cx="402" cy="151" r="18" fill="url(#pinball-gold)" stroke="#fff5ce" stroke-width="3"/>
+    <path d="M402 140l4 9 10 4-10 4-4 9-4-9-10-4 10-4z" fill="#6a4b27"/>
+    <circle cx="516" cy="104" r="16" fill="#7f589f" stroke="#efe2fc" stroke-width="3"/>
+    <circle cx="516" cy="104" r="7" fill="#fff0ba"/>
+    <circle cx="628" cy="171" r="18" fill="#7f589f" stroke="#efe2fc" stroke-width="3"/>
+    <circle cx="628" cy="171" r="7" fill="#fff0ba"/>
+  </g>
+
+  <path d="M351 169l72 64" stroke="#ffe18c" stroke-width="9" stroke-linecap="round" stroke-dasharray="3 15" opacity=".78"/>
+  <path d="M674 387l-21-29 37 2z" fill="#ffe18c"/>
+
+  <g filter="url(#pinball-shadow)">
+    <path d="M401 422l77 31" stroke="#6b432c" stroke-width="29" stroke-linecap="round"/>
+    <path d="M401 418l77 31" stroke="url(#pinball-flipper)" stroke-width="21" stroke-linecap="round"/>
+    <circle cx="401" cy="418" r="14" fill="#704a8b" stroke="#f0ddfd" stroke-width="3"/>
+    <circle cx="401" cy="418" r="7" fill="#ffe6a3"/>
+    <path d="M621 422l-77 31" stroke="#6b432c" stroke-width="29" stroke-linecap="round"/>
+    <path d="M621 418l-77 31" stroke="url(#pinball-flipper)" stroke-width="21" stroke-linecap="round"/>
+    <circle cx="621" cy="418" r="14" fill="#704a8b" stroke="#f0ddfd" stroke-width="3"/>
+    <circle cx="621" cy="418" r="7" fill="#ffe6a3"/>
+  </g>
+
+  <circle cx="665" cy="367" r="16" fill="#fff8e9" stroke="#e4b352" stroke-width="3"/>
+  <circle cx="660" cy="362" r="5" fill="#ffffff" opacity=".88"/>
+  <circle cx="665" cy="367" r="28" fill="none" stroke="#ffe592" stroke-width="2" opacity=".52"/>
+
+  <g filter="url(#pinball-shadow)">
+    <rect x="775" y="344" width="180" height="78" rx="24" fill="#fff1c9" stroke="#d6aa52" stroke-width="5"/>
+    <circle cx="817" cy="383" r="18" fill="#8e65b7" stroke="#fff3ca" stroke-width="3"/>
+    <circle cx="850" cy="383" r="18" fill="#8e65b7" stroke="#fff3ca" stroke-width="3"/>
+    <circle cx="883" cy="383" r="18" fill="#8e65b7" stroke="#fff3ca" stroke-width="3"/>
+    <circle cx="916" cy="383" r="18" fill="url(#pinball-gold)" stroke="#fff3ca" stroke-width="3"/>
+    <path d="M916 374l4 8 9 4-9 4-4 8-4-8-9-4 9-4z" fill="#694c25"/>
+  </g>
+
+  <g transform="translate(772 143) rotate(11)">
+    <path d="M0 38c35-29 77-36 122-18" fill="none" stroke="#f5db91" stroke-width="6" stroke-linecap="round" opacity=".84"/>
+    <path d="M0 38l23-29 16 36-39-7z" fill="#ffe695"/>
+    <circle cx="87" cy="-22" r="9" fill="#f2cc67"/>
+    <circle cx="134" cy="0" r="5" fill="#f4e9ff"/>
+    <circle cx="152" cy="-22" r="3" fill="#ffeaa0"/>
+  </g>
+
+  <path d="M818 249c-7-46 41-87 94-77 17-39 66-47 100-15 45-9 82 34 61 76 29 22 20 70-17 80-23 26-69 24-86-5-35 20-77-3-76-40-29 3-65-1-76-19z" fill="#f4ead2" stroke="#d9b65c" stroke-width="6" opacity=".98"/>
+  <circle cx="856" cy="259" r="23" fill="url(#pinball-gold)" stroke="#fff4d5" stroke-width="4"/>
+  <circle cx="918" cy="232" r="27" fill="#8e65b7" stroke="#fff4d5" stroke-width="4"/>
+  <circle cx="957" cy="286" r="18" fill="#d5a950" stroke="#fff4d5" stroke-width="4"/>
+</svg>

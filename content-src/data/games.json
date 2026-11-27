@@ -920,6 +920,246 @@
     ]
   },
   {
+    "id": "pinball",
+    "title": "弹珠星轨",
+    "subtitle": "弹起弹板，把星星送进轨道",
+    "icon": "🎱",
+    "category": "动作物理",
+    "accent": "#6f4b98",
+    "soft": "#ede5f6",
+    "cover": "res://assets/covers/pinball.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["🎱 弹珠轨道", "✨ 目标灯", "🤝 双人守台"],
+    "searchTerms": ["弹珠", "弹球", "弹珠台", "物理", "反弹", "星星"],
+    "guide": [
+      "按住左右弹板，把弹珠弹向缓冲柱和目标灯。",
+      "打亮全部目标灯，再让弹珠回到发球轨，就能完成这张星轨。",
+      "双人时左右两位小朋友各守一块弹板，共享分数和球权。"
+    ],
+    "modes": [
+      {"id": "adventure", "name": "星轨弹珠", "player_range": [1, 1], "description": "18 张固定弹珠台，弹板、缓冲柱和目标灯"},
+      {"id": "classic", "name": "双人守台", "player_range": [2, 2], "description": "两人各守一块弹板，共享分数和球权，不比较输赢"}
+    ]
+  },
+  {
+    "id": "breakout",
+    "title": "砖块小城堡",
+    "subtitle": "挡板接球，敲下彩色砖块",
+    "icon": "🧱",
+    "category": "动作物理",
+    "accent": "#b35f36",
+    "soft": "#f7e7dc",
+    "cover": "res://assets/covers/breakout.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["🧱 彩色砖墙", "🏓 反弹挡板", "🤝 双人守护"],
+    "searchTerms": ["砖块", "打砖块", "挡板", "反弹", "城堡", "物理"],
+    "guide": [
+      "左右拖动挡板，让小球反弹，敲下城堡里的彩色砖块。",
+      "接住小球会保护爱心，接到道具还能让挡板变宽。",
+      "双人时一人守左挡板、一人守右挡板，共享砖块进度和爱心。"
+    ],
+    "modes": [
+      {"id": "adventure", "name": "砖堡闯关", "player_range": [1, 1], "description": "18 个固定砖块关，挡板接球和道具反弹"},
+      {"id": "classic", "name": "双人守护", "player_range": [2, 2], "description": "两块挡板共同守住小球，共享进度和爱心"}
+    ]
+  },
+  {
+    "id": "air_hockey",
+    "title": "冰球碰碰台",
+    "subtitle": "拖住球拍，把冰球送进小门",
+    "icon": "🏒",
+    "category": "桌面运动",
+    "accent": "#3f628f",
+    "soft": "#e4ecf5",
+    "cover": "res://assets/covers/air_hockey.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["🏒 滑动球拍", "🥅 固定球门", "🏆 双人对抗"],
+    "searchTerms": ["冰球", "桌面冰球", "球拍", "球门", "运动", "对抗", "物理"],
+    "guide": [
+      "用手指拖动自己的球拍，把冰球推向对面球门。",
+      "单人练习只挑战固定目标和时间，不会出现电脑对手。",
+      "双人对抗时左边和右边各有一位小朋友，先得到目标分数的人获胜。"
+    ],
+    "modes": [
+      {"id": "practice", "name": "目标练习", "player_range": [1, 1], "description": "12 个固定目标场，练球拍和冰球反弹"},
+      {"id": "classic", "name": "双人对抗", "player_range": [2, 2], "description": "左右同屏轻竞技，记录双方得分与胜平负"}
+    ]
+  },
+  {
+    "id": "rhythm",
+    "title": "节奏拍拍乐",
+    "subtitle": "跟着节拍，点亮四色轨道",
+    "icon": "🥁",
+    "category": "音乐节奏",
+    "accent": "#a77c16",
+    "soft": "#f5eccb",
+    "cover": "res://assets/covers/rhythm.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["🥁 四轨节拍", "✨ 连击光环", "🤝 双人合拍"],
+    "searchTerms": ["节奏", "音乐", "拍子", "鼓点", "节拍", "合拍", "听音"],
+    "guide": [
+      "看轨道上的节拍块，在它到达圆环时轻轻点击。",
+      "连续命中会亮起连击光环，长按节拍要按住不放。",
+      "双人合拍时两个人共享一条节奏谱和分数，不比较输赢。"
+    ],
+    "modes": [
+      {"id": "adventure", "name": "节奏路线", "player_range": [1, 1], "description": "18 首固定原创节拍谱，点击、长按和连击"},
+      {"id": "classic", "name": "双人合拍", "player_range": [2, 2], "description": "共享节拍谱和分数，一起完成一首歌"}
+    ]
+  },
+  {
+    "id": "garbage_sort",
+    "title": "垃圾分类站",
+    "subtitle": "把生活物品送回正确的垃圾桶",
+    "icon": "♻️",
+    "category": "生活实践",
+    "accent": "#3e7d55",
+    "soft": "#e4f1e6",
+    "cover": "res://assets/covers/garbage_sort.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["♻️ 四色分类", "🧺 拖放物品", "📚 分类解释"],
+    "searchTerms": ["垃圾分类", "环保", "回收", "厨余", "有害垃圾", "生活"],
+    "guide": [
+      "看物品，把它拖到可回收物、厨余垃圾、有害垃圾或其他垃圾桶。",
+      "投放后会告诉你为什么放对或放错，读过解释再继续下一件。",
+      "双人合作时两个人轮流投放，共享分类进度。"
+    ],
+    "modes": [
+      {"id": "adventure", "name": "分类闯关", "player_range": [1, 1], "description": "24 个生活分类关，80 个原创物品"},
+      {"id": "classic", "name": "一起分类", "player_range": [2, 2], "description": "两人轮流投放物品，共享正确数和解释"}
+    ]
+  },
+  {
+    "id": "kitchen",
+    "title": "小小厨房",
+    "subtitle": "按菜谱顺序，做出一份热腾腾的点心",
+    "icon": "🍳",
+    "category": "生活应用",
+    "accent": "#9b653d",
+    "soft": "#f4e7da",
+    "cover": "res://assets/covers/kitchen.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["🍳 按序烹饪", "🧺 食材选择", "🤝 双人上菜"],
+    "searchTerms": ["厨房", "做饭", "菜谱", "食材", "料理", "生活", "顺序"],
+    "guide": [
+      "按菜谱提示，依次点食材、加工和装盘。",
+      "每一步都有图文提示；做错了可以回到上一步重试。",
+      "双人合作时两个人轮流完成一步，共享订单进度。"
+    ],
+    "modes": [
+      {"id": "adventure", "name": "单人小厨", "player_range": [1, 1], "description": "18 个原创菜谱订单，按顺序完成烹饪"},
+      {"id": "classic", "name": "一起上菜", "player_range": [2, 2], "description": "两位小朋友轮流完成菜谱步骤，共享完成记录"}
+    ]
+  },
+  {
+    "id": "maze",
+    "title": "迷宫小探险",
+    "subtitle": "找钥匙、开小门、收齐星徽",
+    "icon": "🧭",
+    "category": "空间探索",
+    "accent": "#5d7436",
+    "soft": "#edf2dd",
+    "cover": "res://assets/covers/maze.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["🗝️ 收集钥匙", "🚪 打开小门", "🤝 双人探路"],
+    "searchTerms": ["迷宫", "探险", "钥匙", "地图", "路径", "空间"],
+    "guide": [
+      "用方向键或滑动走过迷宫，先找钥匙再打开对应的小门。",
+      "沿路收集星徽，经过小旗会保存最近检查点。",
+      "双人探路时两个人轮流移动一格，共享钥匙、门和星徽。"
+    ],
+    "modes": [
+      {"id": "adventure", "name": "迷宫探险", "player_range": [1, 1], "description": "24 个固定迷宫，钥匙、门和检查点"},
+      {"id": "classic", "name": "双人探路", "player_range": [2, 2], "description": "两位小朋友轮流移动一格，共享地图进度"}
+    ]
+  },
+  {
+    "id": "slide_puzzle",
+    "title": "数字华容道",
+    "subtitle": "移动空格，把数字排回自己的位置",
+    "icon": "🔢",
+    "category": "数字逻辑",
+    "accent": "#4f6078",
+    "soft": "#e8edf3",
+    "cover": "res://assets/covers/slide_puzzle.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["🔢 数字滑格", "🧩 图案拼盘", "🤝 双人推格"],
+    "searchTerms": ["华容道", "数字滑块", "滑块", "拼图", "数字", "空格"],
+    "guide": [
+      "点空格旁边的数字或图案，把它滑到空格里。",
+      "把数字按 1、2、3 的顺序排好，或把图案拼完整。",
+      "双人合作时两人轮流滑一格，共享棋盘和撤销次数。"
+    ],
+    "modes": [
+      {"id": "adventure", "name": "华容道闯关", "player_range": [1, 1], "description": "24 个 3×3/4×4 固定可解数字与图案棋盘"},
+      {"id": "classic", "name": "一起推格", "player_range": [2, 2], "description": "两人轮流移动一格，共享进度和提示"}
+    ]
+  },
+  {
+    "id": "bubble",
+    "title": "泡泡星星",
+    "subtitle": "瞄准彩色泡泡，连成三个以上",
+    "icon": "🫧",
+    "category": "观察消除",
+    "accent": "#2f7e91",
+    "soft": "#e2f0f2",
+    "cover": "res://assets/covers/bubble.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["🫧 六角泡泡", "🎯 瞄准发射", "🤝 双人连泡"],
+    "searchTerms": ["泡泡", "消除", "瞄准", "三消", "连泡", "星星"],
+    "guide": [
+      "拖动瞄准线，松手把泡泡射向棋盘。",
+      "让三个同色泡泡连在一起，就能一起消除并得到分数。",
+      "双人合作时两人轮流发射，共享棋盘、分数和颜色队列。"
+    ],
+    "modes": [
+      {"id": "adventure", "name": "泡泡闯关", "player_range": [1, 1], "description": "18 个固定泡泡关，颜色队列和步数目标"},
+      {"id": "classic", "name": "双人连泡", "player_range": [2, 2], "description": "两人轮流发射，共享棋盘与分数"}
+    ]
+  },
+  {
+    "id": "pixel_art",
+    "title": "像素小画家",
+    "subtitle": "按色号填格，画出一张小画",
+    "icon": "🎨",
+    "category": "创意美术",
+    "accent": "#5c4a9a",
+    "soft": "#ebe7f8",
+    "cover": "res://assets/covers/pixel_art.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["🎨 像素画稿", "🔢 按色号填格", "🤝 双人共画"],
+    "searchTerms": ["像素画", "画画", "涂色", "颜色", "美术", "创意"],
+    "guide": [
+      "选一种颜色，再点画布上的格子，把色号填成图案。",
+      "画错可以用橡皮擦掉；缩放和提示不会清空已经完成的部分。",
+      "双人共画时两个人轮流填一格，共享画作和完成记录。"
+    ],
+    "modes": [
+      {"id": "adventure", "name": "像素画册", "player_range": [1, 1], "description": "24 张原创像素画稿，按色号完成图案"},
+      {"id": "classic", "name": "一起涂色", "player_range": [2, 2], "description": "两位小朋友轮流填色，共享画布进度"}
+    ]
+  },
+  {
     "id": "gomoku",
     "title": "五子棋",
     "subtitle": "黑先白后，连成五颗星",

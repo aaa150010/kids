@@ -381,6 +381,76 @@
     "license": "CC BY-SA 4.0",
     "accessedAt": "2026-11-27",
     "note": "只参考旋转元件并接通目标的通用电路谜题概念；本项目使用低压玩具电路、原创元件、BFS 连通规则、儿童化断路提示和自绘界面。"
+  },
+  {
+    "title": "Pinball arcade gameplay",
+    "url": "https://en.wikipedia.org/wiki/Pinball",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考弹板、缓冲柱、目标灯和落球保护的通用玩法；台面、角色、名称和音频均为本项目原创。"
+  },
+  {
+    "title": "Breakout brick-and-paddle gameplay",
+    "url": "https://en.wikipedia.org/wiki/Breakout_(video_game)",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考挡板、反弹球和砖块消除的通用玩法；关卡、城堡、道具和界面均为本项目原创。"
+  },
+  {
+    "title": "Air hockey table-sport gameplay",
+    "url": "https://en.wikipedia.org/wiki/Air_hockey",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考球拍、冰球和球门的通用桌面运动玩法；单人模式为固定目标练习，不实现电脑对手。"
+  },
+  {
+    "title": "Rhythm-game timing and charts",
+    "url": "https://en.wikipedia.org/wiki/Rhythm_game",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考轨道、节拍判定和连击反馈的通用概念；谱面、节拍合成、角色和界面均为本项目原创。"
+  },
+  {
+    "title": "Waste sorting",
+    "url": "https://en.wikipedia.org/wiki/Waste_sorting",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考四类生活垃圾分类的通用知识；物品、解释文案、角色和交互均为项目重新编写。"
+  },
+  {
+    "title": "Mise en place and recipe step sequencing",
+    "url": "https://en.wikipedia.org/wiki/Mise_en_place",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考食材准备和按步骤完成菜谱的通用生活概念；原创菜谱、订单、角色和界面不复制任何第三方烹饪游戏。"
+  },
+  {
+    "title": "Maze navigation",
+    "url": "https://en.wikipedia.org/wiki/Maze",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考固定迷宫、钥匙和路线探索的通用概念；关卡、地图和视觉素材均为本项目原创。"
+  },
+  {
+    "title": "Sliding puzzle",
+    "url": "https://en.wikipedia.org/wiki/Sliding_puzzle",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考滑块移动和固定可解棋盘的通用玩法；数字、图案和界面均为本项目原创。"
+  },
+  {
+    "title": "Bubble-shooter genre",
+    "url": "https://en.wikipedia.org/wiki/Bubble_shooter",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考六角网格、瞄准发射和三连消除的通用玩法；泡泡、星星、棋盘和音效均为本项目原创。"
+  },
+  {
+    "title": "Pixel art color-by-number interaction",
+    "url": "https://en.wikipedia.org/wiki/Pixel_art",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考像素网格和色号填色的通用美术概念；画稿、配色、画布和交互均为本项目原创。"
   }
   ]
 }

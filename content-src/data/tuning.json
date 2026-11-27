@@ -310,6 +310,46 @@
       "kind": "circuit",
       "difficultyEnabled": false
     },
+    "pinball": {
+      "kind": "action",
+      "difficultyEnabled": false
+    },
+    "breakout": {
+      "kind": "action",
+      "difficultyEnabled": false
+    },
+    "air_hockey": {
+      "kind": "action",
+      "difficultyEnabled": false
+    },
+    "rhythm": {
+      "kind": "rhythm",
+      "difficultyEnabled": false
+    },
+    "garbage_sort": {
+      "kind": "life",
+      "difficultyEnabled": false
+    },
+    "kitchen": {
+      "kind": "life",
+      "difficultyEnabled": false
+    },
+    "maze": {
+      "kind": "puzzle",
+      "difficultyEnabled": false
+    },
+    "slide_puzzle": {
+      "kind": "puzzle",
+      "difficultyEnabled": false
+    },
+    "bubble": {
+      "kind": "action",
+      "difficultyEnabled": false
+    },
+    "pixel_art": {
+      "kind": "creative",
+      "difficultyEnabled": false
+    },
     "gomoku": {
       "kind": "board",
       "hintSeconds": {

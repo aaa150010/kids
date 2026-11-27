@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">
+  <defs>
+    <linearGradient id="bubble-sky" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#2f7e91"/>
+      <stop offset=".58" stop-color="#235e72"/>
+      <stop offset="1" stop-color="#173f51"/>
+    </linearGradient>
+    <linearGradient id="bubble-paper" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fff9e9"/>
+      <stop offset="1" stop-color="#e4f0ef"/>
+    </linearGradient>
+    <linearGradient id="bubble-coral" x1="0" y1="0" x2=".7" y2="1">
+      <stop stop-color="#f08d7f"/>
+      <stop offset="1" stop-color="#c64e4b"/>
+    </linearGradient>
+    <linearGradient id="bubble-sun" x1="0" y1="0" x2=".7" y2="1">
+      <stop stop-color="#f4d766"/>
+      <stop offset="1" stop-color="#c38a23"/>
+    </linearGradient>
+    <linearGradient id="bubble-mint" x1="0" y1="0" x2=".7" y2="1">
+      <stop stop-color="#9ad8ad"/>
+      <stop offset="1" stop-color="#4b9b6c"/>
+    </linearGradient>
+    <linearGradient id="bubble-sky2" x1="0" y1="0" x2=".7" y2="1">
+      <stop stop-color="#8bc6ef"/>
+      <stop offset="1" stop-color="#3d78ba"/>
+    </linearGradient>
+    <linearGradient id="bubble-plum" x1="0" y1="0" x2=".7" y2="1">
+      <stop stop-color="#c6a4e7"/>
+      <stop offset="1" stop-color="#7951aa"/>
+    </linearGradient>
+    <filter id="bubble-shadow" x="-35%" y="-35%" width="170%" height="170%">
+      <feDropShadow dx="0" dy="10" stdDeviation="11" flood-color="#0d2b37" flood-opacity=".34"/>
+    </filter>
+    <filter id="bubble-glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="7"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="576" rx="44" fill="url(#bubble-sky)"/>
+  <circle cx="94" cy="86" r="4" fill="#ffe7a0" opacity=".92"/>
+  <circle cx="152" cy="134" r="2.8" fill="#fff9e9" opacity=".72"/>
+  <circle cx="915" cy="82" r="4.5" fill="#fff5c2" opacity=".86"/>
+  <circle cx="880" cy="132" r="2.4" fill="#e3f5f5" opacity=".66"/>
+  <path d="M70 82c82-36 166-32 238 16M792 72c46-22 92-24 140-7" fill="none" stroke="#dff4f2" stroke-width="3" stroke-linecap="round" opacity=".23"/>
+  <path d="M100 488c74-31 145-25 210 9 70-39 143-37 218 3 74-37 147-39 218-6 55-25 108-25 160-5" fill="none" stroke="#9fdfd8" stroke-width="4" stroke-linecap="round" opacity=".18"/>
+
+  <g transform="translate(32 82) rotate(-8 118 40)" filter="url(#bubble-shadow)">
+    <rect width="228" height="78" rx="24" fill="#fff5d9" stroke="#f2d58d" stroke-width="4"/>
+    <path d="M46 25l8 15 17 7-17 7-8 15-8-15-17-7 17-7z" fill="#e2ac31"/>
+    <path d="M114 28l6 11 12 5-12 5-6 11-6-11-12-5 12-5z" fill="#e08a35"/>
+    <path d="M176 26l5 9 10 4-10 4-5 9-5-9-10-4 10-4z" fill="#7fbe8d"/>
+  </g>
+
+  <g filter="url(#bubble-shadow)">
+    <rect x="232" y="70" width="560" height="430" rx="52" fill="url(#bubble-paper)" stroke="#f8e5ae" stroke-width="7"/>
+    <rect x="254" y="92" width="516" height="386" rx="38" fill="#234f61"/>
+    <rect x="269" y="107" width="486" height="356" rx="29" fill="#1d4658" stroke="#d6eeed" stroke-width="4"/>
+  </g>
+
+  <g opacity=".58">
+    <circle cx="314" cy="155" r="3" fill="#fff3b5"/>
+    <circle cx="472" cy="136" r="2.2" fill="#fff9e9"/>
+    <circle cx="671" cy="165" r="3.4" fill="#b9eeef"/>
+    <circle cx="725" cy="229" r="2.4" fill="#fff3b5"/>
+    <circle cx="309" cy="315" r="2.5" fill="#b9eeef"/>
+    <circle cx="605" cy="394" r="2.2" fill="#fff9e9"/>
+    <path d="M356 209h350M328 270h411M320 331h433" stroke="#d9f1ef" stroke-width="2" stroke-dasharray="7 12" opacity=".26"/>
+  </g>
+
+  <g filter="url(#bubble-glow)" opacity=".48">
+    <circle cx="561" cy="232" r="48" fill="#ffe98c"/>
+    <circle cx="424" cy="280" r="34" fill="#89d7da"/>
+  </g>
+
+  <g filter="url(#bubble-shadow)">
+    <g transform="translate(438 180)">
+      <circle r="42" fill="url(#bubble-coral)" stroke="#f9f1cf" stroke-width="5"/>
+      <circle cx="-13" cy="-15" r="11" fill="#fff6e7" opacity=".38"/>
+      <path d="M0 -20l7 13 15 6-15 6-7 13-7-13-15-6 15-6z" fill="#fff4bd"/>
+    </g>
+    <g transform="translate(523 219)">
+      <circle r="42" fill="url(#bubble-sun)" stroke="#f9f1cf" stroke-width="5"/>
+      <circle cx="-13" cy="-15" r="11" fill="#fff9e6" opacity=".42"/>
+    </g>
+    <g transform="translate(440 282)">
+      <circle r="42" fill="url(#bubble-mint)" stroke="#f9f1cf" stroke-width="5"/>
+      <circle cx="-13" cy="-15" r="11" fill="#fffbea" opacity=".40"/>
+    </g>
+    <g transform="translate(525 321)">
+      <circle r="42" fill="url(#bubble-sky2)" stroke="#f9f1cf" stroke-width="5"/>
+      <circle cx="-13" cy="-15" r="11" fill="#fffbea" opacity=".38"/>
+      <path d="M0 -18l6 12 14 5-14 6-6 12-6-12-14-6 14-5z" fill="#e9f7ff" opacity=".88"/>
+    </g>
+    <g transform="translate(609 271)">
+      <circle r="42" fill="url(#bubble-plum)" stroke="#f9f1cf" stroke-width="5"/>
+      <circle cx="-13" cy="-15" r="11" fill="#fffbea" opacity=".35"/>
+    </g>
+    <g transform="translate(626 372)">
+      <circle r="42" fill="url(#bubble-coral)" stroke="#f9f1cf" stroke-width="5"/>
+      <circle cx="-13" cy="-15" r="11" fill="#fff6e7" opacity=".38"/>
+    </g>
+    <g transform="translate(524 401)">
+      <circle r="42" fill="url(#bubble-sun)" stroke="#f9f1cf" stroke-width="5"/>
+      <circle cx="-13" cy="-15" r="11" fill="#fff9e6" opacity=".42"/>
+    </g>
+  </g>
+
+  <path d="M480 430c34-73 54-116 84-158 48-64 106-74 162-46" fill="none" stroke="#ffec9c" stroke-width="8" stroke-linecap="round" stroke-dasharray="4 14" opacity=".86"/>
+  <path d="M641 222l37 1-20 32z" fill="#ffe98c"/>
+
+  <g filter="url(#bubble-shadow)">
+    <rect x="426" y="431" width="184" height="54" rx="24" fill="#fff2cd" stroke="#e0b65e" stroke-width="5"/>
+    <path d="M516 384c37 0 67 27 67 61H449c0-34 30-61 67-61z" fill="#f1c965"/>
+    <circle cx="516" cy="407" r="31" fill="url(#bubble-sun)" stroke="#fdf5d6" stroke-width="5"/>
+    <circle cx="507" cy="397" r="8" fill="#fffbea" opacity=".46"/>
+    <path d="M516 392l5 10 12 5-12 5-5 10-5-10-12-5 12-5z" fill="#fff6d0"/>
+    <circle cx="650" cy="363" r="24" fill="url(#bubble-mint)" stroke="#fdf5d6" stroke-width="4"/>
+    <circle cx="383" cy="357" r="20" fill="url(#bubble-coral)" stroke="#fdf5d6" stroke-width="4"/>
+  </g>
+
+  <path d="M818 347c-6-49 44-93 101-82 18-41 71-50 108-16 48-10 88 36 65 81 31 24 22 75-18 86-25 28-74 26-93-5-38 21-83-3-82-43-31 3-69-1-81-21z" fill="#f4ead0" stroke="#d9b65c" stroke-width="6" opacity=".98"/>
+  <circle cx="858" cy="355" r="26" fill="url(#bubble-coral)" stroke="#fff5d8" stroke-width="4"/>
+  <circle cx="923" cy="325" r="31" fill="url(#bubble-sky2)" stroke="#fff5d8" stroke-width="4"/>
+  <circle cx="963" cy="382" r="20" fill="url(#bubble-sun)" stroke="#fff5d8" stroke-width="4"/>
+
+  <g transform="translate(798 169) rotate(12)">
+    <path d="M0 32c29-24 64-29 102-15" fill="none" stroke="#f8e0a0" stroke-width="6" stroke-linecap="round" opacity=".82"/>
+    <path d="M0 32l19-24 13 30-32-6z" fill="#ffe89a"/>
+    <circle cx="72" cy="-19" r="9" fill="#f5d371"/>
+    <circle cx="113" cy="-1" r="5" fill="#e8f7ef"/>
+  </g>
+</svg>

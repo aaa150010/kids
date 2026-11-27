@@ -18,6 +18,16 @@ const GAME_SCRIPTS := {
 	"tank": "res://src/games/tank_game.gd",
 	"sokoban": "res://src/games/sokoban_game.gd",
 	"circuit": "res://src/games/circuit_game.gd",
+	"pinball": "res://src/games/pinball_game.gd",
+	"breakout": "res://src/games/breakout_game.gd",
+	"air_hockey": "res://src/games/air_hockey_game.gd",
+	"rhythm": "res://src/games/rhythm_game.gd",
+	"garbage_sort": "res://src/games/garbage_sort_game.gd",
+	"kitchen": "res://src/games/kitchen_game.gd",
+	"maze": "res://src/games/maze_game.gd",
+	"slide_puzzle": "res://src/games/slide_puzzle_game.gd",
+	"bubble": "res://src/games/bubble_game.gd",
+	"pixel_art": "res://src/games/pixel_art_game.gd",
 	"trivia": "res://src/games/quiz_game.gd",
 	"gomoku": "res://src/games/board_game.gd",
 	"chess": "res://src/games/chess_game.gd",
@@ -241,8 +251,15 @@ func _capture_games(capture: Dictionary) -> void:
 			return
 		await _sample_performance("%s-%s" % [game_id, capture.label])
 		await _save(viewport, capture, game_id)
-		if game_id in ["tangram", "spot", "shop", "tank", "sokoban", "circuit"]:
-			screen.call("_choose_level", 1)
+		if game_id in ["tangram", "spot", "shop", "tank", "sokoban", "circuit",
+			"pinball", "breakout", "air_hockey", "rhythm", "garbage_sort", "kitchen",
+			"maze", "slide_puzzle", "bubble", "pixel_art"]:
+			if game_id == "pinball" and screen.has_method("_choose_table"):
+				screen.call("_choose_table", 1)
+			elif game_id == "rhythm" and screen.has_method("_choose_chart"):
+				screen.call("_choose_chart", 1)
+			else:
+				screen.call("_choose_level", 1)
 			await _frames(14)
 			_audit(screen, "%s-play" % game_id)
 			await _save(viewport, capture, game_id + "-play")
@@ -346,6 +363,9 @@ func _screenshot_mode(game_id: String) -> Dictionary:
 		"tangram":"adventure", "spot":"adventure", "shop":"adventure", "fruit_slice":"practice",
 		"robot":"adventure", "sentence_train":"adventure", "pipes":"adventure",
 		"tank":"adventure", "sokoban":"adventure", "circuit":"adventure",
+		"pinball":"adventure", "breakout":"adventure", "air_hockey":"practice",
+		"rhythm":"adventure", "garbage_sort":"adventure", "kitchen":"adventure",
+		"maze":"adventure", "slide_puzzle":"adventure", "bubble":"adventure", "pixel_art":"adventure",
 		"workbook":"classic", "memory":"classic", "jungle":"classic", "gomoku":"classic",
 		"chess":"classic", "sudoku":"classic", "military":"classic", "poetry":"classic",
 	}.get(game_id,"classic"))

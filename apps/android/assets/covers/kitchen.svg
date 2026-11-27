@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">
+  <defs>
+    <linearGradient id="kitchen-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#9b653d"/>
+      <stop offset="1" stop-color="#5f3a24"/>
+    </linearGradient>
+    <linearGradient id="kitchen-paper" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fffdf7"/>
+      <stop offset="1" stop-color="#f4e7da"/>
+    </linearGradient>
+    <linearGradient id="kitchen-pot" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#d8834d"/>
+      <stop offset="1" stop-color="#a75b32"/>
+    </linearGradient>
+    <linearGradient id="kitchen-veg" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#88ad55"/>
+      <stop offset="1" stop-color="#5a813e"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="576" rx="42" fill="url(#kitchen-bg)"/>
+  <circle cx="108" cy="92" r="9" fill="#f2d58c" opacity=".9"/>
+  <circle cx="920" cy="92" r="7" fill="#fff9ed" opacity=".7"/>
+  <circle cx="920" cy="490" r="13" fill="#e7b88f" opacity=".64"/>
+  <path d="M68 104c0-29 23-52 52-52h614c29 0 52 23 52 52v338H68z" fill="url(#kitchen-paper)" stroke="#e6c7a7" stroke-width="7"/>
+  <path d="M92 260h628" stroke="#ecd8c4" stroke-width="4"/>
+  <g transform="translate(130 104)">
+    <path d="M0 50h330v38H0z" fill="#d9b98f" stroke="#8f6b45" stroke-width="5"/>
+    <path d="M24 88h282v188H24z" fill="#f9ecd6" stroke="#c8a67b" stroke-width="4"/>
+    <g>
+      <rect x="48" y="118" width="206" height="88" rx="18" fill="#fff9ed" stroke="#d6b98f" stroke-width="4"/>
+      <path d="M66 145h170M66 169h136M66 193h90" stroke="#a98358" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="278" cy="130" r="17" fill="#f0c95f" stroke="#a47f34" stroke-width="3"/>
+    </g>
+    <g transform="translate(60 226)">
+      <ellipse cx="0" cy="34" rx="46" ry="12" fill="#6a553e" opacity=".20"/>
+      <path d="M-44-8h88l-10 58H-34z" fill="url(#kitchen-veg)" stroke="#31522f" stroke-width="5"/>
+      <path d="M-26-8c0-20 12-32 26-32s26 12 26 32" fill="none" stroke="#31522f" stroke-width="5"/>
+      <circle cx="-14" cy="18" r="7" fill="#d7e8a7"/>
+      <circle cx="14" cy="28" r="8" fill="#d7e8a7"/>
+    </g>
+    <g transform="translate(180 226)">
+      <circle cx="0" cy="12" r="34" fill="#d35e4c" stroke="#7f3a2d" stroke-width="4"/>
+      <path d="M0-22c4-18 15-26 31-28" fill="none" stroke="#658743" stroke-width="6" stroke-linecap="round"/>
+      <path d="M10-26c8-18 22-20 34-16-6 18-20 24-34 16z" fill="#6f9a4b"/>
+    </g>
+    <g transform="translate(264 234)">
+      <path d="M0-24c15 21 24 35 24 48A24 24 0 1 1-24 24c0-13 9-27 24-48z" fill="#c9e1df" stroke="#638f91" stroke-width="4"/>
+    </g>
+  </g>
+  <g transform="translate(566 152)">
+    <ellipse cx="0" cy="76" rx="112" ry="24" fill="#57301d" opacity=".20"/>
+    <path d="M-88 20h176l-18 92H-70z" fill="url(#kitchen-pot)" stroke="#61341e" stroke-width="7"/>
+    <path d="M-104 12h208" stroke="#61341e" stroke-width="12" stroke-linecap="round"/>
+    <path d="M-88-24c-16-22 16-26 0-48M-44-20c-14-20 14-25 0-46M4-22c-15-22 15-26 0-48M50-20c-13-19 13-23 0-43" fill="none" stroke="#f7ead9" stroke-width="7" stroke-linecap="round" opacity=".72"/>
+    <path d="M-64 91h128" stroke="#f0b889" stroke-width="7" stroke-linecap="round"/>
+    <circle cx="-42" cy="74" r="9" fill="#f4d778"/>
+    <circle cx="36" cy="72" r="7" fill="#7fa44c"/>
+    <g transform="translate(112 10)">
+      <path d="M0 0v112" stroke="#6e4d35" stroke-width="8" stroke-linecap="round"/>
+      <path d="M-5 30c38 9 63 7 88-4M-5 66c38 9 63 7 88-4" fill="none" stroke="#6e4d35" stroke-width="6" stroke-linecap="round"/>
+      <path d="M-12 8h24M-12 116h24" stroke="#6e4d35" stroke-width="9" stroke-linecap="round"/>
+    </g>
+  </g>
+  <g transform="translate(760 330)">
+    <circle cx="0" cy="0" r="86" fill="#fff9ed" stroke="#d7b78e" stroke-width="6"/>
+    <circle cx="0" cy="0" r="64" fill="#f8ead7"/>
+    <path d="M-42 0c18-30 65-34 86-4-16 36-66 40-86 4z" fill="#80a555" stroke="#466936" stroke-width="4"/>
+    <circle cx="-20" cy="-10" r="13" fill="#d35e4c"/>
+    <circle cx="19" cy="7" r="15" fill="#efc95d"/>
+    <path d="M-4 22c12-10 25-8 34 0" fill="none" stroke="#fff9ed" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(72 430)">
+    <rect width="214" height="64" rx="26" fill="#fff9ed" stroke="#d7b78e" stroke-width="4"/>
+    <path d="M36 32h46M58 13l22 19-22 19" fill="none" stroke="#a35a2d" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="126" cy="32" r="14" fill="#7fa44c"/>
+    <circle cx="160" cy="32" r="14" fill="#e6bd53"/>
+    <circle cx="190" cy="32" r="14" fill="#d35e4c"/>
+  </g>
+  <text x="512" y="541" text-anchor="middle" font-family="Noto Sans CJK SC, sans-serif" font-size="34" font-weight="700" fill="#fff9ed">小小厨房 · 一步一步做出暖暖的小菜</text>
+</svg>

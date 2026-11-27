@@ -40,14 +40,14 @@ func _run() -> void:
 	for script_path in all_scripts("res://src"):
 		var script: GDScript = load(script_path)
 		check(script != null and script.can_instantiate(), "%s parses and can be instantiated" % script_path)
-	check(content.games.size() == 24, "catalog contains 24 entries including the ten new games")
-	check(int(content.content_version) == 24, "content package version is 24")
+	check(content.games.size() == 34, "catalog contains 34 entries including the ten 3.0 games")
+	check(int(content.content_version) == 25, "content package version is 25")
 	var app_version_value: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://version.json"))
 	check(
 		app_version_value is Dictionary
-		and int(app_version_value.get("versionCode", 0)) == 21
-		and str(app_version_value.get("versionName", "")) == "2.5.0",
-		"app version is 2.5.0 (21)"
+		and int(app_version_value.get("versionCode", 0)) == 22
+		and str(app_version_value.get("versionName", "")) == "3.0.0",
+		"app version is 3.0.0 (22)"
 	)
 	check(content.tuning.get("games", {}).size() == content.games.size(), "tuning covers all catalog entries")
 	for content_issue in content.content_issues():
@@ -96,6 +96,16 @@ func _run() -> void:
 	check(content.tank_levels().size() == 30, "tank has 30 fixed mazes")
 	check(content.sokoban_levels().size() == 48, "sokoban has 48 warehouse levels")
 	check(content.circuit_levels().size() == 32, "circuit workshop has 32 low-voltage circuits")
+	check(content.bubble_levels().size() == 24, "bubble has 24 levels")
+	check(content.rhythm_charts().size() == 24, "rhythm has 24 charts")
+	check(content.garbage_levels().size() == 30, "garbage sorting has 30 levels")
+	check(content.kitchen_levels().size() == 24, "little kitchen has 24 orders")
+	check(content.maze_levels().size() == 32, "maze has 32 levels")
+	check(content.slide_levels().size() == 32, "slide puzzle has 32 boards")
+	check(content.pixel_art_pages().size() == 30, "pixel art has 30 pictures")
+	check(content.pinball_tables().size() == 24, "pinball has 24 tables")
+	check(content.breakout_levels().size() == 24, "breakout has 24 levels")
+	check(content.air_hockey_arenas().size() == 18, "air hockey has 18 arenas")
 	for cover_path in [
 		"res://assets/covers/tangram.svg",
 		"res://assets/covers/spot.svg",
@@ -107,6 +117,16 @@ func _run() -> void:
 		"res://assets/covers/tank.svg",
 		"res://assets/covers/sokoban.svg",
 		"res://assets/covers/circuit.svg",
+		"res://assets/covers/bubble.svg",
+		"res://assets/covers/rhythm.svg",
+		"res://assets/covers/garbage_sort.svg",
+		"res://assets/covers/kitchen.svg",
+		"res://assets/covers/maze.svg",
+		"res://assets/covers/slide_puzzle.svg",
+		"res://assets/covers/pixel_art.svg",
+		"res://assets/covers/pinball.svg",
+		"res://assets/covers/breakout.svg",
+		"res://assets/covers/air_hockey.svg",
 	]:
 		check(FileAccess.file_exists(cover_path), "%s is bundled" % cover_path)
 	check(content.search_games("拼图").has("tangram"), "lobby search finds tangram by Chinese alias")
@@ -119,6 +139,15 @@ func _run() -> void:
 	check(content.search_games("坦克大战").has("tank"), "lobby search finds tank by alias")
 	check(content.search_games("推箱子").has("sokoban"), "lobby search finds sokoban by alias")
 	check(content.search_games("灯泡").has("circuit"), "lobby search finds circuit by alias")
+	check(content.search_games("弹珠").has("pinball"), "lobby search finds pinball by alias")
+	check(content.search_games("打砖块").has("breakout"), "lobby search finds breakout by alias")
+	check(content.search_games("冰球").has("air_hockey"), "lobby search finds air hockey by alias")
+	check(content.search_games("节奏").has("rhythm"), "lobby search finds rhythm by alias")
+	check(content.search_games("垃圾分类").has("garbage_sort"), "lobby search finds garbage sorting by alias")
+	check(content.search_games("厨房").has("kitchen"), "lobby search finds kitchen by alias")
+	check(content.search_games("华容道").has("maze") or content.search_games("华容道").has("slide_puzzle"), "lobby search finds maze and sliding puzzle aliases")
+	check(content.search_games("像素画").has("pixel_art"), "lobby search finds pixel art by alias")
+	check(content.search_games("泡泡").has("bubble"), "lobby search finds bubble by alias")
 	check(content.search_games("完全不存在的小游戏").is_empty(), "lobby search returns an empty result for an unknown query")
 	for quiz_game_id in ["math", "pinyin", "patterns", "animals", "trivia"]:
 		for sample_age in [4, 7, 10, 12]:

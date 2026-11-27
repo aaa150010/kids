@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="576" viewBox="0 0 1024 576">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#edf1f6"/>
+      <stop offset="1" stop-color="#9aabc0"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#63758c"/>
+      <stop offset="1" stop-color="#37485e"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#fffdf4"/>
+      <stop offset="1" stop-color="#dfe7ef"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#26364a" flood-opacity=".24"/>
+    </filter>
+  </defs>
+  <rect width="1024" height="576" rx="42" fill="url(#bg)"/>
+  <circle cx="104" cy="82" r="10" fill="#fff9e7" opacity=".75"/>
+  <circle cx="936" cy="106" r="8" fill="#4f6078" opacity=".38"/>
+  <circle cx="926" cy="488" r="13" fill="#fff9e7" opacity=".62"/>
+  <path d="M74 452 512 522l436-70-25 55H99z" fill="#36485d" opacity=".18"/>
+  <g filter="url(#shadow)">
+    <rect x="136" y="68" width="492" height="426" rx="36" fill="url(#frame)" stroke="#2d3d50" stroke-width="7"/>
+    <rect x="158" y="90" width="448" height="382" rx="24" fill="#c8d4df"/>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="178" y="110" width="98" height="98" rx="18" fill="url(#tile)" stroke="#8798aa" stroke-width="4"/>
+    <rect x="286" y="110" width="98" height="98" rx="18" fill="url(#tile)" stroke="#8798aa" stroke-width="4"/>
+    <rect x="394" y="110" width="98" height="98" rx="18" fill="url(#tile)" stroke="#8798aa" stroke-width="4"/>
+    <rect x="502" y="110" width="98" height="98" rx="18" fill="url(#tile)" stroke="#8798aa" stroke-width="4"/>
+    <rect x="178" y="218" width="98" height="98" rx="18" fill="url(#tile)" stroke="#8798aa" stroke-width="4"/>
+    <rect x="286" y="218" width="98" height="98" rx="18" fill="url(#tile)" stroke="#8798aa" stroke-width="4"/>
+    <rect x="394" y="218" width="98" height="98" rx="18" fill="url(#tile)" stroke="#8798aa" stroke-width="4"/>
+    <rect x="502" y="218" width="98" height="98" rx="18" fill="url(#tile)" stroke="#8798aa" stroke-width="4"/>
+    <rect x="178" y="326" width="98" height="98" rx="18" fill="url(#tile)" stroke="#8798aa" stroke-width="4"/>
+    <rect x="286" y="326" width="98" height="98" rx="18" fill="url(#tile)" stroke="#8798aa" stroke-width="4"/>
+    <rect x="394" y="326" width="98" height="98" rx="18" fill="url(#tile)" stroke="#8798aa" stroke-width="4"/>
+    <rect x="502" y="326" width="98" height="98" rx="18" fill="#cbd7e2" stroke="#6e8297" stroke-width="5" stroke-dasharray="10 7"/>
+  </g>
+  <g font-family="Noto Sans CJK SC, sans-serif" text-anchor="middle" font-weight="700">
+    <text x="227" y="176" font-size="48" fill="#41556d">1</text>
+    <text x="335" y="176" font-size="48" fill="#a35d4c">2</text>
+    <text x="443" y="176" font-size="48" fill="#5c7995">3</text>
+    <text x="551" y="176" font-size="48" fill="#4d8a72">4</text>
+    <text x="227" y="284" font-size="48" fill="#8b6f35">5</text>
+    <text x="335" y="284" font-size="48" fill="#725b93">6</text>
+    <text x="443" y="284" font-size="48" fill="#4b8398">7</text>
+    <text x="551" y="284" font-size="48" fill="#9d5949">8</text>
+    <text x="227" y="392" font-size="48" fill="#5f8050">9</text>
+    <text x="335" y="392" font-size="48" fill="#8a5f3d">10</text>
+    <text x="443" y="392" font-size="48" fill="#4f6078">11</text>
+  </g>
+  <g opacity=".65">
+    <path d="M197 136h60M197 244h60M197 352h60" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="327" cy="137" r="4" fill="#4f6078"/><circle cx="435" cy="354" r="4" fill="#4f6078"/>
+  </g>
+  <g transform="translate(398 428)">
+    <rect x="-38" y="-28" width="76" height="56" rx="21" fill="#4f6078" opacity=".92"/>
+    <path d="M-13 0h26M5-14l14 14-14 14" fill="none" stroke="#fff9ed" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <g transform="translate(780 148)" filter="url(#shadow)">
+    <rect width="178" height="284" rx="30" fill="#fff9e9" stroke="#6d7f93" stroke-width="6"/>
+    <rect x="28" y="30" width="122" height="122" rx="18" fill="#30465e"/>
+    <g stroke="#dce7ef" stroke-width="4">
+      <path d="M68 42v98M108 42v98M28 71h122M28 111h122"/>
+    </g>
+    <rect x="28" y="176" width="56" height="44" rx="15" fill="#4f6078"/>
+    <rect x="94" y="176" width="56" height="44" rx="15" fill="#e7ecf3" stroke="#a3b1c0" stroke-width="3"/>
+    <path d="M56 198h18M83 186l12 12-12 12" fill="none" stroke="#fff9ed" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="28" y="238" width="122" height="18" rx="9" fill="#c8d4df"/>
+    <rect x="28" y="238" width="82" height="18" rx="9" fill="#d2a842"/>
+  </g>
+  <g transform="translate(820 460)">
+    <rect x="-74" y="-25" width="148" height="50" rx="18" fill="#4f6078" opacity=".90"/>
+    <circle cx="-48" cy="0" r="8" fill="#fff8df"/><circle cx="-16" cy="0" r="8" fill="#fff8df"/>
+    <circle cx="16" cy="0" r="8" fill="#fff8df"/><circle cx="48" cy="0" r="8" fill="#fff8df"/>
+  </g>
+  <text x="512" y="534" text-anchor="middle" font-family="Noto Sans CJK SC, sans-serif" font-size="34" font-weight="700" fill="#34485e">数字华容道 · 滑一格，排整齐</text>
+</svg>

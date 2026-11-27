@@ -16,6 +16,16 @@
     "assets/covers/tank.svg",
     "assets/covers/sokoban.svg",
     "assets/covers/circuit.svg",
+    "assets/covers/pinball.svg",
+    "assets/covers/breakout.svg",
+    "assets/covers/air_hockey.svg",
+    "assets/covers/rhythm.svg",
+    "assets/covers/garbage_sort.svg",
+    "assets/covers/kitchen.svg",
+    "assets/covers/maze.svg",
+    "assets/covers/slide_puzzle.svg",
+    "assets/covers/bubble.svg",
+    "assets/covers/pixel_art.svg",
     "apps/android/src/ui/original_glyph.gd"
   ],
   "notes": [
