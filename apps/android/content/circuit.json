@@ -1,0 +1,5224 @@
+{
+  "version": 1,
+  "levels": [
+    {
+      "id": "circuit-01",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 4,
+      "title": "小灯泡醒来",
+      "width": 4,
+      "height": 3,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 1
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 3,
+          "y": 1
+        }
+      ],
+      "hint": "先转动第 2 行第 2 列的导线，让接口朝着电池来的方向。",
+      "solution": [
+        {
+          "index": 1,
+          "rotation": 0
+        },
+        {
+          "index": 2,
+          "rotation": 0
+        }
+      ],
+      "narration": "单人第1关，小灯泡醒来。从 3 伏玩具电池出发，接通小灯泡。点导线转一转，让接口对齐。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-02",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 4,
+      "title": "风扇转一转",
+      "width": 4,
+      "height": 3,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 1
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "fan",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 3,
+          "y": 1
+        }
+      ],
+      "hint": "先合上第 2 行第 3 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "rotation": 2
+        },
+        {
+          "index": 2,
+          "closed": true
+        }
+      ],
+      "narration": "单人第2关，风扇转一转。从 3 伏玩具电池出发，接通小风扇。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-03",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 5,
+      "title": "会唱歌的门铃",
+      "width": 5,
+      "height": 3,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "buzzer",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 4,
+          "y": 1
+        }
+      ],
+      "hint": "先合上第 2 行第 2 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "closed": true
+        },
+        {
+          "index": 2,
+          "rotation": 0
+        },
+        {
+          "index": 3,
+          "rotation": 2
+        }
+      ],
+      "narration": "单人第3关，会唱歌的门铃。从 3 伏玩具电池出发，接通蜂鸣器。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-04",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 5,
+      "title": "两盏小夜灯",
+      "width": 5,
+      "height": 3,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 3,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        }
+      ],
+      "parts": [
+        {
+          "x": 3,
+          "y": 0,
+          "type": "bulb",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 0
+        }
+      ],
+      "hint": "先合上第 2 行第 2 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 2,
+          "closed": true
+        },
+        {
+          "index": 3,
+          "rotation": 0
+        }
+      ],
+      "narration": "单人第4关，两盏小夜灯。从 3 伏玩具电池出发，接通两盏小灯泡。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。两盏小灯泡全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-05",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 5,
+      "title": "弯弯的铜线",
+      "width": 5,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 2
+        }
+      ],
+      "parts": [
+        {
+          "x": 2,
+          "y": 0,
+          "type": "bulb",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "buzzer",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 0
+        }
+      ],
+      "hint": "先合上第 3 行第 4 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 2,
+          "rotation": 2
+        },
+        {
+          "index": 4,
+          "rotation": 0
+        },
+        {
+          "index": 5,
+          "closed": true
+        }
+      ],
+      "narration": "单人第5关，弯弯的铜线。从 3 伏玩具电池出发，接通蜂鸣器、小灯泡。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。蜂鸣器、小灯泡全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-06",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 6,
+      "title": "小熊的电风扇",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "bulb",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "fan",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 2
+        }
+      ],
+      "hint": "先合上第 2 行第 3 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 2,
+          "closed": true
+        },
+        {
+          "index": 3,
+          "rotation": 2
+        },
+        {
+          "index": 5,
+          "rotation": 0
+        },
+        {
+          "index": 6,
+          "closed": true
+        }
+      ],
+      "narration": "单人第6关，小熊的电风扇。从 3 伏玩具电池出发，接通小风扇、小灯泡。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小风扇、小灯泡全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-07",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 6,
+      "title": "蜂鸣器报时",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        }
+      ],
+      "parts": [
+        {
+          "x": 2,
+          "y": 0,
+          "type": "buzzer",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 0
+        }
+      ],
+      "hint": "先合上第 2 行第 4 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 2,
+          "rotation": 2
+        },
+        {
+          "index": 4,
+          "closed": true
+        },
+        {
+          "index": 5,
+          "closed": true
+        }
+      ],
+      "narration": "单人第7关，蜂鸣器报时。从 3 伏玩具电池出发，接通小灯泡、蜂鸣器。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-08",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 6,
+      "title": "灯泡和风扇",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 2
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "fan",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 2
+        }
+      ],
+      "hint": "先合上第 2 行第 2 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "closed": true
+        },
+        {
+          "index": 3,
+          "rotation": 0
+        },
+        {
+          "index": 4,
+          "closed": true
+        }
+      ],
+      "narration": "单人第8关，灯泡和风扇。从 3 伏玩具电池出发，接通小灯泡、小风扇。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-09",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 7,
+      "title": "蘑菇屋门灯",
+      "width": 5,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 2
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "buzzer",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 2
+        }
+      ],
+      "hint": "先合上第 2 行第 2 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "closed": true
+        },
+        {
+          "index": 2,
+          "rotation": 2
+        },
+        {
+          "index": 4,
+          "rotation": 0
+        },
+        {
+          "index": 6,
+          "rotation": 0
+        }
+      ],
+      "narration": "单人第9关，蘑菇屋门灯。从 3 伏玩具电池出发，接通小灯泡、蜂鸣器。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-10",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 7,
+      "title": "玩具车充电线",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        }
+      ],
+      "parts": [
+        {
+          "x": 2,
+          "y": 0,
+          "type": "bulb",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "fan",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 0
+        }
+      ],
+      "hint": "先合上第 2 行第 2 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 2,
+          "closed": true
+        },
+        {
+          "index": 4,
+          "rotation": 1
+        },
+        {
+          "index": 7,
+          "rotation": 0
+        },
+        {
+          "index": 8,
+          "rotation": 3
+        }
+      ],
+      "narration": "单人第10关，玩具车充电线。从 3 伏玩具电池出发，接通小风扇、小灯泡。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小风扇、小灯泡全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-11",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 7,
+      "title": "双开关小台灯",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 3
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "buzzer",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "fan",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 2
+        }
+      ],
+      "hint": "先合上第 2 行第 3 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 2,
+          "closed": true
+        },
+        {
+          "index": 3,
+          "rotation": 2
+        },
+        {
+          "index": 5,
+          "rotation": 0
+        }
+      ],
+      "narration": "单人第11关，双开关小台灯。从 3 伏玩具电池出发，接通小灯泡、小风扇、蜂鸣器。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、小风扇、蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-12",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 8,
+      "title": "小火车信号灯",
+      "width": 6,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 2
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 4
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 2,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "switch",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "buzzer",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 4
+        }
+      ],
+      "hint": "先合上第 3 行第 2 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "closed": true
+        },
+        {
+          "index": 3,
+          "rotation": 2
+        },
+        {
+          "index": 4,
+          "closed": true
+        },
+        {
+          "index": 5,
+          "rotation": 0
+        }
+      ],
+      "narration": "单人第12关，小火车信号灯。从 3 伏玩具电池出发，接通小灯泡、蜂鸣器。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-13",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 8,
+      "title": "电阻守门员",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 2
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 6,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 4
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 2,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "buzzer",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "switch",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": true
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "type": "fan",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 6,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 4
+        },
+        {
+          "x": 5,
+          "y": 2
+        }
+      ],
+      "hint": "先合上第 4 行第 4 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "rotation": 2
+        },
+        {
+          "index": 6,
+          "closed": true
+        },
+        {
+          "index": 7,
+          "rotation": 0
+        },
+        {
+          "index": 8,
+          "closed": true
+        }
+      ],
+      "narration": "单人第13关，电阻守门员。从 3 伏玩具电池出发，接通小灯泡、小风扇、蜂鸣器。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、小风扇、蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-14",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 8,
+      "title": "分叉小彩灯",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 2
+      },
+      "fixed": [
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 3
+        }
+      ],
+      "parts": [
+        {
+          "x": 5,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 6,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "fan",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 3
+        }
+      ],
+      "hint": "先合上第 3 行第 2 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 0,
+          "rotation": 1
+        },
+        {
+          "index": 3,
+          "closed": true
+        },
+        {
+          "index": 4,
+          "closed": true
+        },
+        {
+          "index": 7,
+          "rotation": 3
+        }
+      ],
+      "narration": "单人第14关，分叉小彩灯。从 3 伏玩具电池出发，接通小灯泡、小风扇。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-15",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 9,
+      "title": "音乐盒的电线",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 2
+      },
+      "fixed": [
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 4
+        }
+      ],
+      "parts": [
+        {
+          "x": 4,
+          "y": 1,
+          "type": "fan",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 6,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "resistor",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "buzzer",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 4
+        }
+      ],
+      "hint": "先合上第 3 行第 2 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 4,
+          "closed": true
+        },
+        {
+          "index": 5,
+          "closed": true
+        },
+        {
+          "index": 6,
+          "rotation": 0
+        },
+        {
+          "index": 8,
+          "rotation": 3
+        }
+      ],
+      "narration": "单人第15关，音乐盒的电线。从 3 伏玩具电池出发，接通小灯泡、小风扇、蜂鸣器。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、小风扇、蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-16",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 9,
+      "title": "三个小电器",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 2
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 6,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 2,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 6,
+          "y": 2,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "buzzer",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "fan",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 6,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "hint": "先合上第 3 行第 3 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 2,
+          "closed": true
+        },
+        {
+          "index": 4,
+          "closed": true
+        },
+        {
+          "index": 5,
+          "closed": true
+        }
+      ],
+      "narration": "单人第16关，三个小电器。从 3 伏玩具电池出发，接通小灯泡、蜂鸣器、小风扇。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、蜂鸣器、小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-17",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "纸板城夜灯",
+      "width": 6,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 3
+      },
+      "fixed": [
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 3
+        }
+      ],
+      "parts": [
+        {
+          "x": 2,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "switch",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "switch",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": true
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 1
+        }
+      ],
+      "hint": "先合上第 3 行第 3 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "rotation": 1
+        },
+        {
+          "index": 2,
+          "rotation": 0
+        },
+        {
+          "index": 4,
+          "closed": true
+        },
+        {
+          "index": 5,
+          "closed": true
+        },
+        {
+          "index": 9,
+          "rotation": 3
+        }
+      ],
+      "narration": "单人第17关，纸板城夜灯。从 3 伏玩具电池出发，接通两盏小灯泡。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。两盏小灯泡全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-18",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "风车与铃声",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 2
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 6,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 4
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 2,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "buzzer",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "type": "fan",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 6,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 4
+        }
+      ],
+      "hint": "先合上第 3 行第 3 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 2,
+          "closed": true
+        },
+        {
+          "index": 5,
+          "rotation": 1
+        },
+        {
+          "index": 6,
+          "rotation": 0
+        },
+        {
+          "index": 7,
+          "closed": true
+        }
+      ],
+      "narration": "单人第18关，风车与铃声。从 3 伏玩具电池出发，接通小灯泡、蜂鸣器、小风扇。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、蜂鸣器、小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-19",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "双路玩具台",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 3
+      },
+      "fixed": [
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        },
+        {
+          "x": 6,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 4
+        }
+      ],
+      "parts": [
+        {
+          "x": 5,
+          "y": 0,
+          "type": "bulb",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "switch",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": true
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "type": "fan",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "type": "buzzer",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 6,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 0
+        },
+        {
+          "x": 3,
+          "y": 4
+        }
+      ],
+      "hint": "先合上第 3 行第 4 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "rotation": 1
+        },
+        {
+          "index": 4,
+          "closed": true
+        },
+        {
+          "index": 5,
+          "rotation": 3
+        },
+        {
+          "index": 7,
+          "closed": true
+        },
+        {
+          "index": 8,
+          "closed": true
+        },
+        {
+          "index": 10,
+          "rotation": 0
+        }
+      ],
+      "narration": "单人第19关，双路玩具台。从 3 伏玩具电池出发，接通小风扇、小灯泡、蜂鸣器。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小风扇、小灯泡、蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-20",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "分岔生日灯",
+      "width": 7,
+      "height": 6,
+      "source": {
+        "x": 0,
+        "y": 3
+      },
+      "fixed": [
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "parts": [
+        {
+          "x": 3,
+          "y": 1,
+          "type": "fan",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 6,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "switch",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 2
+        }
+      ],
+      "hint": "先合上第 2 行第 6 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "rotation": 1
+        },
+        {
+          "index": 2,
+          "closed": true
+        },
+        {
+          "index": 4,
+          "closed": true
+        },
+        {
+          "index": 8,
+          "closed": true
+        },
+        {
+          "index": 11,
+          "rotation": 3
+        }
+      ],
+      "narration": "单人第20关，分岔生日灯。从 3 伏玩具电池出发，接通两盏小灯泡、小风扇。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。两盏小灯泡、小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-21",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "电阻小花园",
+      "width": 8,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 3
+      },
+      "fixed": [
+        {
+          "x": 7,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 4
+        }
+      ],
+      "parts": [
+        {
+          "x": 5,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 6,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 7,
+          "y": 1,
+          "type": "buzzer",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "bulb",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "fan",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 7,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 4
+        }
+      ],
+      "hint": "先合上第 2 行第 7 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 0,
+          "rotation": 1
+        },
+        {
+          "index": 1,
+          "closed": true
+        },
+        {
+          "index": 7,
+          "rotation": 0
+        },
+        {
+          "index": 9,
+          "closed": true
+        },
+        {
+          "index": 10,
+          "closed": true
+        },
+        {
+          "index": 11,
+          "rotation": 3
+        }
+      ],
+      "narration": "单人第21关，电阻小花园。从 3 伏玩具电池出发，接通蜂鸣器、小灯泡、小风扇。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。蜂鸣器、小灯泡、小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-22",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "维修台总闸",
+      "width": 8,
+      "height": 6,
+      "source": {
+        "x": 0,
+        "y": 4
+      },
+      "fixed": [
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 7,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 3,
+          "y": 4
+        },
+        {
+          "x": 4,
+          "y": 4
+        },
+        {
+          "x": 5,
+          "y": 4
+        },
+        {
+          "x": 3,
+          "y": 5
+        }
+      ],
+      "parts": [
+        {
+          "x": 4,
+          "y": 1,
+          "type": "buzzer",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 6,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 7,
+          "y": 2,
+          "type": "fan",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "switch",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": true
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "type": "switch",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": true
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 4,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 6,
+          "y": 4,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 5,
+          "type": "bulb",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 7,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 5
+        }
+      ],
+      "hint": "先合上第 4 行第 5 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "rotation": 3
+        },
+        {
+          "index": 2,
+          "rotation": 1
+        },
+        {
+          "index": 4,
+          "closed": true
+        },
+        {
+          "index": 5,
+          "closed": true
+        },
+        {
+          "index": 7,
+          "rotation": 2
+        },
+        {
+          "index": 8,
+          "closed": true
+        },
+        {
+          "index": 12,
+          "rotation": 3
+        }
+      ],
+      "narration": "单人第22关，维修台总闸。从 3 伏玩具电池出发，接通小风扇、蜂鸣器、小灯泡。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小风扇、蜂鸣器、小灯泡全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-23",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "彩灯总控板",
+      "width": 8,
+      "height": 6,
+      "source": {
+        "x": 0,
+        "y": 4
+      },
+      "fixed": [
+        {
+          "x": 1,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 7,
+          "y": 3
+        },
+        {
+          "x": 0,
+          "y": 4
+        }
+      ],
+      "parts": [
+        {
+          "x": 1,
+          "y": 0,
+          "type": "buzzer",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "switch",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": true
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "switch",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "fan",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 7,
+          "y": 3,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 7,
+          "y": 3
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 0
+        }
+      ],
+      "hint": "先合上第 2 行第 2 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "closed": true
+        },
+        {
+          "index": 2,
+          "closed": true
+        },
+        {
+          "index": 3,
+          "rotation": 1
+        },
+        {
+          "index": 4,
+          "rotation": 2
+        },
+        {
+          "index": 8,
+          "rotation": 0
+        },
+        {
+          "index": 9,
+          "rotation": 0
+        },
+        {
+          "index": 11,
+          "closed": true
+        },
+        {
+          "index": 14,
+          "rotation": 2
+        },
+        {
+          "index": 15,
+          "rotation": 3
+        }
+      ],
+      "narration": "单人第23关，彩灯总控板。从 3 伏玩具电池出发，接通小灯泡、小风扇、蜂鸣器。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、小风扇、蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-24",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "小工坊毕业照",
+      "width": 8,
+      "height": 6,
+      "source": {
+        "x": 0,
+        "y": 4
+      },
+      "fixed": [
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 7,
+          "y": 3
+        },
+        {
+          "x": 0,
+          "y": 4
+        },
+        {
+          "x": 2,
+          "y": 4
+        },
+        {
+          "x": 5,
+          "y": 4
+        },
+        {
+          "x": 6,
+          "y": 4
+        },
+        {
+          "x": 5,
+          "y": 5
+        }
+      ],
+      "parts": [
+        {
+          "x": 3,
+          "y": 3,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 7,
+          "y": 3,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 6,
+          "y": 4,
+          "type": "fan",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 5,
+          "type": "buzzer",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 7,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 5
+        },
+        {
+          "x": 6,
+          "y": 4
+        }
+      ],
+      "hint": "先合上第 4 行第 5 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 0,
+          "rotation": 1
+        },
+        {
+          "index": 1,
+          "closed": true
+        },
+        {
+          "index": 3,
+          "closed": true
+        },
+        {
+          "index": 6,
+          "closed": true
+        },
+        {
+          "index": 8,
+          "rotation": 3
+        }
+      ],
+      "narration": "单人第24关，小工坊毕业照。从 3 伏玩具电池出发，接通小灯泡、蜂鸣器、小风扇。点导线转一转，点开关合上闸刀。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、蜂鸣器、小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-coop-01",
+      "mode": "classic",
+      "band": "easy",
+      "minAge": 4,
+      "title": "一起点亮纸灯笼",
+      "width": 4,
+      "height": 3,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 3,
+          "y": 1
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 3,
+          "y": 1
+        }
+      ],
+      "hint": "先转动第 2 行第 2 列的导线，让接口朝着电池来的方向。",
+      "solution": [
+        {
+          "index": 1,
+          "rotation": 0
+        },
+        {
+          "index": 2,
+          "rotation": 0
+        }
+      ],
+      "narration": "协作第1关，一起点亮纸灯笼。从 3 伏玩具电池出发，接通小灯泡。两个人轮流转动元件，一起完成。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-coop-02",
+      "mode": "classic",
+      "band": "easy",
+      "minAge": 5,
+      "title": "你合闸我检查",
+      "width": 5,
+      "height": 3,
+      "source": {
+        "x": 0,
+        "y": 1
+      },
+      "fixed": [
+        {
+          "x": 0,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        }
+      ],
+      "parts": [
+        {
+          "x": 0,
+          "y": 1,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "fan",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 4,
+          "y": 1
+        }
+      ],
+      "hint": "先合上第 2 行第 4 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "rotation": 2
+        },
+        {
+          "index": 2,
+          "rotation": 0
+        },
+        {
+          "index": 3,
+          "closed": true
+        }
+      ],
+      "narration": "协作第2关，你合闸我检查。从 3 伏玩具电池出发，接通小风扇。两个人轮流转动元件，一起完成。",
+      "explanation": "电流只沿着接口对上的铜件前进。小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-coop-03",
+      "mode": "classic",
+      "band": "normal",
+      "minAge": 7,
+      "title": "双人小风扇",
+      "width": 5,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 2
+      },
+      "fixed": [
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 2
+        }
+      ],
+      "parts": [
+        {
+          "x": 1,
+          "y": 1,
+          "type": "fan",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "fan",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 1
+        }
+      ],
+      "hint": "先合上第 3 行第 3 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "rotation": 1
+        },
+        {
+          "index": 5,
+          "closed": true
+        },
+        {
+          "index": 6,
+          "rotation": 3
+        }
+      ],
+      "narration": "协作第3关，双人小风扇。从 3 伏玩具电池出发，接通两台小风扇。两个人轮流转动元件，一起完成。",
+      "explanation": "电流只沿着接口对上的铜件前进。两台小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-coop-04",
+      "mode": "classic",
+      "band": "normal",
+      "minAge": 7,
+      "title": "分叉彩线",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 2
+      },
+      "fixed": [
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        }
+      ],
+      "parts": [
+        {
+          "x": 1,
+          "y": 1,
+          "type": "fan",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 1
+        }
+      ],
+      "hint": "先合上第 3 行第 4 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 3,
+          "rotation": 0
+        },
+        {
+          "index": 4,
+          "closed": true
+        },
+        {
+          "index": 5,
+          "rotation": 0
+        }
+      ],
+      "narration": "协作第4关，分叉彩线。从 3 伏玩具电池出发，接通小灯泡、小风扇。两个人轮流转动元件，一起完成。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-coop-05",
+      "mode": "classic",
+      "band": "normal",
+      "minAge": 8,
+      "title": "灯泡蜂鸣二重奏",
+      "width": 6,
+      "height": 4,
+      "source": {
+        "x": 0,
+        "y": 2
+      },
+      "fixed": [
+        {
+          "x": 1,
+          "y": 1
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 2
+        },
+        {
+          "x": 1,
+          "y": 2
+        }
+      ],
+      "parts": [
+        {
+          "x": 1,
+          "y": 1,
+          "type": "buzzer",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 5,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 1
+        }
+      ],
+      "hint": "先合上第 2 行第 4 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 2,
+          "closed": true
+        },
+        {
+          "index": 3,
+          "closed": true
+        },
+        {
+          "index": 7,
+          "rotation": 3
+        }
+      ],
+      "narration": "协作第5关，灯泡蜂鸣二重奏。从 3 伏玩具电池出发，接通小灯泡、蜂鸣器。两个人轮流转动元件，一起完成。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-coop-06",
+      "mode": "classic",
+      "band": "normal",
+      "minAge": 8,
+      "title": "两个开关一条线",
+      "width": 6,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 3
+      },
+      "fixed": [
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 2
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "parts": [
+        {
+          "x": 2,
+          "y": 1,
+          "type": "fan",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "type": "buzzer",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 5,
+          "y": 2
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 1,
+          "y": 2
+        }
+      ],
+      "hint": "先合上第 2 行第 4 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 1,
+          "closed": true
+        },
+        {
+          "index": 4,
+          "rotation": 2
+        },
+        {
+          "index": 5,
+          "rotation": 0
+        },
+        {
+          "index": 9,
+          "rotation": 0
+        },
+        {
+          "index": 10,
+          "closed": true
+        },
+        {
+          "index": 12,
+          "rotation": 3
+        }
+      ],
+      "narration": "协作第6关，两个开关一条线。从 3 伏玩具电池出发，接通小灯泡、小风扇、蜂鸣器。两个人轮流转动元件，一起完成。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、小风扇、蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-coop-07",
+      "mode": "classic",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "玩具城检修路",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 3
+      },
+      "fixed": [
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 2,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 1
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 6,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 4
+        }
+      ],
+      "parts": [
+        {
+          "x": 2,
+          "y": 0,
+          "type": "bulb",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "type": "resistor",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "type": "switch",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": true
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 2,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "wire",
+          "shape": "straight",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 1,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 6,
+          "y": 3,
+          "type": "fan",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 4,
+          "type": "buzzer",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 6,
+          "y": 3
+        },
+        {
+          "x": 2,
+          "y": 0
+        },
+        {
+          "x": 5,
+          "y": 4
+        }
+      ],
+      "hint": "先合上第 2 行第 4 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 2,
+          "closed": true
+        },
+        {
+          "index": 4,
+          "rotation": 2
+        },
+        {
+          "index": 5,
+          "closed": true
+        },
+        {
+          "index": 6,
+          "rotation": 3
+        },
+        {
+          "index": 8,
+          "rotation": 0
+        },
+        {
+          "index": 9,
+          "rotation": 3
+        }
+      ],
+      "narration": "协作第7关，玩具城检修路。从 3 伏玩具电池出发，接通小风扇、小灯泡、蜂鸣器。两个人轮流转动元件，一起完成。",
+      "explanation": "电流只沿着接口对上的铜件前进。小风扇、小灯泡、蜂鸣器全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    },
+    {
+      "id": "circuit-coop-08",
+      "mode": "classic",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "童心电路大合奏",
+      "width": 7,
+      "height": 5,
+      "source": {
+        "x": 0,
+        "y": 3
+      },
+      "fixed": [
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 4,
+          "y": 2
+        },
+        {
+          "x": 0,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 3
+        },
+        {
+          "x": 4,
+          "y": 3
+        },
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 4
+        }
+      ],
+      "parts": [
+        {
+          "x": 4,
+          "y": 1,
+          "type": "wire",
+          "shape": "elbow",
+          "rotation": 3,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 6,
+          "y": 1,
+          "type": "bulb",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "type": "resistor",
+          "rotation": 1,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 1,
+          "solutionClosed": false
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "type": "battery",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "type": "switch",
+          "rotation": 0,
+          "closed": false,
+          "locked": false,
+          "solutionRotation": 0,
+          "solutionClosed": true
+        },
+        {
+          "x": 4,
+          "y": 3,
+          "type": "terminal",
+          "rotation": 0,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 0,
+          "solutionClosed": false
+        },
+        {
+          "x": 5,
+          "y": 3,
+          "type": "buzzer",
+          "rotation": 2,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 2,
+          "solutionClosed": false
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "type": "fan",
+          "rotation": 3,
+          "closed": false,
+          "locked": true,
+          "solutionRotation": 3,
+          "solutionClosed": false
+        }
+      ],
+      "goals": [
+        {
+          "x": 6,
+          "y": 1
+        },
+        {
+          "x": 5,
+          "y": 3
+        },
+        {
+          "x": 1,
+          "y": 4
+        }
+      ],
+      "hint": "先合上第 2 行第 6 列的开关，再顺着铜线看看哪一段还没有接上。",
+      "solution": [
+        {
+          "index": 0,
+          "rotation": 1
+        },
+        {
+          "index": 1,
+          "closed": true
+        },
+        {
+          "index": 6,
+          "closed": true
+        },
+        {
+          "index": 7,
+          "closed": true
+        }
+      ],
+      "narration": "协作第8关，童心电路大合奏。从 3 伏玩具电池出发，接通小灯泡、蜂鸣器、小风扇。两个人轮流转动元件，一起完成。",
+      "explanation": "电流只沿着接口对上的铜件前进。小灯泡、蜂鸣器、小风扇全部通电后，这一关就完成了。还有目标不亮时，看看提示指出的导线或开关；这里只使用安全的低压玩具电池，不碰家里的插座。"
+    }
+  ]
+}

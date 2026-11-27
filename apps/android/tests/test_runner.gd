@@ -40,7 +40,15 @@ func _run() -> void:
 	for script_path in all_scripts("res://src"):
 		var script: GDScript = load(script_path)
 		check(script != null and script.can_instantiate(), "%s parses and can be instantiated" % script_path)
-	check(content.games.size() == 21, "catalog contains 21 entries including the seven new games")
+	check(content.games.size() == 24, "catalog contains 24 entries including the ten new games")
+	check(int(content.content_version) == 24, "content package version is 24")
+	var app_version_value: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://version.json"))
+	check(
+		app_version_value is Dictionary
+		and int(app_version_value.get("versionCode", 0)) == 21
+		and str(app_version_value.get("versionName", "")) == "2.5.0",
+		"app version is 2.5.0 (21)"
+	)
 	check(content.tuning.get("games", {}).size() == content.games.size(), "tuning covers all catalog entries")
 	for content_issue in content.content_issues():
 		check(false, "content validation: %s" % str(content_issue))
@@ -85,6 +93,9 @@ func _run() -> void:
 	check(content.robot_levels().size() == 24, "robot has 24 playable routes")
 	check(content.sentence_stations().size() == 24, "sentence train has 24 stations")
 	check(content.pipe_levels().size() == 36, "pipes has 36 playable gardens")
+	check(content.tank_levels().size() == 30, "tank has 30 fixed mazes")
+	check(content.sokoban_levels().size() == 48, "sokoban has 48 warehouse levels")
+	check(content.circuit_levels().size() == 32, "circuit workshop has 32 low-voltage circuits")
 	for cover_path in [
 		"res://assets/covers/tangram.svg",
 		"res://assets/covers/spot.svg",
@@ -93,6 +104,9 @@ func _run() -> void:
 		"res://assets/covers/robot.svg",
 		"res://assets/covers/sentence_train.svg",
 		"res://assets/covers/pipes.svg",
+		"res://assets/covers/tank.svg",
+		"res://assets/covers/sokoban.svg",
+		"res://assets/covers/circuit.svg",
 	]:
 		check(FileAccess.file_exists(cover_path), "%s is bundled" % cover_path)
 	check(content.search_games("拼图").has("tangram"), "lobby search finds tangram by Chinese alias")
@@ -102,6 +116,9 @@ func _run() -> void:
 	check(content.search_games("编程").has("robot"), "lobby search finds the robot by learning goal")
 	check(content.search_games("组句").has("sentence_train"), "lobby search finds sentence train by alias")
 	check(content.search_games("水管").has("pipes"), "lobby search finds pipes by alias")
+	check(content.search_games("坦克大战").has("tank"), "lobby search finds tank by alias")
+	check(content.search_games("推箱子").has("sokoban"), "lobby search finds sokoban by alias")
+	check(content.search_games("灯泡").has("circuit"), "lobby search finds circuit by alias")
 	check(content.search_games("完全不存在的小游戏").is_empty(), "lobby search returns an empty result for an unknown query")
 	for quiz_game_id in ["math", "pinyin", "patterns", "animals", "trivia"]:
 		for sample_age in [4, 7, 10, 12]:
@@ -362,6 +379,7 @@ func _run() -> void:
 
 	_check_refactor_rules(content, fake_player, fake_player_two)
 	_check_new_games(content, fake_player, fake_player_two)
+	_check_action_games(content, fake_player, fake_player_two)
 
 	var save_store := get_tree().root.get_node_or_null("/root/SaveStore")
 	check(save_store != null, "SaveStore autoload is available")
@@ -834,6 +852,305 @@ func _check_new_games(content: Node, player_one: Dictionary, player_two: Diction
 	check(str(timeout_state.phase) == "result" and str(timeout_state.reason).contains("时间到"), "fruit challenge finishes when its rule timer expires")
 
 
+func _check_action_games(content: Node, player_one: Dictionary, player_two: Dictionary) -> void:
+	_check_tank_rules(content, player_one, player_two)
+	_check_sokoban_rules(content, player_one, player_two)
+	_check_circuit_rules(content, player_one, player_two)
+
+
+func _check_tank_rules(content: Node, player_one: Dictionary, player_two: Dictionary) -> void:
+	var levels: Array = content.tank_levels()
+	var validation: Dictionary = TankRules.validate_catalog({"schemaVersion": 1, "levels": levels})
+	check(bool(validation.get("ok", false)), "tank catalog validates every authored maze and fixed solution")
+	check(levels.filter(func(level): return str(level.get("mode", "")) == "adventure").size() == 24, "tank has 24 solo mazes")
+	check(levels.filter(func(level): return str(level.get("mode", "")) == "classic").size() == 6, "tank has 6 cooperative mazes")
+	check(not levels.is_empty(), "tank levels are available to the rules test")
+	if levels.is_empty():
+		return
+	var wall_rules = TankRules.new()
+	wall_rules.create_session({
+		"gameId": "tank", "modeId": "adventure", "players": [player_one],
+		"levelId": 1, "level": levels[0], "seed": 1001,
+	})
+	var before_wall: Dictionary = wall_rules.tank_at(0)
+	var blocked: Dictionary = wall_rules.move_tank(0, "left")
+	check(bool(blocked.get("ok", false)) and not bool(blocked.get("moved", true)), "tank reports a wall without rejecting the turn")
+	check(int(wall_rules.tank_at(0).get("x", -1)) == int(before_wall.get("x", -2)) and int(wall_rules.tank_at(0).get("y", -1)) == int(before_wall.get("y", -2)), "tank wall collision keeps the tank in place")
+
+	var fixture: Dictionary = {}
+	for level in levels:
+		if str(level.get("mode", "")) != "adventure":
+			continue
+		if not (level.get("targets", []) as Array).is_empty() and not (level.get("gates", []) as Array).is_empty():
+			fixture = level
+			break
+	check(not fixture.is_empty(), "tank exposes a target-and-gate fixture")
+	if not fixture.is_empty():
+		var tank = TankRules.new()
+		tank.create_session({
+			"gameId": "tank", "modeId": "adventure", "players": [player_one],
+			"levelId": 2, "level": fixture, "seed": 1002,
+		})
+		var fired: Dictionary = tank.fire(0)
+		check(bool(fired.get("ok", false)) and (tank.state.bullets as Array).size() == 1, "tank creates a foam shot in the rules state")
+		var flight_snapshot: Dictionary = tank.snapshot()
+		var flight_restore = TankRules.new()
+		check(flight_restore.restore(flight_snapshot), "tank mid-flight shot snapshot restores")
+		check(flight_restore.state.bullets == flight_snapshot.bullets, "tank restore keeps foam shots and their trajectory")
+		var wrong_tank_level: Dictionary = flight_snapshot.duplicate(true)
+		wrong_tank_level.levelId = int(wrong_tank_level.levelId) + 1
+		check(not TankRules.new().restore(wrong_tank_level), "tank rejects a snapshot whose level id does not match its level")
+		var corrupt_flight: Dictionary = flight_snapshot.duplicate(true)
+		corrupt_flight.gatesOpen = {}
+		corrupt_flight.events = {}
+		var corrupt_restore = TankRules.new()
+		check(corrupt_restore.restore(corrupt_flight), "tank repair-restores malformed gate and event containers")
+		check(corrupt_restore.state.get("gatesOpen") is Array and corrupt_restore.state.get("events") is Array, "tank rebuilds safe collections after a malformed snapshot")
+		for _hit_index in 3:
+			tank.state.tanks[0].invuln = 0.0
+			tank._damage_tank(0, "fixture")
+		check(int(tank.state.tanks[0].shield) == 3 and int(tank.state.shieldBreaks) == 1, "tank bubble shield refills at its checkpoint after three hits")
+		var replayed = _replay_tank_level(fixture, [player_one], 2)
+		check(str(replayed.state.get("phase", "")) == "finished", "tank target-and-gate fixed solution reaches its goal")
+		check(not (replayed.state.get("targetsActive", []) as Array).is_empty(), "tank fixed solution activates its signal target")
+		check(not (replayed.state.get("gatesOpen", []) as Array).is_empty(), "tank signal target opens its linked gate")
+		check(not (replayed.state.get("pickupsCollected", []) as Array).is_empty(), "tank fixed solution collects its star badges")
+		var finished_snapshot: Dictionary = replayed.snapshot()
+		var finished_restore = TankRules.new()
+		check(finished_restore.restore(finished_snapshot), "tank completed snapshot restores")
+		check(str(finished_restore.state.get("phase", "")) == "finished", "restored tank keeps every endpoint lit")
+
+	var coop_level: Dictionary = {}
+	for level in levels:
+		if str(level.get("mode", "")) == "classic":
+			coop_level = level
+			break
+	check(not coop_level.is_empty(), "tank exposes a cooperative fixture")
+	if not coop_level.is_empty():
+		var coop = _replay_tank_level(coop_level, [player_one, player_two], 25)
+		check(coop.tank_count() == 2, "tank cooperative maze starts two independent tanks")
+		check(str(coop.state.get("phase", "")) == "finished", "tank cooperative fixed solution lights both endpoints")
+		check(str(coop.result().get("outcome", "")) == "played", "tank cooperative completion is recorded as played instead of a winner")
+		var wrong_mode = TankRules.new()
+		wrong_mode.create_session({
+			"gameId": "tank", "modeId": "adventure", "players": [player_one],
+			"levelId": 1, "level": coop_level, "seed": 1011,
+		})
+		check(str(wrong_mode.state.get("phase", "")) == "empty", "tank rejects a cooperative maze in solo mode")
+	var patrol_level: Dictionary = {}
+	for level in levels:
+		if str(level.get("mode", "")) == "adventure" and not (level.get("movers", []) as Array).is_empty():
+			patrol_level = level
+			break
+	if not patrol_level.is_empty():
+		var patrol_a = TankRules.new()
+		var patrol_b = TankRules.new()
+		for rules in [patrol_a, patrol_b]:
+			rules.create_session({
+				"gameId": "tank", "modeId": "adventure", "players": [player_one],
+				"levelId": 1, "level": patrol_level, "seed": 1019,
+			})
+		patrol_a.move_tank(0, "right")
+		for _step_index in 15:
+			patrol_a.tick(0.05)
+			patrol_b.tick(0.05)
+		var patrol_path_a: Array = []
+		var patrol_path_b: Array = []
+		for mover_value in patrol_level.get("movers", []):
+			var mover: Dictionary = mover_value
+			patrol_path_a.append(patrol_a.mover_cell(mover))
+			patrol_path_b.append(patrol_b.mover_cell(mover))
+		check(patrol_path_a == patrol_path_b, "tank patrol paths follow the same fixed timeline regardless of player movement")
+		check(patrol_a.state.get("emitterTimers", []) == patrol_b.state.get("emitterTimers", []), "tank fixed emitters do not depend on player position")
+
+
+func _replay_tank_level(level: Dictionary, players: Array, level_id: int = 1):
+	var rules = TankRules.new()
+	rules.create_session({
+		"gameId": "tank",
+		"modeId": str(level.get("mode", "adventure")),
+		"players": players,
+		"levelId": level_id,
+		"level": level,
+		"seed": 1010 + level_id,
+	})
+	for token_value in level.get("solution", []):
+		var token := str(token_value)
+		if token.begins_with("wait:"):
+			_tick_tank_seconds(rules, float(token.substr(5)))
+			continue
+		var parts := token.split(":")
+		if parts.size() < 2:
+			continue
+		var seat := int(parts[0])
+		match str(parts[1]):
+			"move":
+				rules.move_tank(seat, str(parts[2]))
+			"face":
+				rules.face_tank(seat, str(parts[2]))
+			"fire":
+				rules.fire(seat)
+	return rules
+
+
+func _tick_tank_seconds(rules, seconds: float) -> void:
+	var remaining := maxf(0.0, seconds)
+	var guard := 0
+	while remaining > 0.0001 and guard < 6000:
+		rules.tick(minf(0.05, remaining))
+		remaining -= 0.05
+		guard += 1
+
+
+func _check_sokoban_rules(content: Node, player_one: Dictionary, player_two: Dictionary) -> void:
+	var levels: Array = content.sokoban_levels()
+	var validation: Dictionary = SokobanRules.validate_catalog({"version": 1, "levels": levels})
+	check(bool(validation.get("ok", false)), "sokoban catalog validates all 48 authored solutions")
+	check(levels.filter(func(level): return not bool(level.get("coop", false))).size() == 36, "sokoban has 36 solo warehouses")
+	check(levels.filter(func(level): return bool(level.get("coop", false))).size() == 12, "sokoban has 12 cooperative warehouses")
+	check(not levels.is_empty(), "sokoban levels are available to the rules test")
+	if levels.is_empty():
+		return
+	var first_level: Dictionary = levels[0]
+	var rules = SokobanRules.new()
+	rules.create_session({
+		"gameId": "sokoban", "modeId": "adventure", "players": [player_one],
+		"levelId": 1, "level": first_level, "seed": 1020,
+	})
+	var deadlock: Dictionary = rules.move("down")
+	check(bool(deadlock.get("ok", false)), "sokoban accepts the first push toward a dead end")
+	deadlock = rules.move("down")
+	check(bool(deadlock.get("ok", false)) and bool(deadlock.get("deadlocked", false)), "sokoban reports a box trapped in a corner without deleting the session")
+	check(bool(rules.undo().get("ok", false)), "sokoban can undo a dead-end push")
+	check(bool(rules.restart().get("ok", false)), "sokoban can restart after a failed plan")
+	for direction in first_level.get("solution", []):
+		check(bool(rules.move(str(direction)).get("ok", false)), "sokoban accepts every authored direction")
+	check(str(rules.state.get("phase", "")) == "finished" and int(rules.state.get("stars", 0)) == 3, "sokoban authored solution completes with three stars")
+	var completed_snapshot: Dictionary = rules.snapshot()
+	var restored = SokobanRules.new()
+	check(restored.restore(completed_snapshot), "sokoban completed snapshot restores")
+	check(str(restored.state.get("phase", "")) == "finished" and restored.boxes_on_goals() == restored.goal_count(), "restored sokoban keeps every box on a goal")
+	var wrong_sokoban_level: Dictionary = completed_snapshot.duplicate(true)
+	wrong_sokoban_level.levelId = int(wrong_sokoban_level.levelId) + 1
+	check(not SokobanRules.new().restore(wrong_sokoban_level), "sokoban rejects a snapshot whose level id does not match its level")
+	var duplicate_boxes: Dictionary = completed_snapshot.duplicate(true)
+	duplicate_boxes.boxes = (duplicate_boxes.boxes as Array).duplicate(true)
+	duplicate_boxes.boxes.append((duplicate_boxes.boxes as Array)[0].duplicate(true))
+	check(not SokobanRules.new().restore(duplicate_boxes), "sokoban rejects duplicate or extra boxes in a snapshot")
+	var wrong_sokoban_mode = SokobanRules.new()
+	wrong_sokoban_mode.create_session({
+		"gameId": "sokoban", "modeId": "classic", "players": [player_one, player_two],
+		"levelId": 1, "level": first_level, "seed": 1022,
+	})
+	check(str(wrong_sokoban_mode.state.get("phase", "")) == "empty", "sokoban rejects a solo warehouse in cooperative mode")
+
+	var coop_level: Dictionary = {}
+	for level in levels:
+		if bool(level.get("coop", false)):
+			coop_level = level
+			break
+	check(not coop_level.is_empty(), "sokoban exposes a cooperative warehouse")
+	if not coop_level.is_empty():
+		var coop = SokobanRules.new()
+		coop.create_session({
+			"gameId": "sokoban", "modeId": "classic", "players": [player_one, player_two],
+			"levelId": 1, "level": coop_level, "seed": 1021,
+		})
+		var opening := str((coop_level.get("solution", []) as Array)[0])
+		check(bool(coop.move(opening).get("ok", false)), "sokoban cooperative warehouse accepts its opening move")
+		check(coop.is_cooperative() and int(coop.state.get("turn", -1)) == 1, "sokoban cooperative move hands the shared turn to the second child")
+		var coop_snapshot: Dictionary = coop.snapshot()
+		var coop_restored = SokobanRules.new()
+		check(coop_restored.restore(coop_snapshot), "sokoban cooperative snapshot restores")
+		check(int(coop_restored.state.get("turn", -1)) == 1, "restored sokoban keeps the cooperative turn order")
+
+
+func _check_circuit_rules(content: Node, player_one: Dictionary, player_two: Dictionary) -> void:
+	var levels: Array = content.circuit_levels()
+	var validation: Dictionary = CircuitRules.validate_catalog({"version": 1, "levels": levels})
+	check(bool(validation.get("ok", false)), "circuit catalog validates all 32 solved low-voltage boards")
+	check(levels.filter(func(level): return str(level.get("mode", "adventure")) == "adventure").size() == 24, "circuit workshop has 24 solo boards")
+	check(levels.filter(func(level): return str(level.get("mode", "")) == "classic").size() == 8, "circuit workshop has 8 cooperative boards")
+	check(not levels.is_empty(), "circuit levels are available to the rules test")
+	if levels.is_empty():
+		return
+	var first_level: Dictionary = levels[0]
+	var rules = CircuitRules.new()
+	rules.create_session({
+		"gameId": "circuit", "modeId": "adventure", "players": [player_one],
+		"levelId": 1, "level": first_level, "seed": 1030,
+	})
+	check(rules.fault_index() >= 0 and not rules.last_fault().is_empty(), "circuit explains an open connection before the child starts")
+	check(rules.powered_goal_count() == 0 and str(rules.state.get("phase", "")) == "playing", "circuit starts incomplete instead of pre-lit")
+	var playing_snapshot: Dictionary = rules.snapshot()
+	var restored = CircuitRules.new()
+	check(restored.restore(playing_snapshot), "circuit mid-board snapshot restores")
+	check(restored.piece_count() == rules.piece_count() and restored.fault_index() == rules.fault_index(), "restored circuit keeps its components and fault hint")
+	var solved = _solve_circuit(first_level, [player_one], "adventure", 1)
+	check(str(solved.state.get("phase", "")) == "finished" and solved.goals_completed(), "circuit authored solution powers every goal")
+	check(int(solved.state.get("stars", 0)) == 3, "circuit clean authored solution earns three stars")
+	var completed_snapshot: Dictionary = solved.snapshot()
+	var completed_restore = CircuitRules.new()
+	check(completed_restore.restore(completed_snapshot), "circuit completed snapshot restores")
+	check(str(completed_restore.state.get("phase", "")) == "finished" and completed_restore.goals_completed(), "restored circuit keeps every target powered")
+	var wrong_circuit_level: Dictionary = playing_snapshot.duplicate(true)
+	wrong_circuit_level.levelId = int(wrong_circuit_level.levelId) + 1
+	check(not CircuitRules.new().restore(wrong_circuit_level), "circuit rejects a snapshot whose level id does not match its board")
+
+	var coop_level: Dictionary = {}
+	for level in levels:
+		if str(level.get("mode", "")) == "classic" and (level.get("solution", []) as Array).size() >= 2:
+			coop_level = level
+			break
+	check(not coop_level.is_empty(), "circuit workshop exposes a cooperative board")
+	if not coop_level.is_empty():
+		var coop = CircuitRules.new()
+		coop.create_session({
+			"gameId": "circuit", "modeId": "classic", "players": [player_one, player_two],
+			"levelId": 1, "level": coop_level, "seed": 1031,
+		})
+		var first_step: Dictionary = coop_level.solution[0]
+		var index := int(first_step.get("index", -1))
+		if first_step.has("rotation"):
+			coop.rotate_part(index)
+		elif first_step.has("closed"):
+			coop.toggle_switch(index)
+		check(coop.is_cooperative(), "circuit cooperative board recognizes both children")
+		check(str(coop.state.get("phase", "")) == "finished" or int(coop.state.get("turn", -1)) == 1, "circuit cooperative action hands the shared turn to the second child")
+		var coop_snapshot: Dictionary = coop.snapshot()
+		var coop_restored = CircuitRules.new()
+		check(coop_restored.restore(coop_snapshot), "circuit cooperative snapshot restores")
+		check(int(coop_restored.state.get("turn", -1)) == int(coop_snapshot.get("turn", -2)), "restored circuit keeps its cooperative turn")
+		var one_player_coop = CircuitRules.new()
+		one_player_coop.create_session({
+			"gameId": "circuit", "modeId": "classic", "players": [player_one],
+			"levelId": 1, "level": coop_level, "seed": 1032,
+		})
+		check(str(one_player_coop.state.get("phase", "")) == "empty", "circuit rejects a cooperative board without two children")
+
+
+func _solve_circuit(level: Dictionary, players: Array, mode_id: String, level_id: int):
+	var rules = CircuitRules.new()
+	rules.create_session({
+		"gameId": "circuit", "modeId": mode_id, "players": players,
+		"levelId": level_id, "level": level, "seed": 1040 + level_id,
+	})
+	for step_value in level.get("solution", []):
+		if not step_value is Dictionary:
+			continue
+		var step: Dictionary = step_value
+		var index := int(step.get("index", -1))
+		if step.has("rotation"):
+			var guard := 0
+			while index >= 0 and int(rules.piece_at(index).get("rotation", -1)) != int(step.get("rotation", 0)) and guard < 4:
+				rules.rotate_part(index)
+				guard += 1
+		if step.has("closed"):
+			if index >= 0 and bool(rules.piece_at(index).get("closed", false)) != bool(step.get("closed", false)):
+				rules.toggle_switch(index)
+	return rules
+
+
 func _check_refactor_saves(save_store: Node) -> void:
 	var save_a: Dictionary = save_store.add_profile("存档甲", 7, "🦊", "#d56c29")
 	var save_b: Dictionary = save_store.add_profile("存档乙", 9, "🐼", "#2878c8")
@@ -865,6 +1182,7 @@ func _check_refactor_saves(save_store: Node) -> void:
 		check(str(save_a.id) in shared_entry.get("archivedProfileIds", []), "shared session records the archived child")
 	save_store.set_setting("sfxVolume", 0.51)
 	check(save_store.flush(), "valid save flush succeeds")
+	check(save_store.flush(), "a second valid flush can rotate the primary safely")
 	var save_paths: Dictionary = save_store.storage_paths()
 	check(FileAccess.file_exists(str(save_paths.backup)), "valid flush rotates a backup")
 	var corrupt_file := FileAccess.open(str(save_paths.save), FileAccess.WRITE)

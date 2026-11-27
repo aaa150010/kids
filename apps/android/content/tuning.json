@@ -298,6 +298,18 @@
       "kind": "puzzle",
       "difficultyEnabled": false
     },
+    "tank": {
+      "kind": "action",
+      "difficultyEnabled": false
+    },
+    "sokoban": {
+      "kind": "puzzle",
+      "difficultyEnabled": false
+    },
+    "circuit": {
+      "kind": "circuit",
+      "difficultyEnabled": false
+    },
     "gomoku": {
       "kind": "board",
       "hintSeconds": {

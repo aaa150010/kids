@@ -13,6 +13,9 @@
     "assets/covers/robot.svg",
     "assets/covers/sentence_train.svg",
     "assets/covers/pipes.svg",
+    "assets/covers/tank.svg",
+    "assets/covers/sokoban.svg",
+    "assets/covers/circuit.svg",
     "apps/android/src/ui/original_glyph.gd"
   ],
   "notes": [

@@ -16,6 +16,9 @@ const GAME_SCRIPTS := {
 	"robot": "res://src/games/robot_game.gd",
 	"sentence_train": "res://src/games/sentence_train_game.gd",
 	"pipes": "res://src/games/pipe_game.gd",
+	"tank": "res://src/games/tank_game.gd",
+	"sokoban": "res://src/games/sokoban_game.gd",
+	"circuit": "res://src/games/circuit_game.gd",
 	"gomoku": "res://src/games/board_game.gd",
 	"chess": "res://src/games/chess_game.gd",
 	"sudoku": "res://src/games/sudoku_game.gd",
@@ -39,6 +42,9 @@ const MUSIC_THEMES := {
 	"robot": "rainbow",
 	"sentence_train": "forest",
 	"pipes": "rainbow",
+	"tank": "rainbow",
+	"sokoban": "lobby",
+	"circuit": "math",
 	"gomoku": "lobby",
 	"chess": "poetry",
 	"sudoku": "math",
@@ -389,9 +395,9 @@ func _game_matches_filter(meta: Dictionary, filter_id: String) -> bool:
 		return true
 	var category := str(meta.get("category", ""))
 	var groups := {
-		"think": ["数学思维", "空间拼搭", "编程思维", "空间逻辑", "逻辑观察", "观察记忆", "观察发现"],
+		"think": ["数学思维", "空间拼搭", "编程思维", "空间逻辑", "空间规划", "动作策略", "逻辑观察", "观察记忆", "观察发现"],
 		"language": ["识字启蒙", "诗词文化", "语言表达", "故事听读"],
-		"science": ["科学常识", "常识百科", "动作观察"],
+		"science": ["科学常识", "常识百科", "科学实验", "动作观察"],
 		"life": ["生活应用"],
 		"board": ["双人棋局"],
 		"story": ["故事听读"],
@@ -777,7 +783,9 @@ func _refresh_preparation() -> void:
 		if profile_id in ids and ids.size() > 1:
 			var seat := ids.find(profile_id)
 			var seat_label := ""
-			if TabletopLayout.enabled(game_id, selected, str(_preparation.modeId)) or game_id in ["chess", "military", "jungle", "gomoku"]:
+			if game_id == "tank":
+				seat_label = "左操作区" if seat == 0 else "右操作区"
+			elif TabletopLayout.enabled(game_id, selected, str(_preparation.modeId)) or game_id in ["chess", "military", "jungle", "gomoku"]:
 				seat_label = "左座" if seat == 0 else "右座"
 			else:
 				seat_label = "先手" if seat == 0 else "后手"
@@ -792,6 +800,8 @@ func _refresh_preparation() -> void:
 	if ids.size() >= minimum:
 		if TabletopLayout.enabled(game_id, selected, str(_preparation.modeId)):
 			summary = "左边：%s　　右边：%s\n两位小朋友坐在平板的左右短边" % [selected[0].name, selected[1].name]
+		elif game_id == "tank":
+			summary = "%s 和 %s\n同坐长边，分别操作左右控制区" % [selected[0].name, selected[1].name]
 		elif selected.size() == 2:
 			summary = "%s 和 %s\n坐在平板下方，一人一次轮流玩" % [selected[0].name, selected[1].name]
 		elif game_id == "poetry":

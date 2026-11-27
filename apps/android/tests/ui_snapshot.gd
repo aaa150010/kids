@@ -15,6 +15,9 @@ const GAME_SCRIPTS := {
 	"robot": "res://src/games/robot_game.gd",
 	"sentence_train": "res://src/games/sentence_train_game.gd",
 	"pipes": "res://src/games/pipe_game.gd",
+	"tank": "res://src/games/tank_game.gd",
+	"sokoban": "res://src/games/sokoban_game.gd",
+	"circuit": "res://src/games/circuit_game.gd",
 	"trivia": "res://src/games/quiz_game.gd",
 	"gomoku": "res://src/games/board_game.gd",
 	"chess": "res://src/games/chess_game.gd",
@@ -238,7 +241,7 @@ func _capture_games(capture: Dictionary) -> void:
 			return
 		await _sample_performance("%s-%s" % [game_id, capture.label])
 		await _save(viewport, capture, game_id)
-		if game_id in ["tangram", "spot", "shop"]:
+		if game_id in ["tangram", "spot", "shop", "tank", "sokoban", "circuit"]:
 			screen.call("_choose_level", 1)
 			await _frames(14)
 			_audit(screen, "%s-play" % game_id)
@@ -342,6 +345,7 @@ func _screenshot_mode(game_id: String) -> Dictionary:
 		"math":"practice", "pinyin":"practice", "patterns":"practice", "animals":"practice", "trivia":"practice",
 		"tangram":"adventure", "spot":"adventure", "shop":"adventure", "fruit_slice":"practice",
 		"robot":"adventure", "sentence_train":"adventure", "pipes":"adventure",
+		"tank":"adventure", "sokoban":"adventure", "circuit":"adventure",
 		"workbook":"classic", "memory":"classic", "jungle":"classic", "gomoku":"classic",
 		"chess":"classic", "sudoku":"classic", "military":"classic", "poetry":"classic",
 	}.get(game_id,"classic"))

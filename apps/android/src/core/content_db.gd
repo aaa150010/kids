@@ -18,6 +18,9 @@ var fruit_data: Dictionary = {}
 var robot_data: Dictionary = {}
 var sentence_train_data: Dictionary = {}
 var pipe_data: Dictionary = {}
+var tank_data: Dictionary = {}
+var sokoban_data: Dictionary = {}
+var circuit_data: Dictionary = {}
 var content_version: int = 1
 var chapters: Dictionary = {}
 var puzzles: Dictionary = {}
@@ -61,6 +64,9 @@ func _load_json_files() -> void:
 	robot_data = _json_dictionary("robot.json")
 	sentence_train_data = _json_dictionary("sentence_train.json")
 	pipe_data = _json_dictionary("pipes.json")
+	tank_data = _json_dictionary("tank.json")
+	sokoban_data = _json_dictionary("sokoban.json")
+	circuit_data = _json_dictionary("circuit.json")
 	chapters = _json_dictionary("chapters.json")
 	puzzles = _json_dictionary("puzzles.json")
 	tuning = _json_dictionary("tuning.json")
@@ -367,6 +373,21 @@ func pipe_levels() -> Array:
 	return value if value is Array else []
 
 
+func tank_levels() -> Array:
+	var value: Variant = tank_data.get("levels", [])
+	return value if value is Array else []
+
+
+func sokoban_levels() -> Array:
+	var value: Variant = sokoban_data.get("levels", [])
+	return value if value is Array else []
+
+
+func circuit_levels() -> Array:
+	var value: Variant = circuit_data.get("levels", [])
+	return value if value is Array else []
+
+
 func sudoku_puzzles() -> Array:
 	if _sudoku_puzzles_cache.is_empty():
 		var value: Variant = _json_dictionary("sudoku.json").get("puzzles", [])
@@ -381,8 +402,8 @@ func content_issues() -> Array[String]:
 
 func _validate_content() -> void:
 	_content_issues.clear()
-	if games.size() != 21:
-		_content_issues.append("游戏目录应为 21 项，实际 %s 项" % games.size())
+	if games.size() != 24:
+		_content_issues.append("游戏目录应为 24 项，实际 %s 项" % games.size())
 	for game_id in ["math", "pinyin", "patterns", "animals"]:
 		if questions(game_id, 5).is_empty() and questions(game_id, 6).is_empty():
 			_content_issues.append("%s 题库为空或年龄映射异常" % game_id)
@@ -415,6 +436,15 @@ func _validate_content() -> void:
 		_content_issues.append("句子小火车车站不足 24 站")
 	if pipe_levels().size() < 36:
 		_content_issues.append("水管工坊关卡不足 36 关")
+	if tank_levels().size() != 30:
+		_content_issues.append("坦克小卫士固定关卡应为 30 张，实际 %s 张" % tank_levels().size())
+	if sokoban_levels().size() != 48:
+		_content_issues.append("仓库推推乐关卡应为 48 关，实际 %s 关" % sokoban_levels().size())
+	if circuit_levels().size() != 32:
+		_content_issues.append("电路小工坊关卡应为 32 关，实际 %s 关" % circuit_levels().size())
+	_append_rule_issues("坦克小卫士", TankRules.validate_catalog(tank_data))
+	_append_rule_issues("仓库推推乐", SokobanRules.validate_catalog(sokoban_data))
+	_append_rule_issues("电路小工坊", CircuitRules.validate_catalog(circuit_data))
 	for level in tangram_levels:
 		if not level is Dictionary or not level.get("targetPieces") is Array or level.targetPieces.size() != 7:
 			_content_issues.append("七巧板关卡碎片配置异常")
@@ -445,3 +475,11 @@ func _validate_content() -> void:
 		_content_issues.append("军棋残局不足 24 题")
 	for issue in _content_issues:
 		push_warning("内容检查：" + issue)
+
+
+func _append_rule_issues(label: String, report: Dictionary) -> void:
+	var issues_value: Variant = report.get("issues", [])
+	if not issues_value is Array:
+		return
+	for issue in issues_value:
+		_content_issues.append("%s：%s" % [label, str(issue)])

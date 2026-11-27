@@ -1,0 +1,4686 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "levels": [
+    {
+      "id": "tank-a01",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 4,
+      "title": "第一次出发",
+      "width": 8,
+      "height": 5,
+      "layout": [
+        "########",
+        "#......#",
+        "#......#",
+        "#......#",
+        "########"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 2,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 6,
+          "y": 2
+        }
+      ],
+      "targets": [],
+      "gates": [],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a01-s1",
+          "x": 3,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a01-s2",
+          "x": 5,
+          "y": 2,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [],
+      "parShots": 0,
+      "hint": "沿着中间一排向右，星徽会自己跳到坦克身上。",
+      "explanation": "一直向右开，经过两颗星徽，就到达终点小旗。",
+      "solution": [
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right"
+      ]
+    },
+    {
+      "id": "tank-a02",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 4,
+      "title": "绕过纸箱",
+      "width": 9,
+      "height": 6,
+      "layout": [
+        "#########",
+        "#.......#",
+        "#..###..#",
+        "#.......#",
+        "#.......#",
+        "#########"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 1,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 7,
+          "y": 4
+        }
+      ],
+      "targets": [],
+      "gates": [],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a02-s1",
+          "x": 3,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a02-s2",
+          "x": 7,
+          "y": 2,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [],
+      "parShots": 0,
+      "hint": "纸箱只挡住中间一排，先沿最上排走到右边。",
+      "explanation": "从上排绕过纸箱，再从右边向下开，就能到达终点。",
+      "solution": [
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a03",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 5,
+      "title": "两个小终点",
+      "width": 10,
+      "height": 6,
+      "layout": [
+        "##########",
+        "#........#",
+        "#........#",
+        "#...##...#",
+        "#........#",
+        "##########"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 4,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 8,
+          "y": 1
+        },
+        {
+          "x": 8,
+          "y": 4
+        }
+      ],
+      "targets": [],
+      "gates": [],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a03-s1",
+          "x": 4,
+          "y": 4,
+          "kind": "star"
+        },
+        {
+          "id": "a03-s2",
+          "x": 4,
+          "y": 1,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [],
+      "parShots": 0,
+      "hint": "两个终点都要踩亮，顺着中岛绕一圈就好。",
+      "explanation": "先点亮下方终点，再绕过中岛点亮上方终点。",
+      "solution": [
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:left",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a04",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 5,
+      "title": "信号靶开门",
+      "width": 10,
+      "height": 6,
+      "layout": [
+        "##########",
+        "#........#",
+        "#........#",
+        "#........#",
+        "#........#",
+        "##########"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 3,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 8,
+          "y": 3
+        }
+      ],
+      "targets": [
+        {
+          "id": "a04-t1",
+          "x": 5,
+          "y": 1
+        }
+      ],
+      "gates": [
+        {
+          "id": "a04-g1",
+          "cells": [
+            {
+              "x": 5,
+              "y": 2
+            },
+            {
+              "x": 5,
+              "y": 3
+            },
+            {
+              "x": 5,
+              "y": 4
+            }
+          ],
+          "targets": [
+            "a04-t1"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a04-s1",
+          "x": 2,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a04-s2",
+          "x": 8,
+          "y": 4,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [],
+      "parShots": 1,
+      "hint": "先绕到上面一排，朝右边的信号靶开一发泡泡弹。",
+      "explanation": "打亮信号靶后，中间的信号门会收起，再穿过门到终点。",
+      "solution": [
+        "0:move:up",
+        "0:move:right",
+        "0:move:up",
+        "0:move:right",
+        "0:face:right",
+        "0:fire",
+        "wait:0.80",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up"
+      ]
+    },
+    {
+      "id": "tank-a05",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 6,
+      "title": "远处的信号靶",
+      "width": 11,
+      "height": 7,
+      "layout": [
+        "###########",
+        "#.........#",
+        "#..###....#",
+        "#.........#",
+        "#....#.#..#",
+        "#.........#",
+        "###########"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 1,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 9,
+          "y": 5
+        }
+      ],
+      "targets": [
+        {
+          "id": "a05-t1",
+          "x": 9,
+          "y": 1
+        }
+      ],
+      "gates": [
+        {
+          "id": "a05-g1",
+          "cells": [
+            {
+              "x": 6,
+              "y": 2
+            },
+            {
+              "x": 6,
+              "y": 3
+            },
+            {
+              "x": 6,
+              "y": 4
+            }
+          ],
+          "targets": [
+            "a05-t1"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a05-s1",
+          "x": 3,
+          "y": 3,
+          "kind": "star"
+        },
+        {
+          "id": "a05-s2",
+          "x": 9,
+          "y": 4,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [],
+      "parShots": 1,
+      "hint": "信号靶在上排最右边，先沿上排走到中间，再朝右打。",
+      "explanation": "泡泡弹飞过整排地板，打亮远处的信号靶，门就打开了。",
+      "solution": [
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:face:right",
+        "0:fire",
+        "wait:0.95",
+        "0:move:left",
+        "0:move:left",
+        "0:move:left",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:right",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a06",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 6,
+      "title": "两个信号靶",
+      "width": 11,
+      "height": 6,
+      "layout": [
+        "###########",
+        "#.........#",
+        "#.........#",
+        "#.........#",
+        "#.........#",
+        "###########"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 2,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 9,
+          "y": 2
+        }
+      ],
+      "targets": [
+        {
+          "id": "a06-t1",
+          "x": 3,
+          "y": 3
+        },
+        {
+          "id": "a06-t2",
+          "x": 7,
+          "y": 3
+        }
+      ],
+      "gates": [
+        {
+          "id": "a06-g1",
+          "cells": [
+            {
+              "x": 5,
+              "y": 1
+            },
+            {
+              "x": 5,
+              "y": 2
+            },
+            {
+              "x": 5,
+              "y": 3
+            },
+            {
+              "x": 5,
+              "y": 4
+            }
+          ],
+          "targets": [
+            "a06-t1"
+          ]
+        },
+        {
+          "id": "a06-g2",
+          "cells": [
+            {
+              "x": 8,
+              "y": 1
+            },
+            {
+              "x": 8,
+              "y": 2
+            },
+            {
+              "x": 8,
+              "y": 3
+            },
+            {
+              "x": 8,
+              "y": 4
+            }
+          ],
+          "targets": [
+            "a06-t2"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a06-s1",
+          "x": 2,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a06-s2",
+          "x": 6,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a06-s3",
+          "x": 9,
+          "y": 4,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [],
+      "parShots": 2,
+      "hint": "两个信号靶都要打亮：一个开左边门，一个开右边门。",
+      "explanation": "先打亮左边的靶，再走中间，找到第二个靶打亮最后一道门。",
+      "solution": [
+        "0:move:up",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.55",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.55",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up"
+      ]
+    },
+    {
+      "id": "tank-a07",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 6,
+      "title": "泡泡盾练习",
+      "width": 10,
+      "height": 6,
+      "layout": [
+        "##########",
+        "#........#",
+        "#........#",
+        "#........#",
+        "#........#",
+        "##########"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 4,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 8,
+          "y": 4
+        }
+      ],
+      "targets": [
+        {
+          "id": "a07-t1",
+          "x": 3,
+          "y": 1
+        }
+      ],
+      "gates": [
+        {
+          "id": "a07-g1",
+          "cells": [
+            {
+              "x": 6,
+              "y": 1
+            },
+            {
+              "x": 6,
+              "y": 2
+            },
+            {
+              "x": 6,
+              "y": 3
+            },
+            {
+              "x": 6,
+              "y": 4
+            }
+          ],
+          "targets": [
+            "a07-t1"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [
+        {
+          "id": "a07-e1",
+          "x": 8,
+          "y": 0,
+          "dir": "down",
+          "period": 2.2,
+          "phase": 0.7,
+          "speed": 8.0,
+          "disableByTarget": "a07-t1"
+        }
+      ],
+      "pickups": [
+        {
+          "id": "a07-s1",
+          "x": 2,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a07-s2",
+          "x": 8,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a07-s3",
+          "x": 8,
+          "y": 3,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a07-c1",
+          "x": 7,
+          "y": 2
+        }
+      ],
+      "parShots": 1,
+      "hint": "先打亮左边的信号靶，右边墙上的泡泡发射器就会停下来。",
+      "explanation": "信号靶会让泡泡发射器停止，穿过安全的小门就能收集右边的星徽。",
+      "solution": [
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.55",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a08",
+      "mode": "adventure",
+      "band": "easy",
+      "minAge": 6,
+      "title": "移动纸门",
+      "width": 11,
+      "height": 6,
+      "layout": [
+        "###########",
+        "#....#....#",
+        "#.........#",
+        "#.........#",
+        "#....#....#",
+        "###########"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 2,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 9,
+          "y": 2
+        }
+      ],
+      "targets": [],
+      "gates": [],
+      "movers": [
+        {
+          "id": "a08-m1",
+          "path": [
+            {
+              "x": 5,
+              "y": 2
+            },
+            {
+              "x": 5,
+              "y": 3
+            }
+          ],
+          "stepSeconds": 1.4,
+          "phase": 0.0
+        }
+      ],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a08-s1",
+          "x": 3,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a08-s2",
+          "x": 7,
+          "y": 2,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a08-c1",
+          "x": 6,
+          "y": 2
+        }
+      ],
+      "parShots": 0,
+      "hint": "纸门在上下两个格子之间来回移动，等它让开再穿过。",
+      "explanation": "移动纸门按固定节拍换位，等它停在上面的格子时，就可以安全通过。",
+      "solution": [
+        "0:move:right",
+        "0:move:right",
+        "wait:1.50",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right"
+      ]
+    },
+    {
+      "id": "tank-a09",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 7,
+      "title": "双门训练",
+      "width": 11,
+      "height": 7,
+      "layout": [
+        "###########",
+        "#.........#",
+        "#.........#",
+        "#.........#",
+        "#.........#",
+        "#.........#",
+        "###########"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 1,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 9,
+          "y": 2
+        },
+        {
+          "x": 9,
+          "y": 5
+        }
+      ],
+      "targets": [
+        {
+          "id": "a09-t1",
+          "x": 2,
+          "y": 2
+        },
+        {
+          "id": "a09-t2",
+          "x": 6,
+          "y": 2
+        }
+      ],
+      "gates": [
+        {
+          "id": "a09-g1",
+          "cells": [
+            {
+              "x": 4,
+              "y": 1
+            },
+            {
+              "x": 4,
+              "y": 2
+            },
+            {
+              "x": 4,
+              "y": 3
+            },
+            {
+              "x": 4,
+              "y": 4
+            },
+            {
+              "x": 4,
+              "y": 5
+            }
+          ],
+          "targets": [
+            "a09-t1"
+          ]
+        },
+        {
+          "id": "a09-g2",
+          "cells": [
+            {
+              "x": 7,
+              "y": 1
+            },
+            {
+              "x": 7,
+              "y": 2
+            },
+            {
+              "x": 7,
+              "y": 3
+            },
+            {
+              "x": 7,
+              "y": 4
+            },
+            {
+              "x": 7,
+              "y": 5
+            }
+          ],
+          "targets": [
+            "a09-t2"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a09-s1",
+          "x": 3,
+          "y": 5,
+          "kind": "star"
+        },
+        {
+          "id": "a09-s2",
+          "x": 5,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a09-s3",
+          "x": 9,
+          "y": 4,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a09-c1",
+          "x": 5,
+          "y": 4
+        }
+      ],
+      "parShots": 2,
+      "hint": "先从左边绕到第一个信号靶前，再用中间的第二个靶打开第二道门。",
+      "explanation": "两道信号门依次打开，最后点亮上下两个终点。",
+      "solution": [
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:left",
+        "0:face:up",
+        "0:fire",
+        "wait:0.55",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:up",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.55",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up"
+      ]
+    },
+    {
+      "id": "tank-a10",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 7,
+      "title": "高塔与低塔",
+      "width": 12,
+      "height": 7,
+      "layout": [
+        "############",
+        "#..........#",
+        "#..##..##..#",
+        "#..........#",
+        "#..##..##..#",
+        "#..........#",
+        "############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 3,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 10,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 5
+        }
+      ],
+      "targets": [
+        {
+          "id": "a10-t1",
+          "x": 2,
+          "y": 1
+        },
+        {
+          "id": "a10-t2",
+          "x": 2,
+          "y": 5
+        }
+      ],
+      "gates": [
+        {
+          "id": "a10-g1",
+          "cells": [
+            {
+              "x": 6,
+              "y": 1
+            },
+            {
+              "x": 6,
+              "y": 2
+            },
+            {
+              "x": 6,
+              "y": 3
+            },
+            {
+              "x": 6,
+              "y": 4
+            },
+            {
+              "x": 6,
+              "y": 5
+            }
+          ],
+          "targets": [
+            "a10-t1",
+            "a10-t2"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a10-s1",
+          "x": 3,
+          "y": 3,
+          "kind": "star"
+        },
+        {
+          "id": "a10-s2",
+          "x": 8,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a10-s3",
+          "x": 8,
+          "y": 5,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a10-c1",
+          "x": 7,
+          "y": 3
+        }
+      ],
+      "parShots": 2,
+      "hint": "上下各有一个信号靶，两个都打亮，中间的大门才会收起。",
+      "explanation": "从下方朝上打一靶，再绕到下方打另一靶，双门一起打开。",
+      "solution": [
+        "0:move:right",
+        "0:move:right",
+        "0:move:left",
+        "0:face:up",
+        "0:fire",
+        "wait:0.50",
+        "0:face:down",
+        "0:fire",
+        "wait:0.50",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:left",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up"
+      ]
+    },
+    {
+      "id": "tank-a11",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 8,
+      "title": "移门与泡泡",
+      "width": 12,
+      "height": 7,
+      "layout": [
+        "############",
+        "#.....#....#",
+        "#..........#",
+        "#..........#",
+        "#.....#....#",
+        "#.....#....#",
+        "############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 3,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 9,
+          "y": 3
+        }
+      ],
+      "targets": [
+        {
+          "id": "a11-t1",
+          "x": 4,
+          "y": 1
+        }
+      ],
+      "gates": [
+        {
+          "id": "a11-g1",
+          "cells": [
+            {
+              "x": 8,
+              "y": 1
+            },
+            {
+              "x": 8,
+              "y": 2
+            },
+            {
+              "x": 8,
+              "y": 3
+            },
+            {
+              "x": 8,
+              "y": 4
+            },
+            {
+              "x": 8,
+              "y": 5
+            }
+          ],
+          "targets": [
+            "a11-t1"
+          ]
+        }
+      ],
+      "movers": [
+        {
+          "id": "a11-m1",
+          "path": [
+            {
+              "x": 6,
+              "y": 2
+            },
+            {
+              "x": 6,
+              "y": 3
+            }
+          ],
+          "stepSeconds": 1.6,
+          "phase": 0.0
+        }
+      ],
+      "emitters": [
+        {
+          "id": "a11-e1",
+          "x": 9,
+          "y": 0,
+          "dir": "down",
+          "period": 2.1,
+          "phase": 0.5,
+          "speed": 8.0,
+          "disableByTarget": "a11-t1"
+        }
+      ],
+      "pickups": [
+        {
+          "id": "a11-s1",
+          "x": 2,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a11-s2",
+          "x": 7,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a11-s3",
+          "x": 10,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a11-s4",
+          "x": 10,
+          "y": 4,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a11-c1",
+          "x": 7,
+          "y": 4
+        }
+      ],
+      "parShots": 1,
+      "hint": "先打亮左边的信号靶，泡泡发射器会停；再等移动纸门让出下面的格子。",
+      "explanation": "信号靶先关掉发射器，移动纸门再按固定节拍让出通道，就能安全通过两道机关。",
+      "solution": [
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.55",
+        "0:move:right",
+        "wait:1.75",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:down",
+        "0:move:down",
+        "0:move:left"
+      ]
+    },
+    {
+      "id": "tank-a12",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 8,
+      "title": "走廊上的双终点",
+      "width": 12,
+      "height": 8,
+      "layout": [
+        "############",
+        "#....#.....#",
+        "#....#.....#",
+        "#..........#",
+        "#....#.....#",
+        "#....#.....#",
+        "#..........#",
+        "############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 6,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 10,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 6
+        }
+      ],
+      "targets": [
+        {
+          "id": "a12-t1",
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "gates": [
+        {
+          "id": "a12-g1",
+          "cells": [
+            {
+              "x": 5,
+              "y": 3
+            }
+          ],
+          "targets": [
+            "a12-t1"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a12-s1",
+          "x": 2,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a12-s2",
+          "x": 7,
+          "y": 3,
+          "kind": "star"
+        },
+        {
+          "id": "a12-s3",
+          "x": 9,
+          "y": 5,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a12-c1",
+          "x": 6,
+          "y": 3
+        }
+      ],
+      "parShots": 1,
+      "hint": "信号靶在左边走廊，打亮它才能穿过中间的小门。",
+      "explanation": "穿过中间门后先上高塔，再回到下面点亮第二座终点。",
+      "solution": [
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:down",
+        "0:face:right",
+        "0:fire",
+        "wait:0.55",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:left",
+        "0:move:down",
+        "0:move:right"
+      ]
+    },
+    {
+      "id": "tank-a13",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 8,
+      "title": "双门双终点",
+      "width": 12,
+      "height": 7,
+      "layout": [
+        "############",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 3,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 10,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 5
+        }
+      ],
+      "targets": [
+        {
+          "id": "a13-t1",
+          "x": 2,
+          "y": 1
+        },
+        {
+          "id": "a13-t2",
+          "x": 6,
+          "y": 5
+        }
+      ],
+      "gates": [
+        {
+          "id": "a13-g1",
+          "cells": [
+            {
+              "x": 4,
+              "y": 1
+            },
+            {
+              "x": 4,
+              "y": 2
+            },
+            {
+              "x": 4,
+              "y": 3
+            },
+            {
+              "x": 4,
+              "y": 4
+            },
+            {
+              "x": 4,
+              "y": 5
+            }
+          ],
+          "targets": [
+            "a13-t1"
+          ]
+        },
+        {
+          "id": "a13-g2",
+          "cells": [
+            {
+              "x": 8,
+              "y": 1
+            },
+            {
+              "x": 8,
+              "y": 2
+            },
+            {
+              "x": 8,
+              "y": 3
+            },
+            {
+              "x": 8,
+              "y": 4
+            },
+            {
+              "x": 8,
+              "y": 5
+            }
+          ],
+          "targets": [
+            "a13-t2"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a13-s1",
+          "x": 3,
+          "y": 5,
+          "kind": "star"
+        },
+        {
+          "id": "a13-s2",
+          "x": 6,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a13-s3",
+          "x": 10,
+          "y": 3,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a13-c1",
+          "x": 7,
+          "y": 3
+        }
+      ],
+      "parShots": 2,
+      "hint": "第一个靶开左边的门，第二个靶开右边的门，两个终点都要亮。",
+      "explanation": "沿着两扇信号门一路向右，再把上下两个终点都踩亮。",
+      "solution": [
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:left",
+        "0:face:up",
+        "0:fire",
+        "wait:0.50",
+        "0:move:right",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:face:down",
+        "0:fire",
+        "wait:0.50",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a14",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 9,
+      "title": "泡泡走廊",
+      "width": 12,
+      "height": 8,
+      "layout": [
+        "############",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 4,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 10,
+          "y": 4
+        }
+      ],
+      "targets": [
+        {
+          "id": "a14-t1",
+          "x": 3,
+          "y": 1
+        },
+        {
+          "id": "a14-t2",
+          "x": 7,
+          "y": 3
+        }
+      ],
+      "gates": [
+        {
+          "id": "a14-g1",
+          "cells": [
+            {
+              "x": 6,
+              "y": 1
+            },
+            {
+              "x": 6,
+              "y": 2
+            },
+            {
+              "x": 6,
+              "y": 3
+            },
+            {
+              "x": 6,
+              "y": 4
+            },
+            {
+              "x": 6,
+              "y": 5
+            },
+            {
+              "x": 6,
+              "y": 6
+            }
+          ],
+          "targets": [
+            "a14-t1"
+          ]
+        },
+        {
+          "id": "a14-g2",
+          "cells": [
+            {
+              "x": 9,
+              "y": 1
+            },
+            {
+              "x": 9,
+              "y": 2
+            },
+            {
+              "x": 9,
+              "y": 3
+            },
+            {
+              "x": 9,
+              "y": 4
+            },
+            {
+              "x": 9,
+              "y": 5
+            },
+            {
+              "x": 9,
+              "y": 6
+            }
+          ],
+          "targets": [
+            "a14-t2"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [
+        {
+          "id": "a14-e1",
+          "x": 5,
+          "y": 0,
+          "dir": "down",
+          "period": 1.8,
+          "phase": 0.4,
+          "speed": 8.0,
+          "disableByTarget": "a14-t1"
+        },
+        {
+          "id": "a14-e2",
+          "x": 5,
+          "y": 7,
+          "dir": "up",
+          "period": 1.8,
+          "phase": 1.3,
+          "speed": 8.0,
+          "disableByTarget": "a14-t1"
+        }
+      ],
+      "pickups": [
+        {
+          "id": "a14-s1",
+          "x": 2,
+          "y": 3,
+          "kind": "star"
+        },
+        {
+          "id": "a14-s2",
+          "x": 7,
+          "y": 4,
+          "kind": "star"
+        },
+        {
+          "id": "a14-s3",
+          "x": 10,
+          "y": 2,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a14-c1",
+          "x": 8,
+          "y": 4
+        }
+      ],
+      "parShots": 2,
+      "hint": "两枚信号靶分别关掉上下两个泡泡发射器，再打开两道门。",
+      "explanation": "先打左上靶，停住泡泡；穿过后再打中段靶，打开最后一道门。",
+      "solution": [
+        "0:move:up",
+        "0:move:right",
+        "0:move:up",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.55",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.55",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a15",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 9,
+      "title": "移动长廊",
+      "width": 13,
+      "height": 7,
+      "layout": [
+        "#############",
+        "#...#...#...#",
+        "#.......#...#",
+        "#.......#...#",
+        "#...#.......#",
+        "#...#.......#",
+        "#############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 3,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 11,
+          "y": 3
+        }
+      ],
+      "targets": [],
+      "gates": [],
+      "movers": [
+        {
+          "id": "a15-m1",
+          "path": [
+            {
+              "x": 4,
+              "y": 2
+            },
+            {
+              "x": 4,
+              "y": 3
+            }
+          ],
+          "stepSeconds": 1.5,
+          "phase": 0.0
+        },
+        {
+          "id": "a15-m2",
+          "path": [
+            {
+              "x": 8,
+              "y": 4
+            },
+            {
+              "x": 8,
+              "y": 5
+            }
+          ],
+          "stepSeconds": 1.9,
+          "phase": 0.7
+        }
+      ],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a15-s1",
+          "x": 3,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a15-s2",
+          "x": 6,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a15-s3",
+          "x": 10,
+          "y": 5,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a15-c1",
+          "x": 5,
+          "y": 2
+        },
+        {
+          "id": "a15-c2",
+          "x": 9,
+          "y": 4
+        }
+      ],
+      "parShots": 0,
+      "hint": "两次都要在移动纸门让出通道时通过，先看它停在哪一格。",
+      "explanation": "两道移动纸门按各自的固定节拍开合，耐心等一会儿就能穿过。",
+      "solution": [
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "wait:1.55",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "wait:0.80",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right"
+      ]
+    },
+    {
+      "id": "tank-a16",
+      "mode": "adventure",
+      "band": "normal",
+      "minAge": 9,
+      "title": "大练兵迷宫",
+      "width": 13,
+      "height": 8,
+      "layout": [
+        "#############",
+        "#...........#",
+        "#..###.###..#",
+        "#...........#",
+        "#.###...###.#",
+        "#...........#",
+        "#..###.###..#",
+        "#############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 1,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 11,
+          "y": 1
+        },
+        {
+          "x": 11,
+          "y": 6
+        }
+      ],
+      "targets": [
+        {
+          "id": "a16-t1",
+          "x": 3,
+          "y": 3
+        }
+      ],
+      "gates": [
+        {
+          "id": "a16-g1",
+          "cells": [
+            {
+              "x": 6,
+              "y": 1
+            },
+            {
+              "x": 6,
+              "y": 2
+            },
+            {
+              "x": 6,
+              "y": 3
+            },
+            {
+              "x": 6,
+              "y": 4
+            },
+            {
+              "x": 6,
+              "y": 5
+            },
+            {
+              "x": 6,
+              "y": 6
+            }
+          ],
+          "targets": [
+            "a16-t1"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a16-s1",
+          "x": 2,
+          "y": 6,
+          "kind": "star"
+        },
+        {
+          "id": "a16-s2",
+          "x": 4,
+          "y": 3,
+          "kind": "star"
+        },
+        {
+          "id": "a16-s3",
+          "x": 10,
+          "y": 3,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a16-c1",
+          "x": 10,
+          "y": 6
+        }
+      ],
+      "parShots": 1,
+      "hint": "信号靶在中央走廊的侧面，先把它打亮，再穿过中央门。",
+      "explanation": "从下方绕进中央走廊，打亮信号靶，穿过大门点亮两座终点。",
+      "solution": [
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:up",
+        "0:move:left",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:face:right",
+        "0:fire",
+        "wait:0.55",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:left",
+        "0:move:left",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a17",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "三段信号",
+      "width": 13,
+      "height": 7,
+      "layout": [
+        "#############",
+        "#...........#",
+        "#...........#",
+        "#...........#",
+        "#...........#",
+        "#...........#",
+        "#############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 3,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 11,
+          "y": 3
+        }
+      ],
+      "targets": [
+        {
+          "id": "a17-t1",
+          "x": 2,
+          "y": 5
+        },
+        {
+          "id": "a17-t2",
+          "x": 5,
+          "y": 1
+        },
+        {
+          "id": "a17-t3",
+          "x": 8,
+          "y": 5
+        }
+      ],
+      "gates": [
+        {
+          "id": "a17-g1",
+          "cells": [
+            {
+              "x": 3,
+              "y": 1
+            },
+            {
+              "x": 3,
+              "y": 2
+            },
+            {
+              "x": 3,
+              "y": 3
+            },
+            {
+              "x": 3,
+              "y": 4
+            },
+            {
+              "x": 3,
+              "y": 5
+            }
+          ],
+          "targets": [
+            "a17-t1"
+          ]
+        },
+        {
+          "id": "a17-g2",
+          "cells": [
+            {
+              "x": 6,
+              "y": 1
+            },
+            {
+              "x": 6,
+              "y": 2
+            },
+            {
+              "x": 6,
+              "y": 3
+            },
+            {
+              "x": 6,
+              "y": 4
+            },
+            {
+              "x": 6,
+              "y": 5
+            }
+          ],
+          "targets": [
+            "a17-t2"
+          ]
+        },
+        {
+          "id": "a17-g3",
+          "cells": [
+            {
+              "x": 9,
+              "y": 1
+            },
+            {
+              "x": 9,
+              "y": 2
+            },
+            {
+              "x": 9,
+              "y": 3
+            },
+            {
+              "x": 9,
+              "y": 4
+            },
+            {
+              "x": 9,
+              "y": 5
+            }
+          ],
+          "targets": [
+            "a17-t3"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a17-s1",
+          "x": 2,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a17-s2",
+          "x": 4,
+          "y": 5,
+          "kind": "star"
+        },
+        {
+          "id": "a17-s3",
+          "x": 7,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a17-s4",
+          "x": 11,
+          "y": 1,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a17-c1",
+          "x": 10,
+          "y": 3
+        }
+      ],
+      "parShots": 3,
+      "hint": "三枚信号靶各开一道门，按顺序打亮它们。",
+      "explanation": "依次打亮三枚信号靶，三道信号门会一起让出通道。",
+      "solution": [
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:face:down",
+        "0:fire",
+        "wait:0.45",
+        "0:move:right",
+        "0:move:down",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.45",
+        "0:move:right",
+        "0:move:up",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:face:down",
+        "0:fire",
+        "wait:0.45",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a18",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "双塔泡泡阵",
+      "width": 13,
+      "height": 8,
+      "layout": [
+        "#############",
+        "#...........#",
+        "#...........#",
+        "#...........#",
+        "#...........#",
+        "#...........#",
+        "#...........#",
+        "#############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 1,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 11,
+          "y": 1
+        },
+        {
+          "x": 11,
+          "y": 6
+        }
+      ],
+      "targets": [
+        {
+          "id": "a18-t1",
+          "x": 4,
+          "y": 1
+        },
+        {
+          "id": "a18-t2",
+          "x": 8,
+          "y": 6
+        }
+      ],
+      "gates": [
+        {
+          "id": "a18-g1",
+          "cells": [
+            {
+              "x": 5,
+              "y": 1
+            },
+            {
+              "x": 5,
+              "y": 2
+            },
+            {
+              "x": 5,
+              "y": 3
+            },
+            {
+              "x": 5,
+              "y": 4
+            },
+            {
+              "x": 5,
+              "y": 5
+            },
+            {
+              "x": 5,
+              "y": 6
+            }
+          ],
+          "targets": [
+            "a18-t1"
+          ]
+        },
+        {
+          "id": "a18-g2",
+          "cells": [
+            {
+              "x": 9,
+              "y": 1
+            },
+            {
+              "x": 9,
+              "y": 2
+            },
+            {
+              "x": 9,
+              "y": 3
+            },
+            {
+              "x": 9,
+              "y": 4
+            },
+            {
+              "x": 9,
+              "y": 5
+            },
+            {
+              "x": 9,
+              "y": 6
+            }
+          ],
+          "targets": [
+            "a18-t2"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [
+        {
+          "id": "a18-e1",
+          "x": 10,
+          "y": 0,
+          "dir": "down",
+          "period": 1.7,
+          "phase": 0.5,
+          "speed": 8.0,
+          "disableByTarget": "a18-t2"
+        }
+      ],
+      "pickups": [
+        {
+          "id": "a18-s1",
+          "x": 2,
+          "y": 6,
+          "kind": "star"
+        },
+        {
+          "id": "a18-s2",
+          "x": 6,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a18-s3",
+          "x": 11,
+          "y": 4,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a18-c1",
+          "x": 6,
+          "y": 5
+        },
+        {
+          "id": "a18-c2",
+          "x": 10,
+          "y": 3
+        }
+      ],
+      "parShots": 2,
+      "hint": "第二枚信号靶会关掉高塔上的泡泡发射器，先绕到它下面。",
+      "explanation": "先开第一道门，再打亮第二靶让发射器停火，最后点亮两座终点。",
+      "solution": [
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.45",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:face:down",
+        "0:fire",
+        "wait:0.45",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a19",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "双层移动门",
+      "width": 13,
+      "height": 8,
+      "layout": [
+        "#############",
+        "#....#..#...#",
+        "#.......#...#",
+        "#.......#...#",
+        "#....#......#",
+        "#....#......#",
+        "#....#..#...#",
+        "#############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 4,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 11,
+          "y": 2
+        },
+        {
+          "x": 11,
+          "y": 6
+        }
+      ],
+      "targets": [
+        {
+          "id": "a19-t1",
+          "x": 2,
+          "y": 1
+        },
+        {
+          "id": "a19-t2",
+          "x": 9,
+          "y": 5
+        }
+      ],
+      "gates": [
+        {
+          "id": "a19-g1",
+          "cells": [
+            {
+              "x": 10,
+              "y": 1
+            },
+            {
+              "x": 10,
+              "y": 2
+            },
+            {
+              "x": 10,
+              "y": 3
+            },
+            {
+              "x": 10,
+              "y": 4
+            },
+            {
+              "x": 10,
+              "y": 5
+            },
+            {
+              "x": 10,
+              "y": 6
+            }
+          ],
+          "targets": [
+            "a19-t2"
+          ]
+        }
+      ],
+      "movers": [
+        {
+          "id": "a19-m1",
+          "path": [
+            {
+              "x": 5,
+              "y": 2
+            },
+            {
+              "x": 5,
+              "y": 3
+            }
+          ],
+          "stepSeconds": 1.5,
+          "phase": 0.0
+        },
+        {
+          "id": "a19-m2",
+          "path": [
+            {
+              "x": 8,
+              "y": 4
+            },
+            {
+              "x": 8,
+              "y": 5
+            }
+          ],
+          "stepSeconds": 1.8,
+          "phase": 0.4
+        }
+      ],
+      "emitters": [
+        {
+          "id": "a19-e1",
+          "x": 6,
+          "y": 0,
+          "dir": "down",
+          "period": 1.9,
+          "phase": 0.6,
+          "speed": 8.0,
+          "disableByTarget": "a19-t1"
+        },
+        {
+          "id": "a19-e2",
+          "x": 6,
+          "y": 7,
+          "dir": "up",
+          "period": 1.9,
+          "phase": 1.4,
+          "speed": 8.0,
+          "disableByTarget": "a19-t1"
+        }
+      ],
+      "pickups": [
+        {
+          "id": "a19-s1",
+          "x": 3,
+          "y": 3,
+          "kind": "star"
+        },
+        {
+          "id": "a19-s2",
+          "x": 6,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a19-s3",
+          "x": 9,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a19-s4",
+          "x": 11,
+          "y": 4,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a19-c1",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "id": "a19-c2",
+          "x": 9,
+          "y": 4
+        }
+      ],
+      "parShots": 2,
+      "hint": "先打亮左上信号靶，停掉两座泡泡发射器；两道移动门要按各自的节拍通过。",
+      "explanation": "信号靶停止发射器，移动门再按固定节拍让路，最后打亮第二靶打开最终大门。",
+      "solution": [
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:left",
+        "0:face:up",
+        "0:fire",
+        "wait:0.45",
+        "0:move:right",
+        "0:move:right",
+        "wait:1.55",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "wait:0.80",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:face:down",
+        "0:fire",
+        "wait:0.45",
+        "0:move:up",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a20",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "双门节拍",
+      "width": 13,
+      "height": 7,
+      "layout": [
+        "#############",
+        "#...#...#...#",
+        "#.......#...#",
+        "#...........#",
+        "#...#.......#",
+        "#...#...#...#",
+        "#############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 3,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 11,
+          "y": 1
+        },
+        {
+          "x": 11,
+          "y": 5
+        }
+      ],
+      "targets": [],
+      "gates": [],
+      "movers": [
+        {
+          "id": "a20-m1",
+          "path": [
+            {
+              "x": 4,
+              "y": 2
+            },
+            {
+              "x": 4,
+              "y": 3
+            }
+          ],
+          "stepSeconds": 1.4,
+          "phase": 0.0
+        },
+        {
+          "id": "a20-m2",
+          "path": [
+            {
+              "x": 8,
+              "y": 3
+            },
+            {
+              "x": 8,
+              "y": 4
+            }
+          ],
+          "stepSeconds": 1.7,
+          "phase": 0.3
+        }
+      ],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a20-s1",
+          "x": 2,
+          "y": 5,
+          "kind": "star"
+        },
+        {
+          "id": "a20-s2",
+          "x": 6,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a20-s3",
+          "x": 9,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a20-s4",
+          "x": 11,
+          "y": 3,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a20-c1",
+          "x": 6,
+          "y": 3
+        },
+        {
+          "id": "a20-c2",
+          "x": 9,
+          "y": 3
+        }
+      ],
+      "parShots": 0,
+      "hint": "两道移动纸门一前一后，先观察哪一格的纸门让开。",
+      "explanation": "按固定节拍穿过两道移动门，再依次点亮两个终点。",
+      "solution": [
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "wait:1.45",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:right",
+        "wait:1.55",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a21",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "大城堡信号网",
+      "width": 14,
+      "height": 10,
+      "layout": [
+        "##############",
+        "#............#",
+        "#.##.##.##...#",
+        "#............#",
+        "#.##.##.##...#",
+        "#............#",
+        "#.##.##.##...#",
+        "#............#",
+        "#............#",
+        "##############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 1,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 12,
+          "y": 1
+        },
+        {
+          "x": 12,
+          "y": 8
+        }
+      ],
+      "targets": [
+        {
+          "id": "a21-t1",
+          "x": 4,
+          "y": 1
+        },
+        {
+          "id": "a21-t2",
+          "x": 10,
+          "y": 7
+        }
+      ],
+      "gates": [
+        {
+          "id": "a21-g1",
+          "cells": [
+            {
+              "x": 7,
+              "y": 1
+            },
+            {
+              "x": 7,
+              "y": 2
+            },
+            {
+              "x": 7,
+              "y": 3
+            },
+            {
+              "x": 7,
+              "y": 4
+            },
+            {
+              "x": 7,
+              "y": 5
+            },
+            {
+              "x": 7,
+              "y": 6
+            },
+            {
+              "x": 7,
+              "y": 7
+            },
+            {
+              "x": 7,
+              "y": 8
+            }
+          ],
+          "targets": [
+            "a21-t1"
+          ]
+        },
+        {
+          "id": "a21-g2",
+          "cells": [
+            {
+              "x": 11,
+              "y": 1
+            },
+            {
+              "x": 11,
+              "y": 2
+            },
+            {
+              "x": 11,
+              "y": 3
+            },
+            {
+              "x": 11,
+              "y": 4
+            },
+            {
+              "x": 11,
+              "y": 5
+            },
+            {
+              "x": 11,
+              "y": 6
+            },
+            {
+              "x": 11,
+              "y": 7
+            }
+          ],
+          "targets": [
+            "a21-t2"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [
+        {
+          "id": "a21-e1",
+          "x": 10,
+          "y": 0,
+          "dir": "down",
+          "period": 1.6,
+          "phase": 0.4,
+          "speed": 8.0,
+          "disableByTarget": "a21-t1"
+        }
+      ],
+      "pickups": [
+        {
+          "id": "a21-s1",
+          "x": 2,
+          "y": 8,
+          "kind": "star"
+        },
+        {
+          "id": "a21-s2",
+          "x": 4,
+          "y": 4,
+          "kind": "star"
+        },
+        {
+          "id": "a21-s3",
+          "x": 9,
+          "y": 3,
+          "kind": "star"
+        },
+        {
+          "id": "a21-s4",
+          "x": 12,
+          "y": 4,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a21-c1",
+          "x": 5,
+          "y": 1
+        },
+        {
+          "id": "a21-c2",
+          "x": 10,
+          "y": 4
+        }
+      ],
+      "parShots": 2,
+      "hint": "大城堡里有两道信号门：先打左上靶，穿过中门再打右下靶。",
+      "explanation": "两枚信号靶依次打开大城堡的两道门，最后沿右侧点亮上下终点。",
+      "solution": [
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:face:up",
+        "0:fire",
+        "wait:0.45",
+        "0:move:down",
+        "0:move:down",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:left",
+        "0:move:left",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:left",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:face:down",
+        "0:fire",
+        "wait:0.45",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a22",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 11,
+      "title": "节拍回廊",
+      "width": 14,
+      "height": 8,
+      "layout": [
+        "##############",
+        "#...#..#..#..#",
+        "#......#.....#",
+        "#......#.....#",
+        "#...#.....#..#",
+        "#...#.....#..#",
+        "#...#..#..#..#",
+        "##############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 4,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 12,
+          "y": 4
+        }
+      ],
+      "targets": [],
+      "gates": [],
+      "movers": [
+        {
+          "id": "a22-m1",
+          "path": [
+            {
+              "x": 4,
+              "y": 2
+            },
+            {
+              "x": 4,
+              "y": 3
+            }
+          ],
+          "stepSeconds": 1.4,
+          "phase": 0.0
+        },
+        {
+          "id": "a22-m2",
+          "path": [
+            {
+              "x": 7,
+              "y": 4
+            },
+            {
+              "x": 7,
+              "y": 5
+            }
+          ],
+          "stepSeconds": 1.7,
+          "phase": 0.3
+        },
+        {
+          "id": "a22-m3",
+          "path": [
+            {
+              "x": 10,
+              "y": 2
+            },
+            {
+              "x": 10,
+              "y": 3
+            }
+          ],
+          "stepSeconds": 1.5,
+          "phase": 0.6
+        }
+      ],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "a22-s1",
+          "x": 2,
+          "y": 6,
+          "kind": "star"
+        },
+        {
+          "id": "a22-s2",
+          "x": 5,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a22-s3",
+          "x": 8,
+          "y": 4,
+          "kind": "star"
+        },
+        {
+          "id": "a22-s4",
+          "x": 11,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a22-s5",
+          "x": 12,
+          "y": 1,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a22-c1",
+          "x": 5,
+          "y": 4
+        },
+        {
+          "id": "a22-c2",
+          "x": 8,
+          "y": 5
+        },
+        {
+          "id": "a22-c3",
+          "x": 11,
+          "y": 4
+        }
+      ],
+      "parShots": 0,
+      "hint": "三道移动门各按自己的节拍移动，别急着冲过去。",
+      "explanation": "三次耐心等待，移动门让路后依次收集星徽并到终点。",
+      "solution": [
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "wait:1.45",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "wait:1.55",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "wait:1.55",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a23",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "全能训练",
+      "width": 14,
+      "height": 9,
+      "layout": [
+        "##############",
+        "#...#........#",
+        "#...#........#",
+        "#............#",
+        "#............#",
+        "#...#........#",
+        "#...#........#",
+        "#...#........#",
+        "##############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 4,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 12,
+          "y": 1
+        },
+        {
+          "x": 12,
+          "y": 7
+        }
+      ],
+      "targets": [
+        {
+          "id": "a23-t1",
+          "x": 3,
+          "y": 1
+        },
+        {
+          "id": "a23-t2",
+          "x": 9,
+          "y": 6
+        }
+      ],
+      "gates": [
+        {
+          "id": "a23-g1",
+          "cells": [
+            {
+              "x": 7,
+              "y": 1
+            },
+            {
+              "x": 7,
+              "y": 2
+            },
+            {
+              "x": 7,
+              "y": 3
+            },
+            {
+              "x": 7,
+              "y": 4
+            },
+            {
+              "x": 7,
+              "y": 5
+            },
+            {
+              "x": 7,
+              "y": 6
+            },
+            {
+              "x": 7,
+              "y": 7
+            }
+          ],
+          "targets": [
+            "a23-t1"
+          ]
+        },
+        {
+          "id": "a23-g2",
+          "cells": [
+            {
+              "x": 10,
+              "y": 1
+            },
+            {
+              "x": 10,
+              "y": 2
+            },
+            {
+              "x": 10,
+              "y": 3
+            },
+            {
+              "x": 10,
+              "y": 4
+            },
+            {
+              "x": 10,
+              "y": 5
+            },
+            {
+              "x": 10,
+              "y": 6
+            },
+            {
+              "x": 10,
+              "y": 7
+            }
+          ],
+          "targets": [
+            "a23-t2"
+          ]
+        }
+      ],
+      "movers": [
+        {
+          "id": "a23-m1",
+          "path": [
+            {
+              "x": 4,
+              "y": 3
+            },
+            {
+              "x": 4,
+              "y": 4
+            }
+          ],
+          "stepSeconds": 1.5,
+          "phase": 0.0
+        }
+      ],
+      "emitters": [
+        {
+          "id": "a23-e1",
+          "x": 5,
+          "y": 0,
+          "dir": "down",
+          "period": 1.8,
+          "phase": 0.5,
+          "speed": 8.0,
+          "disableByTarget": "a23-t1"
+        },
+        {
+          "id": "a23-e2",
+          "x": 11,
+          "y": 0,
+          "dir": "down",
+          "period": 1.5,
+          "phase": 0.2,
+          "speed": 8.0,
+          "disableByTarget": "a23-t2"
+        }
+      ],
+      "pickups": [
+        {
+          "id": "a23-s1",
+          "x": 2,
+          "y": 6,
+          "kind": "star"
+        },
+        {
+          "id": "a23-s2",
+          "x": 5,
+          "y": 3,
+          "kind": "star"
+        },
+        {
+          "id": "a23-s3",
+          "x": 8,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a23-s4",
+          "x": 11,
+          "y": 4,
+          "kind": "star"
+        },
+        {
+          "id": "a23-s5",
+          "x": 12,
+          "y": 4,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a23-c1",
+          "x": 5,
+          "y": 4
+        },
+        {
+          "id": "a23-c2",
+          "x": 8,
+          "y": 4
+        },
+        {
+          "id": "a23-c3",
+          "x": 11,
+          "y": 3
+        }
+      ],
+      "parShots": 2,
+      "hint": "先停掉第一座泡泡发射器，再穿过移动门，打亮第二靶打开最后大门。",
+      "explanation": "信号靶、移动门和泡泡发射器一起合作，按顺序解决就能点亮两个终点。",
+      "solution": [
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.45",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "wait:1.55",
+        "0:move:up",
+        "0:move:right",
+        "0:move:down",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:face:down",
+        "0:fire",
+        "wait:0.45",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-a24",
+      "mode": "adventure",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "最后堡垒",
+      "width": 14,
+      "height": 10,
+      "layout": [
+        "##############",
+        "#............#",
+        "#.##.........#",
+        "#............#",
+        "#.##...##....#",
+        "#............#",
+        "#.##...##....#",
+        "#............#",
+        "#............#",
+        "##############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 7,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 12,
+          "y": 1
+        },
+        {
+          "x": 12,
+          "y": 8
+        }
+      ],
+      "targets": [
+        {
+          "id": "a24-t1",
+          "x": 3,
+          "y": 3
+        },
+        {
+          "id": "a24-t2",
+          "x": 9,
+          "y": 5
+        }
+      ],
+      "gates": [
+        {
+          "id": "a24-g1",
+          "cells": [
+            {
+              "x": 5,
+              "y": 1
+            },
+            {
+              "x": 5,
+              "y": 2
+            },
+            {
+              "x": 5,
+              "y": 3
+            },
+            {
+              "x": 5,
+              "y": 4
+            },
+            {
+              "x": 5,
+              "y": 5
+            },
+            {
+              "x": 5,
+              "y": 6
+            },
+            {
+              "x": 5,
+              "y": 7
+            },
+            {
+              "x": 5,
+              "y": 8
+            }
+          ],
+          "targets": [
+            "a24-t1"
+          ]
+        },
+        {
+          "id": "a24-g2",
+          "cells": [
+            {
+              "x": 11,
+              "y": 1
+            },
+            {
+              "x": 11,
+              "y": 2
+            },
+            {
+              "x": 11,
+              "y": 3
+            },
+            {
+              "x": 11,
+              "y": 4
+            },
+            {
+              "x": 11,
+              "y": 5
+            },
+            {
+              "x": 11,
+              "y": 6
+            },
+            {
+              "x": 11,
+              "y": 7
+            },
+            {
+              "x": 11,
+              "y": 8
+            }
+          ],
+          "targets": [
+            "a24-t2"
+          ]
+        }
+      ],
+      "movers": [
+        {
+          "id": "a24-m1",
+          "path": [
+            {
+              "x": 7,
+              "y": 1
+            },
+            {
+              "x": 7,
+              "y": 2
+            }
+          ],
+          "stepSeconds": 1.5,
+          "phase": 0.1
+        }
+      ],
+      "emitters": [
+        {
+          "id": "a24-e1",
+          "x": 6,
+          "y": 0,
+          "dir": "down",
+          "period": 1.7,
+          "phase": 0.3,
+          "speed": 8.0,
+          "disableByTarget": "a24-t1"
+        },
+        {
+          "id": "a24-e2",
+          "x": 11,
+          "y": 0,
+          "dir": "down",
+          "period": 1.9,
+          "phase": 0.8,
+          "speed": 8.0,
+          "disableByTarget": "a24-t2"
+        }
+      ],
+      "pickups": [
+        {
+          "id": "a24-s1",
+          "x": 2,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "a24-s2",
+          "x": 4,
+          "y": 8,
+          "kind": "star"
+        },
+        {
+          "id": "a24-s3",
+          "x": 7,
+          "y": 3,
+          "kind": "star"
+        },
+        {
+          "id": "a24-s4",
+          "x": 10,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "a24-s5",
+          "x": 12,
+          "y": 5,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "a24-c1",
+          "x": 4,
+          "y": 3
+        },
+        {
+          "id": "a24-c2",
+          "x": 8,
+          "y": 7
+        },
+        {
+          "id": "a24-c3",
+          "x": 12,
+          "y": 7
+        }
+      ],
+      "parShots": 2,
+      "hint": "最后堡垒有两道信号门，先打左靶，再从下方绕到右靶。",
+      "explanation": "按顺序打亮两枚信号靶，穿过两道门，把最后的星徽和终点全部点亮。",
+      "solution": [
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:left",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:face:right",
+        "0:fire",
+        "wait:0.45",
+        "0:move:left",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:left",
+        "0:move:left",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:face:right",
+        "0:fire",
+        "wait:0.45",
+        "0:move:left",
+        "0:move:left",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down"
+      ]
+    },
+    {
+      "id": "tank-c01",
+      "mode": "classic",
+      "band": "easy",
+      "minAge": 5,
+      "title": "并肩出发",
+      "width": 12,
+      "height": 6,
+      "layout": [
+        "############",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 2,
+          "dir": "right"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 10,
+          "y": 2
+        },
+        {
+          "x": 10,
+          "y": 4
+        }
+      ],
+      "targets": [],
+      "gates": [],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "c01-s1",
+          "x": 4,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "c01-s2",
+          "x": 7,
+          "y": 3,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "c01-c1",
+          "x": 6,
+          "y": 3
+        }
+      ],
+      "parShots": 0,
+      "hint": "两位小朋友各开一辆坦克，一人点亮一个终点。",
+      "explanation": "左边的小坦克走上路，右边的小坦克走下路，共享同一张地图的进度。",
+      "solution": [
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:down",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right"
+      ]
+    },
+    {
+      "id": "tank-c02",
+      "mode": "classic",
+      "band": "easy",
+      "minAge": 6,
+      "title": "一人打靶一人掩护",
+      "width": 12,
+      "height": 6,
+      "layout": [
+        "############",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 1,
+          "dir": "right"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 10,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 4
+        }
+      ],
+      "targets": [
+        {
+          "id": "c02-t1",
+          "x": 4,
+          "y": 1
+        }
+      ],
+      "gates": [
+        {
+          "id": "c02-g1",
+          "cells": [
+            {
+              "x": 6,
+              "y": 1
+            },
+            {
+              "x": 6,
+              "y": 2
+            },
+            {
+              "x": 6,
+              "y": 3
+            },
+            {
+              "x": 6,
+              "y": 4
+            }
+          ],
+          "targets": [
+            "c02-t1"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "c02-s1",
+          "x": 2,
+          "y": 4,
+          "kind": "star"
+        },
+        {
+          "id": "c02-s2",
+          "x": 8,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "c02-s3",
+          "x": 8,
+          "y": 4,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "c02-c1",
+          "x": 7,
+          "y": 2
+        }
+      ],
+      "parShots": 1,
+      "hint": "左边的小朋友先打亮信号靶，右边的小朋友可以先收集星徽。",
+      "explanation": "两位小朋友分工合作，一个开门，一个收集星徽，再一起点亮终点。",
+      "solution": [
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.45",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right"
+      ]
+    },
+    {
+      "id": "tank-c03",
+      "mode": "classic",
+      "band": "normal",
+      "minAge": 8,
+      "title": "两道门两队人",
+      "width": 12,
+      "height": 7,
+      "layout": [
+        "############",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 1,
+          "dir": "right"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 10,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 5
+        }
+      ],
+      "targets": [
+        {
+          "id": "c03-t1",
+          "x": 3,
+          "y": 1
+        },
+        {
+          "id": "c03-t2",
+          "x": 7,
+          "y": 5
+        }
+      ],
+      "gates": [
+        {
+          "id": "c03-g1",
+          "cells": [
+            {
+              "x": 5,
+              "y": 1
+            },
+            {
+              "x": 5,
+              "y": 2
+            },
+            {
+              "x": 5,
+              "y": 3
+            },
+            {
+              "x": 5,
+              "y": 4
+            },
+            {
+              "x": 5,
+              "y": 5
+            }
+          ],
+          "targets": [
+            "c03-t1"
+          ]
+        },
+        {
+          "id": "c03-g2",
+          "cells": [
+            {
+              "x": 9,
+              "y": 1
+            },
+            {
+              "x": 9,
+              "y": 2
+            },
+            {
+              "x": 9,
+              "y": 3
+            },
+            {
+              "x": 9,
+              "y": 4
+            },
+            {
+              "x": 9,
+              "y": 5
+            }
+          ],
+          "targets": [
+            "c03-t2"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "c03-s1",
+          "x": 2,
+          "y": 5,
+          "kind": "star"
+        },
+        {
+          "id": "c03-s2",
+          "x": 6,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "c03-s3",
+          "x": 10,
+          "y": 3,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "c03-c1",
+          "x": 6,
+          "y": 4
+        }
+      ],
+      "parShots": 2,
+      "hint": "每人负责一枚信号靶，然后一起穿过两道门。",
+      "explanation": "两个小朋友各打一枚靶，依次打开两道信号门，最后分别点亮自己的终点。",
+      "solution": [
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.45",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:face:right",
+        "1:fire",
+        "wait:0.45",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "1:move:up",
+        "1:move:up",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:down",
+        "1:move:down"
+      ]
+    },
+    {
+      "id": "tank-c04",
+      "mode": "classic",
+      "band": "normal",
+      "minAge": 9,
+      "title": "上下泡泡岗",
+      "width": 12,
+      "height": 8,
+      "layout": [
+        "############",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "#..........#",
+        "############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 1,
+          "dir": "right"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 10,
+          "y": 1
+        },
+        {
+          "x": 10,
+          "y": 5
+        }
+      ],
+      "targets": [
+        {
+          "id": "c04-t1",
+          "x": 3,
+          "y": 1
+        },
+        {
+          "id": "c04-t2",
+          "x": 7,
+          "y": 5
+        }
+      ],
+      "gates": [
+        {
+          "id": "c04-g1",
+          "cells": [
+            {
+              "x": 5,
+              "y": 1
+            },
+            {
+              "x": 5,
+              "y": 2
+            },
+            {
+              "x": 5,
+              "y": 3
+            },
+            {
+              "x": 5,
+              "y": 4
+            },
+            {
+              "x": 5,
+              "y": 5
+            },
+            {
+              "x": 5,
+              "y": 6
+            }
+          ],
+          "targets": [
+            "c04-t1"
+          ]
+        },
+        {
+          "id": "c04-g2",
+          "cells": [
+            {
+              "x": 9,
+              "y": 1
+            },
+            {
+              "x": 9,
+              "y": 2
+            },
+            {
+              "x": 9,
+              "y": 3
+            },
+            {
+              "x": 9,
+              "y": 4
+            },
+            {
+              "x": 9,
+              "y": 5
+            },
+            {
+              "x": 9,
+              "y": 6
+            }
+          ],
+          "targets": [
+            "c04-t2"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [
+        {
+          "id": "c04-e1",
+          "x": 7,
+          "y": 0,
+          "dir": "down",
+          "period": 1.8,
+          "phase": 0.4,
+          "speed": 8.0,
+          "disableByTarget": "c04-t1"
+        },
+        {
+          "id": "c04-e2",
+          "x": 7,
+          "y": 7,
+          "dir": "up",
+          "period": 1.8,
+          "phase": 1.1,
+          "speed": 8.0,
+          "disableByTarget": "c04-t2"
+        }
+      ],
+      "pickups": [
+        {
+          "id": "c04-s1",
+          "x": 2,
+          "y": 5,
+          "kind": "star"
+        },
+        {
+          "id": "c04-s2",
+          "x": 8,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "c04-s3",
+          "x": 8,
+          "y": 5,
+          "kind": "star"
+        },
+        {
+          "id": "c04-s4",
+          "x": 10,
+          "y": 3,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "c04-c1",
+          "x": 6,
+          "y": 2
+        },
+        {
+          "id": "c04-c2",
+          "x": 8,
+          "y": 4
+        }
+      ],
+      "parShots": 2,
+      "hint": "上面的人打上面的靶，下面的人打下面的靶，各关掉一座发射器。",
+      "explanation": "两位小朋友各守一侧，打掉靶子之后穿过门，最后一起点亮终点。",
+      "solution": [
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.45",
+        "1:move:right",
+        "1:move:up",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:face:down",
+        "1:fire",
+        "wait:0.45",
+        "0:move:right",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "1:move:right",
+        "1:move:down",
+        "1:move:up",
+        "1:move:up",
+        "1:move:right",
+        "1:move:right",
+        "1:move:down",
+        "1:move:down"
+      ]
+    },
+    {
+      "id": "tank-c05",
+      "mode": "classic",
+      "band": "challenge",
+      "minAge": 10,
+      "title": "移动门合作",
+      "width": 13,
+      "height": 7,
+      "layout": [
+        "#############",
+        "#...#....#..#",
+        "#........#..#",
+        "#........#..#",
+        "#...#.......#",
+        "#...#.......#",
+        "#############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 2,
+          "dir": "right"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 11,
+          "y": 2
+        },
+        {
+          "x": 11,
+          "y": 4
+        }
+      ],
+      "targets": [],
+      "gates": [],
+      "movers": [
+        {
+          "id": "c05-m1",
+          "path": [
+            {
+              "x": 4,
+              "y": 2
+            },
+            {
+              "x": 4,
+              "y": 3
+            }
+          ],
+          "stepSeconds": 1.5,
+          "phase": 0.0
+        },
+        {
+          "id": "c05-m2",
+          "path": [
+            {
+              "x": 9,
+              "y": 4
+            },
+            {
+              "x": 9,
+              "y": 5
+            }
+          ],
+          "stepSeconds": 1.8,
+          "phase": 0.5
+        }
+      ],
+      "emitters": [],
+      "pickups": [
+        {
+          "id": "c05-s1",
+          "x": 3,
+          "y": 5,
+          "kind": "star"
+        },
+        {
+          "id": "c05-s2",
+          "x": 7,
+          "y": 3,
+          "kind": "star"
+        },
+        {
+          "id": "c05-s3",
+          "x": 8,
+          "y": 1,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "c05-c1",
+          "x": 5,
+          "y": 2
+        },
+        {
+          "id": "c05-c2",
+          "x": 10,
+          "y": 4
+        }
+      ],
+      "parShots": 0,
+      "hint": "两辆坦克可以分别等不同的移动门，不用抢同一个节拍。",
+      "explanation": "一辆先过第一道门，另一辆等第二道门，最后两座终点一起点亮。",
+      "solution": [
+        "0:move:right",
+        "0:move:right",
+        "wait:1.55",
+        "0:move:right",
+        "0:move:right",
+        "1:move:down",
+        "1:move:right",
+        "1:move:right",
+        "1:move:up",
+        "1:move:up",
+        "wait:1.50",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:down",
+        "1:move:right",
+        "1:move:right",
+        "wait:0.30",
+        "0:move:up",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:up",
+        "0:move:right",
+        "1:move:right",
+        "1:move:right"
+      ]
+    },
+    {
+      "id": "tank-c06",
+      "mode": "classic",
+      "band": "challenge",
+      "minAge": 12,
+      "title": "最后一起回家",
+      "width": 14,
+      "height": 8,
+      "layout": [
+        "##############",
+        "#........#...#",
+        "#............#",
+        "#............#",
+        "#........#...#",
+        "#........#...#",
+        "#........#...#",
+        "##############"
+      ],
+      "starts": [
+        {
+          "x": 1,
+          "y": 1,
+          "dir": "right"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "dir": "right"
+        }
+      ],
+      "goals": [
+        {
+          "x": 12,
+          "y": 2
+        },
+        {
+          "x": 12,
+          "y": 5
+        }
+      ],
+      "targets": [
+        {
+          "id": "c06-t1",
+          "x": 3,
+          "y": 1
+        },
+        {
+          "id": "c06-t2",
+          "x": 10,
+          "y": 2
+        }
+      ],
+      "gates": [
+        {
+          "id": "c06-g1",
+          "cells": [
+            {
+              "x": 5,
+              "y": 1
+            },
+            {
+              "x": 5,
+              "y": 2
+            },
+            {
+              "x": 5,
+              "y": 3
+            },
+            {
+              "x": 5,
+              "y": 4
+            },
+            {
+              "x": 5,
+              "y": 5
+            },
+            {
+              "x": 5,
+              "y": 6
+            }
+          ],
+          "targets": [
+            "c06-t1"
+          ]
+        },
+        {
+          "id": "c06-g2",
+          "cells": [
+            {
+              "x": 11,
+              "y": 1
+            },
+            {
+              "x": 11,
+              "y": 2
+            },
+            {
+              "x": 11,
+              "y": 3
+            },
+            {
+              "x": 11,
+              "y": 4
+            },
+            {
+              "x": 11,
+              "y": 5
+            },
+            {
+              "x": 11,
+              "y": 6
+            }
+          ],
+          "targets": [
+            "c06-t2"
+          ]
+        }
+      ],
+      "movers": [],
+      "emitters": [
+        {
+          "id": "c06-e1",
+          "x": 7,
+          "y": 0,
+          "dir": "down",
+          "period": 1.8,
+          "phase": 0.4,
+          "speed": 8.0,
+          "disableByTarget": "c06-t1"
+        },
+        {
+          "id": "c06-e2",
+          "x": 10,
+          "y": 7,
+          "dir": "up",
+          "period": 1.8,
+          "phase": 1.0,
+          "speed": 8.0,
+          "disableByTarget": "c06-t2"
+        }
+      ],
+      "pickups": [
+        {
+          "id": "c06-s1",
+          "x": 2,
+          "y": 6,
+          "kind": "star"
+        },
+        {
+          "id": "c06-s2",
+          "x": 6,
+          "y": 2,
+          "kind": "star"
+        },
+        {
+          "id": "c06-s3",
+          "x": 10,
+          "y": 1,
+          "kind": "star"
+        },
+        {
+          "id": "c06-s4",
+          "x": 12,
+          "y": 4,
+          "kind": "star"
+        }
+      ],
+      "checkpoints": [
+        {
+          "id": "c06-c1",
+          "x": 6,
+          "y": 4
+        },
+        {
+          "id": "c06-c2",
+          "x": 10,
+          "y": 3
+        }
+      ],
+      "parShots": 2,
+      "hint": "先让上面的小朋友打开第一道门，再一起穿过移动门打最后的信号靶。",
+      "explanation": "两位小朋友分工完成打靶、等待移动门和点亮终点，一起完成最后一张合作地图。",
+      "solution": [
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:face:up",
+        "0:fire",
+        "wait:0.45",
+        "1:move:right",
+        "1:move:up",
+        "1:move:up",
+        "1:move:up",
+        "1:move:right",
+        "1:move:right",
+        "1:move:up",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:move:right",
+        "1:face:right",
+        "1:fire",
+        "wait:0.45",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:down",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:right",
+        "0:move:up",
+        "0:move:up",
+        "0:move:left",
+        "0:move:right",
+        "0:move:down",
+        "0:move:right",
+        "1:move:down",
+        "1:move:right",
+        "1:move:right",
+        "1:move:down",
+        "1:move:right",
+        "1:move:right",
+        "1:move:down"
+      ]
+    }
+  ]
+}

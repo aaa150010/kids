@@ -360,6 +360,27 @@
     "license": "CC BY-SA 4.0",
     "accessedAt": "2026-11-27",
     "note": "只参考旋转管件、连接水源与目标的通用玩法概念；水管、花圃、关卡和视觉素材均为本项目原创。"
-    }
+  },
+  {
+    "title": "Battle City maze-action gameplay",
+    "url": "https://en.wikipedia.org/wiki/Battle_City",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考固定迷宫、四向移动、发射物和机关门的通用玩法概念；本项目使用原创坦克小卫士名称、地图、泡泡弹、纸箱机关、角色与视觉素材。"
+  },
+  {
+    "title": "Sokoban warehouse-puzzle gameplay",
+    "url": "https://en.wikipedia.org/wiki/Sokoban",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考推动箱子到目标的通用空间规划玩法；仓库、木箱、角色、关卡、提示文案和撤销交互均为本项目原创。"
+  },
+  {
+    "title": "Net rotation-and-connection puzzle gameplay",
+    "url": "https://en.wikipedia.org/wiki/Net_(video_game)",
+    "license": "CC BY-SA 4.0",
+    "accessedAt": "2026-11-27",
+    "note": "只参考旋转元件并接通目标的通用电路谜题概念；本项目使用低压玩具电路、原创元件、BFS 连通规则、儿童化断路提示和自绘界面。"
+  }
   ]
 }

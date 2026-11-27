@@ -818,6 +818,108 @@
     ]
   },
   {
+    "id": "tank",
+    "title": "坦克小卫士",
+    "subtitle": "泡泡弹、纸箱迷宫和小旗",
+    "icon": "🛡️",
+    "category": "动作策略",
+    "accent": "#34465a",
+    "soft": "#e3e8ef",
+    "cover": "res://assets/covers/tank.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["🚜 四向行进", "🫧 泡沫弹", "🤝 双人开路"],
+    "searchTerms": ["坦克", "坦克大战", "泡泡弹", "迷宫", "射击", "动作", "机关"],
+    "guide": [
+      "方向键让坦克一格一格前进，按住开火键发射泡沫弹。",
+      "打中信号靶会打开闸门，收集星徽后再开到小旗。",
+      "双人时两个人分别操作左右控制区，一起完成红蓝目标和两个终点。"
+    ],
+    "modes": [
+      {
+        "id": "adventure",
+        "name": "泡泡闯关",
+        "player_range": [1, 1],
+        "description": "24 个固定迷宫，打靶开闸、收集星徽并抵达终点"
+      },
+      {
+        "id": "classic",
+        "name": "双人开路",
+        "player_range": [2, 2],
+        "description": "两人同时操作左右控制区，合作完成红蓝目标和双终点"
+      }
+    ]
+  },
+  {
+    "id": "sokoban",
+    "title": "仓库推推乐",
+    "subtitle": "把纸箱推到小圆点上",
+    "icon": "📦",
+    "category": "空间规划",
+    "accent": "#8a5f3d",
+    "soft": "#f2e5d7",
+    "cover": "res://assets/covers/sokoban.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["📦 推动纸箱", "🧭 四向规划", "↩️ 撤回重试"],
+    "searchTerms": ["推箱子", "仓库", "箱子", "路径", "规划", "移动", "逻辑"],
+    "guide": [
+      "点方向键或滑动，让小车移动一格；小车只能推箱子，不能拉箱子。",
+      "把所有纸箱都推到圆点上；箱子卡住时可以撤回或重开。",
+      "双人时两个人轮流走一步，共用同一张仓库地图。"
+    ],
+    "modes": [
+      {
+        "id": "adventure",
+        "name": "单人仓库",
+        "player_range": [1, 1],
+        "description": "36 个固定推箱关，从 3×3 小盘到复杂仓库"
+      },
+      {
+        "id": "classic",
+        "name": "一起搬箱子",
+        "player_range": [2, 2],
+        "description": "两位小朋友轮流推一格，共享进度和撤销次数"
+      }
+    ]
+  },
+  {
+    "id": "circuit",
+    "title": "电路小工坊",
+    "subtitle": "接好导线，让灯泡亮起来",
+    "icon": "💡",
+    "category": "科学实验",
+    "accent": "#a55b2a",
+    "soft": "#f6e7d9",
+    "cover": "res://assets/covers/circuit.svg",
+    "group": "games",
+    "players": "1–2 人",
+    "player_range": [1, 2],
+    "features": ["💡 点亮目标", "🔌 旋转导线", "🤝 双人接电"],
+    "searchTerms": ["电路", "导线", "灯泡", "开关", "科学", "通电", "实验"],
+    "guide": [
+      "点导线旋转方向，点开关切换通断，把电池接到每个目标元件。",
+      "灯泡亮起、风扇转动、蜂鸣器发声，才表示这一段电路接通。",
+      "双人时两个人轮流转动或切换一个元件，一起完成共享电路。"
+    ],
+    "modes": [
+      {
+        "id": "adventure",
+        "name": "单人接线",
+        "player_range": [1, 1],
+        "description": "24 个低压玩具电路，从直连线到分叉电路"
+      },
+      {
+        "id": "classic",
+        "name": "一起接电",
+        "player_range": [2, 2],
+        "description": "两人轮流操作共享电路，不比较输赢"
+      }
+    ]
+  },
+  {
     "id": "gomoku",
     "title": "五子棋",
     "subtitle": "黑先白后，连成五颗星",
