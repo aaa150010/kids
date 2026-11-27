@@ -30,8 +30,14 @@ if retired_marker not in text:
         "    redir @kids_play_legacy /play-app/ 308\n"
     )
     text, count = legacy_pattern.subn(replacement, text, count=1)
-    if count != 1:
-        raise SystemExit("没有找到旧网页版 /play/* 路由，已停止修改 Caddy")
+    if count == 0:
+        # The legacy route may already have been removed manually. Add the
+        # redirect block at the same location without requiring the old route.
+        marker = "\n    handle {"
+        index = text.rfind(marker)
+        if index < 0:
+            raise SystemExit("没有找到 Caddy 最终 handle 块，已停止修改")
+        text = text[:index] + "\n" + replacement + text[index:]
 
 native_marker = "# kids-playground-native-routes"
 if native_marker not in text:
